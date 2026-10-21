@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿商家端 - 营业设置</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .content { flex:1; overflow-y:auto; padding:10px 16px; }
+  .card {
+    background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:10px;
+  }
+  .row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 0; border-bottom:1px solid #F2F3F5;
+  }
+  .row:last-child { border-bottom:none; }
+  .row .label { font-size:15px; }
+  .row .val { font-size:14px; color:#86909C; display:flex; align-items:center; gap:4px; }
+  .switch {
+    width:48px; height:28px; border-radius:14px; background:#FF6B2C;
+    position:relative; cursor:pointer;
+  }
+  .switch::after {
+    content:""; position:absolute; right:3px; top:3px; width:22px; height:22px;
+    border-radius:50%; background:#fff;
+  }
+  .switch.off { background:#C9CDD4; }
+  .switch.off::after { right:auto; left:3px; }
+  .status-banner {
+    background:linear-gradient(135deg,#00B578,#36CFC9); color:#fff;
+    border-radius:12px; padding:20px; text-align:center; margin-bottom:10px;
+  }
+  .status-banner.closed { background:linear-gradient(135deg,#86909C,#4E5969); }
+  .status-banner .big { font-size:20px; font-weight:700; margin-bottom:4px; }
+  .status-banner .small { font-size:13px; opacity:.9; }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    营业设置
+  </div>
+  <div class="content">
+    <div class="status-banner">
+      <div class="big">营业中</div>
+      <div class="small">今日已接42单 · 营业至21:00</div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <span class="label">开启/歇业</span>
+        <div class="switch"></div>
+      </div>
+      <div class="row">
+        <span class="label">营业时间</span>
+        <span class="val">09:00 - 21:00
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </div>
+      <div class="row">
+        <span class="label">自动接单</span>
+        <div class="switch"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <span class="label">起送价</span>
+        <span class="val">¥15
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </div>
+      <div class="row">
+        <span class="label">配送范围</span>
+        <span class="val">5公里
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </div>
+      <div class="row">
+        <span class="label">配送费</span>
+        <span class="val">¥3/单
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <span class="label">店铺公告</span>
+        <span class="val" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">今日辣椒用完，少辣请备注 ›</span>
+      </div>
+      <div class="row">
+        <span class="label">满减活动</span>
+        <span class="val">满25减3
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

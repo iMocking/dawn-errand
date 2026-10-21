@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿商家端 - 经营数据</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .content { flex:1; overflow-y:auto; padding:10px 16px 20px; }
+  .range-tabs { display:flex; background:#fff; border-radius:8px; padding:4px; margin-bottom:10px; }
+  .range-tab { flex:1; text-align:center; padding:8px 0; font-size:13px; color:#4E5969; border-radius:6px; }
+  .range-tab.active { background:#FF6B2C; color:#fff; font-weight:600; }
+  .overview-card {
+    background:#fff; border-radius:12px; padding:16px; margin-bottom:10px;
+  }
+  .ov-row { display:flex; }
+  .ov-item { flex:1; text-align:center; }
+  .ov-item .n { font-size:20px; font-weight:700; }
+  .ov-item .n.orange { color:#FF6B2C; }
+  .ov-item .n.green { color:#00B578; }
+  .ov-item .t { font-size:11px; color:#86909C; margin-top:2px; }
+  .chart-card {
+    background:#fff; border-radius:12px; padding:16px; margin-bottom:10px;
+  }
+  .chart-title { font-size:14px; font-weight:600; margin-bottom:12px; }
+  .bar-chart { display:flex; align-items:flex-end; gap:8px; height:120px; padding-top:10px; }
+  .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .bar { width:100%; border-radius:4px 4px 0 0; background:linear-gradient(180deg,#FF8A3D,#FF6B2C); }
+  .bar-label { font-size:10px; color:#86909C; }
+  .rank-item {
+    display:flex; align-items:center; padding:10px 0; border-bottom:1px solid #F2F3F5;
+  }
+  .rank-item:last-child { border-bottom:none; }
+  .rank-num {
+    width:20px; height:20px; border-radius:4px; font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-right:12px;
+  }
+  .rank-name { flex:1; font-size:14px; }
+  .rank-sales { font-size:13px; color:#86909C; }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    经营数据
+  </div>
+  <div class="content">
+    <div class="range-tabs">
+      <div class="range-tab active">今日</div>
+      <div class="range-tab">近7天</div>
+      <div class="range-tab">近30天</div>
+      <div class="range-tab">本月</div>
+    </div>
+
+    <div class="overview-card">
+      <div class="ov-row">
+        <div class="ov-item"><div class="n orange">¥1,286</div><div class="t">营业额</div></div>
+        <div class="ov-item"><div class="n">42</div><div class="t">订单数</div></div>
+        <div class="ov-item"><div class="n">¥30.6</div><div class="t">客单价</div></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">近7天营业额趋势（元）</div>
+      <div class="bar-chart">
+        <div class="bar-col"><div class="bar" style="height:50%"></div><span class="bar-label">周三</span></div>
+        <div class="bar-col"><div class="bar" style="height:65%"></div><span class="bar-label">周四</span></div>
+        <div class="bar-col"><div class="bar" style="height:45%"></div><span class="bar-label">周五</span></div>
+        <div class="bar-col"><div class="bar" style="height:85%"></div><span class="bar-label">周六</span></div>
+        <div class="bar-col"><div class="bar" style="height:95%"></div><span class="bar-label">周日</span></div>
+        <div class="bar-col"><div class="bar" style="height:55%"></div><span class="bar-label">周一</span></div>
+        <div class="bar-col"><div class="bar" style="height:70%"></div><span class="bar-label">今天</span></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">热销菜品 TOP5</div>
+      <div class="rank-item">
+        <div class="rank-num" style="background:#FF4D4F;color:#fff">1</div>
+        <span class="rank-name">农家小炒肉</span>
+        <span class="rank-sales">86份</span>
+      </div>
+      <div class="rank-item">
+        <div class="rank-num" style="background:#FF6B2C;color:#fff">2</div>
+        <span class="rank-name">西红柿炒蛋</span>
+        <span class="rank-sales">78份</span>
+      </div>
+      <div class="rank-item">
+        <div class="rank-num" style="background:#FA8C16;color:#fff">3</div>
+        <span class="rank-name">红烧土鸡块</span>
+        <span class="rank-sales">64份</span>
+      </div>
+      <div class="rank-item">
+        <div class="rank-num" style="background:#F2F3F5;color:#4E5969">4</div>
+        <span class="rank-name">麻婆豆腐</span>
+        <span class="rank-sales">45份</span>
+      </div>
+      <div class="rank-item">
+        <div class="rank-num" style="background:#F2F3F5;color:#4E5969">5</div>
+        <span class="rank-name">手撕包菜</span>
+        <span class="rank-sales">52份</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

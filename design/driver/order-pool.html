@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿骑手端 - 接单大厅</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; border-bottom:1px solid #F2F3F5; flex-shrink:0;
+  }
+  .filter-bar {
+    background:#fff; padding:10px 16px; display:flex; gap:8px;
+    border-bottom:1px solid #F2F3F5; flex-shrink:0;
+  }
+  .filter-chip {
+    padding:5px 12px; border-radius:14px; background:#F2F3F5; font-size:12px; color:#4E5969;
+  }
+  .filter-chip.active { background:#FFF3E8; color:#FF6B2C; font-weight:600; }
+  .list { flex:1; overflow-y:auto; padding:10px 16px 20px; }
+  .order-card {
+    background:#fff; border-radius:12px; padding:14px; margin-bottom:10px;
+  }
+  .order-head {
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+  }
+  .order-type {
+    font-size:12px; padding:2px 8px; border-radius:4px; font-weight:600;
+  }
+  .order-type.food { background:#FFF3E8; color:#FF6B2C; }
+  .order-type.errand { background:#FFF3E8; color:#FF6B2C; }
+  .order-type.takeout { background:#E8F7F0; color:#00B578; }
+  .distance { font-size:12px; color:#86909C; }
+  .route { padding:8px 0; }
+  .route-row { display:flex; gap:8px; align-items:flex-start; padding:3px 0; }
+  .dot { width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+  .dot.pick { background:#FF6B2C; }
+  .dot.drop { background:#00B578; }
+  .route-text { font-size:13px; line-height:1.4; }
+  .order-foot {
+    display:flex; justify-content:space-between; align-items:center;
+    padding-top:10px; border-top:1px solid #F2F3F5; margin-top:6px;
+  }
+  .reward { font-size:18px; font-weight:700; color:#FF4D4F; }
+  .reward small { font-size:11px; font-weight:400; color:#86909C; }
+  .grab-btn {
+    background:linear-gradient(135deg,#FF6B2C,#FF5A1F); color:#fff;
+    padding:8px 20px; border-radius:18px; font-size:14px; font-weight:600;
+  }
+</style>
+</head>
+<body>
+  <div class="nav">接单大厅</div>
+  <div class="filter-bar">
+    <div class="filter-chip active">全部</div>
+    <div class="filter-chip">外卖单</div>
+    <div class="filter-chip">跑腿单</div>
+    <div class="filter-chip">5公里内</div>
+  </div>
+  <div class="list">
+    <!-- 订单1 -->
+    <div class="order-card">
+      <div class="order-head">
+        <span class="order-type food">外卖订单</span>
+        <span class="distance">2.3km</span>
+      </div>
+      <div class="route">
+        <div class="route-row">
+          <div class="dot pick"></div>
+          <div class="route-text">村口老陈家常菜（镇中心）</div>
+        </div>
+        <div class="route-row">
+          <div class="dot drop"></div>
+          <div class="route-text">王家湾村三组26号</div>
+        </div>
+      </div>
+      <div class="order-foot">
+        <div class="reward">¥6.5 <small>配送费</small></div>
+        <div class="grab-btn">抢单</div>
+      </div>
+    </div>
+
+    <!-- 订单2 -->
+    <div class="order-card">
+      <div class="order-head">
+        <span class="order-type errand">帮我买</span>
+        <span class="distance">1.8km</span>
+      </div>
+      <div class="route">
+        <div class="route-row">
+          <div class="dot pick"></div>
+          <div class="route-text">镇中心供销社超市</div>
+        </div>
+        <div class="route-row">
+          <div class="dot drop"></div>
+          <div class="route-text">绿杨乡中学宿舍3栋201</div>
+        </div>
+      </div>
+      <div class="order-foot">
+        <div class="reward">¥8.0 <small>跑腿费</small></div>
+        <div class="grab-btn">抢单</div>
+      </div>
+    </div>
+
+    <!-- 订单3 -->
+    <div class="order-card">
+      <div class="order-head">
+        <span class="order-type takeout">帮我取</span>
+        <span class="distance">3.5km</span>
+      </div>
+      <div class="route">
+        <div class="route-row">
+          <div class="dot pick"></div>
+          <div class="route-text">镇邮政代办点（取快递）</div>
+        </div>
+        <div class="route-row">
+          <div class="dot drop"></div>
+          <div class="route-text">王家湾村五组李秀英家</div>
+        </div>
+      </div>
+      <div class="order-foot">
+        <div class="reward">¥5.0 <small>取件费</small></div>
+        <div class="grab-btn">抢单</div>
+      </div>
+    </div>
+
+    <!-- 订单4 -->
+    <div class="order-card">
+      <div class="order-head">
+        <span class="order-type food">外卖订单</span>
+        <span class="distance">4.1km</span>
+      </div>
+      <div class="route">
+        <div class="route-row">
+          <div class="dot pick"></div>
+          <div class="route-text">乡里乡亲水果店</div>
+        </div>
+        <div class="route-row">
+          <div class="dot drop"></div>
+          <div class="route-text">王家湾村七组·红砖大屋</div>
+        </div>
+      </div>
+      <div class="order-foot">
+        <div class="reward">¥7.0 <small>配送费</small></div>
+        <div class="grab-btn">抢单</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

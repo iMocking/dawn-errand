@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿 - 启动页</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:linear-gradient(180deg, #2B1A4E 0%, #6B2D5C 35%, #C73E4D 65%, #FF6B2C 100%);
+    position:relative; color:#fff;
+  }
+  .stars { position:absolute; top:0; left:0; width:100%; height:50%; }
+  .star { position:absolute; background:#fff; border-radius:50%; opacity:.8; }
+  .center {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-58%);
+    text-align:center; width:100%;
+  }
+  .logo-wrap {
+    width:120px; height:120px; margin:0 auto 24px;
+    background:rgba(255,255,255,.18); backdrop-filter:blur(10px);
+    border-radius:32px; display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(255,255,255,.3);
+    box-shadow:0 8px 32px rgba(255,107,44,.4);
+  }
+  .brand-name {
+    font-size:36px; font-weight:800; letter-spacing:6px; margin-bottom:10px;
+    text-shadow:0 2px 12px rgba(0,0,0,.2);
+  }
+  .brand-en {
+    font-size:12px; letter-spacing:8px; opacity:.8; font-weight:300;
+  }
+  .slogan {
+    position:absolute; bottom:120px; width:100%; text-align:center;
+    font-size:15px; opacity:.9; letter-spacing:2px;
+  }
+  .slogan::before, .slogan::after {
+    content:""; display:inline-block; width:30px; height:1px; background:rgba(255,255,255,.5);
+    vertical-align:middle; margin:0 16px;
+  }
+  .version {
+    position:absolute; bottom:40px; width:100%; text-align:center;
+    font-size:12px; opacity:.6;
+  }
+</style>
+</head>
+<body>
+  <div class="stars">
+    <div class="star" style="width:2px;height:2px;top:60px;left:40px"></div>
+    <div class="star" style="width:3px;height:3px;top:100px;left:280px"></div>
+    <div class="star" style="width:2px;height:2px;top:150px;left:180px"></div>
+    <div class="star" style="width:2px;height:2px;top:80px;left:200px"></div>
+    <div class="star" style="width:1px;height:1px;top:200px;left:80px"></div>
+    <div class="star" style="width:2px;height:2px;top:120px;left:330px"></div>
+  </div>
+  <div class="center">
+    <div class="logo-wrap">
+      <!-- 曙光Logo：日出+奔跑人形 SVG线框风格 -->
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="32" cy="36" r="12" fill="#FFD66B" stroke="none"/>
+        <line x1="32" y1="14" x2="32" y2="20"/>
+        <line x1="48" y1="20" x2="44" y2="24"/>
+        <line x1="16" y1="20" x2="20" y2="24"/>
+        <line x1="54" y1="36" x2="48" y2="36"/>
+        <line x1="10" y1="36" x2="16" y2="36"/>
+        <path d="M24 48 Q32 44 40 48"/>
+      </svg>
+    </div>
+    <div class="brand-name">曙光跑腿</div>
+    <div class="brand-en">DAWN &nbsp;ERRAND</div>
+  </div>
+  <div class="slogan">乡镇跑腿 · 随叫随到</div>
+  <div class="version">v1.0.0</div>
+</body>
+</html>

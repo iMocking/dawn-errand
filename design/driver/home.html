@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿骑手端 - 工作台</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .top {
+    background:linear-gradient(180deg,#FF8A3D 0%,#FF6B2C 100%);
+    padding:54px 16px 30px; color:#fff; flex-shrink:0;
+  }
+  .rider-row { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+  .rider-avatar {
+    width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.25);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .rider-name { font-size:16px; font-weight:700; }
+  .rider-tag { font-size:11px; background:rgba(255,255,255,.25); padding:2px 8px; border-radius:8px; margin-left:6px; }
+  .today-ring {
+    display:flex; align-items:center; justify-content:center; gap:24px;
+  }
+  .ring-wrap { position:relative; width:110px; height:110px; }
+  .ring-center {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  .ring-amount { font-size:22px; font-weight:700; }
+  .ring-lbl { font-size:11px; opacity:.85; }
+  .ring-side { font-size:13px; line-height:2; }
+  .ring-side b { font-size:18px; display:block; }
+  .ring-side .slbl { opacity:.85; font-size:11px; }
+  .online-bar {
+    margin:16px; background:#fff; border-radius:14px; padding:16px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .online-text .t { font-size:15px; font-weight:600; }
+  .online-text .s { font-size:12px; color:#00B578; margin-top:2px; }
+  .big-switch {
+    width:56px; height:30px; border-radius:15px; background:#00B578;
+    position:relative; cursor:pointer;
+  }
+  .big-switch::after {
+    content:""; position:absolute; right:3px; top:3px; width:24px; height:24px;
+    border-radius:50%; background:#fff;
+  }
+  .active-card {
+    margin:0 16px 10px; background:#fff; border-radius:14px; padding:16px;
+    border-left:4px solid #FF6B2C;
+  }
+  .active-head { display:flex; justify-content:space-between; margin-bottom:10px; }
+  .active-title { font-size:14px; font-weight:600; color:#FF6B2C; }
+  .active-status { font-size:12px; color:#86909C; }
+  .route-row { display:flex; gap:10px; padding:4px 0; }
+  .route-dot { width:10px; height:10px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+  .route-info { flex:1; }
+  .route-name { font-size:14px; font-weight:500; }
+  .route-addr { font-size:12px; color:#86909C; margin-top:2px; }
+  .go-btn {
+    margin:0 16px 14px; background:linear-gradient(135deg,#FF8A3D,#FF5A1F);
+    color:#fff; height:48px; border-radius:24px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:600;
+  }
+  .tabbar {
+    position:absolute; bottom:0; left:0; right:0; height:64px; background:#fff;
+    border-top:1px solid #E5E6EB; display:flex; padding-bottom:8px;
+  }
+  .tabbar-item {
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; font-size:10px; color:#86909C;
+  }
+  .tabbar-item.active { color:#FF6B2C; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="rider-row">
+      <div class="rider-avatar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center">
+          <span class="rider-name">张师傅</span>
+          <span class="rider-tag">银牌骑手</span>
+        </div>
+      </div>
+    </div>
+    <div class="today-ring">
+      <div class="ring-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="6"/>
+          <circle cx="55" cy="55" r="48" fill="none" stroke="#fff" stroke-width="6"
+            stroke-dasharray="301.6" stroke-dashoffset="105" stroke-linecap="round"
+            transform="rotate(-90 55 55)"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-amount">¥186</div>
+          <div class="ring-lbl">今日已赚</div>
+        </div>
+      </div>
+      <div class="ring-side">
+        <div><b>12</b><span class="slbl">已完成单</span></div>
+        <div><b>4.9</b><span class="slbl">服务评分</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="online-bar">
+    <div class="online-text">
+      <div class="t">上线状态</div>
+      <div class="s">● 正在接单 · 绿杨乡片区</div>
+    </div>
+    <div class="big-switch"></div>
+  </div>
+
+  <div class="active-card">
+    <div class="active-head">
+      <span class="active-title">🚴 进行中订单</span>
+      <span class="active-status">待取货</span>
+    </div>
+    <div class="route-row">
+      <div class="route-dot" style="background:#FF6B2C"></div>
+      <div class="route-info">
+        <div class="route-name">村口老陈家常菜</div>
+        <div class="route-addr">取货 · 已出餐，请尽快取餐</div>
+      </div>
+    </div>
+    <div class="route-row">
+      <div class="route-dot" style="background:#00B578"></div>
+      <div class="route-info">
+        <div class="route-name">王家湾村三组26号</div>
+        <div class="route-addr">送货 · 王建国 138****8888</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="go-btn">🧭 导航去取餐</div>
+
+  <div class="tabbar">
+    <div class="tabbar-item active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      工作台
+    </div>
+    <div class="tabbar-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      接单
+    </div>
+    <div class="tabbar-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/></svg>
+      订单
+    </div>
+    <div class="tabbar-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      我的
+    </div>
+  </div>
+</body>
+</html>

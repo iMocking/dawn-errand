@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿商家端 - 工作台</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  /* 顶部 */
+  .top {
+    background:linear-gradient(135deg,#FF8A3D,#FF6B2C);
+    padding:54px 16px 20px; color:#fff; flex-shrink:0;
+  }
+  .shop-row { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .shop-avatar {
+    width:44px; height:44px; border-radius:10px; background:rgba(255,255,255,.25);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .shop-name { font-size:16px; font-weight:700; }
+  .shop-status {
+    font-size:11px; background:rgba(255,255,255,.25); padding:2px 8px; border-radius:8px;
+    margin-left:6px;
+  }
+  /* 数据卡片 */
+  .data-card {
+    background:rgba(255,255,255,.18); border-radius:12px; padding:14px;
+    display:flex;
+  }
+  .data-item { flex:1; text-align:center; }
+  .data-item .num { font-size:22px; font-weight:700; }
+  .data-item .lbl { font-size:11px; opacity:.85; margin-top:2px; }
+  /* 待接单提醒条 */
+  .urgent-bar {
+    margin:-12px 16px 10px; background:#fff; border-radius:12px; padding:14px 16px;
+    display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(245,63,63,.15);
+    border:1.5px solid #FF4D4F; position:relative; z-index:2;
+  }
+  .urgent-icon {
+    width:40px; height:40px; border-radius:50%; background:#FF4D4F; color:#fff;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .urgent-info { flex:1; }
+  .urgent-title { font-size:15px; font-weight:700; color:#FF4D4F; }
+  .urgent-desc { font-size:12px; color:#86909C; margin-top:2px; }
+  .urgent-btn {
+    background:#FF4D4F; color:#fff; padding:8px 16px; border-radius:16px;
+    font-size:13px; font-weight:600;
+  }
+  /* 功能宫格 */
+  .grid-card {
+    margin:0 16px 10px; background:#fff; border-radius:12px; padding:16px;
+  }
+  .grid-title { font-size:14px; font-weight:600; margin-bottom:14px; }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px 0; }
+  .g-item { text-align:center; cursor:pointer; position:relative; }
+  .g-icon {
+    width:44px; height:44px; margin:0 auto 6px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .g-item .lbl { font-size:12px; color:#4E5969; }
+  .badge-dot {
+    position:absolute; top:-2px; right:18px; background:#FF4D4F; color:#fff;
+    font-size:10px; min-width:16px; height:16px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; padding:0 4px; font-weight:700;
+  }
+  /* 底部Tab */
+  .tabbar {
+    position:absolute; bottom:0; left:0; right:0; height:64px; background:#fff;
+    border-top:1px solid #E5E6EB; display:flex; padding-bottom:8px;
+  }
+  .tabbar-item {
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; font-size:10px; color:#86909C;
+  }
+  .tabbar-item.active { color:#FF6B2C; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="shop-row">
+      <div class="shop-avatar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M4 11l1 9h14l1-9"/></svg>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center">
+          <span class="shop-name">村口老陈家常菜</span>
+          <span class="shop-status">营业中</span>
+        </div>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-item"><div class="num">¥1,286</div><div class="lbl">今日营业额</div></div>
+      <div class="data-item"><div class="num">42</div><div class="lbl">今日订单</div></div>
+      <div class="data-item"><div class="num">98%</div><div class="lbl">好评率</div></div>
+    </div>
+  </div>
+
+  <div class="urgent-bar">
+    <div class="urgent-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="urgent-info">
+      <div class="urgent-title">2笔新订单待接单</div>
+      <div class="urgent-desc">新订单快来了，请尽快处理</div>
+    </div>
+    <div class="urgent-btn">去接单</div>
+  </div>
+
+  <div class="grid-card">
+    <div class="grid-title">订单管理</div>
+    <div class="grid">
+      <div class="g-item">
+        <div class="g-icon" style="background:#FFF3E8">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="lbl">待接单</div>
+        <div class="badge-dot">2</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon" style="background:#E8F0FF">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B7FFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="lbl">制作中</div>
+        <div class="badge-dot">3</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon" style="background:#E8F7F0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2"/></svg>
+        </div>
+        <div class="lbl">配送中</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon" style="background:#F2F3F5">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="lbl">已完成</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-card">
+    <div class="grid-title">店铺管理</div>
+    <div class="grid">
+      <div class="g-item">
+        <div class="g-icon" style="background:#FFF8E0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D48806" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="lbl">菜品管理</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon" style="background:#FFE8E8">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5222D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="lbl">营业设置</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon" style="background:#E8F7F0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="lbl">收入提现</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon" style="background:#F0E8FF">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#722ED1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="lbl">经营数据</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tabbar-item active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      工作台
+    </div>
+    <div class="tabbar-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      订单
+    </div>
+    <div class="tabbar-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+      菜品
+    </div>
+    <div class="tabbar-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      我的
+    </div>
+  </div>
+</body>
+</html>

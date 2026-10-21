@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿 - 首页</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  /* 顶部问候区 */
+  .greeting {
+    background:linear-gradient(180deg,#FF8A3D 0%,#FF6B2C 100%);
+    padding:54px 16px 20px; color:#fff; flex-shrink:0;
+  }
+  .hello { font-size:13px; opacity:.9; margin-bottom:2px; }
+  .hello-name { font-size:22px; font-weight:700; margin-bottom:14px; }
+  .location-row {
+    display:flex; align-items:center; gap:4px; font-size:13px;
+    background:rgba(255,255,255,.2); border-radius:16px; padding:6px 12px;
+    margin-bottom:12px; width:fit-content;
+  }
+  .search-bar {
+    background:#fff; border-radius:24px; height:42px; display:flex; align-items:center;
+    padding:0 16px; gap:8px; color:#86909C; font-size:14px;
+  }
+  /* 场景大入口 */
+  .scene-row {
+    display:flex; gap:10px; margin:-12px 16px 14px; position:relative; z-index:2;
+  }
+  .scene-card {
+    flex:1; border-radius:14px; padding:16px 14px; color:#fff;
+    display:flex; flex-direction:column; justify-content:space-between; height:100px;
+  }
+  .scene-card.eat { background:linear-gradient(135deg,#FF6B2C,#FF5A1F); }
+  .scene-card.run { background:linear-gradient(135deg,#FF9F43,#FF7A2C); }
+  .scene-title { font-size:16px; font-weight:700; }
+  .scene-sub { font-size:11px; opacity:.9; margin-top:2px; }
+  .scene-arrow {
+    width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.25);
+    display:flex; align-items:center; justify-content:center; align-self:flex-end;
+  }
+  /* 推荐横滑 */
+  .section-head {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 16px 10px;
+  }
+  .section-title { font-size:16px; font-weight:700; }
+  .section-more { font-size:12px; color:#86909C; }
+  .rec-scroll {
+    display:flex; gap:10px; padding:0 16px 14px; overflow-x:auto; flex-shrink:0;
+  }
+  .rec-card {
+    width:140px; flex-shrink:0; background:#fff; border-radius:12px; overflow:hidden;
+  }
+  .rec-img {
+    height:90px; display:flex; align-items:center; justify-content:center;
+  }
+  .rec-info { padding:10px; }
+  .rec-name { font-size:13px; font-weight:600; margin-bottom:4px; }
+  .rec-meta { font-size:11px; color:#86909C; }
+  /* 附近商家列表 */
+  .nearby-list { flex:1; overflow-y:auto; padding:0 16px 90px; }
+  .nearby-card {
+    background:#fff; border-radius:12px; margin-bottom:10px; overflow:hidden;
+  }
+  .nearby-banner {
+    height:100px; display:flex; align-items:center; justify-content:center;
+  }
+  .nearby-info { padding:12px 14px; }
+  .nearby-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .nearby-name { font-size:15px; font-weight:600; }
+  .nearby-dist { font-size:11px; color:#86909C; background:#F5F6F8; padding:2px 8px; border-radius:8px; }
+  .nearby-meta { font-size:12px; color:#86909C; margin-bottom:6px; }
+  .nearby-tags { display:flex; gap:4px; }
+  .ntag {
+    font-size:10px; padding:2px 6px; border-radius:4px;
+  }
+  .ntag.hot { background:#FFF3E8; color:#FF6B2C; }
+  .ntag.free { background:#E8F7F0; color:#00B578; }
+  /* 底部Tab */
+  .tabbar {
+    position:absolute; bottom:0; left:0; right:0; height:64px; background:#fff;
+    border-top:1px solid #E5E6EB; display:flex; padding-bottom:8px;
+  }
+  .tabbar-item {
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; font-size:10px; color:#86909C;
+  }
+  .tabbar-item.active { color:#FF6B2C; }
+</style>
+</head>
+<body>
+  <div class="greeting">
+    <div class="hello">中午好，</div>
+    <div class="hello-name">王建国 👋</div>
+    <div class="location-row">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      王家湾村三组 · 红砖大铁门
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      想吃点啥？搜"小炒肉""大米"
+    </div>
+  </div>
+
+  <div class="scene-row">
+    <div class="scene-card eat">
+      <div>
+        <div class="scene-title">🍚 点个饭</div>
+        <div class="scene-sub">村里餐馆送到家</div>
+      </div>
+      <div class="scene-arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <div class="scene-card run">
+      <div>
+        <div class="scene-title">🏃 跑个腿</div>
+        <div class="scene-sub">代买代取代送</div>
+      </div>
+      <div class="scene-arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="section-title">🔥 村里人都在点</div>
+    <div class="section-more">查看全部 ›</div>
+  </div>
+  <div class="rec-scroll">
+    <div class="rec-card">
+      <div class="rec-img" style="background:#FFE8D6">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FF8A3D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M4 11l1 9h14l1-9"/></svg>
+      </div>
+      <div class="rec-info">
+        <div class="rec-name">老陈家常菜</div>
+        <div class="rec-meta">4.8分 · 25分钟</div>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-img" style="background:#E8F5E9">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#52C41A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M9 21V13h6v8"/></svg>
+      </div>
+      <div class="rec-info">
+        <div class="rec-name">王家湾超市</div>
+        <div class="rec-meta">4.9分 · 15分钟</div>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-img" style="background:#FCE4EC">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#EB2F96" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M12 9c-3 0-5-2-5-5 3 0 5 2 5 5 0-3 2-5 5-5 0 3-2 5-5 5"/></svg>
+      </div>
+      <div class="rec-info">
+        <div class="rec-name">乡亲水果店</div>
+        <div class="rec-meta">4.7分 · 35分钟</div>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-img" style="background:#FFF3E0">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FA8C16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+      </div>
+      <div class="rec-info">
+        <div class="rec-name">李记卤味</div>
+        <div class="rec-meta">4.6分 · 20分钟</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="section-title">📍 离你最近</div>
+  </div>
+  <div class="nearby-list">
+    <div class="nearby-card">
+      <div class="nearby-banner" style="background:linear-gradient(135deg,#FFE8D6,#FFD4B8)">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF8A3D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M4 11l1 9h14l1-9"/></svg>
+      </div>
+      <div class="nearby-info">
+        <div class="nearby-top">
+          <span class="nearby-name">村口老陈家常菜</span>
+          <span class="nearby-dist">2.1km</span>
+        </div>
+        <div class="nearby-meta">⭐ 4.8 · 月售326单 · 25分钟送到</div>
+        <div class="nearby-tags">
+          <span class="ntag hot">🔥 本周热销</span>
+          <span class="ntag free">满25免配送费</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nearby-card">
+      <div class="nearby-banner" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9)">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#52C41A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M9 21V13h6v8"/></svg>
+      </div>
+      <div class="nearby-info">
+        <div class="nearby-top">
+          <span class="nearby-name">王家湾综合超市</span>
+          <span class="nearby-dist">0.8km</span>
+        </div>
+        <div class="nearby-meta">⭐ 4.9 · 月售512单 · 15分钟送到</div>
+        <div class="nearby-tags">
+          <span class="ntag hot">生鲜日配</span>
+          <span class="ntag free">烟酒饮料</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nearby-card">
+      <div class="nearby-banner" style="background:linear-gradient(135deg,#FCE4EC,#F8BBD0)">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#EB2F96" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M12 9c-3 0-5-2-5-5 3 0 5 2 5 5 0-3 2-5 5-5 0 3-2 5-5 5"/></svg>
+      </div>
+      <div class="nearby-info">
+        <div class="nearby-top">
+          <span class="nearby-name">乡里乡亲水果店</span>
+          <span class="nearby-dist">3.5km</span>
+        </div>
+        <div class="nearby-meta">⭐ 4.7 · 月售189单 · 35分钟送到</div>
+        <div class="nearby-tags">
+          <span class="ntag hot">产地直发</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tabbar-item active">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      首页
+    </div>
+    <div class="tabbar-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M4 22l4-4 3 2 5-5 4 3"/></svg>
+      跑腿
+    </div>
+    <div class="tabbar-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      订单
+    </div>
+    <div class="tabbar-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      我的
+    </div>
+  </div>
+</body>
+</html>

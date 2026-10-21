@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿骑手端 - 订单详情</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .content { flex:1; overflow-y:auto; padding:10px 16px 100px; }
+  .step-card {
+    background:#fff; border-radius:12px; padding:16px; margin-bottom:10px;
+  }
+  .step-row { display:flex; gap:12px; padding:8px 0; }
+  .step-dot {
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-info { flex:1; }
+  .step-name { font-size:15px; font-weight:600; }
+  .step-addr { font-size:13px; color:#86909C; margin-top:2px; line-height:1.5; }
+  .step-contact { font-size:13px; color:#4E5969; margin-top:4px; }
+  .call-btn {
+    width:32px; height:32px; border-radius:50%; background:#FFF3E8;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .info-card {
+    background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:10px;
+  }
+  .info-title { font-size:14px; font-weight:600; margin-bottom:10px; }
+  .info-row {
+    display:flex; justify-content:space-between; padding:6px 0; font-size:13px;
+  }
+  .info-row .k { color:#86909C; }
+  .info-row .v { color:#1D2129; }
+  .info-row .v.red { color:#FF4D4F; font-weight:700; font-size:16px; }
+  .bottom-bar {
+    position:absolute; bottom:0; left:0; right:0; background:#fff;
+    padding:12px 16px 24px; display:flex; gap:10px; border-top:1px solid #E5E6EB;
+  }
+  .btn { flex:1; height:48px; border-radius:24px; font-size:15px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; }
+  .btn-outline { border:1px solid #E5E6EB; color:#4E5969; background:#fff; }
+  .btn-primary { background:linear-gradient(135deg,#FF6B2C,#FF5A1F); color:#fff; }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    配送详情
+  </div>
+  <div class="content">
+    <div class="step-card">
+      <div class="step-row">
+        <div class="step-dot" style="background:#FFF3E8">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="step-info">
+          <div class="step-name">村口老陈家常菜</div>
+          <div class="step-addr">浠水县绿杨乡镇中心街 · 已出餐</div>
+          <div class="step-contact">陈老板 139****5555</div>
+        </div>
+        <div class="call-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.72.37 1.42.72 2.06a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.66.36 1.36.61 2.08.73A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot" style="background:#E8F7F0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="step-info">
+          <div class="step-name">王建国</div>
+          <div class="step-addr">王家湾村三组26号 · 红砖大铁门，门口有大樟树</div>
+          <div class="step-contact">138****8888</div>
+        </div>
+        <div class="call-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.72.37 1.42.72 2.06a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.66.36 1.36.61 2.08.73A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-title">订单信息</div>
+      <div class="info-row"><span class="k">订单编号</span><span class="v">20261022001</span></div>
+      <div class="info-row"><span class="k">商品</span><span class="v">农家小炒肉等3件</span></div>
+      <div class="info-row"><span class="k">取餐距离</span><span class="v">1.2km</span></div>
+      <div class="info-row"><span class="k">配送距离</span><span class="v">2.3km</span></div>
+      <div class="info-row"><span class="k">预计送达</span><span class="v" style="color:#FF6B2C;font-weight:600">12:55前</span></div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-title">本单收入</div>
+      <div class="info-row"><span class="k">配送费收入</span><span class="v">¥6.5</span></div>
+      <div class="info-row"><span class="k">距离补贴</span><span class="v">¥0.5</span></div>
+      <div class="info-row"><span class="k">合计</span><span class="v red">¥7.0</span></div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="btn btn-outline">联系顾客</div>
+    <div class="btn btn-primary">确认送达</div>
+  </div>
+</body>
+</html>

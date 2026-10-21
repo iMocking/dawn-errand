@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>曙光跑腿 · 商家端 UI 设计稿预览</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#ECEEF1; padding:40px 20px;
+  }
+  .header { text-align:center; margin-bottom:40px; }
+  .header h1 { font-size:32px; color:#1D2129; margin-bottom:8px; }
+  .header p { color:#86909C; font-size:14px; }
+  .brand-info {
+    display:inline-flex; gap:16px; margin-top:16px; align-items:center;
+    background:#fff; padding:12px 24px; border-radius:12px;
+  }
+  .swatch {
+    display:inline-block; width:20px; height:20px; border-radius:50%;
+    vertical-align:middle; margin-right:6px; border:1px solid rgba(0,0,0,.1);
+  }
+  .grid {
+    display:flex; flex-wrap:wrap; gap:32px; justify-content:center;
+    max-width:1900px; margin:0 auto;
+  }
+  .phone-wrap { text-align:center; }
+  .phone {
+    width:375px; height:812px; border-radius:44px; overflow:hidden;
+    border:10px solid #1D2129; box-shadow:0 20px 60px rgba(0,0,0,.15);
+    background:#fff; position:relative;
+  }
+  .phone iframe {
+    width:100%; height:100%; border:none; display:block; overflow:hidden;
+  }
+  .phone-label {
+    margin-top:16px; font-size:14px; color:#4E5969; font-weight:500;
+  }
+  .phone-label small { display:block; color:#86909C; font-size:12px; margin-top:2px; font-weight:400; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>曙光跑腿 · 商家端 App UI</h1>
+    <p>乡镇本地商家专用 · 接单 / 菜品管理 / 营业设置 / 收入提现 / 经营数据</p>
+    <div class="brand-info">
+      <span><span class="swatch" style="background:#FF6B2C"></span>主色 #FF6B2C</span>
+      <span><span class="swatch" style="background:#FF4D4F"></span>警示 #FF4D4F</span>
+      <span><span class="swatch" style="background:#00B578"></span>成功 #00B578</span>
+      <span>375 × 812</span>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="login.html" scrolling="no"></iframe></div>
+      <div class="phone-label">商家登录<small>手机号验证码 / 入驻引导</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="dashboard.html" scrolling="no"></iframe></div>
+      <div class="phone-label">工作台<small>今日数据 / 待接单提醒</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="orders.html" scrolling="no"></iframe></div>
+      <div class="phone-label">订单管理<small>待接单 / 制作中</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="order-detail.html" scrolling="no"></iframe></div>
+      <div class="phone-label">订单详情<small>顾客信息 / 商品明细 / 出餐</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="menu.html" scrolling="no"></iframe></div>
+      <div class="phone-label">菜品管理<small>上下架 / 编辑</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="edit-dish.html" scrolling="no"></iframe></div>
+      <div class="phone-label">新增菜品<small>图片 / 价格 / 库存</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="business.html" scrolling="no"></iframe></div>
+      <div class="phone-label">营业设置<small>营业时间 / 配送范围</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="statistics.html" scrolling="no"></iframe></div>
+      <div class="phone-label">经营数据<small>营业额趋势 / 热销排行</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="finance.html" scrolling="no"></iframe></div>
+      <div class="phone-label">收入提现<small>余额 / 流水</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="profile.html" scrolling="no"></iframe></div>
+      <div class="phone-label">商家中心<small>资质 / 结算 / 评价</small></div>
+    </div>
+  </div>
+</body>
+</html>

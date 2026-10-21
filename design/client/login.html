@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿 - 登录</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:linear-gradient(180deg, #FF8A3D 0%, #FF6B2C 38%, #F5F6F8 38.5%);
+    position:relative; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  /* 状态栏 */
+  .status-bar {
+    height:44px; padding:0 24px; display:flex; justify-content:space-between; align-items:center;
+    color:#fff; font-size:14px; font-weight:600; flex-shrink:0;
+  }
+  /* 顶部品牌区 */
+  .header { padding:16px 16px 36px; color:#fff; }
+  .header h1 { font-size:28px; font-weight:800; margin-bottom:8px; letter-spacing:1px; }
+  .header p { font-size:14px; opacity:.9; }
+  /* 白色卡片表单 */
+  .form-card {
+    margin:0 16px; background:#fff; border-radius:16px; padding:28px 24px;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);
+  }
+  .field { margin-bottom:22px; }
+  .field label { display:block; font-size:13px; color:#86909C; margin-bottom:10px; }
+  .input-row {
+    display:flex; align-items:center; padding:12px 0;
+    border-bottom:1px solid #E5E6EB;
+  }
+  .prefix {
+    font-size:16px; color:#1D2129; padding-right:14px; margin-right:14px;
+    border-right:1px solid #E5E6EB; line-height:24px;
+  }
+  .input-row input {
+    flex:1; border:none; outline:none; font-size:16px; color:#1D2129; background:transparent;
+    padding:0; line-height:24px;
+  }
+  .input-row input::placeholder { color:#C9CDD4; }
+  .code-btn {
+    background:none; border:none; color:#FF6B2C; font-size:14px; font-weight:500;
+    padding-left:14px; border-left:1px solid #E5E6EB; white-space:nowrap; cursor:pointer;
+    line-height:24px;
+  }
+  .login-btn {
+    width:100%; height:48px; background:linear-gradient(90deg,#FF8A3D,#FF5A1F);
+    color:#fff; border:none; border-radius:24px; font-size:17px; font-weight:600;
+    margin-top:8px; box-shadow:0 4px 12px rgba(255,107,44,.35); cursor:pointer;
+  }
+  .agreement {
+    margin-top:18px; font-size:12px; color:#86909C; text-align:center; line-height:1.6;
+  }
+  .agreement a { color:#FF6B2C; text-decoration:none; }
+  .checkbox {
+    display:inline-flex; width:14px; height:14px; border-radius:50%;
+    background:#FF6B2C; color:#fff; text-align:center; line-height:14px; font-size:10px;
+    margin-right:4px; vertical-align:-2px; align-items:center; justify-content:center;
+  }
+  /* 底部其他登录 */
+  .other-login {
+    margin-top:auto; padding-bottom:40px;
+  }
+  .other-login .divider {
+    display:flex; align-items:center; margin-bottom:24px; padding:0 40px;
+    color:#86909C; font-size:12px;
+  }
+  .divider::before, .divider::after {
+    content:""; flex:1; height:1px; background:#E5E6EB;
+  }
+  .divider span { padding:0 12px; }
+  .login-icons { display:flex; justify-content:center; gap:36px; }
+  .icon-circle {
+    width:48px; height:48px; border-radius:50%; background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+  }
+</style>
+</head>
+<body>
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="display:flex;align-items:center;gap:5px">
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="0.5"/><rect x="4.5" y="4.5" width="3" height="6.5" rx="0.5"/><rect x="9" y="2" width="3" height="9" rx="0.5"/><rect x="13" y="0" width="3" height="11" rx="0.5" opacity="0.3"/></svg>
+      <svg width="24" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="20" height="11" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="15" height="8" rx="1" fill="currentColor"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="currentColor"/></svg>
+    </span>
+  </div>
+  <div class="header">
+    <h1>欢迎登录</h1>
+    <p>乡镇外卖跑腿，曙光帮你送到家</p>
+  </div>
+  <div class="form-card">
+    <div class="field">
+      <label>手机号</label>
+      <div class="input-row">
+        <span class="prefix">+86</span>
+        <input type="tel" placeholder="请输入手机号" value="138 8888 8888">
+      </div>
+    </div>
+    <div class="field">
+      <label>验证码</label>
+      <div class="input-row">
+        <input type="text" placeholder="请输入6位验证码">
+        <button class="code-btn">获取验证码</button>
+      </div>
+    </div>
+    <button class="login-btn">登录 / 注册</button>
+    <div class="agreement">
+      <span class="checkbox">✓</span>我已阅读并同意
+      <a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a>
+    </div>
+  </div>
+  <div class="other-login">
+    <div class="divider"><span>其他登录方式</span></div>
+    <div class="login-icons">
+      <div class="icon-circle">
+        <!-- 微信 -->
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#07C160" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8.5 3C4.9 3 2 5.5 2 8.6c0 1.8 1 3.4 2.5 4.4l-.6 1.9 2.2-1.1c.8.2 1.5.3 2.4.3h.4a5 5 0 0 1-.2-1.4c0-3 2.8-5.4 6.2-5.4h.4C15.9 4.8 12.6 3 8.5 3z" fill="#07C160" stroke="none"/>
+          <circle cx="6.5" cy="7.6" r="0.6" fill="#fff"/><circle cx="10.5" cy="7.6" r="0.6" fill="#fff"/>
+          <path d="M22 13.7c0-2.6-2.5-4.7-5.6-4.7s-5.6 2.1-5.6 4.7 2.5 4.7 5.6 4.7c.7 0 1.3-.1 1.9-.3l1.9.9-.5-1.6c1.4-.9 2.3-2.3 2.3-3.7z" fill="#07C160" stroke="none"/>
+          <circle cx="14.7" cy="12.6" r="0.5" fill="#fff"/><circle cx="17.7" cy="12.6" r="0.5" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="icon-circle">
+        <!-- 支付宝 -->
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1677FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z" fill="#1677FF" stroke="none"/>
+          <path d="M7 9h10M12 6v3M8 15c1.5 1.5 4 2 6.5 1" stroke="#fff" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

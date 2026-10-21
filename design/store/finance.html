@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿商家端 - 收入提现</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .balance-card {
+    margin:16px; background:linear-gradient(135deg,#FF8A3D,#FF5A1F);
+    border-radius:16px; padding:24px 20px; color:#fff;
+  }
+  .balance-lbl { font-size:13px; opacity:.9; margin-bottom:8px; }
+  .balance-num { font-size:36px; font-weight:700; }
+  .balance-num small { font-size:18px; font-weight:400; }
+  .balance-row { display:flex; gap:24px; margin-top:16px; }
+  .balance-item .n { font-size:15px; font-weight:600; }
+  .balance-item .t { font-size:11px; opacity:.85; margin-top:2px; }
+  .withdraw-btn {
+    margin:0 16px 16px; background:#fff; color:#FF6B2C; height:44px;
+    border-radius:22px; display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:600;
+  }
+  .section-title {
+    font-size:14px; font-weight:600; padding:0 16px 8px; color:#4E5969;
+  }
+  .list { padding:0 16px; }
+  .record-card {
+    background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:8px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .r-left .r-title { font-size:14px; font-weight:500; }
+  .r-left .r-time { font-size:12px; color:#86909C; margin-top:2px; }
+  .r-amount { font-size:15px; font-weight:600; color:#00B578; }
+  .r-amount.out { color:#1D2129; }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    收入提现
+  </div>
+  <div class="balance-card">
+    <div class="balance-lbl">可提现余额（元）</div>
+    <div class="balance-num"><small>¥</small>3,682.50</div>
+    <div class="balance-row">
+      <div class="balance-item"><div class="n">¥1,286</div><div class="t">今日营业额</div></div>
+      <div class="balance-item"><div class="n">¥8,940</div><div class="t">本月营业额</div></div>
+      <div class="balance-item"><div class="n">128单</div><div class="t">本月订单</div></div>
+    </div>
+  </div>
+  <div class="withdraw-btn">提现到微信钱包</div>
+  <div class="section-title">近期记录</div>
+  <div class="list">
+    <div class="record-card">
+      <div class="r-left">
+        <div class="r-title">订单 #20261022001 收入</div>
+        <div class="r-time">今天 12:30</div>
+      </div>
+      <div class="r-amount">+¥30.8</div>
+    </div>
+    <div class="record-card">
+      <div class="r-left">
+        <div class="r-title">订单 #20261021156 收入</div>
+        <div class="r-time">今天 11:45</div>
+      </div>
+      <div class="r-amount">+¥45.0</div>
+    </div>
+    <div class="record-card">
+      <div class="r-left">
+        <div class="r-title">提现到微信</div>
+        <div class="r-time">10月20日 09:00</div>
+      </div>
+      <div class="r-amount out">-¥2,000.0</div>
+    </div>
+    <div class="record-card">
+      <div class="r-left">
+        <div class="r-title">平台服务费扣款</div>
+        <div class="r-time">10月20日 00:00</div>
+      </div>
+      <div class="r-amount out">-¥89.4</div>
+    </div>
+  </div>
+</body>
+</html>

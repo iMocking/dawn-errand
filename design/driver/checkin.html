@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿骑手端 - 每日签到</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .hero {
+    background:linear-gradient(135deg,#FF8A3D,#FF5A1F); color:#fff;
+    padding:30px 24px; text-align:center;
+  }
+  .hero .title { font-size:20px; font-weight:700; margin-bottom:6px; }
+  .hero .sub { font-size:13px; opacity:.9; }
+  .streak-card {
+    margin:-20px 16px 10px; background:#fff; border-radius:12px; padding:20px;
+    text-align:center; box-shadow:0 4px 16px rgba(0,0,0,.06); position:relative; z-index:2;
+  }
+  .streak-num { font-size:36px; font-weight:700; color:#FF6B2C; }
+  .streak-lbl { font-size:13px; color:#86909C; margin-top:4px; }
+  .checkin-btn {
+    width:100%; height:48px; margin-top:16px;
+    background:linear-gradient(135deg,#FF8A3D,#FF5A1F); color:#fff;
+    border-radius:24px; font-size:16px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .checkin-btn.done { background:#E5E6EB; color:#86909C; }
+  .calendar-card {
+    margin:0 16px 10px; background:#fff; border-radius:12px; padding:16px;
+  }
+  .cal-title { font-size:14px; font-weight:600; margin-bottom:14px; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+  .cal-day {
+    aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-size:12px;
+  }
+  .cal-day.checked { background:#FFF3E8; color:#FF6B2C; font-weight:600; }
+  .cal-day.today { background:#FF6B2C; color:#fff; font-weight:700; }
+  .cal-day.future { color:#C9CDD4; }
+  .reward-card {
+    margin:0 16px; background:#fff; border-radius:12px; padding:16px;
+  }
+  .reward-row {
+    display:flex; justify-content:space-between; padding:8px 0; font-size:13px;
+  }
+  .reward-row .k { color:#86909C; }
+  .reward-row .v { color:#1D2129; font-weight:500; }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    每日签到
+  </div>
+  <div class="hero">
+    <div class="title">连续签到赚奖励</div>
+    <div class="sub">每天上线跑单，额外奖励翻倍</div>
+  </div>
+  <div class="streak-card">
+    <div class="streak-num">7 天</div>
+    <div class="streak-lbl">已连续签到（再签2天领¥10奖励）</div>
+    <div class="checkin-btn done">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      今日已签到
+    </div>
+  </div>
+  <div class="calendar-card">
+    <div class="cal-title">本周签到记录</div>
+    <div class="cal-grid">
+      <div class="cal-day checked">一<br>✓</div>
+      <div class="cal-day checked">二<br>✓</div>
+      <div class="cal-day checked">三<br>✓</div>
+      <div class="cal-day checked">四<br>✓</div>
+      <div class="cal-day checked">五<br>✓</div>
+      <div class="cal-day checked">六<br>✓</div>
+      <div class="cal-day today">日<br>今</div>
+    </div>
+  </div>
+  <div class="reward-card">
+    <div class="cal-title">签到奖励规则</div>
+    <div class="reward-row"><span class="k">连续3天</span><span class="v">奖励 ¥3 现金</span></div>
+    <div class="reward-row"><span class="k">连续7天</span><span class="v">奖励 ¥5 现金</span></div>
+    <div class="reward-row"><span class="k">连续15天</span><span class="v">奖励 ¥10 现金</span></div>
+    <div class="reward-row"><span class="k">连续30天</span><span class="v">奖励 ¥20 + 金牌加速卡</span></div>
+  </div>
+</body>
+</html>

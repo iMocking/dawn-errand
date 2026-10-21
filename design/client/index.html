@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>曙光跑腿 · 用户端 UI 设计稿预览</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#ECEEF1; padding:40px 20px;
+  }
+  .header { text-align:center; margin-bottom:40px; }
+  .header h1 { font-size:32px; color:#1D2129; margin-bottom:8px; }
+  .header p { color:#86909C; font-size:14px; }
+  .brand-info {
+    display:inline-flex; gap:16px; margin-top:16px; align-items:center;
+    background:#fff; padding:12px 24px; border-radius:12px;
+  }
+  .swatch {
+    display:inline-block; width:20px; height:20px; border-radius:50%;
+    vertical-align:middle; margin-right:6px; border:1px solid rgba(0,0,0,.1);
+  }
+  .grid {
+    display:flex; flex-wrap:wrap; gap:32px; justify-content:center;
+    max-width:1600px; margin:0 auto;
+  }
+  .phone-wrap { text-align:center; }
+  .phone {
+    width:375px; height:812px; border-radius:44px; overflow:hidden;
+    border:10px solid #1D2129; box-shadow:0 20px 60px rgba(0,0,0,.15);
+    background:#fff; position:relative;
+  }
+  .phone iframe {
+    width:100%; height:100%; border:none; display:block;
+    overflow:hidden;
+  }
+  .phone-label {
+    margin-top:16px; font-size:14px; color:#4E5969; font-weight:500;
+  }
+  .phone-label small { display:block; color:#86909C; font-size:12px; margin-top:2px; font-weight:400; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>曙光跑腿 · 用户端 App UI</h1>
+    <p>乡镇农村外卖跑腿SaaS平台 · 移动端用户端高保真设计稿</p>
+    <div class="brand-info">
+      <span><span class="swatch" style="background:#FF6B2C"></span>主色 #FF6B2C</span>
+      <span><span class="swatch" style="background:#00B578"></span>成功 #00B578</span>
+      <span><span class="swatch" style="background:#FF4D4F"></span>价格 #FF4D4F</span>
+      <span><span class="swatch" style="background:#F5F6F8"></span>背景 #F5F6F8</span>
+      <span>375 × 812</span>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="splash.html" scrolling="no"></iframe></div>
+      <div class="phone-label">启动页<small>Splash</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="login.html" scrolling="no"></iframe></div>
+      <div class="phone-label">登录页<small>Login · 手机号验证码</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="home.html" scrolling="no"></iframe></div>
+      <div class="phone-label">首页<small>定位 / 服务入口 / 附近商家</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="merchant-detail.html" scrolling="no"></iframe></div>
+      <div class="phone-label">商家详情<small>菜单 / 购物车</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="order-confirm.html" scrolling="no"></iframe></div>
+      <div class="phone-label">确认订单<small>地址 / 明细 / 支付</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="errand.html" scrolling="no"></iframe></div>
+      <div class="phone-label">跑腿下单<small>帮我买 / 送 / 取 / 办</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="order-track.html" scrolling="no"></iframe></div>
+      <div class="phone-label">订单追踪<small>实时地图 / 骑手信息</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="orders.html" scrolling="no"></iframe></div>
+      <div class="phone-label">我的订单<small>进行中 / 已完成</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="profile.html" scrolling="no"></iframe></div>
+      <div class="phone-label">个人中心<small>资产 / 订单 / 设置</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="address.html" scrolling="no"></iframe></div>
+      <div class="phone-label">地址管理<small>村组详细地址</small></div>
+    </div>
+  </div>
+</body>
+</html>

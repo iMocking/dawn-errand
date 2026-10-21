@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿商家端 - 新增菜品</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .nav .save { position:absolute; right:16px; color:#FF6B2C; font-size:15px; }
+  .content { flex:1; overflow-y:auto; padding:10px 16px 100px; }
+  .card { background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .row {
+    display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #F2F3F5;
+  }
+  .row:last-child { border-bottom:none; }
+  .row .label { font-size:14px; color:#4E5969; width:80px; flex-shrink:0; }
+  .row input {
+    flex:1; border:none; outline:none; font-size:15px; color:#1D2129; text-align:right;
+  }
+  .row input::placeholder { color:#C9CDD4; }
+  .upload-area {
+    width:80px; height:80px; border-radius:8px; border:1.5px dashed #C9CDD4;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#86909C; font-size:11px; gap:4px;
+  }
+  .switch {
+    width:44px; height:24px; border-radius:12px; background:#FF6B2C;
+    position:relative; cursor:pointer;
+  }
+  .switch::after {
+    content:""; position:absolute; right:2px; top:2px; width:20px; height:20px;
+    border-radius:50%; background:#fff;
+  }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    新增菜品
+    <span class="save">保存</span>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="row" style="align-items:flex-start;">
+        <span class="label">菜品图片</span>
+        <div class="upload-area">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          上传图片
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">菜品名称</span>
+        <input type="text" placeholder="如：农家小炒肉">
+      </div>
+      <div class="row">
+        <span class="label">分类</span>
+        <input type="text" placeholder="招牌炒菜" value="招牌炒菜">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <span class="label">售价</span>
+        <input type="text" placeholder="¥0.00" value="¥16.8">
+      </div>
+      <div class="row">
+        <span class="label">原价</span>
+        <input type="text" placeholder="选填">
+      </div>
+      <div class="row">
+        <span class="label">库存</span>
+        <input type="text" placeholder="不限" value="不限">
+      </div>
+      <div class="row">
+        <span class="label">月售</span>
+        <input type="text" placeholder="自动统计" value="自动统计" readonly>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <span class="label">菜品描述</span>
+        <input type="text" placeholder="招牌土猪肉现炒，香辣下饭">
+      </div>
+      <div class="row">
+        <span class="label">是否上架</span>
+        <div style="margin-left:auto"><div class="switch"></div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

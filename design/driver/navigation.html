@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿骑手端 - 导航</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#E8ECEB; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav-bar {
+    position:absolute; top:0; left:0; right:0; z-index:10;
+    padding:54px 16px 16px; background:linear-gradient(180deg,rgba(0,0,0,.3),transparent);
+  }
+  .nav-title {
+    background:#fff; border-radius:12px; padding:12px 16px;
+    display:flex; align-items:center; gap:10px;
+    box-shadow:0 4px 16px rgba(0,0,0,.1);
+  }
+  .nav-title .back {
+    width:32px; height:32px; border-radius:50%; background:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-text { flex:1; }
+  .nav-text .from { font-size:12px; color:#FF6B2C; font-weight:600; }
+  .nav-text .to { font-size:14px; font-weight:600; margin-top:2px; }
+  /* 地图区域 */
+  .map-area { flex:1; position:relative; overflow:hidden; }
+  .road { position:absolute; background:#fff; }
+  .road.h { height:24px; }
+  .road.v { width:24px; }
+  .my-loc {
+    position:absolute; width:16px; height:16px; border-radius:50%;
+    background:#FF6B2C; border:3px solid #fff; box-shadow:0 2px 8px rgba(255,107,44,.4);
+  }
+  .pick-marker {
+    position:absolute; width:32px; height:32px;
+    background:#FF6B2C; border-radius:50% 50% 50% 0; transform:rotate(-45deg);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 12px rgba(255,107,44,.4);
+  }
+  .pick-marker span { transform:rotate(45deg); color:#fff; font-size:12px; font-weight:700; }
+  .route-line {
+    position:absolute; height:4px; background:#FF6B2C; border-radius:2px;
+    transform-origin:left center;
+  }
+  /* 底部信息卡 */
+  .bottom-panel {
+    position:absolute; bottom:0; left:0; right:0; background:#fff;
+    border-radius:20px 20px 0 0; padding:20px 16px 28px;
+    box-shadow:0 -4px 20px rgba(0,0,0,.1);
+  }
+  .eta-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .eta .big { font-size:28px; font-weight:700; color:#FF6B2C; }
+  .eta .small { font-size:12px; color:#86909C; }
+  .eta .dist { text-align:right; }
+  .eta .dist .n { font-size:18px; font-weight:600; }
+  .eta .dist .l { font-size:12px; color:#86909C; }
+  .nav-btn {
+    width:100%; height:48px; background:linear-gradient(135deg,#FF6B2C,#FF5A1F);
+    color:#fff; border-radius:24px; display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:600; gap:6px;
+  }
+</style>
+</head>
+<body>
+  <div class="nav-bar">
+    <div class="nav-title">
+      <div class="back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="nav-text">
+        <div class="from">当前位置 → 取餐点</div>
+        <div class="to">村口老陈家常菜</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-area">
+    <!-- 模拟道路 -->
+    <div class="road h" style="top:200px;left:0;right:0"></div>
+    <div class="road h" style="top:400px;left:0;right:0"></div>
+    <div class="road v" style="left:100px;top:0;bottom:0"></div>
+    <div class="road v" style="left:250px;top:0;bottom:0"></div>
+    <!-- 我的位置 -->
+    <div class="my-loc" style="left:108px;top:380px"></div>
+    <!-- 取餐点 -->
+    <div class="pick-marker" style="left:240px;top:180px"><span>取</span></div>
+    <!-- 路线 -->
+    <div class="route-line" style="left:116px;top:388px;width:140px;transform:rotate(-55deg)"></div>
+  </div>
+
+  <div class="bottom-panel">
+    <div class="eta-row">
+      <div class="eta">
+        <div class="big">5分钟</div>
+        <div class="small">预计到达取餐点</div>
+      </div>
+      <div class="dist">
+        <div class="n">1.2 km</div>
+        <div class="l">剩余距离</div>
+      </div>
+    </div>
+    <div class="nav-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      开始导航
+    </div>
+  </div>
+</body>
+</html>
