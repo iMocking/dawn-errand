@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
+import AppButton from '@/components/AppButton.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
 import { getOrderDetail, type OrderDetail } from '@/api/orders'
 import { formatClock, formatTime } from '@/utils/format'
@@ -35,8 +36,8 @@ onMounted(load)
 </script>
 
 <template>
-  <div v-if="loading" class="p-6 text-ink-3">加载中…</div>
-  <div v-else-if="detail" class="flex flex-col gap-4 p-5">
+  <div v-if="loading" class="text-ink-3">加载中…</div>
+  <div v-else-if="detail" class="flex flex-col gap-4">
     <!-- 订单概要 -->
     <div class="flex items-center rounded-card bg-white px-5 py-4">
       <div>
@@ -51,20 +52,21 @@ onMounted(load)
         </div>
       </div>
       <div class="ml-auto flex items-center gap-3">
-        <button
-          class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2"
+        <AppButton
+          variant="secondary"
+          icon="download"
+          :icon-size="15"
+          class="!gap-2"
           @click="toast.info('打印任务已发送')"
         >
-          <SvgIcon name="download" :size="15" />
           打印小票
-        </button>
-        <button
-          class="h-9 rounded-lg border-none px-4 text-[13px] font-semibold text-white"
-          style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);box-shadow:0 4px 12px rgba(255,107,44,.3);"
+        </AppButton>
+        <AppButton
+          class="shadow-[0_4px_12px_rgba(255,107,44,.3)]"
           @click="onContactRider"
         >
           联系骑手
-        </button>
+        </AppButton>
       </div>
     </div>
 

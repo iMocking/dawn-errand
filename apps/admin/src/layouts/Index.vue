@@ -8,7 +8,7 @@ import Topbar from './Topbar.vue'
     <Sidebar />
     <section class="flex min-w-0 flex-1 flex-col">
       <Topbar />
-      <main class="flex-1 overflow-y-auto">
+      <main class="flex-1 overflow-y-auto p-2">
         <router-view />
       </main>
     </section>

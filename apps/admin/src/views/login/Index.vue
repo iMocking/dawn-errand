@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
+import AppInput from '@/components/AppInput.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
 
@@ -93,37 +95,45 @@ async function onSubmit() {
 
         <div class="mt-8">
           <label class="mb-2 block text-[13px] text-ink-2">账号</label>
-          <div class="flex h-12 items-center rounded-lg border border-line bg-white px-[14px]">
-            <SvgIcon name="user" :size="20" :stroke-width="1.8" class="shrink-0 text-ink-3" />
-            <input
-              v-model="account"
-              class="ml-2.5 flex-1 border-none text-[14px] text-ink-1 outline-none"
-              placeholder="请输入管理员账号"
-            />
-          </div>
+          <AppInput
+            v-model="account"
+            class="!h-12 !px-[14px]"
+            input-class="!text-[14px]"
+            placeholder="请输入管理员账号"
+          >
+            <template #prefix>
+              <SvgIcon name="user" :size="20" :stroke-width="1.8" class="shrink-0 text-ink-3" />
+            </template>
+          </AppInput>
 
           <label class="mb-2 mt-5 block text-[13px] text-ink-2">密码</label>
-          <div class="flex h-12 items-center rounded-lg border border-line bg-white px-[14px]">
-            <SvgIcon name="lock" :size="20" :stroke-width="1.8" class="shrink-0 text-ink-3" />
-            <input
-              v-model="password"
-              type="password"
-              class="ml-2.5 flex-1 border-none text-[14px] text-ink-1 outline-none"
-              placeholder="请输入密码"
-            />
-            <SvgIcon name="eye" :size="20" :stroke-width="1.8" class="shrink-0 cursor-pointer text-ink-3" />
-          </div>
+          <AppInput
+            v-model="password"
+            type="password"
+            class="!h-12 !px-[14px]"
+            input-class="!text-[14px]"
+            placeholder="请输入密码"
+          >
+            <template #prefix>
+              <SvgIcon name="lock" :size="20" :stroke-width="1.8" class="shrink-0 text-ink-3" />
+            </template>
+            <template #suffix>
+              <SvgIcon name="eye" :size="20" :stroke-width="1.8" class="shrink-0 cursor-pointer text-ink-3" />
+            </template>
+          </AppInput>
 
           <label class="mb-2 mt-5 block text-[13px] text-ink-2">验证码</label>
           <div class="flex gap-3">
-            <div class="flex h-12 flex-1 items-center rounded-lg border border-line bg-white px-[14px]">
-              <SvgIcon name="captcha" :size="20" :stroke-width="1.8" class="shrink-0 text-ink-3" />
-              <input
-                v-model="captcha"
-                class="ml-2.5 flex-1 border-none text-[14px] tracking-[4px] text-ink-1 outline-none"
-                placeholder="请输入验证码"
-              />
-            </div>
+            <AppInput
+              v-model="captcha"
+              class="!h-12 !px-[14px] flex-1"
+              input-class="!text-[14px] !tracking-[4px]"
+              placeholder="请输入验证码"
+            >
+              <template #prefix>
+                <SvgIcon name="captcha" :size="20" :stroke-width="1.8" class="shrink-0 text-ink-3" />
+              </template>
+            </AppInput>
             <div class="flex h-12 w-32 shrink-0 items-center justify-center rounded-lg" style="background:#FFF3E8;">
               <span class="text-[16px] font-bold tracking-[3px] text-primary">8A6K</span>
             </div>
@@ -139,14 +149,14 @@ async function onSubmit() {
             <span class="cursor-pointer text-[13px] text-primary">忘记密码？</span>
           </div>
 
-          <button
-            class="mt-7 h-12 w-full rounded-lg border-none text-[16px] font-semibold text-white disabled:opacity-70"
-            style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);box-shadow:0 6px 16px rgba(255,107,44,.35);"
-            :disabled="loading"
+          <AppButton
+            variant="primary"
+            class="mt-7 !h-12 !w-full !text-[16px] shadow-[0_6px_16px_rgba(255,107,44,.35)]"
+            :loading="loading"
             @click="onSubmit"
           >
             {{ loading ? '登录中…' : '登 录' }}
-          </button>
+          </AppButton>
         </div>
 
         <div class="mt-8 flex items-center gap-3">

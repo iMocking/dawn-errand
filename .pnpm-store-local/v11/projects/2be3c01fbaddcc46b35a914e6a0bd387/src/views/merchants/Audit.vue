@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import StatusTag from '@/components/StatusTag.vue'
 import Modal from '@/components/Modal.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatTime } from '@/utils/format'
 import {
@@ -91,15 +92,16 @@ onMounted(load)
         </div>
       </div>
       <div class="ml-auto flex items-center gap-2">
-        <button
+        <AppButton
           v-for="t in tabs"
           :key="t"
-          class="rounded-md px-3.5 py-1.5 text-[13px] transition-colors"
-          :class="activeTab === t ? 'bg-primary-bg font-semibold text-primary' : 'bg-head text-ink-2 hover:text-ink-1'"
+          variant="text"
+          class="!rounded-md !px-3.5 !py-1.5 !leading-normal"
+          :class="activeTab === t ? '!bg-primary-bg !font-semibold !text-primary' : '!bg-head !font-normal !text-ink-2 hover:!text-ink-1'"
           @click="activeTab = t"
         >
 {{ t }}
-</button>
+</AppButton>
       </div>
     </div>
 
@@ -149,24 +151,23 @@ onMounted(load)
 
         <!-- 操作按钮 -->
         <div v-if="row.status === '待审核'" class="flex shrink-0 flex-col justify-center gap-2.5">
-          <button
+          <AppButton
             v-permission="'merchant:audit'"
-            class="h-9 rounded-lg border-none px-6 text-[13px] font-semibold text-white disabled:opacity-60"
-            style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
-            :disabled="submittingId === row.id"
+            class="!px-6"
+            :loading="submittingId === row.id"
             @click="openConfirm(row, 'approve')"
           >
 {{ submittingId === row.id ? '提交中…' : '通过入驻' }}
-</button>
-          <button
+</AppButton>
+          <AppButton
             v-permission="'merchant:audit'"
-            class="h-9 rounded-lg border border-line bg-white px-6 text-[13px] disabled:opacity-60"
-            style="color:#FF4D4F;"
+            variant="secondary"
+            class="!px-6 !text-[#FF4D4F]"
             :disabled="submittingId === row.id"
             @click="openConfirm(row, 'reject')"
           >
 {{ submittingId === row.id ? '提交中…' : '驳回申请' }}
-</button>
+</AppButton>
         </div>
       </div>
     </div>

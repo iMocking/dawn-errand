@@ -3,6 +3,8 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import DataTable, { type Column } from '@/components/DataTable.vue'
 import Modal from '@/components/Modal.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
+import AppInput from '@/components/AppInput.vue'
 import { useToast } from '@/composables/useToast'
 import { formatDate } from '@/utils/format'
 import { getFeeRules, saveFeeRule, type FeeRuleRow } from '@/api/settings'
@@ -85,7 +87,7 @@ const ladderColumns: Column[] = [
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 px-6 py-3">
+  <div class="flex flex-col gap-3">
     <!-- 费率状态条 -->
     <div class="flex shrink-0 items-center gap-3 rounded-card bg-white px-5 py-3">
       <div class="flex h-[34px] w-10 items-center justify-center rounded-[10px]" style="background:#FFF3E8;">
@@ -100,9 +102,9 @@ const ladderColumns: Column[] = [
         </div>
       </div>
       <div class="ml-auto flex items-center gap-3">
-        <button
-          class="flex items-center gap-2 rounded-lg px-3.5 py-2"
-          style="background:#E8F7F0;"
+        <AppButton
+          variant="ghost"
+          class="!rounded-lg !px-3.5 !py-2 !bg-[#E8F7F0] !text-[#00B578]"
           :disabled="toggleSubmitting"
           @click="toggleEnabled"
         >
@@ -113,14 +115,13 @@ const ladderColumns: Column[] = [
             />
           </span>
           <span class="text-[12px] font-semibold" style="color:#00B578;">已启用</span>
-        </button>
-        <button
-          class="h-[30px] rounded-lg border-none px-[18px] text-[13px] font-semibold text-white"
-          :style="{ background: 'linear-gradient(135deg,#FF8A3D,#FF6B2C)' }"
+        </AppButton>
+        <AppButton
+          class="!h-[30px] !px-[18px]"
           @click="openEdit"
         >
           编辑规则
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -224,22 +225,22 @@ const ladderColumns: Column[] = [
       <div class="flex flex-col gap-3.5 py-1">
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-24 shrink-0 text-right">起步价（0-3km）</span>
-          <input v-model.number="form.startFee" type="number" class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary" />
+          <AppInput v-model.number="form.startFee" type="number" class="flex-1" />
           <span class="text-[12px] text-ink-4">元</span>
         </label>
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-24 shrink-0 text-right">续程单价</span>
-          <input v-model.number="form.continueFee" type="number" class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary" />
+          <AppInput v-model.number="form.continueFee" type="number" class="flex-1" />
           <span class="text-[12px] text-ink-4">元/km</span>
         </label>
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-24 shrink-0 text-right">远途单价</span>
-          <input v-model.number="form.farFee" type="number" class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary" />
+          <AppInput v-model.number="form.farFee" type="number" class="flex-1" />
           <span class="text-[12px] text-ink-4">元/km</span>
         </label>
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-24 shrink-0 text-right">配送费上限</span>
-          <input v-model.number="form.cap" type="number" class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary" />
+          <AppInput v-model.number="form.cap" type="number" class="flex-1" />
           <span class="text-[12px] text-ink-4">元</span>
         </label>
       </div>

@@ -26,7 +26,7 @@ async function onLogout() {
 <template>
   <aside class="flex h-full w-[224px] shrink-0 flex-col border-r border-line bg-white">
     <!-- Logo -->
-    <div class="flex items-center gap-2.5 border-b border-[#F2F3F5] px-4 py-[18px]">
+    <div class="flex items-center gap-2.5 border-b border-[#F2F3F5] px-4 py-2">
       <div
         class="flex h-[38px] w-[38px] items-center justify-center rounded-[10px]"
         style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"

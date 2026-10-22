@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import { getDashboard, type DashboardDto } from '@/api/dashboard'
 import StatCard from '@/components/StatCard.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
 import { greetByHour } from '@/utils/format'
 import { useAuthStore } from '@/stores/auth'
 
@@ -22,8 +23,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="loading" class="p-6 text-ink-3">加载中…</div>
-  <div v-else-if="data" class="flex flex-col gap-4 p-5">
+  <div v-if="loading" class="text-ink-3">加载中…</div>
+  <div v-else-if="data" class="flex flex-col gap-4">
     <!-- 欢迎行 -->
     <div class="flex items-center">
       <div>
@@ -33,17 +34,14 @@ onMounted(async () => {
         </div>
       </div>
       <div class="ml-auto flex gap-3">
-        <button class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2">
-          <SvgIcon name="download" :size="15" />
-          导出报表
-        </button>
-        <button
-          class="flex h-9 items-center gap-2 rounded-lg border-none text-[13px] font-semibold text-white"
-          style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);box-shadow:0 4px 12px rgba(255,107,44,.3);"
+        <AppButton variant="secondary" icon="download">导出报表</AppButton>
+        <AppButton
+          variant="primary"
+          icon="plus"
+          class="shadow-[0_4px_12px_rgba(255,107,44,.3)]"
         >
-          <SvgIcon name="plus" :size="15" :stroke-width="2.2" />
           发布公告
-        </button>
+        </AppButton>
       </div>
     </div>
 

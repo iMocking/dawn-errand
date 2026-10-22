@@ -6,6 +6,7 @@ import Pagination from '@/components/Pagination.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Modal from '@/components/Modal.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatDate, formatNumber } from '@/utils/format'
 import {
@@ -140,7 +141,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 px-6 py-5">
+  <div class="flex flex-col gap-4">
     <!-- 指标行 -->
     <div class="grid shrink-0 grid-cols-4 gap-4">
       <div class="flex items-center gap-3.5 rounded-card bg-white p-4">
@@ -207,13 +208,7 @@ onMounted(async () => {
     <div class="flex shrink-0 items-center">
       <div class="text-[16px] font-bold text-ink-1">用户列表</div>
       <div class="ml-auto flex gap-3">
-        <button
-          class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2"
-          @click="toast.info('导出列表')"
-        >
-          <SvgIcon name="download" :size="15" />
-          导出列表
-        </button>
+        <AppButton variant="secondary" icon="download" @click="toast.info('导出列表')">导出列表</AppButton>
       </div>
     </div>
 
@@ -223,28 +218,26 @@ onMounted(async () => {
         <template #extra>
           <span class="flex items-center gap-2 text-[13px] text-ink-2">
             状态
-            <button
+            <AppButton
               v-for="t in STATUS_TABS"
               :key="t.value"
-              class="rounded-md px-3.5 py-1.5 text-[13px]"
-              :class="query.status === t.value ? 'bg-primary-bg font-semibold text-primary' : 'bg-head text-ink-2'"
+              variant="text"
+              class="!rounded-md !px-3.5 !py-1.5 !leading-normal"
+              :class="query.status === t.value ? '!bg-primary-bg !font-semibold !text-primary' : '!bg-head !font-normal !text-ink-2'"
               @click="pickStatus(t.value)"
-            >
-              {{ t.label }}
-            </button>
+            >{{ t.label }}</AppButton>
           </span>
           <span class="h-6 w-px bg-line" />
           <span class="flex items-center gap-2 text-[13px] text-ink-2">
             常驻区域
-            <button
+            <AppButton
               v-for="a in AREA_TABS"
               :key="a"
-              class="rounded-md px-3.5 py-1.5 text-[13px]"
-              :class="areaFilter === a ? 'bg-primary-bg font-semibold text-primary' : 'bg-head text-ink-2'"
+              variant="text"
+              class="!rounded-md !px-3.5 !py-1.5 !leading-normal"
+              :class="areaFilter === a ? '!bg-primary-bg !font-semibold !text-primary' : '!bg-head !font-normal !text-ink-2'"
               @click="pickArea(a)"
-            >
-              {{ a }}
-            </button>
+            >{{ a }}</AppButton>
           </span>
         </template>
       </SearchBar>

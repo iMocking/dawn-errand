@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatDate, formatTime, formatMoney, formatNumber } from '@/utils/format'
 import { getMerchantDetail, type MerchantDetail } from '@/api/merchants'
@@ -50,7 +51,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="loading" class="p-6 text-ink-3">加载中…</div>
+  <div v-if="loading" class="text-ink-3">加载中…</div>
   <div v-else-if="detail" class="flex flex-col gap-3">
     <!-- 商家头部卡 -->
     <div class="flex items-center gap-3 rounded-card bg-white p-[12px_20px]">
@@ -82,8 +83,8 @@ onMounted(async () => {
         </div>
       </div>
       <div class="flex shrink-0 gap-2">
-        <button class="h-[30px] rounded-lg border border-line bg-white px-[18px] text-[13px] text-ink-2">编辑资料</button>
-        <button class="h-[30px] rounded-lg border bg-white px-[18px] text-[13px]" style="border-color:#FFD9D9;color:#FF4D4F;">暂停营业</button>
+        <AppButton variant="secondary" class="!h-[30px] !px-[18px]">编辑资料</AppButton>
+        <AppButton variant="secondary" class="!h-[30px] !px-[18px] !border-[#FFD9D9] !text-[#FF4D4F]">暂停营业</AppButton>
       </div>
     </div>
 
@@ -128,14 +129,8 @@ onMounted(async () => {
             </div>
           </div>
           <div class="mt-2 flex justify-end gap-2 border-t border-line pt-4">
-            <button class="h-[30px] rounded-lg border border-line bg-white px-5 text-[13px] text-ink-2">取消</button>
-            <button
-              class="h-[30px] rounded-lg border-none px-5 text-[13px] font-semibold text-white"
-              style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
-              @click="toast.success('资料已保存')"
-            >
-保存修改
-</button>
+            <AppButton variant="secondary" class="!h-[30px] !px-5">取消</AppButton>
+            <AppButton class="!h-[30px] !px-5" @click="toast.success('资料已保存')">保存修改</AppButton>
           </div>
         </div>
 

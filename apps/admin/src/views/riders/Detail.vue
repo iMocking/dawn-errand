@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
 import Empty from '@/components/Empty.vue'
 import Confirm from '@/components/Confirm.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatDate, formatNumber, formatClock } from '@/utils/format'
 import { getRiderDetail, freezeRider, type RiderDetailDto } from '@/api/riders'
@@ -55,7 +56,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div v-if="loading" class="p-6 text-ink-3">加载中…</div>
+  <div v-if="loading" class="text-ink-3">加载中…</div>
   <div v-else-if="detail" class="flex flex-col gap-4">
     <!-- 骑手头部卡 -->
     <div class="flex items-center gap-4 rounded-card bg-white px-5 py-[18px]">
@@ -91,14 +92,14 @@ onMounted(load)
         </div>
       </div>
       <div class="flex shrink-0 gap-2.5">
-        <button class="h-9 rounded-lg border border-line bg-white px-[18px] text-[13px] text-ink-2">编辑资料</button>
-        <button
-          class="h-9 rounded-lg border bg-white px-[18px] text-[13px]"
-          style="border-color:#FFD9D9;color:#FF4D4F;"
+        <AppButton variant="secondary" class="!px-[18px]">编辑资料</AppButton>
+        <AppButton
+          variant="secondary"
+          class="!px-[18px] !border-[#FFD9D9] !text-[#FF4D4F]"
           @click="freezeOpen = true"
         >
 冻结账号
-</button>
+</AppButton>
       </div>
     </div>
 

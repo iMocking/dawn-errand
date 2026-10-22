@@ -7,6 +7,8 @@ import SearchBar from '@/components/SearchBar.vue'
 import Modal from '@/components/Modal.vue'
 import Confirm from '@/components/Confirm.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
+import AppInput from '@/components/AppInput.vue'
 import { useToast } from '@/composables/useToast'
 import { formatTime } from '@/utils/format'
 import {
@@ -162,7 +164,7 @@ async function onConfirmAction() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 px-6 py-5">
+  <div class="flex flex-col gap-4">
     <!-- 顶部操作条 -->
     <div class="flex shrink-0 items-center">
       <div class="flex items-center gap-[10px]">
@@ -173,14 +175,14 @@ async function onConfirmAction() {
       </div>
       <div class="ml-auto flex items-center gap-3">
         <SearchBar placeholder="搜索公告标题" @search="onSearch" @reset="onReset" />
-        <button
-          class="flex h-[34px] items-center gap-1.5 rounded-lg border-none px-[18px] text-[13px] font-semibold text-white"
-          :style="{ background: 'linear-gradient(135deg,#FF8A3D,#FF6B2C)' }"
+        <AppButton
+          icon="plus"
+          :icon-size="14"
+          class="!h-[34px] !px-[18px]"
           @click="openCreate"
         >
-          <SvgIcon name="plus" :size="14" />
           发布公告
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -272,19 +274,19 @@ async function onConfirmAction() {
             </div>
           </div>
           <div class="mt-4 flex justify-end gap-2.5">
-            <button
-              class="h-[34px] rounded-lg border border-line bg-white px-4 text-[12px] text-ink-2"
+            <AppButton
+              variant="secondary"
+              class="!h-[34px] !text-[12px]"
               @click="toast.info('App 端预览')"
             >
               预览 App 端
-            </button>
-            <button
-              class="h-[34px] rounded-lg border-none px-4 text-[12px] font-semibold text-white"
-              :style="{ background: 'linear-gradient(135deg,#FF8A3D,#FF6B2C)' }"
+            </AppButton>
+            <AppButton
+              class="!h-[34px] !text-[12px]"
               @click="active && openEdit(active)"
             >
               编辑公告
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -316,11 +318,7 @@ async function onConfirmAction() {
       <div class="flex flex-col gap-3.5 py-1">
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-20 shrink-0 text-right">公告标题</span>
-          <input
-            v-model="form.title"
-            class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary"
-            placeholder="请输入公告标题"
-          />
+          <AppInput v-model="form.title" class="flex-1" placeholder="请输入公告标题" />
         </label>
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-20 shrink-0 text-right">公告类型</span>

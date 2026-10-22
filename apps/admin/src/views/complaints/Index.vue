@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
+import AppButton from '@/components/AppButton.vue'
 import { getComplaints, type ComplaintRow } from '@/api/complaints'
 import { formatTime } from '@/utils/format'
 
@@ -63,7 +64,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-5">
+  <div class="flex flex-col gap-4">
     <!-- 标题行 -->
     <div class="flex items-center">
       <div>
@@ -167,20 +168,20 @@ onMounted(load)
         </div>
         <!-- 操作行 -->
         <div v-if="row.status === '待处理'" class="mt-3 flex items-center gap-2.5">
-          <button
+          <AppButton
             v-permission="'complaint:handle'"
-            class="h-[34px] rounded-lg border-none px-5 text-[13px] font-semibold text-white"
-            style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
+            class="!h-[34px] !px-5"
             @click="openDetail(row)"
           >
             开始处理
-          </button>
-          <button
-            class="h-[34px] rounded-lg border border-line bg-white px-5 text-[13px] text-ink-2"
+          </AppButton>
+          <AppButton
+            variant="secondary"
+            class="!h-[34px] !px-5"
             @click="router.push(`/orders/${row.order_id}`)"
           >
             查看订单
-          </button>
+          </AppButton>
           <span class="ml-auto text-[12px] text-ink-4">{{ row.deadline }}</span>
         </div>
       </div>

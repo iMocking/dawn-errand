@@ -7,6 +7,7 @@ import Pagination from '@/components/Pagination.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Confirm from '@/components/Confirm.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import {
   getRiders,
@@ -184,17 +185,8 @@ onMounted(() => {
     <div class="flex items-center">
       <div class="text-[16px] font-bold text-ink-1">骑手列表</div>
       <div class="ml-auto flex gap-3">
-        <button class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2">
-          <SvgIcon name="download" :size="15" />
-          导出列表
-        </button>
-        <button
-          class="flex h-9 items-center gap-1.5 rounded-lg text-[13px] font-semibold text-white"
-          style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);box-shadow:0 4px 12px rgba(255,107,44,.3);"
-        >
-          <SvgIcon name="plus" :size="15" :stroke-width="2.2" />
-          新增骑手
-        </button>
+        <AppButton variant="secondary" icon="download">导出列表</AppButton>
+        <AppButton variant="primary" icon="plus" class="shadow-[0_4px_12px_rgba(255,107,44,.3)]">新增骑手</AppButton>
       </div>
     </div>
 

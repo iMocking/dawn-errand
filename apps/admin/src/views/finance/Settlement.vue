@@ -6,6 +6,8 @@ import {
   type FinanceDto,
   type SettlementRow,
 } from '@/api/finance'
+import AppButton from '@/components/AppButton.vue'
+import AppInput from '@/components/AppInput.vue'
 import DataTable, { type Column } from '@/components/DataTable.vue'
 import Pagination from '@/components/Pagination.vue'
 import { formatClock, formatDate, formatMoney } from '@/utils/format'
@@ -70,7 +72,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-5">
+  <div class="flex flex-col gap-4">
     <div v-if="loading" class="py-16 text-center text-ink-3">加载中…</div>
     <template v-else-if="stats">
       <!-- 汇总指标卡 -->
@@ -93,23 +95,27 @@ onMounted(async () => {
         <div class="rounded-card bg-white px-[18px] py-4">
           <div class="text-[12px] text-ink-3">待结算金额</div>
           <div class="mt-1.5 text-[24px] font-bold" style="color:#D48806;">{{ formatMoney(stats.pendingAmount) }}</div>
-          <button class="mt-1 cursor-pointer text-[11px] font-semibold" style="color:#FF6B2C;">{{ stats.pendingCountText }}</button>
+          <AppButton variant="text" class="mt-1 cursor-pointer !text-[11px]">{{ stats.pendingCountText }}</AppButton>
         </div>
       </div>
 
       <!-- 筛选条 -->
       <div class="flex shrink-0 items-center gap-3 rounded-card bg-white px-[18px] py-[14px]">
         <span class="shrink-0 text-[12px] text-ink-3">结算类型</span>
-        <button
+        <AppButton
           v-for="t in TYPES"
           :key="t"
-          class="rounded-md px-3 py-[5px] text-[12px]"
-          :class="activeType === t ? 'font-semibold' : 'text-ink-2'"
-          :style="activeType === t ? 'background:#FFF3E8;color:#FF6B2C;' : 'background:#F7F8FA;'"
+          variant="ghost"
+          class="!rounded-md !px-3 !py-[5px] !text-[12px]"
+          :class="
+            activeType === t
+              ? '!bg-[#FFF3E8] !font-semibold !text-[#FF6B2C] hover:!text-[#FF6B2C]'
+              : '!bg-[#F7F8FA] !text-ink-2 hover:!text-ink-2'
+          "
           @click="onTypeChange(t)"
         >
           {{ t }}
-        </button>
+        </AppButton>
         <div class="ml-auto flex items-center gap-2">
           <div class="flex h-8 items-center gap-2 rounded-lg bg-head px-3 text-[12px] text-ink-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -120,25 +126,23 @@ onMounted(async () => {
             </svg>
             {{ stats.dateRange }}
           </div>
-          <div class="flex h-8 items-center gap-2 rounded-lg bg-head px-3 text-[12px] text-ink-4">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              v-model="keyword"
-              class="w-20 bg-transparent text-ink-2 outline-none placeholder:text-ink-4"
-              placeholder="流水号搜索"
-              @keyup.enter="onSearch(keyword)"
-            />
-          </div>
-          <button
-            class="h-8 rounded-lg border-none px-4 text-[12px] font-semibold text-white"
-            style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
+          <AppInput
+            v-model="keyword"
+            size="sm"
+            variant="plain"
+            prefix="search"
+            placeholder="流水号搜索"
+            class="w-[126px]"
+            input-class="!text-[12px] !text-ink-2"
+            @keyup.enter="onSearch(keyword)"
+          />
+          <AppButton
+            variant="primary"
+            class="!h-8 !text-[12px]"
             @click="toast.info('对账单导出任务已提交')"
           >
             导出对账单
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -162,9 +166,13 @@ onMounted(async () => {
               <span class="text-ink-3">{{ shortTime(row.settled_at) }}</span>
             </template>
             <template #col-action="{ row }">
-              <button class="text-[12px] font-semibold" style="color:#2B7FFF;" @click="toast.info(`${row.id} 明细查看功能待接入`)">
+              <AppButton
+                variant="text"
+                class="!text-[12px] !text-[#2B7FFF]"
+                @click="toast.info(`${row.id} 明细查看功能待接入`)"
+              >
                 {{ row.action }}
-              </button>
+              </AppButton>
             </template>
           </DataTable>
         </div>

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import DataTable, { type Column } from '@/components/DataTable.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import Pagination from '@/components/Pagination.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatNumber } from '@/utils/format'
 import {
@@ -156,42 +157,36 @@ onMounted(load)
     <div class="flex items-center">
       <div class="text-[16px] font-bold text-ink-1">商家列表</div>
       <div class="ml-auto flex gap-3">
-        <button class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-          导出列表
-        </button>
-        <button
-          class="flex h-9 items-center gap-1.5 rounded-lg border-none px-4 text-[13px] font-semibold text-white"
-          style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);box-shadow:0 4px 12px rgba(255,107,44,.3);"
-        >
-+ 新增商家
-</button>
+        <AppButton variant="secondary" icon="download">导出列表</AppButton>
+        <AppButton class="shadow-[0_4px_12px_rgba(255,107,44,.3)]">+ 新增商家</AppButton>
       </div>
     </div>
 
     <!-- 筛选行 -->
     <div class="flex items-center gap-3">
       <span class="text-[13px] text-ink-2">状态</span>
-      <button
+      <AppButton
         v-for="t in statusTabs"
         :key="t.value"
-        class="rounded-md px-3.5 py-1.5 text-[13px] transition-colors"
-        :class="query.status === t.value ? 'bg-primary-bg font-semibold text-primary' : 'bg-head text-ink-2 hover:text-ink-1'"
+        variant="text"
+        class="!rounded-md !px-3.5 !py-1.5 !leading-normal"
+        :class="query.status === t.value ? '!bg-primary-bg !font-semibold !text-primary' : '!bg-head !font-normal !text-ink-2 hover:!text-ink-1'"
         @click="selectStatus(t.value)"
       >
 {{ t.label }}
-</button>
+</AppButton>
       <div class="h-6 w-px bg-line"></div>
       <span class="text-[13px] text-ink-2">经营类型</span>
-      <button
+      <AppButton
         v-for="c in categoryTabs"
         :key="c"
-        class="rounded-md px-3.5 py-1.5 text-[13px] transition-colors"
-        :class="query.category === c ? 'bg-primary-bg font-semibold text-primary' : 'bg-head text-ink-2 hover:text-ink-1'"
+        variant="text"
+        class="!rounded-md !px-3.5 !py-1.5 !leading-normal"
+        :class="query.category === c ? '!bg-primary-bg !font-semibold !text-primary' : '!bg-head !font-normal !text-ink-2 hover:!text-ink-1'"
         @click="query.category = query.category === c ? '' : c"
       >
 {{ c }}
-</button>
+</AppButton>
       <div class="ml-auto flex h-9 w-[220px] items-center gap-2 rounded-lg bg-head px-3">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" /></svg>
         <span class="text-[13px] text-ink-4">配送区域：全部</span>

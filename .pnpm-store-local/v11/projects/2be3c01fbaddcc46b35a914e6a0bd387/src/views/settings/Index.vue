@@ -5,7 +5,8 @@ import Modal from '@/components/Modal.vue'
 import Confirm from '@/components/Confirm.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import Empty from '@/components/Empty.vue'
-import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
+import AppInput from '@/components/AppInput.vue'
 import { useToast } from '@/composables/useToast'
 import { formatNumber } from '@/utils/format'
 import { getSettings, saveSettings, type ServiceArea, type SystemSettings } from '@/api/settings'
@@ -129,7 +130,7 @@ async function onConfirmAction() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 px-6 py-5">
+  <div class="flex flex-col gap-4">
     <!-- 设置页签（照设计稿） -->
     <div class="flex shrink-0 items-center gap-5">
       <span
@@ -161,20 +162,13 @@ async function onConfirmAction() {
           </div>
         </div>
         <div class="ml-auto flex gap-3">
-          <button
-            class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2"
-            @click="toast.info('导入区域')"
-          >
-            <SvgIcon name="download" :size="15" />
-            导入区域
-          </button>
-          <button
-            class="h-9 rounded-lg border-none px-4 text-[13px] font-semibold text-white shadow-[0_4px_12px_rgba(255,107,44,.3)]"
-            :style="{ background: 'linear-gradient(135deg,#FF8A3D,#FF6B2C)' }"
+          <AppButton icon="download" @click="toast.info('导入区域')">导入区域</AppButton>
+          <AppButton
+            class="shadow-[0_4px_12px_rgba(255,107,44,.3)]"
             @click="openCreate"
           >
             + 新增服务区域
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -255,36 +249,20 @@ async function onConfirmAction() {
       <div class="flex flex-col gap-3.5 py-1">
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-20 shrink-0 text-right">区域名称</span>
-          <input
-            v-model="form.name"
-            class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary"
-            placeholder="如：王家湾镇"
-          />
+          <AppInput v-model="form.name" class="flex-1" placeholder="如：王家湾镇" />
         </label>
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-20 shrink-0 text-right">下辖村组</span>
-          <input
-            v-model.number="form.villages"
-            type="number"
-            class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary"
-          />
+          <AppInput v-model.number="form.villages" type="number" class="flex-1" />
         </label>
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-20 shrink-0 text-right">服务半径</span>
-          <input
-            v-model.number="form.radius_km"
-            type="number"
-            class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary"
-          />
+          <AppInput v-model.number="form.radius_km" type="number" class="flex-1" />
           <span class="text-[12px] text-ink-4">km</span>
         </label>
         <label class="flex items-center gap-2 text-[13px] text-ink-2">
           <span class="w-20 shrink-0 text-right">起步价</span>
-          <input
-            v-model.number="form.start_fee"
-            type="number"
-            class="h-9 flex-1 rounded-lg border border-line px-3 text-[13px] outline-none focus:border-primary"
-          />
+          <AppInput v-model.number="form.start_fee" type="number" class="flex-1" />
           <span class="text-[12px] text-ink-4">元</span>
         </label>
       </div>

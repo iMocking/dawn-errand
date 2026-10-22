@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
 import { getComplaintDetail, type ComplaintDetail } from '@/api/complaints'
 import { http } from '@/utils/request'
 import { formatTime } from '@/utils/format'
@@ -47,8 +48,8 @@ onMounted(load)
 </script>
 
 <template>
-  <div v-if="loading" class="p-6 text-ink-3">加载中…</div>
-  <div v-else-if="detail" class="flex flex-col gap-3 p-3">
+  <div v-if="loading" class="text-ink-3">加载中…</div>
+  <div v-else-if="detail" class="flex flex-col gap-3">
     <!-- 工单头部卡 -->
     <div class="flex items-center gap-3 rounded-card bg-white px-5 py-3">
       <div class="flex h-[38px] w-[56px] shrink-0 items-center justify-center rounded-[14px]" style="background:#FFF0E8;">
@@ -69,17 +70,20 @@ onMounted(load)
         </div>
       </div>
       <div class="flex shrink-0 gap-2">
-        <button class="h-[30px] rounded-lg border border-line bg-white px-[18px] text-[13px] text-ink-2" @click="toast.info('已打开转派处理人')">
+        <AppButton
+          variant="secondary"
+          class="!h-[30px] !px-[18px]"
+          @click="toast.info('已打开转派处理人')"
+        >
           转派处理人
-        </button>
-        <button
+        </AppButton>
+        <AppButton
           v-permission="'complaint:handle'"
-          class="h-[30px] rounded-lg border-none px-[18px] text-[13px] font-semibold text-white"
-          style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
+          class="!h-[30px] !px-[18px]"
           @click="onConfirm"
         >
           标记完成
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -210,18 +214,21 @@ onMounted(load)
             ></textarea>
           </div>
           <div class="mt-2 flex gap-2">
-            <button
+            <AppButton
               v-permission="'complaint:handle'"
-              class="h-8 flex-1 rounded-lg border-none text-[13px] font-semibold text-white disabled:opacity-60"
-              style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
+              class="!h-8 flex-1"
               :disabled="submitting"
               @click="onConfirm"
             >
               {{ submitting ? '提交中…' : '确认退款并完结' }}
-            </button>
-            <button class="h-8 flex-1 rounded-lg border border-line bg-white text-[13px] text-ink-2" @click="toast.info('已暂存草稿')">
+            </AppButton>
+            <AppButton
+              variant="secondary"
+              class="!h-8 flex-1"
+              @click="toast.info('已暂存草稿')"
+            >
               暂存
-            </button>
+            </AppButton>
           </div>
           <div class="mt-2 flex items-center gap-1.5 text-[12px] text-ink-4">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9CDD4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>

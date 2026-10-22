@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
 import Modal from '@/components/Modal.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatDate, formatMoney, formatTime } from '@/utils/format'
 import { getUserDetail, banUser, unbanUser, type UserDetail } from '@/api/users'
@@ -57,9 +58,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="loading" class="p-6 text-ink-3">加载中…</div>
+  <div v-if="loading" class="text-ink-3">加载中…</div>
 
-  <div v-else-if="detail" class="flex flex-col gap-2 px-6 py-3">
+  <div v-else-if="detail" class="flex flex-col gap-2">
     <!-- 用户头部卡 -->
     <div class="flex shrink-0 items-center gap-3 rounded-card bg-white px-5 py-3">
       <div
@@ -86,21 +87,22 @@ onMounted(async () => {
         </div>
       </div>
       <div class="flex shrink-0 gap-2">
-        <button
-          class="h-[30px] rounded-lg border border-line bg-white px-[18px] text-[13px] text-ink-2"
+        <AppButton
+          variant="secondary"
+          class="!h-[30px] !px-[18px]"
           @click="toast.info('发送站内信')"
         >
-          发送站内信
-        </button>
-        <button
+发送站内信
+</AppButton>
+        <AppButton
           v-permission="'user:ban'"
-          class="h-[30px] rounded-lg border bg-white px-[18px] text-[13px]"
-          :class="detail.status === '已封禁' ? 'border-line text-ink-2' : ''"
-          :style="detail.status === '已封禁' ? {} : { borderColor: '#FFD9D9', color: '#FF4D4F' }"
+          variant="secondary"
+          class="!h-[30px] !px-[18px]"
+          :class="detail.status === '已封禁' ? '' : '!border-[#FFD9D9] !text-[#FF4D4F]'"
           @click="confirmOpen = true"
         >
-          {{ detail.status === '已封禁' ? '解封账号' : '封禁账号' }}
-        </button>
+{{ detail.status === '已封禁' ? '解封账号' : '封禁账号' }}
+</AppButton>
       </div>
     </div>
 

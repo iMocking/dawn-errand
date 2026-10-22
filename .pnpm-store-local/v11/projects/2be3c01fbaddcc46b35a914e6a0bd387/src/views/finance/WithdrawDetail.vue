@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { getWithdrawDetail, auditWithdraw, type WithdrawDetailDto } from '@/api/finance'
+import AppButton from '@/components/AppButton.vue'
 import Confirm from '@/components/Confirm.vue'
 import Modal from '@/components/Modal.vue'
 import { formatMoney, formatTime } from '@/utils/format'
@@ -61,7 +62,7 @@ async function onReject() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-5">
+  <div class="flex flex-col gap-4">
     <div v-if="loading" class="py-16 text-center text-ink-3">加载中…</div>
     <template v-else-if="detail">
       <!-- 提现头部卡 -->
@@ -88,24 +89,24 @@ async function onReject() {
           </div>
         </div>
         <div class="flex shrink-0 gap-2.5">
-          <button
+          <AppButton
             v-permission="'withdraw:audit'"
-            class="h-9 rounded-lg border bg-white px-[18px] text-[13px]"
-            style="border-color:#FFD9D9;color:#FF4D4F;"
+            variant="secondary"
+            class="!border-[#FFD9D9] !text-[#FF4D4F] !px-[18px]"
             :disabled="submitting || detail.status !== '待审核'"
             @click="rejectOpen = true"
           >
             驳回申请
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             v-permission="'withdraw:audit'"
-            class="h-9 rounded-lg border-none px-[18px] text-[13px] font-semibold text-white disabled:opacity-60"
-            style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
+            variant="primary"
+            class="!px-[18px]"
             :disabled="submitting || detail.status !== '待审核'"
             @click="confirmOpen = true"
           >
             {{ detail.status === '待审核' ? '确认打款' : '已打款' }}
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -237,22 +238,23 @@ async function onReject() {
                 placeholder="填写审核备注，将同步给骑手…"
               />
               <div class="mt-4 flex gap-2.5">
-                <button
+                <AppButton
                   v-permission="'withdraw:audit'"
-                  class="h-10 flex-1 rounded-lg border-none text-[13px] font-semibold text-white disabled:opacity-60"
-                  style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
+                  variant="primary"
+                  class="!h-10 flex-1"
                   :disabled="submitting || detail.status !== '待审核'"
                   @click="confirmOpen = true"
                 >
                   确认打款 {{ formatMoney(detail.amount) }}
-                </button>
-                <button
-                  class="h-10 flex-1 rounded-lg border border-line bg-white text-[13px] text-ink-2"
+                </AppButton>
+                <AppButton
+                  variant="secondary"
+                  class="!h-10 flex-1"
                   :disabled="submitting"
                   @click="toast.info('已加入待复核队列，稍后处理')"
                 >
                   加入待复核
-                </button>
+                </AppButton>
               </div>
               <div class="mt-3 flex items-center gap-1.5 text-[12px] text-ink-4">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9CDD4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

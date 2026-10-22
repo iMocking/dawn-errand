@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import Modal from '@/components/Modal.vue'
 import StatusTag from '@/components/StatusTag.vue'
+import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatTime } from '@/utils/format'
 import {
@@ -158,23 +159,23 @@ onMounted(() => {
         </div>
 
         <div class="mt-2 flex gap-2">
-          <button
+          <AppButton
             v-permission="'rider:audit'"
-            class="h-[30px] flex-1 rounded-lg text-[13px] font-semibold text-white disabled:opacity-60"
-            style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
-            :disabled="submitting"
+            class="!h-[30px] flex-1"
+            :loading="submitting"
             @click="askApprove(row)"
           >
 通过入驻
-</button>
-          <button
+</AppButton>
+          <AppButton
             v-permission="'rider:audit'"
-            class="h-[30px] flex-1 rounded-lg border border-line bg-white text-[13px] text-ink-2 disabled:opacity-60"
+            variant="secondary"
+            class="!h-[30px] flex-1"
             :disabled="submitting"
             @click="askReject(row)"
           >
 驳回
-</button>
+</AppButton>
         </div>
       </div>
 

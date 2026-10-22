@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import AppButton from '@/components/AppButton.vue'
 import DataTable, { type Column } from '@/components/DataTable.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import Pagination from '@/components/Pagination.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
 import { getOrders, type OrderRow } from '@/api/orders'
 import { formatClock, formatNumber } from '@/utils/format'
 import { useToast } from '@/composables/useToast'
@@ -128,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-5">
+  <div class="flex flex-col gap-4">
     <!-- 标题行 -->
     <div class="flex items-center">
       <div>
@@ -139,13 +139,15 @@ onMounted(() => {
         </div>
       </div>
       <div class="ml-auto">
-        <button
-          class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2"
+        <AppButton
+          variant="secondary"
+          icon="download"
+          :icon-size="15"
+          class="!gap-2"
           @click="onExport"
         >
-          <SvgIcon name="download" :size="15" />
           导出订单
-        </button>
+        </AppButton>
       </div>
     </div>
 

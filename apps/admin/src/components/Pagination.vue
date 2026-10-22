@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import AppButton from './AppButton.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -38,30 +39,24 @@ function go(n: number) {
 
 <template>
   <div class="flex items-center justify-end gap-1.5 text-[13px]">
-    <button
-      class="h-7 rounded border border-line px-2.5 text-ink-2 disabled:opacity-40"
-      :disabled="page <= 1"
-      @click="go(page - 1)"
-    >
+    <AppButton variant="secondary" size="sm" class="!rounded" :disabled="page <= 1" @click="go(page - 1)">
       上一页
-    </button>
-    <button
+    </AppButton>
+    <AppButton
       v-for="(it, i) in items"
       :key="i"
-      class="h-7 min-w-7 rounded border px-2"
-      :class="it === page ? 'border-primary bg-primary-bg text-primary font-semibold' : 'border-line text-ink-2'"
+      variant="secondary"
+      size="sm"
+      class="min-w-7 !rounded"
+      :class="it === page ? '!border-primary !bg-primary-bg !text-primary font-semibold' : ''"
       :disabled="it === '…'"
       @click="typeof it === 'number' && go(it)"
     >
       {{ it }}
-    </button>
-    <button
-      class="h-7 rounded border border-line px-2.5 text-ink-2 disabled:opacity-40"
-      :disabled="page >= pages"
-      @click="go(page + 1)"
-    >
+    </AppButton>
+    <AppButton variant="secondary" size="sm" class="!rounded" :disabled="page >= pages" @click="go(page + 1)">
       下一页
-    </button>
+    </AppButton>
     <span class="ml-2 text-ink-3">共 {{ total }} 条</span>
   </div>
 </template>

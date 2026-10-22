@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { getFinance, auditWithdraw, type FinanceDto, type WithdrawRow } from '@/api/finance'
+import AppButton from '@/components/AppButton.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import Confirm from '@/components/Confirm.vue'
@@ -67,7 +68,7 @@ async function onConfirm() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-5">
+  <div class="flex flex-col gap-4">
     <div v-if="loading" class="py-16 text-center text-ink-3">加载中…</div>
     <template v-else-if="data">
       <!-- 汇总指标卡 -->
@@ -106,7 +107,7 @@ async function onConfirm() {
             <div class="text-[12px] text-ink-3">提现申请待处理</div>
             <div class="mt-1 text-[22px] font-bold leading-7" style="color:#D48806;">{{ data.stats.withdrawPendingCount }}</div>
           </div>
-          <button class="cursor-pointer text-[11px] font-semibold" style="color:#FF6B2C;" @click="activeTab = '待审核'">去审核</button>
+          <AppButton variant="text" class="cursor-pointer !text-[11px]" @click="activeTab = '待审核'">去审核</AppButton>
         </div>
 
         <div class="flex items-center gap-3.5 rounded-card bg-white p-4">
@@ -132,30 +133,34 @@ async function onConfirm() {
           <span class="cursor-pointer text-[14px] text-ink-3 hover:text-ink-1">对账管理</span>
         </div>
         <div class="ml-auto">
-          <button
-            class="flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2"
+          <AppButton
+            variant="secondary"
+            icon="download"
             @click="toast.info('导出任务已提交，完成后可在下载中心查看')"
           >
-            <SvgIcon name="download" :size="15" />
             导出流水
-          </button>
+          </AppButton>
         </div>
       </div>
 
       <!-- 状态筛选 tabs -->
       <div class="flex shrink-0 items-center gap-2">
-        <button
+        <AppButton
           v-for="t in TABS"
           :key="t"
-          class="rounded-md px-3 py-[5px] text-[12px]"
-          :class="activeTab === t ? 'font-semibold' : 'text-ink-2'"
-          :style="activeTab === t ? 'background:#FFF3E8;color:#FF6B2C;' : 'background:#F7F8FA;'"
+          variant="ghost"
+          class="!rounded-md !px-3 !py-[5px] !text-[12px]"
+          :class="
+            activeTab === t
+              ? '!bg-[#FFF3E8] !font-semibold !text-[#FF6B2C] hover:!text-[#FF6B2C]'
+              : '!bg-[#F7F8FA] !text-ink-2 hover:!text-ink-2'
+          "
           @click="activeTab = t"
         >
           {{ t }}<span class="ml-1 text-[11px]" :style="activeTab === t ? 'color:#FF6B2C;' : 'color:#C9CDD4;'">
             {{ t === '全部' ? (data.withdraws?.length ?? 0) : countOf(t) }}
           </span>
-        </button>
+        </AppButton>
       </div>
 
       <!-- 提现审核列表 -->
@@ -193,22 +198,22 @@ async function onConfirm() {
           </div>
           <div class="flex shrink-0 gap-2.5">
             <template v-if="row.status === '待审核'">
-              <button
+              <AppButton
                 v-permission="'withdraw:audit'"
-                class="h-[34px] rounded-lg border-none px-5 text-[13px] font-semibold text-white"
-                style="background:linear-gradient(135deg,#FF8A3D,#FF6B2C);"
+                variant="primary"
+                class="!h-[34px] !px-5"
                 @click="askAudit(row, 'pass')"
               >
                 确认打款
-              </button>
-              <button
+              </AppButton>
+              <AppButton
                 v-permission="'withdraw:audit'"
-                class="h-[34px] rounded-lg border border-line bg-white px-5 text-[13px]"
-                style="color:#FF4D4F;"
+                variant="secondary"
+                class="!h-[34px] !px-5 !text-[#FF4D4F]"
                 @click="askAudit(row, 'reject')"
               >
                 驳回
-              </button>
+              </AppButton>
             </template>
             <StatusTag v-else :tone="row.status === '已通过' ? 'green' : 'red'">{{ row.status }}</StatusTag>
           </div>

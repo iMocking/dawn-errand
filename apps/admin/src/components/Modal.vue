@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SvgIcon from './SvgIcon/SvgIcon.vue'
+import AppButton from './AppButton.vue'
 
 withDefaults(
   defineProps<{
@@ -34,28 +34,18 @@ function close() {
       >
         <div class="flex items-center justify-between border-b border-line px-5 py-3.5">
           <div class="text-[15px] font-semibold text-ink-1">{{ title }}</div>
-          <button class="text-ink-3 hover:text-ink-1" @click="close">
-            <SvgIcon name="close" :size="16" />
-          </button>
+          <AppButton variant="ghost" icon="close" :icon-size="16" class="!p-0" @click="close" />
         </div>
         <div class="px-5 py-4">
           <slot />
         </div>
         <div class="flex justify-end gap-2.5 border-t border-line px-5 py-3">
-          <button
-            class="h-8 rounded-lg border border-line bg-white px-4 text-[13px] text-ink-2 hover:border-primary hover:text-primary"
-            @click="close"
-          >
+          <AppButton variant="secondary" class="!h-8" @click="close">
             {{ cancelText }}
-          </button>
-          <button
-            class="h-8 rounded-lg border-none px-4 text-[13px] font-semibold text-white disabled:opacity-60"
-            :style="{ background: 'linear-gradient(135deg,#FF8A3D,#FF6B2C)' }"
-            :disabled="loading"
-            @click="emit('confirm')"
-          >
+          </AppButton>
+          <AppButton variant="primary" class="!h-8" :loading="loading" @click="emit('confirm')">
             {{ loading ? '提交中…' : confirmText }}
-          </button>
+          </AppButton>
         </div>
       </div>
     </div>
