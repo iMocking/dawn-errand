@@ -1,0 +1,158 @@
+// Package identity 身份权限限界上下文：用户、凭证、邮箱验证、密码重置、角色。
+package identity
+
+import (
+	"time"
+
+	"dawn-errand/internal/domain/tenant"
+)
+
+// 角色（系统内置，与 Casbin policy 对齐）。
+const (
+	RoleUser          = "user"           // 用户（正式会员）
+	RoleSuperAdmin    = "super_admin"    // 系统管理员
+	RoleCSManager     = "cs_manager"     // 客服经理
+	RoleCSAgent       = "cs_agent"       // 平台客服
+	RoleRegionStation = "region_station" // 区域站长
+	RoleMerchant      = "merchant"       // 商家
+	RoleDriver        = "driver"         // 司机（跑手）
+)
+
+// AllRoles 全部内置角色。
+var AllRoles = []string{
+	RoleSuperAdmin, RoleCSManager, RoleCSAgent, RoleRegionStation,
+	RoleMerchant, RoleDriver, RoleUser,
+}
+
+// 角色中文显示名（DTO 层映射用）。
+var RoleDisplayName = map[string]string{
+	RoleSuperAdmin:    "系统管理员",
+	RoleCSManager:     "客服经理",
+	RoleCSAgent:       "平台客服",
+	RoleRegionStation: "区域站长",
+	RoleMerchant:      "商家",
+	RoleDriver:        "司机",
+	RoleUser:          "正式会员",
+}
+
+// UserStatus 用户状态。
+type UserStatus string
+
+const (
+	UserStatusActive UserStatus = "active" // 正常
+	UserStatusBanned UserStatus = "banned" // 已封禁
+)
+
+// User 用户聚合根。身份权限限界上下文核心模型。
+type User struct {
+	ID            string
+	Email         string
+	Phone         string
+	Name          string // 昵称/姓名
+	Avatar        string
+	Status        UserStatus
+	EmailVerified bool
+	Role          string
+	// 租户/主体绑定：不同角色绑定不同主体
+	RegionID     string // 区域站长/正式会员：所属区域
+	MerchantID   string // 商家：所属商家
+	RiderID      string // 司机：所属骑手档案
+	RegisteredAt int64
+	UpdatedAt    int64
+}
+
+// IsActive 用户是否可用。
+func (u *User) IsActive() bool { return u.Status == UserStatusActive }
+
+// Credential 登录凭证。仅存强哈希，不存明文。
+type Credential struct {
+	UserID         string
+	PasswordHash   string
+	SessionVersion int64 // 密码修改/封禁后递增，使旧 JWT 与刷新令牌失效
+	UpdatedAt      int64
+}
+
+// EmailVerificationToken 邮箱验证令牌。数据库仅存哈希，一次性、带 TTL。
+type EmailVerificationToken struct {
+	ID        string
+	UserID    string
+	TokenHash string
+	ExpiresAt int64
+	UsedAt    int64 // 0 表示未使用
+}
+
+// PasswordResetToken 密码重置令牌。数据库仅存哈希，一次性、带 TTL。
+type PasswordResetToken struct {
+	ID        string
+	UserID    string
+	TokenHash string
+	ExpiresAt int64
+	UsedAt    int64
+}
+
+// UserRepository 用户仓储端口（由 infrastructure 实现）。
+type UserRepository interface {
+	// Save 保存用户（幂等 upsert）。
+	Save(u *User) error
+	// FindByID 按 ID 查用户。
+	FindByID(id string) (*User, error)
+	// FindByEmail 按邮箱查用户。
+	FindByEmail(email string) (*User, error)
+	// FindByPhone 按手机号查用户。
+	FindByPhone(phone string) (*User, error)
+	// List 分页查询（keyword 匹配昵称/邮箱/手机号，status 过滤；scope 隔离）。
+	List(q UserQuery, sc tenant.Scope) ([]*User, int64, error)
+	// UpdateStatus 更新状态并递增会话版本（封禁/解封）。
+	UpdateStatus(id string, status UserStatus) error
+	// CountRegisteredSince 统计指定时间后注册的用户数（scope 隔离）。
+	CountRegisteredSince(sc tenant.Scope, since int64) (int64, error)
+	// CountStatus 统计指定状态的用户数（scope 隔离）。
+	CountStatus(sc tenant.Scope, status UserStatus) (int64, error)
+}
+
+// UserQuery 用户分页查询。
+type UserQuery struct {
+	Page     int
+	PageSize int
+	Keyword  string
+	Status   string
+}
+
+// CredentialRepository 凭证仓储端口。
+type CredentialRepository interface {
+	// Save 保存凭证。
+	Save(c *Credential) error
+	// FindByUserID 按用户 ID 查凭证。
+	FindByUserID(userID string) (*Credential, error)
+	// BumpSessionVersion 递增会话版本（撤销全部会话）。
+	BumpSessionVersion(userID string) (int64, error)
+}
+
+// EmailTokenRepository 邮箱验证令牌仓储端口。
+type EmailTokenRepository interface {
+	// Create 创建令牌记录。
+	Create(t *EmailVerificationToken) error
+	// FindByHash 按哈希查有效令牌（未使用且未过期）。
+	FindByHash(hash string) (*EmailVerificationToken, error)
+	// MarkUsed 标记已使用。
+	MarkUsed(id string) error
+	// DeleteExpired 清理过期记录。
+	DeleteExpired(now int64) error
+}
+
+// PasswordTokenRepository 密码重置令牌仓储端口。
+type PasswordTokenRepository interface {
+	// Create 创建令牌记录。
+	Create(t *PasswordResetToken) error
+	// FindByHash 按哈希查有效令牌。
+	FindByHash(hash string) (*PasswordResetToken, error)
+	// MarkUsed 标记已使用。
+	MarkUsed(id string) error
+	// DeleteExpired 清理过期记录。
+	DeleteExpired(now int64) error
+	// DeleteByUser 删除用户全部重置令牌（改密成功后）。
+	DeleteByUser(userID string) error
+}
+
+// Now 供领域层测试替换的时间源（默认系统时钟）。
+var Now = func() int64 { return time.Now().Unix() }

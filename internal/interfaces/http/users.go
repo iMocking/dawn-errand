@@ -1,0 +1,93 @@
+package http
+
+import (
+	"github.com/gin-gonic/gin"
+
+	"dawn-errand/internal/domain/identity"
+	"dawn-errand/internal/interfaces/middleware"
+	"dawn-errand/internal/pkg/response"
+)
+
+// ListUsers GET /users。
+func (h *Handler) ListUsers(c *gin.Context) {
+	page, size := parsePage(c)
+	rows, total, err := h.Users.List(c.Request.Context(), identity.UserQuery{
+		Page: page, PageSize: size,
+		Keyword: c.Query("keyword"), Status: mapUserStatus(c.Query("status")),
+	}, scope(c))
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	list := make([]UserRowDto, 0, len(rows))
+	for _, u := range rows {
+		list = append(list, toUserRow(u))
+	}
+	pageResult(c, list, total, page, size)
+}
+
+// GetUsersOverview GET /users/overview。
+func (h *Handler) GetUsersOverview(c *gin.Context) {
+	ov, err := h.Users.Overview(c.Request.Context(), scope(c))
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	activeRate := 0.0
+	if ov.Total > 0 {
+		activeRate = float64(ov.ActiveMonth) / float64(ov.Total) * 100
+	}
+	response.OK(c, UsersOverviewDto{
+		Total: ov.Total, TodayNew: ov.TodayNew, ActiveMonth: ov.ActiveMonth,
+		ActiveRate: round1(activeRate), AvgOrders: round1(ov.AvgOrders), Banned: ov.Banned,
+	})
+}
+
+func round1(v float64) float64 {
+	return float64(int64(v*10+0.5)) / 10
+}
+
+// GetUser GET /users/:id。
+func (h *Handler) GetUser(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	d, err := h.Users.Detail(c.Request.Context(), id, scope(c))
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OK(c, toUserDetail(d.User, d.Profile, d.TotalOrders, d.MonthOrders, d.TotalSpent, d.ComplaintCount, d.RecentOrders))
+}
+
+// BanUser POST /users/:id/ban。
+func (h *Handler) BanUser(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	if err := h.Users.Ban(c.Request.Context(), id, true, u.ID, scope(c)); err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "已封禁", gin.H{"id": id, "status": "已封禁"})
+}
+
+// UnbanUser POST /users/:id/unban。
+func (h *Handler) UnbanUser(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	if err := h.Users.Ban(c.Request.Context(), id, false, u.ID, scope(c)); err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "已解封", gin.H{"id": id, "status": "正常"})
+}

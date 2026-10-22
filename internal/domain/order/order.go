@@ -1,0 +1,168 @@
+// Package order 订单限界上下文（外卖/帮买/帮送/帮取/帮办）。
+package order
+
+import "dawn-errand/internal/domain/tenant"
+
+// OrderType 订单类型。
+type OrderType string
+
+const (
+	OrderTypeFood   OrderType = "外卖"
+	OrderTypeBuy    OrderType = "帮买"
+	OrderTypeSend   OrderType = "帮送"
+	OrderTypePick   OrderType = "帮取"
+	OrderTypeErrand OrderType = "帮办"
+)
+
+// OrderStatus 订单状态。
+type OrderStatus string
+
+const (
+	OrderPending    OrderStatus = "待接单"
+	OrderDelivering OrderStatus = "配送中"
+	OrderPicked     OrderStatus = "已取件待送达"
+	OrderDone       OrderStatus = "已完成"
+	OrderCanceled   OrderStatus = "已取消"
+	OrderCookingOot OrderStatus = "出餐超时"
+	OrderAbnormal   OrderStatus = "异常"
+)
+
+// OrderGoods 商品明细。
+type OrderGoods struct {
+	Name  string
+	Spec  string
+	Price float64
+}
+
+// OrderFee 费用明细。
+type OrderFee struct {
+	Label    string
+	Value    float64
+	Negative bool
+}
+
+// OrderStep 状态步骤。
+type OrderStep struct {
+	Title string
+	Time  int64  // 完成时间，0=未完成
+	State string // done / active / pending
+	Sub   string
+}
+
+// MerchantSnapshot 商家快照。
+type MerchantSnapshot struct {
+	Name    string
+	Address string
+	Phone   string
+	Status  string
+}
+
+// UserSnapshot 用户快照。
+type UserSnapshot struct {
+	Name    string
+	Address string
+	Phone   string
+}
+
+// RiderSnapshot 骑手快照。
+type RiderSnapshot struct {
+	Name    string
+	Vehicle string
+	Phone   string
+	Service string
+	Score   string
+}
+
+// Order 订单聚合根。
+type Order struct {
+	ID         string // 平台内部单号 SG...
+	OrderNo    string // 用户可见单号（不含 #）
+	RegionID   string
+	MerchantID string
+	UserID     string
+	RiderID    string
+
+	Type      OrderType
+	Status    OrderStatus
+	Route     string
+	UserName  string // 下单用户姓名（快照）
+	RiderName string
+
+	Amount           float64 // 商品金额
+	CreatedAt        int64
+	Channel          string
+	EstimatedArrival int64
+	Remark           string
+
+	Goods []OrderGoods
+	Fees  []OrderFee
+	Steps []OrderStep
+
+	Merchant MerchantSnapshot
+	User     UserSnapshot
+	Rider    RiderSnapshot
+
+	PayAmount float64
+	PayMethod string
+	FundFlow  string
+}
+
+// Query 订单列表查询。
+type Query struct {
+	Page     int
+	PageSize int
+	Keyword  string
+	Status   string
+	UserID   string // 用户详情近期订单
+	Limit    int
+}
+
+// Stats 订单模块聚合统计（dashboard 使用）。
+type Stats struct {
+	TodayOrders     int64
+	TodayGMV        float64
+	YesterdayOrders int64
+	YesterdayGMV    float64
+	OnTimeRate      float64
+}
+
+// DayTrend 单日趋势点。
+type DayTrend struct {
+	Day    string // 10/16
+	Orders int64
+	GMV    float64
+}
+
+// OrderRepository 订单仓储端口。
+type OrderRepository interface {
+	Save(o *Order) error
+	FindByID(id string) (*Order, error)
+	// List 订单列表（scope 强制隔离）。
+	List(q Query, scope tenant.Scope) ([]*Order, int64, error)
+	// ListByUser 用户近期订单。
+	ListByUser(userID string, limit int) ([]*Order, error)
+	// Stats 当日/昨日统计（scope 隔离）。
+	Stats(scope tenant.Scope, now int64) (*Stats, error)
+	// Trend7d 近 7 日订单/交易额趋势（scope 隔离）。
+	Trend7d(scope tenant.Scope, now int64) ([]DayTrend, error)
+	// CountByRegion 区域今日订单数。
+	CountByRegion(regionID string, now int64) (int64, error)
+	// CountToday 全局今日订单数。
+	CountToday(now int64) (int64, error)
+	// SumTodayGMV 全局今日交易额。
+	SumTodayGMV(now int64) (float64, error)
+	// CountUserOrders 用户累计订单数。
+	CountUserOrders(userID string) (int64, error)
+	// CountUserMonth 用户本月订单数。
+	CountUserMonth(userID string, now int64) (int64, error)
+	// CountUserSpent 用户累计消费。
+	CountUserSpent(userID string) (float64, error)
+	// CountActiveMonth 本月活跃下单用户数（scope 隔离）。
+	CountActiveMonth(scope tenant.Scope, now int64) (int64, error)
+	// CountRecent 最近 7 天活跃用户数（用于活跃率）。
+	CountRecentActiveUsers(now int64) (int64, error)
+	// CountByType 按订单类型计数（scope 隔离）。
+	CountByType(scope tenant.Scope) (map[OrderType]int64, error)
+	// CountAll 订单总数（scope 隔离）。
+	CountAll(scope tenant.Scope) (int64, error)
+}

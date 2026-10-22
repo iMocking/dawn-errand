@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch, onBeforeUnmount } from 'vue'
 import { getDashboard, type DashboardDto } from '@/api/dashboard'
 import StatCard from '@/components/StatCard.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
@@ -13,12 +13,58 @@ const loading = ref(true)
 
 const greeting = computed(() => `${greetByHour()}，${auth.user?.name ?? '陈运营'}`)
 
+/** 订单趋势图：左轴标签区 / 右侧留白（px），绘图横向基准（原坐标 40~620） */
+const PAD_L = 40
+const PAD_R = 8
+const PLOT_BASE = 580 // 640 - 48
+
+/** 图表 SVG 实际宽度（ResizeObserver 驱动，跟随容器变化） */
+const chartRef = ref<SVGSVGElement | null>(null)
+const chartW = ref(0)
+let chartRo: ResizeObserver | null = null
+
+/** 趋势图渲染数据：x 坐标按当前宽度线性重映射，y 沿用原坐标系（高度 250 固定） */
+const trend = computed(() => {
+  if (!data.value) return null
+  const w = chartW.value || 640 // 未测量前用原画布宽度兜底，挂载后由 ResizeObserver 更新
+  const plotW = Math.max(1, w - PAD_L - PAD_R)
+  const sx = (px: number) => PAD_L + ((px - 40) * plotW) / PLOT_BASE
+  const tipX = (t: { x: number; w: number }) =>
+    Math.min(Math.max(sx(t.x) - t.w / 2, PAD_L), Math.max(PAD_L, w - PAD_R - t.w))
+  const right = w - PAD_R
+  return {
+    svgW: w,
+    right,
+    gmvLine: data.value.trend.gmvLine.map((p) => ({ x: sx(p.x), y: p.y })),
+    orderLine: data.value.trend.orderLine.map((p) => ({ x: sx(p.x), y: p.y })),
+    orderTip: { ...data.value.trend.orderTip, x: tipX(data.value.trend.orderTip) },
+    gmvTip: { ...data.value.trend.gmvTip, x: tipX(data.value.trend.gmvTip) },
+    xLabels: data.value.trend.xLabels,
+  }
+})
+
+function measureChart() {
+  if (chartRef.value) chartW.value = chartRef.value.clientWidth
+}
+
 onMounted(async () => {
   try {
     data.value = await getDashboard()
   } finally {
     loading.value = false
   }
+})
+
+watch(chartRef, (el) => {
+  if (!el) return
+  chartRo = chartRo ?? new ResizeObserver(() => measureChart())
+  chartRo.observe(el)
+  measureChart()
+})
+
+onBeforeUnmount(() => {
+  chartRo?.disconnect()
+  chartRo = null
 })
 </script>
 
@@ -84,7 +130,14 @@ onMounted(async () => {
           </div>
         </div>
 
-        <svg viewBox="0 0 640 250" width="100%" height="250" class="mt-3 block">
+        <svg
+          v-if="trend"
+          ref="chartRef"
+          :viewBox="`0 0 ${trend.svgW} 250`"
+          width="100%"
+          height="250"
+          class="mt-3 block"
+        >
           <defs>
             <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#2B7FFF" stop-opacity="0.18" />
@@ -95,11 +148,11 @@ onMounted(async () => {
               <stop offset="100%" stop-color="#FF6B2C" stop-opacity="0" />
             </linearGradient>
           </defs>
-          <line x1="40" y1="20" x2="620" y2="20" stroke="#F2F3F5" stroke-width="1" />
-          <line x1="40" y1="70" x2="620" y2="70" stroke="#F2F3F5" stroke-width="1" />
-          <line x1="40" y1="120" x2="620" y2="120" stroke="#F2F3F5" stroke-width="1" />
-          <line x1="40" y1="170" x2="620" y2="170" stroke="#F2F3F5" stroke-width="1" />
-          <line x1="40" y1="220" x2="620" y2="220" stroke="#F2F3F5" stroke-width="1" />
+          <line :x1="PAD_L" y1="20" :x2="trend.right" y2="20" stroke="#F2F3F5" stroke-width="1" />
+          <line :x1="PAD_L" y1="70" :x2="trend.right" y2="70" stroke="#F2F3F5" stroke-width="1" />
+          <line :x1="PAD_L" y1="120" :x2="trend.right" y2="120" stroke="#F2F3F5" stroke-width="1" />
+          <line :x1="PAD_L" y1="170" :x2="trend.right" y2="170" stroke="#F2F3F5" stroke-width="1" />
+          <line :x1="PAD_L" y1="220" :x2="trend.right" y2="220" stroke="#F2F3F5" stroke-width="1" />
           <text x="32" y="24" font-size="11" fill="#C9CDD4" text-anchor="end">1600</text>
           <text x="32" y="74" font-size="11" fill="#C9CDD4" text-anchor="end">1200</text>
           <text x="32" y="124" font-size="11" fill="#C9CDD4" text-anchor="end">800</text>
@@ -108,44 +161,44 @@ onMounted(async () => {
 
           <!-- 交易额（蓝）面积+线 -->
           <polygon
-            :points="`${data.trend.gmvLine.map(p => `${p.x},${p.y}`).join(' ')} 620,220 40,220`"
+            :points="`${trend.gmvLine.map(p => `${p.x},${p.y}`).join(' ')} ${trend.right},220 ${PAD_L},220`"
             fill="url(#g1)"
           />
           <polyline
-            :points="data.trend.gmvLine.map(p => `${p.x},${p.y}`).join(' ')"
+            :points="trend.gmvLine.map(p => `${p.x},${p.y}`).join(' ')"
             fill="none" stroke="#2B7FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
           />
           <!-- 订单量（橙）面积+线 -->
           <polygon
-            :points="`${data.trend.orderLine.map(p => `${p.x},${p.y}`).join(' ')} 620,220 40,220`"
+            :points="`${trend.orderLine.map(p => `${p.x},${p.y}`).join(' ')} ${trend.right},220 ${PAD_L},220`"
             fill="url(#g2)"
           />
           <polyline
-            :points="data.trend.orderLine.map(p => `${p.x},${p.y}`).join(' ')"
+            :points="trend.orderLine.map(p => `${p.x},${p.y}`).join(' ')"
             fill="none" stroke="#FF6B2C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
           />
           <circle
-            v-for="p in data.trend.orderLine"
+            v-for="p in trend.orderLine"
             :key="`o${p.x}`"
             :cx="p.x" :cy="p.y" r="4" fill="#fff" stroke="#FF6B2C" stroke-width="2"
           />
 
-          <rect :x="data.trend.orderTip.x - data.trend.orderTip.w / 2" :y="data.trend.orderTip.y - 16"
-            :width="data.trend.orderTip.w" height="24" rx="6" fill="#FF6B2C" />
-          <text :x="data.trend.orderTip.x" :y="data.trend.orderTip.y" font-size="11" fill="#fff"
-            text-anchor="middle" font-weight="600">{{ data.trend.orderTip.text }}</text>
+          <rect :x="trend.orderTip.x" :y="trend.orderTip.y - 16"
+            :width="trend.orderTip.w" height="24" rx="6" fill="#FF6B2C" />
+          <text :x="trend.orderTip.x + trend.orderTip.w / 2" :y="trend.orderTip.y" font-size="11" fill="#fff"
+            text-anchor="middle" font-weight="600">{{ trend.orderTip.text }}</text>
 
-          <rect :x="data.trend.gmvTip.x - data.trend.gmvTip.w / 2" :y="data.trend.gmvTip.y - 16"
-            :width="data.trend.gmvTip.w" height="24" rx="6" fill="#2B7FFF" />
-          <text :x="data.trend.gmvTip.x" :y="data.trend.gmvTip.y" font-size="11" fill="#fff"
-            text-anchor="middle" font-weight="600">{{ data.trend.gmvTip.text }}</text>
+          <rect :x="trend.gmvTip.x" :y="trend.gmvTip.y - 16"
+            :width="trend.gmvTip.w" height="24" rx="6" fill="#2B7FFF" />
+          <text :x="trend.gmvTip.x + trend.gmvTip.w / 2" :y="trend.gmvTip.y" font-size="11" fill="#fff"
+            text-anchor="middle" font-weight="600">{{ trend.gmvTip.text }}</text>
 
           <text
-            v-for="(label, i) in data.trend.xLabels"
+            v-for="(label, i) in trend.xLabels"
             :key="label"
-            :x="data.trend.orderLine[i].x" y="242" font-size="11"
-            :fill="i === data.trend.xLabels.length - 1 ? '#FF6B2C' : '#86909C'"
-            text-anchor="middle" :font-weight="i === data.trend.xLabels.length - 1 ? 600 : 400"
+            :x="trend.orderLine[i].x" y="242" font-size="11"
+            :fill="i === trend.xLabels.length - 1 ? '#FF6B2C' : '#86909C'"
+            text-anchor="middle" :font-weight="i === trend.xLabels.length - 1 ? 600 : 400"
           >{{ label }}</text>
         </svg>
       </div>

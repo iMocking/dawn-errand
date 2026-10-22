@@ -1,0 +1,116 @@
+// Package merchant 商家限界上下文。
+package merchant
+
+import "dawn-errand/internal/domain/tenant"
+
+// MerchantStatus 商家营业状态。
+type MerchantStatus string
+
+const (
+	MerchantStatusOpen   MerchantStatus = "open"   // 营业中
+	MerchantStatusRest   MerchantStatus = "rest"   // 休息中
+	MerchantStatusBanned MerchantStatus = "banned" // 已封禁
+)
+
+// AuditStatus 入驻审核状态。
+type AuditStatus string
+
+const (
+	AuditPending  AuditStatus = "pending"  // 待审核
+	AuditApproved AuditStatus = "approved" // 已通过
+	AuditRejected AuditStatus = "rejected" // 已驳回
+)
+
+// Merchant 商家聚合根。
+type Merchant struct {
+	ID          string
+	RegionID    string
+	OwnerUserID string
+
+	Name           string
+	Category       string
+	Address        string
+	AddressSub     string
+	Contact        string
+	Phone          string
+	OpenHours      string
+	DeliveryRange  string
+	Commission     float64 // 平台佣金比例 %
+	BankAccount    string
+	DeliveryMethod string
+
+	Status       MerchantStatus
+	AuditStatus  AuditStatus
+	ApplyNo      string
+	Operator     string // 申请人姓名
+	AppliedAt    int64
+	CertLabels   []string // 证照类型标签 license/idcard/storefront/foodlicense/pharmacylicense
+	RejectReason string
+
+	Rating         float64
+	MonthlyOrders  int64
+	MonthlyRevenue float64
+	AvgOrder       float64
+	GoodRate       float64
+	JoinedAt       int64
+	LastUpdatedAt  int64
+	Completeness   int
+	ReviewCount    int
+	LastOperation  string
+
+	// 今日快照（运营指标）
+	TodayOrders     int64
+	TodayRevenue    float64
+	OnTimeRate      float64
+	PendingAbnormal int
+}
+
+// MerchantQuery 商家列表查询。
+type MerchantQuery struct {
+	Page     int
+	PageSize int
+	Keyword  string
+	Status   string // 营业状态（列表页）
+}
+
+// AuditQuery 审核列表查询。
+type AuditQuery struct {
+	Page     int
+	PageSize int
+	Keyword  string
+	Status   string // 审核状态
+}
+
+// Stats 商家模块顶部聚合。
+type Stats struct {
+	Total    int64
+	WeekNew  int64
+	Open     int64
+	OpenRate float64
+	Pending  int64
+	Closed   int64 // 休息 + 封禁
+}
+
+// MerchantRepository 商家仓储端口。
+type MerchantRepository interface {
+	Save(m *Merchant) error
+	FindByID(id string) (*Merchant, error)
+	// List 商家列表（scope 强制数据隔离）。
+	List(q MerchantQuery, scope tenant.Scope) ([]*Merchant, int64, error)
+	// AuditList 入驻审核列表（scope 隔离）。
+	AuditList(q AuditQuery, scope tenant.Scope) ([]*Merchant, int64, error)
+	// UpdateAudit 审核处理。
+	UpdateAudit(id string, approved bool, reason, operator string, now int64) error
+	// UpdateStatus 变更营业状态。
+	UpdateStatus(id string, status MerchantStatus, now int64) error
+	// Stats 聚合统计（scope 隔离）。
+	Stats(scope tenant.Scope) (*Stats, error)
+	// CountByRegion 统计各区域商家数（settings 用）。
+	CountByRegion(regionID string) (int64, error)
+	// OnlineCountByRegion 统计区域在线商家数。
+	OnlineCountByRegion(regionID string) (int64, error)
+	// CountAll 全局商家数。
+	CountAll() (int64, error)
+	// CountWeekNew 本周新增（入驻）数。
+	CountWeekNew(now int64) (int64, error)
+}
