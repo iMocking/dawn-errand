@@ -87,12 +87,14 @@ function statusTone(status: string) {
 const formOpen = ref(false)
 const submitting = ref(false)
 const editingId = ref<string | null>(null)
+const editingRow = ref<AnnouncementRow | null>(null)
 const form = reactive({ title: '', type: '活动', audience: '全部用户', content: '' })
 const FORM_TYPES = ['费率', '活动', '提醒', '协议']
 const FORM_AUDIENCES = ['全部用户', '商家 / 骑手', '骑手', '商家', '新入驻商家', '骑手（12 人）']
 
 function openCreate() {
   editingId.value = null
+  editingRow.value = null
   form.title = ''
   form.type = '活动'
   form.audience = '全部用户'
@@ -101,6 +103,7 @@ function openCreate() {
 }
 function openEdit(row: AnnouncementRow) {
   editingId.value = row.id
+  editingRow.value = row
   form.title = row.title
   form.type = row.type
   form.audience = row.audience
@@ -116,6 +119,7 @@ async function onSubmit() {
   submitting.value = true
   try {
     await saveAnnouncement({
+      ...(editingRow.value ?? {}),
       id: editingId.value,
       action: editingId.value ? 'update' : 'create',
       title: form.title.trim(),

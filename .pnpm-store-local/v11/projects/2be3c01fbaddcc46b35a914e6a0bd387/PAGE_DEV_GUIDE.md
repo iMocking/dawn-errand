@@ -17,6 +17,7 @@ pnpm build        # 产物 dist/
 ```
 
 - 默认账号：`admin@shuguang` / 密码 `shuguang2026` / 验证码 `8A6K`（任意值也可登录，dev mock 不校验）。
+- 真实后端（proxy 模式）种子超管：`admin@shuguang.local` / 一次性密码（以 seed 输出为准，当前见 `internal/integration/api_test.go` 头部常量）；验证码后端不校验，任意非空即可。
 - 提/交/自测前 `pnpm typecheck && pnpm lint && pnpm build` 必须全绿；自测完 dev server 必须停止，**不要占用 8080**。
 
 ---
@@ -207,11 +208,20 @@ export function getOrderDetail(id: string) {
 }
 ```
 
+### 系统配置 API（`src/api/system.ts`，设置页「邮箱 SMTP / 短信服务」）
+- SMTP 已对接真实后端：`getSmtpConfig`（GET `/system/config/smtp`，password 已配置时为掩码 `******`）、`updateSmtpConfig`（PUT，密码留空/掩码时后端保留原值）、`testSmtpConfig`（POST `/system/config/smtp/test`，不落库）。
+- 短信契约（`getSmsConfig/updateSmsConfig/testSmsConfig`）按与 SMTP 对称的 `/system/config/sms*` 预留，**后端暂未实现**：页面请求 404 时显示「接口未提供」提示条并禁用保存/测试；后端实现后前端零改动即可用。
+- 设置页 tab 约定：配送费率、公告管理已在左侧菜单有独立入口（`/settings/fee-rules`、`/settings/announcements`），**不要在「系统设置」页重复放置这两个 tab**；系统设置页 tabs = 服务区域 / 邮箱 SMTP 服务配置 / 短信服务配置 / 提现规则(占位) / 账号权限(占位)。
+
 ---
 
-## 5. Mock 中间件契约（dev 自动生效）
+## 5. Mock 中间件契约（仅 VITE_USE_MOCK=1 时生效）
 
-vite.config.ts 里的 dev 中间件拦截所有 `/api/*`，按下面规则从 `mock/*.json` 取数。**你的页面不要在组件里硬编码业务数据**，把数据写进对应 mock json，再通过 api 拉。
+`vite.config.ts` 已按 `VITE_USE_MOCK` 环境变量切换请求链路：
+- **默认（未设置或非 `'1'`）**：`/api/*` 由 `server.proxy` 转发到真实后端 `http://localhost:8080`，mock 中间件不注册。需后端已启动并完成 migrate + seed。
+- **`VITE_USE_MOCK=1`**：注册 dev 中间件，按下面规则从 `mock/*.json` 取数，无需后端即可开发。
+
+mock 模式下**你的页面不要在组件里硬编码业务数据**，把数据写进对应 mock json，再通过 api 拉。
 
 ### 5.1 文件 ↔ 路由映射（严格遵守）
 

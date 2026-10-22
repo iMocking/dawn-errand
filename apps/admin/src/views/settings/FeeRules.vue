@@ -39,7 +39,7 @@ async function toggleEnabled() {
   toggleSubmitting.value = true
   try {
     enabled.value = !enabled.value
-    await saveFeeRule({ id: summary.value?.id, enabled: enabled.value })
+    await saveFeeRule({ ...(summary.value ?? {}), enabled: enabled.value })
     toast.success(enabled.value ? '费率规则已启用' : '费率规则已停用')
   } finally {
     toggleSubmitting.value = false
@@ -62,16 +62,21 @@ async function onEditSubmit() {
   if (editSubmitting.value) return
   editSubmitting.value = true
   try {
-    await saveFeeRule({
-      action: 'edit',
-      version: summary.value?.version,
-      start_fee: form.startFee,
-      continue_fee: form.continueFee,
-      far_fee: form.farFee,
-      cap: form.cap,
+    // 后端按单条 cms.FeeRule 更新（无批量/版本化契约），将表单值写回各基础费率行的 value
+    const targetRows = [basicRows.value[0], basicRows.value[1], basicRows.value[2], basicRows.value[3]]
+    const targetValues = [`${form.startFee} 元`, `${form.continueFee} 元/km`, `${form.farFee} 元/km`, `${form.cap} 元`]
+    const targets: Array<[FeeRuleRow, string]> = []
+    targetRows.forEach((row, i) => {
+      if (row?.id) targets.push([row, targetValues[i]])
     })
-    toast.success('费率规则已提交，待审核后次日 00:00 生效')
+    if (targets.length === 0) {
+      toast.warning('暂无基础费率规则可编辑')
+      return
+    }
+    await Promise.all(targets.map(([row, value]) => saveFeeRule({ ...row, value })))
+    toast.success('基础费率规则已更新')
     editOpen.value = false
+    await load()
   } finally {
     editSubmitting.value = false
   }

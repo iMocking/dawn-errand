@@ -114,9 +114,39 @@ export function getSettings() {
   return http.get<SystemSettings>('/settings')
 }
 
-/** 区域新增 / 编辑 / 停用 / 删除：POST /api/settings（mock 回显请求体） */
+/**
+ * 区域新增 / 编辑 / 停用 / 删除：POST /api/settings
+ * 后端契约：{ action: 'create' | 'update' | 'disable' | 'delete', area: Region }
+ * 前端调用传入扁平 payload（mock 形态），此处归一为后端结构并映射操作名：
+ * - action 别名：停用→disable、删除→delete，其余原样透传
+ * - 编辑（update）需携带完整区域对象，避免整行覆盖清空 status / free_km / notice
+ * 注意：后端 tenant.Region 无 json tag，JSON 绑定按 Go 字段名大小写不敏感匹配，
+ * 多词字段须发 camelCase（radiusKM / startFee / freeKM），snake_case 键会被静默丢弃。
+ */
+const AREA_BODY_FIELDS: Record<string, string> = {
+  id: 'id',
+  name: 'name',
+  status: 'status',
+  villages: 'villages',
+  radius_km: 'radiusKM',
+  start_fee: 'startFee',
+  free_km: 'freeKM',
+  notice: 'notice',
+}
+
+const AREA_ACTION_ALIAS: Record<string, string> = {
+  停用: 'disable',
+  删除: 'delete',
+}
+
 export function saveSettings(payload: Record<string, unknown>) {
-  return http.post<Record<string, unknown>>('/settings', payload)
+  const rawAction = String(payload.action ?? '')
+  const action = AREA_ACTION_ALIAS[rawAction] ?? rawAction
+  const area: Record<string, unknown> = {}
+  for (const [from, to] of Object.entries(AREA_BODY_FIELDS)) {
+    if (payload[from] !== undefined) area[to] = payload[from]
+  }
+  return http.post<Record<string, unknown>>('/settings', { action, area })
 }
 
 /** 费率规则：GET /api/settings/fee-rules */
@@ -124,9 +154,41 @@ export function getFeeRules(q: PageQuery = {}) {
   return http.get<PageResult<FeeRuleRow>>('/settings/fee-rules', q as Record<string, unknown>)
 }
 
-/** 编辑规则 / 启用切换：POST /api/settings/fee-rules（mock 回显请求体） */
+/**
+ * 编辑规则 / 启用切换：POST /api/settings/fee-rules
+ * 后端契约：请求体为完整 cms.FeeRule 对象（名称必填；无 json tag，多词字段发 camelCase）。
+ * - 启用切换只传 { id, enabled } 时补 status（后端以 status 持久化、enabled 派生）
+ * - mock 形态字段（action / start_fee / continue_fee / far_fee / cap 等）后端不存在，丢弃
+ */
+const FEE_BODY_FIELDS: Record<string, string> = {
+  id: 'id',
+  category: 'category',
+  name: 'name',
+  status: 'status',
+  value: 'value',
+  desc: 'desc',
+  accent: 'accent',
+  highlight: 'highlight',
+  rule: 'rule',
+  example: 'example',
+  fee: 'fee',
+  rider_share: 'riderShare',
+  icon_color: 'iconColor',
+  version: 'version',
+  updated_at: 'updatedAt',
+  next_effective_at: 'nextEffectiveAt',
+  enabled: 'enabled',
+}
+
 export function saveFeeRule(payload: Record<string, unknown>) {
-  return http.post<Record<string, unknown>>('/settings/fee-rules', payload)
+  const body: Record<string, unknown> = {}
+  for (const [from, to] of Object.entries(FEE_BODY_FIELDS)) {
+    if (payload[from] !== undefined) body[to] = payload[from]
+  }
+  if (payload.enabled !== undefined && body.status === undefined) {
+    body.status = payload.enabled ? '已启用' : '已停用'
+  }
+  return http.post<Record<string, unknown>>('/settings/fee-rules', body)
 }
 
 /** 公告列表：GET /api/settings/announcements */
@@ -134,7 +196,39 @@ export function getAnnouncements(q: PageQuery = {}) {
   return http.get<PageResult<AnnouncementRow>>('/settings/announcements', q as Record<string, unknown>)
 }
 
-/** 发布 / 编辑 / 下线 / 撤回公告：POST /api/settings/announcements（mock 回显请求体） */
+/**
+ * 发布 / 编辑 / 下线 / 撤回公告：POST /api/settings/announcements
+ * 后端契约：{ action: 'save' | 'publish' | 'offline' | 'review' | 'withdraw', announcement: Announcement }
+ * - action 别名：create/update→save、发布→publish、下线→offline、撤回→withdraw
+ * - 编辑（save）需携带完整公告对象，避免整行覆盖清空 status / type_tone / 计划时间等
+ */
+const ANN_ACTION_ALIAS: Record<string, string> = {
+  create: 'save',
+  update: 'save',
+  发布: 'publish',
+  下线: 'offline',
+  撤回: 'withdraw',
+}
+
+const ANN_BODY_FIELDS: Record<string, string> = {
+  id: 'id',
+  title: 'title',
+  type: 'type',
+  type_tone: 'typeTone',
+  audience: 'audience',
+  status: 'status',
+  content: 'content',
+  tags: 'tags',
+  planned_at: 'plannedAt',
+  published_at: 'publishedAt',
+}
+
 export function saveAnnouncement(payload: Record<string, unknown>) {
-  return http.post<Record<string, unknown>>('/settings/announcements', payload)
+  const rawAction = String(payload.action ?? 'save')
+  const action = ANN_ACTION_ALIAS[rawAction] ?? rawAction
+  const announcement: Record<string, unknown> = {}
+  for (const [from, to] of Object.entries(ANN_BODY_FIELDS)) {
+    if (payload[from] !== undefined) announcement[to] = payload[from]
+  }
+  return http.post<Record<string, unknown>>('/settings/announcements', { action, announcement })
 }

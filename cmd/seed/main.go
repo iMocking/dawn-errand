@@ -62,7 +62,14 @@ func main() {
 		fmt.Printf("超管已创建: %s (%s)，一次性密码: %s\n", res.AdminName, res.AdminEmail, res.OneTimePassword)
 	}
 
-	// 2. 演示数据（幂等：已存在则跳过）。
+	// 2. 内置系统级身份（幂等；随初始化自动创建）。
+	if err := app.System.EnsureSystemUsers(ctx); err != nil {
+		fmt.Fprintln(os.Stderr, "系统身份创建失败:", err)
+		os.Exit(1)
+	}
+	fmt.Printf("系统身份已就绪: %d 个\n", len(identity.SystemIdentities))
+
+	// 3. 演示数据（幂等：已存在则跳过）。
 	now := time.Now().Unix()
 	repos := app.Store.Repos()
 

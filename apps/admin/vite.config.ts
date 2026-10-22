@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 import { existsSync, readFileSync } from 'node:fs'
@@ -168,40 +168,43 @@ function mockPlugin(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [vue(), mockPlugin()],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
-  },
-  server: {
-    open: true,
-    host: '0.0.0.0',
-    cors: true,
-    port: 5173,
-    // dev 环境所有 /api/* 由上方 mockPlugin 中间件接管；
-    // 后端就绪后，如需代理真实 8080，可在此追加 server.proxy 并把 mockPlugin 改为仅在无命中时 next()。
-    /*
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
+export default defineConfig(({ mode }) => {
+  // 请求链路开关：
+  // - 默认（VITE_USE_MOCK 未设置或非 '1'）：/api/* 由 server.proxy 转发到真实后端（http://localhost:8080）
+  // - VITE_USE_MOCK=1：由上方 mockPlugin 中间件接管，返回 ./mock/*.json（无需后端即可开发）
+  const useMock = loadEnv(mode, process.cwd(), '').VITE_USE_MOCK === '1'
+
+  return {
+    plugins: useMock ? [vue(), mockPlugin()] : [vue()],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    */
-  },
-  build: {
-    outDir: '../dist',
-    emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        entryFileNames: 'assets/js/[name].js',
-        chunkFileNames: 'assets/js/[name].js',
-        assetFileNames: ()=> {
-          return 'assets/images/[name].[ext]'
+    server: {
+      open: true,
+      host: '0.0.0.0',
+      cors: true,
+      port: 5173,
+      proxy: useMock
+        ? undefined
+        : {
+            '/api': {
+              target: 'http://localhost:8080',
+              changeOrigin: true,
+            },
+          },
+    },
+    build: {
+      outDir: '../dist',
+      emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          entryFileNames: 'js/[name].js',
+          chunkFileNames: 'js/[name]-[hash].js',
+          assetFileNames: 'css/[name].[ext]',
         },
       },
     },
-  },
+  }
 })

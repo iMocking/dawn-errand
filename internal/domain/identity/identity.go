@@ -16,12 +16,27 @@ const (
 	RoleRegionStation = "region_station" // 区域站长
 	RoleMerchant      = "merchant"       // 商家
 	RoleDriver        = "driver"         // 司机（跑手）
+	RoleSystem        = "system"         // 系统级服务身份（非人工，禁登录）
 )
 
 // AllRoles 全部内置角色。
 var AllRoles = []string{
 	RoleSuperAdmin, RoleCSManager, RoleCSAgent, RoleRegionStation,
-	RoleMerchant, RoleDriver, RoleUser,
+	RoleMerchant, RoleDriver, RoleUser, RoleSystem,
+}
+
+// SystemIdentity 系统级身份定义（初始化完成后自动创建，与普通用户同表）。
+type SystemIdentity struct {
+	Email string
+	Name  string
+}
+
+// SystemIdentities 内置系统级身份清单（邮箱固定，幂等创建）。
+var SystemIdentities = []SystemIdentity{
+	{Email: "mailer@system.shuguang", Name: "邮件服务系统"},
+	{Email: "sms@system.shuguang", Name: "短信服务系统"},
+	{Email: "inmail@system.shuguang", Name: "站内信通知服务系统"},
+	{Email: "system@shuguang.local", Name: "基础系统服务"},
 }
 
 // 角色中文显示名（DTO 层映射用）。
@@ -33,6 +48,7 @@ var RoleDisplayName = map[string]string{
 	RoleMerchant:      "商家",
 	RoleDriver:        "司机",
 	RoleUser:          "正式会员",
+	RoleSystem:        "系统服务",
 }
 
 // UserStatus 用户状态。

@@ -12,12 +12,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 
 	"dawn-errand/internal/assembly"
 	"dawn-errand/internal/config"
+	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/infrastructure/ent"
 	"dawn-errand/internal/infrastructure/ent/credential"
 	"dawn-errand/internal/infrastructure/ent/emailverificationtoken"
@@ -150,8 +152,8 @@ func cleanUser(t *testing.T, email string) {
 
 var mailTokenRe = regexp.MustCompile(`token=([A-Za-z0-9_\-\.]+)`)
 
-// mailToken 从 dev 发件箱中取回给指定邮箱的最新邮件并解析明文令牌。
-func mailToken(t *testing.T, email string) string {
+// mailToken 从 dev 发件箱中取回指定邮箱、指定主题（subjectKeyword）的最新邮件并解析明文令牌。
+func mailToken(t *testing.T, email, subjectKeyword string) string {
 	t.Helper()
 	token := loginAdmin(t)
 	r, _ := do(t, http.MethodGet, "/api/system/dev/outbox", token, nil)
@@ -161,6 +163,7 @@ func mailToken(t *testing.T, email string) string {
 	var body struct {
 		List []struct {
 			ToEmail string `json:"to_email"`
+			Subject string `json:"subject"`
 			Body    string `json:"body"`
 		} `json:"list"`
 	}
@@ -168,7 +171,7 @@ func mailToken(t *testing.T, email string) string {
 		t.Fatal(err)
 	}
 	for _, m := range body.List {
-		if m.ToEmail != email {
+		if m.ToEmail != email || !strings.Contains(m.Subject, subjectKeyword) {
 			continue
 		}
 		mm := mailTokenRe.FindStringSubmatch(m.Body)
@@ -276,7 +279,7 @@ func TestRoleDenied(t *testing.T) {
 	if r.Code != 0 {
 		t.Fatalf("register code=%d msg=%s", r.Code, r.Message)
 	}
-	vt := mailToken(t, email)
+	vt := mailToken(t, email, "验证您的邮箱")
 	do(t, http.MethodGet, "/api/auth/email/verify?token="+vt, "", nil)
 
 	login, _ := do(t, http.MethodPost, "/api/auth/login", "", map[string]string{
@@ -313,7 +316,7 @@ func TestRegisterVerifyLogin(t *testing.T) {
 		t.Fatalf("未验证登录应 1003, got %d", login1.Code)
 	}
 	// 验证邮箱（从 dev 发件箱取令牌）
-	vt := mailToken(t, email)
+	vt := mailToken(t, email, "验证您的邮箱")
 	verify, _ := do(t, http.MethodGet, "/api/auth/email/verify?token="+vt, "", nil)
 	if verify.Code != 0 {
 		t.Fatalf("verify code=%d msg=%s", verify.Code, verify.Message)
@@ -337,7 +340,7 @@ func TestForgotResetAndSessionInvalidation(t *testing.T) {
 	if r.Code != 0 {
 		t.Fatalf("register code=%d", r.Code)
 	}
-	vt := mailToken(t, email)
+	vt := mailToken(t, email, "验证您的邮箱")
 	do(t, http.MethodGet, "/api/auth/email/verify?token="+vt, "", nil)
 
 	login, _ := do(t, http.MethodPost, "/api/auth/login", "", map[string]string{"account": email, "password": "OldPass123"})
@@ -353,7 +356,7 @@ func TestForgotResetAndSessionInvalidation(t *testing.T) {
 	if f.Code != 0 {
 		t.Fatalf("forgot code=%d msg=%s", f.Code, f.Message)
 	}
-	rt := mailToken(t, email)
+	rt := mailToken(t, email, "重置您的密码")
 	rs, _ := do(t, http.MethodPost, "/api/auth/password/reset", "", map[string]string{
 		"token": rt, "new_password": "NewPass456",
 	})
@@ -375,7 +378,7 @@ func TestChangePassword(t *testing.T) {
 	email := "chpw-it@shuguang.local"
 	cleanUser(t, email)
 	do(t, http.MethodPost, "/api/auth/register", "", map[string]string{"email": email, "password": "ChpwPass123", "name": "改密测试"})
-	vt := mailToken(t, email)
+	vt := mailToken(t, email, "验证您的邮箱")
 	do(t, http.MethodGet, "/api/auth/email/verify?token="+vt, "", nil)
 	login, _ := do(t, http.MethodPost, "/api/auth/login", "", map[string]string{"account": email, "password": "ChpwPass123"})
 	var lb struct {
@@ -404,7 +407,7 @@ func TestRefreshRotateAndLogout(t *testing.T) {
 	if reg.Code != 0 {
 		t.Fatalf("register code=%d msg=%s", reg.Code, reg.Message)
 	}
-	vt := mailToken(t, email)
+	vt := mailToken(t, email, "验证您的邮箱")
 	vr, _ := do(t, http.MethodGet, "/api/auth/email/verify?token="+vt, "", nil)
 	if vr.Code != 0 {
 		t.Fatalf("verify code=%d", vr.Code)
@@ -472,5 +475,38 @@ func TestPasswdRoundTrip(t *testing.T) {
 	}
 	if h.Verify(hash, "WrongPass123") {
 		t.Fatal("错误密码不应通过")
+	}
+}
+
+// TestSystemIdentities 内置系统级身份：初始化后自动创建、可在用户列表检索、禁登录。
+func TestSystemIdentities(t *testing.T) {
+	setup()
+	tok := loginAdmin(t)
+	r, _ := do(t, http.MethodGet, "/api/users?keyword=system&pageSize=50", tok, nil)
+	if r.Code != 0 {
+		t.Fatalf("users 列表 code=%d msg=%s", r.Code, r.Message)
+	}
+	var body struct {
+		List []struct {
+			Name string `json:"name"`
+		} `json:"list"`
+		Total int64 `json:"total"`
+	}
+	_ = json.Unmarshal(r.Body, &body)
+	names := map[string]bool{}
+	for _, u := range body.List {
+		names[u.Name] = true
+	}
+	for _, si := range identity.SystemIdentities {
+		if !names[si.Name] {
+			t.Fatalf("缺少系统身份 %s (%s)", si.Email, si.Name)
+		}
+	}
+	// 系统身份禁登录：无凭证，登录必须失败且不暴露密码比对对象
+	bad, _ := do(t, http.MethodPost, "/api/auth/login", "", map[string]string{
+		"account": "mailer@system.shuguang", "password": "Whatever123",
+	})
+	if bad.Code != 1002 {
+		t.Fatalf("系统身份登录应 1002, got %d", bad.Code)
 	}
 }

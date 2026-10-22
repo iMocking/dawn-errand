@@ -303,6 +303,9 @@ func DefaultPolicies() [][]string {
 
 		{"p", identity.RoleUser, "order:list", "*"},
 		{"p", identity.RoleUser, "order:detail", "*"},
+
+		// 系统级身份（RoleSystem）默认不授任何业务权限：仅作为身份/审计主体；
+		// 内部调用入口（通知/结算等）上线时按最小权限在此显式授予，禁止给 system 授予 "*"。
 	}
 }
 

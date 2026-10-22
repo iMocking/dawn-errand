@@ -1,41 +1,37 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import Modal from '@/components/Modal.vue'
 import Confirm from '@/components/Confirm.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import Empty from '@/components/Empty.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppInput from '@/components/AppInput.vue'
+import SmtpConfig from './SmtpConfig.vue'
+import SmsConfig from './SmsConfig.vue'
 import { useToast } from '@/composables/useToast'
 import { formatNumber } from '@/utils/format'
 import { getSettings, saveSettings, type ServiceArea, type SystemSettings } from '@/api/settings'
 
 const toast = useToast()
-const route = useRoute()
-const router = useRouter()
 
 const loading = ref(false)
 const settings = ref<SystemSettings | null>(null)
 
-/** 页签：配送费率 / 公告管理跳对应路由，其余按设计稿占位 */
+/**
+ * 页签：服务区域 / 邮箱 SMTP / 短信服务在本页内切换；
+ * 配送费率、公告管理在左侧菜单已有独立入口（/settings/fee-rules、/settings/announcements），不再重复；
+ * 提现规则、账号权限按设计稿占位。
+ */
 const tabs = [
-  { label: '服务区域', path: '/settings' },
-  { label: '配送费率', path: '/settings/fee-rules' },
-  { label: '公告管理', path: '/settings/announcements' },
+  { label: '服务区域' },
+  { label: '邮箱 SMTP 服务配置' },
+  { label: '短信服务配置' },
   { label: '提现规则' },
   { label: '账号权限' },
 ]
 const localTab = ref('服务区域')
-const activeTab = computed(() => {
-  if (route.path === '/settings') return localTab.value
-  return '服务区域'
-})
-function pickTab(t: { label: string; path?: string }) {
-  if (t.path && t.path !== '/settings') {
-    router.push(t.path)
-    return
-  }
+const activeTab = computed(() => localTab.value)
+function pickTab(t: { label: string }) {
   localTab.value = t.label
 }
 
@@ -83,8 +79,8 @@ async function onSubmit() {
   submitting.value = true
   try {
     await saveSettings({
+      ...(editing.value ?? {}),
       action: editing.value ? 'update' : 'create',
-      id: editing.value?.id,
       name: form.name.trim(),
       villages: Number(form.villages),
       radius_km: Number(form.radius_km),
@@ -231,6 +227,12 @@ async function onConfirmAction() {
         </div>
       </div>
     </div>
+
+    <!-- 邮箱 SMTP 服务配置 -->
+    <SmtpConfig v-else-if="activeTab === '邮箱 SMTP 服务配置'" class="min-h-0 flex-1" />
+
+    <!-- 短信服务配置 -->
+    <SmsConfig v-else-if="activeTab === '短信服务配置'" class="min-h-0 flex-1" />
 
     <!-- 提现规则 / 账号权限：设计稿仅占位，无内容页 -->
     <div v-else class="flex flex-1 items-center justify-center rounded-card bg-white py-20">

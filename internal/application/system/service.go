@@ -5,6 +5,7 @@ import (
 	"context"
 	crand "crypto/rand"
 	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
@@ -32,6 +33,37 @@ type Service struct {
 }
 
 const mask = "******"
+
+// EnsureSystemUsers 幂等创建内置系统级身份（邮件/短信/站内信/基础系统服务）。
+// 系统身份复用 users 表基础信息、role=system；不创建登录凭证（禁登录）；
+// 邮箱已被真实用户占用时跳过，绝不覆盖人工账号。
+func (s *Service) EnsureSystemUsers(ctx context.Context) error {
+	return s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
+		now := time.Now().Unix()
+		for _, si := range identity.SystemIdentities {
+			email := strings.ToLower(strings.TrimSpace(si.Email))
+			existing, err := tx.Users.FindByEmail(email)
+			if err == nil {
+				if existing.Role == identity.RoleSystem {
+					continue // 已存在系统身份，幂等跳过
+				}
+				// 邮箱被真实用户占用：不覆盖
+				continue
+			}
+			if !errors.Is(err, application.ErrNotFound) {
+				return err
+			}
+			if err := tx.Users.Save(&identity.User{
+				Email: email, Name: si.Name, Status: identity.UserStatusActive,
+				EmailVerified: true, Role: identity.RoleSystem,
+				RegisteredAt: now, UpdatedAt: now,
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
 
 // BootstrapStatus 初始化状态。
 func (s *Service) BootstrapStatus(ctx context.Context) (*system.BootstrapState, error) {
@@ -102,6 +134,10 @@ func (s *Service) Bootstrap(ctx context.Context, adminEmail, initToken string) (
 	// 默认系统配置（幂等）
 	if err := s.seedDefaultSettings(ctx, adminID, now); err != nil {
 		return nil, err
+	}
+	// 内置系统级身份（邮件/短信/站内信/基础服务，幂等创建）
+	if err := s.EnsureSystemUsers(ctx); err != nil {
+		return nil, errcode.Wrap(err, errcode.CodeInternal, "系统级身份创建失败")
 	}
 	if err := s.Repos.Settings.MarkInitialized(adminID, now); err != nil {
 		return nil, err
