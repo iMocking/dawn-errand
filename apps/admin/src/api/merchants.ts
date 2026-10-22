@@ -120,3 +120,29 @@ export function getMerchantDetail(id: string) {
 export function auditMerchant(id: string, action: 'approve' | 'reject', reason?: string) {
   return http.post<unknown>(`/merchants/audit/${id}`, { id, action, reason })
 }
+
+/** 新增商家（创建即提交入驻申请，进入待审核） */
+export interface CreateMerchantPayload {
+  name: string
+  category?: string
+  contact?: string
+  phone: string
+  address?: string
+  addressSub?: string
+  openHours?: string
+  deliveryRange?: string
+  commission?: number
+  deliveryMethod?: string
+  regionId?: string
+}
+
+/** 新增商家返回：创建成功后回传 id / 申请单号 / 审核状态 */
+export interface CreateMerchantResult {
+  id: string
+  applyNo: string
+  auditStatus: string
+}
+
+export function createMerchant(data: CreateMerchantPayload) {
+  return http.post<CreateMerchantResult>('/merchants', data)
+}

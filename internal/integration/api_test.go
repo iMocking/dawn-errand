@@ -24,6 +24,7 @@ import (
 	"dawn-errand/internal/infrastructure/ent/credential"
 	"dawn-errand/internal/infrastructure/ent/emailverificationtoken"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
+	"dawn-errand/internal/infrastructure/ent/systemsetting"
 	"dawn-errand/internal/infrastructure/ent/user"
 	"dawn-errand/internal/infrastructure/passwd"
 	apihandlers "dawn-errand/internal/interfaces/http"
@@ -509,4 +510,231 @@ func TestSystemIdentities(t *testing.T) {
 	if bad.Code != 1002 {
 		t.Fatalf("系统身份登录应 1002, got %d", bad.Code)
 	}
+}
+
+// TestAdminCreateMerchantRiderAndUserQueries 验证商家/骑手创建接口与用户维度订单/投诉查询接口。
+func TestAdminCreateMerchantRiderAndUserQueries(t *testing.T) {
+	token := loginAdmin(t)
+
+	// 必填校验：缺名称返回 400（HTTP）/ 1301（业务码）
+	bad, _ := do(t, http.MethodPost, "/api/merchants", token, map[string]string{"phone": "13800000001"})
+	if bad.Code != 1301 {
+		t.Fatalf("merchant 缺 name 应 1301, got %d", bad.Code)
+	}
+
+	// 创建商家
+	mr, _ := do(t, http.MethodPost, "/api/merchants", token, map[string]string{
+		"name": "测试接入商家", "phone": "13800000001", "contact": "测试员", "category": "其他",
+	})
+	if mr.Code != 0 {
+		t.Fatalf("create merchant code=%d msg=%s", mr.Code, mr.Message)
+	}
+	var mCreated struct {
+		ID          string `json:"id"`
+		ApplyNo     string `json:"applyNo"`
+		AuditStatus string `json:"auditStatus"`
+	}
+	if err := json.Unmarshal(mr.Body, &mCreated); err != nil {
+		t.Fatal(err)
+	}
+	if mCreated.ID == "" || mCreated.ApplyNo == "" || mCreated.AuditStatus != "pending" {
+		t.Fatalf("merchant created 缺字段: %+v", mCreated)
+	}
+
+	// 创建骑手
+	rr, _ := do(t, http.MethodPost, "/api/riders", token, map[string]string{
+		"name": "测试接入骑手", "phone": "13800000002", "area": "王家湾镇", "tool": "电动车",
+	})
+	if rr.Code != 0 {
+		t.Fatalf("create rider code=%d msg=%s", rr.Code, rr.Message)
+	}
+	var rCreated struct {
+		ID      string `json:"id"`
+		ApplyNo string `json:"applyNo"`
+	}
+	if err := json.Unmarshal(rr.Body, &rCreated); err != nil {
+		t.Fatal(err)
+	}
+	if rCreated.ID == "" || rCreated.ApplyNo == "" {
+		t.Fatalf("rider created 缺字段: %+v", rCreated)
+	}
+
+	// 取一个真实用户
+	ur, _ := do(t, http.MethodGet, "/api/users?page=1&pageSize=1", token, nil)
+	if ur.Code != 0 {
+		t.Fatalf("users list code=%d msg=%s", ur.Code, ur.Message)
+	}
+	var uBody struct {
+		List []struct {
+			ID string `json:"id"`
+		} `json:"list"`
+	}
+	if err := json.Unmarshal(ur.Body, &uBody); err != nil {
+		t.Fatal(err)
+	}
+	if len(uBody.List) == 0 {
+		t.Fatal("users 列表为空")
+	}
+	uid := uBody.List[0].ID
+
+	// 用户订单记录（分页，空列表亦需 code 0 且结构完整）
+	or, _ := do(t, http.MethodGet, "/api/users/"+uid+"/orders?page=1&pageSize=10", token, nil)
+	if or.Code != 0 {
+		t.Fatalf("user orders code=%d msg=%s", or.Code, or.Message)
+	}
+	var oBody struct {
+		List  []json.RawMessage `json:"list"`
+		Total int64             `json:"total"`
+	}
+	if err := json.Unmarshal(or.Body, &oBody); err != nil {
+		t.Fatal(err)
+	}
+
+	// 用户投诉售后（分页）
+	cr, _ := do(t, http.MethodGet, "/api/users/"+uid+"/complaints?page=1&pageSize=10", token, nil)
+	if cr.Code != 0 {
+		t.Fatalf("user complaints code=%d msg=%s", cr.Code, cr.Message)
+	}
+	var cBody struct {
+		List  []json.RawMessage `json:"list"`
+		Total int64             `json:"total"`
+	}
+	if err := json.Unmarshal(cr.Body, &cBody); err != nil {
+		t.Fatal(err)
+	}
+
+	// 清理测试数据
+	ctx := context.Background()
+	_ = client.Merchant.DeleteOneID(mCreated.ID).Exec(ctx)
+	_ = client.Rider.DeleteOneID(rCreated.ID).Exec(ctx)
+}
+
+// TestAdminSmsWithdrawRuleAndUserRole 验证短信配置/提现规则/用户角色接口。
+func TestAdminSmsWithdrawRuleAndUserRole(t *testing.T) {
+	token := loginAdmin(t)
+
+	// 短信配置：GET 懒默认 → PUT 保存 → GET 回读脱敏 → test 校验
+	do(t, http.MethodGet, "/api/system/config/sms", token, nil)
+	putSMS := map[string]string{
+		"provider": "aliyun", "access_key": "LTAI5tTest", "secret_key": "TestSecret123",
+		"sign_name": "曙光跑腿", "template_code": "SMS_123456789",
+	}
+	sp, _ := do(t, http.MethodPut, "/api/system/config/sms", token, putSMS)
+	if sp.Code != 0 {
+		t.Fatalf("update sms code=%d msg=%s", sp.Code, sp.Message)
+	}
+	sg, _ := do(t, http.MethodGet, "/api/system/config/sms", token, nil)
+	if sg.Code != 0 {
+		t.Fatalf("get sms code=%d", sg.Code)
+	}
+	var sms struct {
+		AccessKey string `json:"access_key"`
+		SecretKey string `json:"secret_key"`
+		SignName  string `json:"sign_name"`
+		Enabled   bool   `json:"enabled"`
+	}
+	if err := json.Unmarshal(sg.Body, &sms); err != nil {
+		t.Fatal(err)
+	}
+	if sms.AccessKey != "LTAI5tTest" || !sms.Enabled || sms.SecretKey != "******" {
+		t.Fatalf("sms 回读不符: %+v", sms)
+	}
+	st, _ := do(t, http.MethodPost, "/api/system/config/sms/test", token, putSMS)
+	if st.Code != 0 {
+		t.Fatalf("sms test code=%d msg=%s", st.Code, st.Message)
+	}
+
+	// 提现规则：GET 懒默认 → PUT → GET 回读
+	wg, _ := do(t, http.MethodGet, "/api/system/config/withdraw-rule", token, nil)
+	if wg.Code != 0 {
+		t.Fatalf("get withdraw-rule code=%d", wg.Code)
+	}
+	var wdef struct {
+		Enabled  bool    `json:"enabled"`
+		FeeRate  float64 `json:"fee_rate"`
+		Mode     string  `json:"mode"`
+	}
+	if err := json.Unmarshal(wg.Body, &wdef); err != nil {
+		t.Fatal(err)
+	}
+	if !wdef.Enabled || wdef.FeeRate != 0.006 || wdef.Mode != "manual" {
+		t.Fatalf("withdraw-rule 懒默认不符: %+v", wdef)
+	}
+	wp, _ := do(t, http.MethodPut, "/api/system/config/withdraw-rule", token, map[string]any{
+		"enabled": true, "fee_rate": 0.008, "min_amount": 20, "max_amount": 8000,
+		"daily_limit": 3, "mode": "auto", "settle_days": 2,
+	})
+	if wp.Code != 0 {
+		t.Fatalf("update withdraw-rule code=%d msg=%s", wp.Code, wp.Message)
+	}
+	wg2, _ := do(t, http.MethodGet, "/api/system/config/withdraw-rule", token, nil)
+	var w2 struct {
+		FeeRate   float64 `json:"fee_rate"`
+		MinAmount float64 `json:"min_amount"`
+		Mode      string  `json:"mode"`
+	}
+	if err := json.Unmarshal(wg2.Body, &w2); err != nil {
+		t.Fatal(err)
+	}
+	if w2.FeeRate != 0.008 || w2.MinAmount != 20 || w2.Mode != "auto" {
+		t.Fatalf("withdraw-rule 回读不符: %+v", w2)
+	}
+
+	// 用户角色：列表带角色 → 改角色 → 详情回读 → 改回；改自己被拒
+	ur, _ := do(t, http.MethodGet, "/api/users?page=1&pageSize=20", token, nil)
+	var uBody struct {
+		List []struct {
+			ID   string `json:"id"`
+			Role string `json:"role"`
+		} `json:"list"`
+	}
+	if err := json.Unmarshal(ur.Body, &uBody); err != nil {
+		t.Fatal(err)
+	}
+	target := ""
+	for _, u := range uBody.List {
+		if u.Role == identity.RoleUser {
+			target = u.ID
+			break
+		}
+	}
+	if target == "" {
+		t.Fatal("未找到可改角色的普通用户")
+	}
+	rr, _ := do(t, http.MethodPost, "/api/users/"+target+"/role", token, map[string]string{"role": identity.RoleRegionStation})
+	if rr.Code != 0 {
+		t.Fatalf("set role code=%d msg=%s", rr.Code, rr.Message)
+	}
+	dd, _ := do(t, http.MethodGet, "/api/users/"+target, token, nil)
+	var uDetail struct {
+		Role     string `json:"role"`
+		RoleName string `json:"roleName"`
+	}
+	if err := json.Unmarshal(dd.Body, &uDetail); err != nil {
+		t.Fatal(err)
+	}
+	if uDetail.Role != identity.RoleRegionStation {
+		t.Fatalf("角色未生效: %+v", uDetail)
+	}
+	if rr2, _ := do(t, http.MethodPost, "/api/users/"+target+"/role", token, map[string]string{"role": identity.RoleUser}); rr2.Code != 0 {
+		t.Fatalf("还原角色 code=%d msg=%s", rr2.Code, rr2.Message)
+	}
+	// 改自己：超管自身 → 1105 拒绝
+	me, _ := do(t, http.MethodGet, "/api/auth/me", token, nil)
+	var meBody struct {
+		User struct {
+			ID string `json:"id"`
+		} `json:"user"`
+	}
+	if err := json.Unmarshal(me.Body, &meBody); err != nil {
+		t.Fatal(err)
+	}
+	self, _ := do(t, http.MethodPost, "/api/users/"+meBody.User.ID+"/role", token, map[string]string{"role": identity.RoleUser})
+	if self.Code != 1105 {
+		t.Fatalf("改自己应 1105, got %d", self.Code)
+	}
+
+	// 清理：删除测试写入的两个配置键
+	ctx := context.Background()
+	_, _ = client.SystemSetting.Delete().Where(systemsetting.KeyIn("sms", "withdraw.rule")).Exec(ctx)
 }

@@ -613,6 +613,8 @@ type UserRowDto struct {
 	OrderCount   int64  `json:"orderCount"`
 	Status       string `json:"status"`
 	RegisteredAt int64  `json:"registeredAt"`
+	Role         string `json:"role"`
+	RoleName     string `json:"roleName"`
 }
 
 func toUserRow(u *identity.User) UserRowDto {
@@ -624,8 +626,18 @@ func toUserRow(u *identity.User) UserRowDto {
 	return UserRowDto{
 		ID: u.ID, Name: displayName(u), AvatarBg: bg, AvatarColor: color,
 		Phone: formatPhone(u.Phone), Area: area, Status: userStatusText(u.Status),
-		RegisteredAt: u.RegisteredAt,
+		RegisteredAt: u.RegisteredAt, Role: u.Role, RoleName: roleDisplayName(u.Role),
 	}
+}
+
+func roleDisplayName(role string) string {
+	if n, ok := identity.RoleDisplayName[role]; ok {
+		return n
+	}
+	if role == "" {
+		return "普通用户"
+	}
+	return role
 }
 
 func displayName(u *identity.User) string {
@@ -675,6 +687,8 @@ type UserDetailDto struct {
 	AvatarColor      string               `json:"avatarColor"`
 	Level            string               `json:"level"`
 	Status           string               `json:"status"`
+	Role             string               `json:"role"`
+	RoleName         string               `json:"roleName"`
 	Phone            string               `json:"phone"`
 	RegisteredAt     int64                `json:"registeredAt"`
 	TotalOrders      int64                `json:"totalOrders"`
@@ -707,6 +721,25 @@ type UserRecentOrderDto struct {
 	OrderedAt int64   `json:"orderedAt"`
 }
 
+// toRecentOrder 订单 → 用户详情订单行 DTO（基本信息卡/订单记录 tab 复用）。
+func toRecentOrder(o *order.Order) UserRecentOrderDto {
+	if o == nil {
+		return UserRecentOrderDto{}
+	}
+	bz := string(o.Type)
+	bzbg, bzcolor := orderTypeColors(o.Type)
+	riderText := "待分配"
+	if o.RiderName != "" {
+		riderText = o.RiderName
+	}
+	merchantText := o.Route
+	return UserRecentOrderDto{
+		ID: o.ID, BizType: bz, BizBg: bzbg, BizColor: bzcolor,
+		Merchant: merchantText, Amount: o.Amount, Rider: riderText,
+		Status: string(o.Status), OrderedAt: o.CreatedAt,
+	}
+}
+
 func toUserDetail(u *identity.User, p *userprofile.Profile, totalOrders, monthOrders int64, totalSpent float64, complaintCount int64, recent []*order.Order) UserDetailDto {
 	bg, color := userAvatarColors(u)
 	level := "Lv.1 新用户"
@@ -731,22 +764,12 @@ func toUserDetail(u *identity.User, p *userprofile.Profile, totalOrders, monthOr
 	}
 	recentOrders := make([]UserRecentOrderDto, 0, len(recent))
 	for _, o := range recent {
-		bz := string(o.Type)
-		bzbg, bzcolor := orderTypeColors(o.Type)
-		riderText := "待分配"
-		if o.RiderName != "" {
-			riderText = o.RiderName
-		}
-		merchantText := o.Route
-		recentOrders = append(recentOrders, UserRecentOrderDto{
-			ID: o.ID, BizType: bz, BizBg: bzbg, BizColor: bzcolor,
-			Merchant: merchantText, Amount: o.Amount, Rider: riderText,
-			Status: string(o.Status), OrderedAt: o.CreatedAt,
-		})
+		recentOrders = append(recentOrders, toRecentOrder(o))
 	}
 	return UserDetailDto{
 		ID: u.ID, UserNo: "U" + u.ID[len(u.ID)-6:], Name: displayName(u),
 		AvatarBg: bg, AvatarColor: color, Level: level, Status: userStatusText(u.Status),
+		Role: u.Role, RoleName: roleDisplayName(u.Role),
 		Phone: formatPhone(u.Phone), RegisteredAt: u.RegisteredAt,
 		TotalOrders: totalOrders, TotalSpent: totalSpent, MonthOrders: monthOrders,
 		Verified: verified, Nickname: nickname, RealName: realName, Region: region,

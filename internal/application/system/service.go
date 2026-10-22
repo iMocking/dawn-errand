@@ -163,6 +163,29 @@ func (s *Service) seedDefaultSettings(ctx context.Context, adminID string, now i
 			return err
 		}
 	}
+	// SMS：默认禁用
+	if _, err := s.Repos.Settings.Get(system.KeySMS); err == application.ErrNotFound {
+		b, _ := json.Marshal(system.SMSConfig{Provider: "aliyun"})
+		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+			Key: system.KeySMS, Status: system.SettingDisabled,
+			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
+		}); err != nil {
+			return err
+		}
+	}
+	// 提现规则：默认启用（手工审核，T+1 到账，0.6% 手续费）
+	if _, err := s.Repos.Settings.Get(system.KeyWithdrawRule); err == application.ErrNotFound {
+		b, _ := json.Marshal(system.WithdrawRuleConfig{
+			Enabled: true, FeeRate: 0.006, MinAmount: 10, MaxAmount: 5000,
+			DailyLimit: 5, Mode: "manual", SettleDays: 1,
+		})
+		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+			Key: system.KeyWithdrawRule, Status: system.SettingEnabled,
+			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
+		}); err != nil {
+			return err
+		}
+	}
 	// OSS：默认禁用
 	if _, err := s.Repos.Settings.Get(system.KeyOSS); err == application.ErrNotFound {
 		b, _ := json.Marshal(system.OSSConfig{Provider: "oss"})
@@ -384,6 +407,153 @@ func (s *Service) UpdateLocalStorage(ctx context.Context, in system.LocalStorage
 // TestLocalStorage 测试本地存储。
 func (s *Service) TestLocalStorage(ctx context.Context, in system.LocalStorageConfig) error {
 	return storage.TestLocal(ctx, &in)
+}
+
+// ---- 短信服务 ----
+
+// GetSMS 读取短信服务配置（脱敏）。
+func (s *Service) GetSMS(ctx context.Context) (*system.SMSConfig, error) {
+	cfg, err := s.loadSMS(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if cfg.SecretKey != "" {
+		cfg.SecretKey = mask
+	}
+	return cfg, nil
+}
+
+func (s *Service) loadSMS(ctx context.Context) (*system.SMSConfig, error) {
+	rec, err := s.Repos.Settings.Get(system.KeySMS)
+	if err != nil {
+		if err == application.ErrNotFound {
+			return &system.SMSConfig{Provider: "aliyun"}, nil
+		}
+		return nil, err
+	}
+	var cfg system.SMSConfig
+	if err := json.Unmarshal([]byte(rec.ValueJSON), &cfg); err != nil {
+		return nil, err
+	}
+	if cfg.SecretKey != "" && cfg.SecretKey != mask {
+		if plain, err := s.Cipher.Decrypt(cfg.SecretKey); err == nil {
+			cfg.SecretKey = plain
+		}
+	}
+	return &cfg, nil
+}
+
+// UpdateSMS 更新短信服务配置（SecretKey 留空/掩码则保持不变）。
+func (s *Service) UpdateSMS(ctx context.Context, in system.SMSConfig, operator string) error {
+	if strings.TrimSpace(in.AccessKey) == "" || strings.TrimSpace(in.SignName) == "" {
+		return errcode.New(errcode.CodeSettingInvalid, "access_key 与 sign_name 必填")
+	}
+	if in.Provider == "" {
+		in.Provider = "aliyun"
+	}
+	cur, err := s.loadSMS(ctx)
+	if err != nil {
+		return err
+	}
+	if in.SecretKey == "" || in.SecretKey == mask {
+		in.SecretKey = cur.SecretKey
+	} else {
+		enc, err := s.Cipher.Encrypt(in.SecretKey)
+		if err != nil {
+			return err
+		}
+		in.SecretKey = enc
+	}
+	now := time.Now().Unix()
+	status := system.SettingEnabled
+	if in.AccessKey == "" || in.SignName == "" {
+		status = system.SettingDisabled
+	}
+	b, _ := json.Marshal(in)
+	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		Key: system.KeySMS, Status: status, ValueJSON: string(b),
+		UpdatedBy: operator, UpdatedAt: now,
+	}); err != nil {
+		return err
+	}
+	s.Repos.Audit.Record(ctx, application.AuditEntry{
+		UserID: operator, Action: "config.sms.update", Object: "sms", Result: "success",
+		RequestID: reqID(ctx), IP: ipFrom(ctx),
+	})
+	metricsConfigChange("sms")
+	return nil
+}
+
+// TestSMS 校验短信服务配置（不落库）。
+// 正式发送通道依赖服务商 SDK 与已备案签名，配置阶段仅做完整性校验。
+func (s *Service) TestSMS(ctx context.Context, in system.SMSConfig) error {
+	if strings.TrimSpace(in.AccessKey) == "" || strings.TrimSpace(in.SignName) == "" {
+		return errcode.New(errcode.CodeSettingInvalid, "access_key 与 sign_name 必填")
+	}
+	switch in.Provider {
+	case "aliyun", "tencent", "other":
+	default:
+		return errcode.New(errcode.CodeSMSTestFailed, "不支持的服务商: "+in.Provider)
+	}
+	return nil
+}
+
+// ---- 提现规则 ----
+
+// GetWithdrawRule 读取提现规则配置（未初始化时返回默认值，不落库）。
+func (s *Service) GetWithdrawRule(ctx context.Context) (*system.WithdrawRuleConfig, error) {
+	rec, err := s.Repos.Settings.Get(system.KeyWithdrawRule)
+	if err != nil {
+		if err == application.ErrNotFound {
+			return &system.WithdrawRuleConfig{
+				Enabled: true, FeeRate: 0.006, MinAmount: 10, MaxAmount: 5000,
+				DailyLimit: 5, Mode: "manual", SettleDays: 1,
+			}, nil
+		}
+		return nil, err
+	}
+	var cfg system.WithdrawRuleConfig
+	if err := json.Unmarshal([]byte(rec.ValueJSON), &cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+// UpdateWithdrawRule 更新提现规则配置。
+func (s *Service) UpdateWithdrawRule(ctx context.Context, in system.WithdrawRuleConfig, operator string) error {
+	if in.FeeRate < 0 || in.MinAmount < 0 || in.MaxAmount < 0 {
+		return errcode.New(errcode.CodeSettingInvalid, "费率与金额不能为负数")
+	}
+	if in.MaxAmount > 0 && in.MinAmount > 0 && in.MinAmount > in.MaxAmount {
+		return errcode.New(errcode.CodeSettingInvalid, "最低提现金额不能高于最高金额")
+	}
+	if in.DailyLimit < 0 || in.SettleDays < 0 {
+		return errcode.New(errcode.CodeSettingInvalid, "次数与到账周期不能为负数")
+	}
+	if in.Mode == "" {
+		in.Mode = "manual"
+	}
+	if in.Mode != "auto" && in.Mode != "manual" {
+		return errcode.New(errcode.CodeSettingInvalid, "审核模式仅支持 auto/manual")
+	}
+	now := time.Now().Unix()
+	status := system.SettingEnabled
+	if !in.Enabled {
+		status = system.SettingDisabled
+	}
+	b, _ := json.Marshal(in)
+	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		Key: system.KeyWithdrawRule, Status: status, ValueJSON: string(b),
+		UpdatedBy: operator, UpdatedAt: now,
+	}); err != nil {
+		return err
+	}
+	s.Repos.Audit.Record(ctx, application.AuditEntry{
+		UserID: operator, Action: "config.withdraw_rule.update", Object: "withdraw.rule", Result: "success",
+		RequestID: reqID(ctx), IP: ipFrom(ctx),
+	})
+	metricsConfigChange("withdraw.rule")
+	return nil
 }
 
 // ---- Casbin 配置 ----

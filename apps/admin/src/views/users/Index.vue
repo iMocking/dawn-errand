@@ -128,11 +128,28 @@ const columns: Column[] = [
   { key: 'id', title: '用户 ID', width: '110px' },
   { key: 'info', title: '用户信息' },
   { key: 'phone', title: '手机号', width: '150px' },
-  { key: 'area', title: '常驻区域', width: '160px' },
-  { key: 'orderCount', title: '累计下单', width: '100px' },
+  { key: 'area', title: '常驻区域', width: '140px' },
+  { key: 'roleName', title: '角色', width: '110px' },
+  { key: 'orderCount', title: '累计下单', width: '90px' },
   { key: 'status', title: '状态', width: '90px' },
   { key: 'action', title: '操作', width: '110px', align: 'right' },
 ]
+
+function roleTone(role: string): 'orange' | 'blue' | 'green' | 'gray' | 'red' | 'yellow' {
+  switch (role) {
+    case 'super_admin':
+      return 'orange'
+    case 'cs_manager':
+    case 'cs_agent':
+    case 'region_station':
+      return 'blue'
+    case 'merchant':
+    case 'driver':
+      return 'green'
+    default:
+      return 'gray'
+  }
+}
 
 onMounted(async () => {
   overview.value = await getUsersOverview()
@@ -270,6 +287,9 @@ onMounted(async () => {
         </template>
         <template #col-orderCount="{ row }">
           <span class="text-[13px] font-semibold text-primary">{{ row.orderCount }}</span>
+        </template>
+        <template #col-roleName="{ row }">
+          <StatusTag :tone="roleTone(row.role as string)">{{ row.roleName || '普通用户' }}</StatusTag>
         </template>
         <template #col-status="{ row }">
           <StatusTag :tone="row.status === '已封禁' ? 'red' : 'green'">{{ row.status }}</StatusTag>

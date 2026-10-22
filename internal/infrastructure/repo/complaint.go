@@ -67,6 +67,9 @@ func (r ComplaintRepo) List(q complaint.Query, sc tenant.Scope) ([]*complaint.Co
 	if sc.RegionOnly() {
 		bq.Where(entcomplaint.RegionID(sc.RegionID))
 	}
+	if q.UserID != "" {
+		bq.Where(entcomplaint.UserID(q.UserID))
+	}
 	if s := strings.TrimSpace(q.Status); s != "" {
 		bq.Where(entcomplaint.Status(s))
 	}

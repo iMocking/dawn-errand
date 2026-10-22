@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"dawn-errand/internal/application"
+	"dawn-errand/internal/domain/complaint"
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/order"
 	"dawn-errand/internal/domain/tenant"
@@ -111,6 +112,47 @@ func (s *UsersService) Detail(ctx context.Context, id string, sc tenant.Scope) (
 	}, nil
 }
 
+// userAccessOK 用户对象级作用域校验（区域站长限本区域、普通用户限本人）。
+func (s *UsersService) userAccessOK(u *identity.User, sc tenant.Scope) bool {
+	if sc.RegionOnly() && u.RegionID != sc.RegionID {
+		return false
+	}
+	if sc.UserOnly() && u.ID != sc.UserID {
+		return false
+	}
+	return true
+}
+
+// OrdersByUser 用户订单记录（分页，scope 隔离）。
+func (s *UsersService) OrdersByUser(ctx context.Context, id string, page, size int, sc tenant.Scope) ([]*order.Order, int64, error) {
+	u, err := s.Repos.Users.FindByID(id)
+	if err != nil {
+		if err == application.ErrNotFound {
+			return nil, 0, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
+		}
+		return nil, 0, err
+	}
+	if !s.userAccessOK(u, sc) {
+		return nil, 0, tenantDenied()
+	}
+	return s.Repos.Orders.List(order.Query{Page: page, PageSize: size, UserID: id}, sc)
+}
+
+// ComplaintsByUser 用户投诉售后（分页，scope 隔离）。
+func (s *UsersService) ComplaintsByUser(ctx context.Context, id string, page, size int, sc tenant.Scope) ([]*complaint.Complaint, int64, error) {
+	u, err := s.Repos.Users.FindByID(id)
+	if err != nil {
+		if err == application.ErrNotFound {
+			return nil, 0, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
+		}
+		return nil, 0, err
+	}
+	if !s.userAccessOK(u, sc) {
+		return nil, 0, tenantDenied()
+	}
+	return s.Repos.Complaints.List(complaint.Query{Page: page, PageSize: size, UserID: id}, sc)
+}
+
 // Ban 封禁/解封用户（撤销会话）。
 func (s *UsersService) Ban(ctx context.Context, id string, ban bool, operator string, sc tenant.Scope) error {
 	u, err := s.Repos.Users.FindByID(id)
@@ -142,6 +184,45 @@ func (s *UsersService) Ban(ctx context.Context, id string, ban bool, operator st
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
 		UserID: operator, Action: action, Object: id, Result: "success",
+		RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx),
+	})
+	return nil
+}
+
+// SetRole 修改用户后台角色。
+// 约束：仅全局管理员（非区域站长/非普通用户 scope）可操作；不能改自己；系统级身份（role=system）禁止修改。
+func (s *UsersService) SetRole(ctx context.Context, id, role, operator string, sc tenant.Scope) error {
+	if sc.RegionOnly() || sc.UserOnly() {
+		return tenantDenied()
+	}
+	if id == operator {
+		return errcode.New(errcode.CodeSettingInvalid, "不能修改自己的角色")
+	}
+	u, err := s.Repos.Users.FindByID(id)
+	if err != nil {
+		if err == application.ErrNotFound {
+			return errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
+		}
+		return err
+	}
+	if u.Role == identity.RoleSystem {
+		return errcode.New(errcode.CodeSettingInvalid, "系统服务身份不可修改角色")
+	}
+	valid := false
+	for _, r := range identity.AllRoles {
+		if r == role {
+			valid = true
+			break
+		}
+	}
+	if !valid || role == identity.RoleSystem {
+		return errcode.New(errcode.CodeSettingInvalid, "不支持的岗位角色: "+role)
+	}
+	if err := s.Repos.Users.UpdateRole(id, role); err != nil {
+		return err
+	}
+	s.Repos.Audit.Record(ctx, application.AuditEntry{
+		UserID: operator, Action: "user.role.update", Object: id, Result: "success",
 		RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx),
 	})
 	return nil

@@ -6,6 +6,8 @@ import StatusTag from '@/components/StatusTag.vue'
 import Pagination from '@/components/Pagination.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Confirm from '@/components/Confirm.vue'
+import Modal from '@/components/Modal.vue'
+import AppInput from '@/components/AppInput.vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
 import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
@@ -13,6 +15,7 @@ import {
   getRiders,
   getRiderStats,
   freezeRider,
+  createRider,
   type RiderRow,
   type RiderStatsDto,
 } from '@/api/riders'
@@ -122,6 +125,56 @@ async function onFreeze() {
   }
 }
 
+/** ---- 新增骑手 ---- */
+const createOpen = ref(false)
+const creating = ref(false)
+const createForm = reactive({
+  name: '',
+  phone: '',
+  area: '',
+  tool: '' as string,
+  orderTypes: '',
+  idCard: '',
+})
+
+function openCreate() {
+  createForm.name = ''
+  createForm.phone = ''
+  createForm.area = ''
+  createForm.tool = ''
+  createForm.orderTypes = ''
+  createForm.idCard = ''
+  createOpen.value = true
+}
+
+async function onCreate() {
+  if (creating.value) return
+  if (!createForm.name.trim()) {
+    toast.warning('请填写骑手姓名')
+    return
+  }
+  if (!createForm.phone.trim()) {
+    toast.warning('请填写联系电话')
+    return
+  }
+  creating.value = true
+  try {
+    await createRider({
+      name: createForm.name.trim(),
+      phone: createForm.phone.trim(),
+      area: createForm.area.trim() || undefined,
+      tool: createForm.tool || undefined,
+      orderTypes: createForm.orderTypes.trim() || undefined,
+      idCard: createForm.idCard.trim() || undefined,
+    })
+    toast.success('已提交入驻申请，待审核')
+    createOpen.value = false
+    load()
+  } finally {
+    creating.value = false
+  }
+}
+
 onMounted(() => {
   load()
   loadStats()
@@ -186,7 +239,7 @@ onMounted(() => {
       <div class="text-[16px] font-bold text-ink-1">骑手列表</div>
       <div class="ml-auto flex gap-3">
         <AppButton variant="secondary" icon="download">导出列表</AppButton>
-        <AppButton variant="primary" icon="plus" class="shadow-[0_4px_12px_rgba(255,107,44,.3)]">新增骑手</AppButton>
+        <AppButton variant="primary" icon="plus" class="shadow-[0_4px_12px_rgba(255,107,44,.3)]" @click="openCreate">新增骑手</AppButton>
       </div>
     </div>
 
@@ -238,7 +291,7 @@ onMounted(() => {
                 {{ (row as RiderRow).name }}
                 <StatusTag :tone="statusTone[(row as RiderRow).status]">{{ (row as RiderRow).status }}</StatusTag>
               </div>
-              <div class="mt-[3px] text-[12px] text-ink-3">{{ (row as RiderRow).tool }} · 等级 {{ (row as RiderRow).level }}</div>
+              <div class="mt-[3px] text-[12px] text-ink-3">{{ (row as RiderRow).tool }}{{ (row as RiderRow).level ? ' · 等级 ' + (row as RiderRow).level : '' }}</div>
             </div>
           </div>
         </template>
@@ -285,5 +338,54 @@ onMounted(() => {
       @update:open="(v) => (freezeOpen = v)"
       @confirm="onFreeze"
     />
+
+    <!-- 新增骑手弹窗 -->
+    <Modal
+      v-model:open="createOpen"
+      title="新增骑手"
+      :width="600"
+      confirm-text="提交申请"
+      :loading="creating"
+      @confirm="onCreate"
+    >
+      <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">骑手姓名 <span class="text-[#FF4D4F]">*</span></div>
+          <AppInput v-model="createForm.name" placeholder="真实姓名" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">联系电话 <span class="text-[#FF4D4F]">*</span></div>
+          <AppInput v-model="createForm.phone" placeholder="手机号码" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">服务区域</div>
+          <AppInput v-model="createForm.area" placeholder="如 王家湾村 / 李庄村" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">配送工具</div>
+          <div class="flex gap-2">
+            <AppButton
+              v-for="t in TOOL_TABS.filter((x) => x)"
+              :key="t"
+              variant="text"
+              class="!rounded-md !px-3 !py-1 !text-[12px]"
+              :class="createForm.tool === t ? '!bg-primary-bg !font-semibold !text-primary' : '!bg-head !font-normal !text-ink-2'"
+              @click="createForm.tool = createForm.tool === t ? '' : t"
+            >{{ t }}</AppButton>
+          </div>
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">接单类型</div>
+          <AppInput v-model="createForm.orderTypes" placeholder="如 外卖 / 帮送" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">身份证号</div>
+          <AppInput v-model="createForm.idCard" placeholder="用于实名核验" clearable />
+        </div>
+      </div>
+      <div class="mt-3 rounded-lg bg-head px-3 py-2.5 text-[12px] text-ink-3">
+        提交后将进入入驻审核，审核通过后骑手方可接单。
+      </div>
+    </Modal>
   </div>
 </template>

@@ -74,6 +74,7 @@ type Query struct {
 	PageSize int
 	Keyword  string
 	Status   string
+	UserID   string // 用户维度筛选（用户详情投诉售后）
 }
 
 // ComplaintRepository 投诉仓储端口。

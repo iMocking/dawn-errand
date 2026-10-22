@@ -31,8 +31,8 @@ function cellText(row: T, key: string): string | number {
 <template>
   <div class="w-full overflow-x-auto">
     <table class="w-full border-collapse text-sm">
-      <thead>
-        <tr class="bg-head">
+      <thead class="radius-tl radius-tr bg-white text-ink-2">
+        <tr>
           <th
             v-for="c in columns"
             :key="c.key"

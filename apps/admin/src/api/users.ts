@@ -1,5 +1,6 @@
 import { http } from '@/utils/request'
 import type { PageResult, PageQuery } from '@/types'
+import type { ComplaintRow } from './complaints'
 
 /** 用户状态（与设计稿 / mock 文案逐字一致） */
 export type UserStatus = '正常' | '已封禁'
@@ -23,6 +24,10 @@ export interface UserRow extends Record<string, unknown> {
   status: UserStatus | string
   /** 注册时间，Unix 秒 */
   registeredAt: number
+  /** 后台角色编码（user / super_admin / region_station 等） */
+  role: string
+  /** 后台角色展示名（系统管理员 / 区域站长 / 正式会员…） */
+  roleName: string
 }
 
 /** 用户模块顶部概览指标（对应 mock/users-overview.json） */
@@ -72,6 +77,10 @@ export interface UserDetail {
   level: string
   status: UserStatus | string
   phone: string
+  /** 后台角色编码 */
+  role: string
+  /** 后台角色展示名 */
+  roleName: string
   /** 注册时间，Unix 秒 */
   registeredAt: number
   /** 累计订单数 */
@@ -127,4 +136,30 @@ export function banUser(id: string) {
 /** 解封账号（写操作，mock 中间件回显请求体） */
 export function unbanUser(id: string) {
   return http.post<{ id: string; status: string }>(`/users/${id}/unban`, { id, status: '正常' })
+}
+
+/** 用户订单记录（分页，复用近期订单行结构） */
+export function getUserOrders(id: string, q: PageQuery) {
+  return http.get<PageResult<UserRecentOrder>>(`/users/${id}/orders`, q as Record<string, unknown>)
+}
+
+/** 用户投诉售后（分页，复用投诉工单行结构） */
+export function getUserComplaints(id: string, q: PageQuery) {
+  return http.get<PageResult<ComplaintRow>>(`/users/${id}/complaints`, q as Record<string, unknown>)
+}
+
+/** 后台角色枚举（对齐后端 identity.AllRoles） */
+export const BACKEND_ROLES: Array<{ value: string; label: string }> = [
+  { value: 'user', label: '正式会员' },
+  { value: 'super_admin', label: '系统管理员' },
+  { value: 'cs_manager', label: '客服经理' },
+  { value: 'cs_agent', label: '平台客服' },
+  { value: 'region_station', label: '区域站长' },
+  { value: 'merchant', label: '商家' },
+  { value: 'driver', label: '司机' },
+]
+
+/** 修改用户后台角色（账号权限，仅超管可操作，不能改自己） */
+export function updateUserRole(id: string, role: string) {
+  return http.post<{ id: string; role: string }>(`/users/${id}/role`, { role })
 }

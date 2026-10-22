@@ -79,3 +79,32 @@ export function updateSmsConfig(payload: SmsConfigPayload) {
 export function testSmsConfig(payload: SmsConfigPayload) {
   return http.post<Record<string, never>>('/system/config/sms/test', payload)
 }
+
+/** 提现规则配置。 */
+export interface WithdrawRuleDto {
+  enabled: boolean
+  /** 手续费率（0.006 = 0.6%） */
+  fee_rate: number
+  /** 单笔最低提现金额（元） */
+  min_amount: number
+  /** 单笔最高提现金额（元） */
+  max_amount: number
+  /** 每日提现次数上限 */
+  daily_limit: number
+  /** auto 自动审核 / manual 人工审核 */
+  mode: 'auto' | 'manual'
+  /** 到账周期（T+N 个工作日） */
+  settle_days: number
+}
+
+export type WithdrawRulePayload = WithdrawRuleDto
+
+/** 读取提现规则配置 */
+export function getWithdrawRule() {
+  return http.get<WithdrawRuleDto>('/system/config/withdraw-rule')
+}
+
+/** 保存提现规则配置 */
+export function updateWithdrawRule(payload: WithdrawRulePayload) {
+  return http.put<Record<string, never>>('/system/config/withdraw-rule', payload)
+}

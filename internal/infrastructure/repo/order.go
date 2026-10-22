@@ -75,6 +75,9 @@ func (r OrderRepo) List(q order.Query, sc tenant.Scope) ([]*order.Order, int64, 
 	ctx := context.Background()
 	bq := r.client.Order.Query()
 	scopeOrder(bq, sc)
+	if q.UserID != "" {
+		bq.Where(entorder.UserID(q.UserID))
+	}
 	if s := strings.TrimSpace(q.Status); s != "" {
 		bq.Where(entorder.Status(s))
 	}

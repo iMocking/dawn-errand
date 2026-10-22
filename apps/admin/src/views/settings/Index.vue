@@ -8,6 +8,7 @@ import AppButton from '@/components/AppButton.vue'
 import AppInput from '@/components/AppInput.vue'
 import SmtpConfig from './SmtpConfig.vue'
 import SmsConfig from './SmsConfig.vue'
+import WithdrawRule from './WithdrawRule.vue'
 import { useToast } from '@/composables/useToast'
 import { formatNumber } from '@/utils/format'
 import { getSettings, saveSettings, type ServiceArea, type SystemSettings } from '@/api/settings'
@@ -18,16 +19,15 @@ const loading = ref(false)
 const settings = ref<SystemSettings | null>(null)
 
 /**
- * 页签：服务区域 / 邮箱 SMTP / 短信服务在本页内切换；
+ * 页签：服务区域 / 邮箱 SMTP / 短信服务 / 提现规则在本页内切换；
  * 配送费率、公告管理在左侧菜单已有独立入口（/settings/fee-rules、/settings/announcements），不再重复；
- * 提现规则、账号权限按设计稿占位。
+ * 账号权限已集成到用户管理（用户列表角色列 + 用户详情角色设置），不再单独设置页。
  */
 const tabs = [
   { label: '服务区域' },
   { label: '邮箱 SMTP 服务配置' },
   { label: '短信服务配置' },
   { label: '提现规则' },
-  { label: '账号权限' },
 ]
 const localTab = ref('服务区域')
 const activeTab = computed(() => localTab.value)
@@ -234,7 +234,10 @@ async function onConfirmAction() {
     <!-- 短信服务配置 -->
     <SmsConfig v-else-if="activeTab === '短信服务配置'" class="min-h-0 flex-1" />
 
-    <!-- 提现规则 / 账号权限：设计稿仅占位，无内容页 -->
+    <!-- 提现规则 -->
+    <WithdrawRule v-else-if="activeTab === '提现规则'" class="min-h-0 flex-1" />
+
+    <!-- 兜底（正常不出现） -->
     <div v-else class="flex flex-1 items-center justify-center rounded-card bg-white py-20">
       <Empty :text="`「${activeTab}」模块建设中，敬请期待`" />
     </div>

@@ -152,3 +152,26 @@ export function rejectRider(id: string, reason?: string) {
 export function freezeRider(id: string, action: 'freeze' | 'unfreeze') {
   return http.post<{ id: string; action: string }>('/riders/freeze', { id, action })
 }
+
+/** 新增骑手（创建即提交入驻申请，进入待审核） */
+export interface CreateRiderPayload {
+  name: string
+  phone: string
+  area?: string
+  tool?: string
+  orderTypes?: string
+  idCard?: string
+  serviceType?: string
+  regionId?: string
+}
+
+/** 新增骑手返回：创建成功后回传 id / 申请单号 / 审核状态 */
+export interface CreateRiderResult {
+  id: string
+  applyNo: string
+  auditStatus: string
+}
+
+export function createRider(data: CreateRiderPayload) {
+  return http.post<CreateRiderResult>('/riders', data)
+}

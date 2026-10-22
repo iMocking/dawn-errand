@@ -110,6 +110,114 @@ func (h *Handler) TestSMTP(c *gin.Context) {
 	response.OKMsg(c, "SMTP 连接成功", gin.H{})
 }
 
+// GetSMS GET /system/config/sms。
+func (h *Handler) GetSMS(c *gin.Context) {
+	cfg, err := h.System.GetSMS(c.Request.Context())
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OK(c, gin.H{
+		"enabled":       cfg.AccessKey != "" && cfg.SignName != "",
+		"provider":      cfg.Provider,
+		"access_key":    cfg.AccessKey,
+		"secret_key":    cfg.SecretKey,
+		"sign_name":     cfg.SignName,
+		"template_code": cfg.TemplateCode,
+	})
+}
+
+type smsBody struct {
+	Provider     string `json:"provider"`
+	AccessKey    string `json:"access_key"`
+	SecretKey    string `json:"secret_key"`
+	SignName     string `json:"sign_name"`
+	TemplateCode string `json:"template_code"`
+}
+
+// UpdateSMS PUT /system/config/sms。
+func (h *Handler) UpdateSMS(c *gin.Context) {
+	var in smsBody
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	err := h.System.UpdateSMS(c.Request.Context(), system.SMSConfig{
+		Provider: in.Provider, AccessKey: in.AccessKey, SecretKey: in.SecretKey,
+		SignName: in.SignName, TemplateCode: in.TemplateCode,
+	}, u.ID)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "短信服务配置已保存", gin.H{})
+}
+
+// TestSMS POST /system/config/sms/test。
+func (h *Handler) TestSMS(c *gin.Context) {
+	var in smsBody
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	if err := h.System.TestSMS(c.Request.Context(), system.SMSConfig{
+		Provider: in.Provider, AccessKey: in.AccessKey, SecretKey: in.SecretKey,
+		SignName: in.SignName, TemplateCode: in.TemplateCode,
+	}); err != nil {
+		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeSMSTestFailed, "短信服务配置校验失败："+err.Error())
+		return
+	}
+	response.OKMsg(c, "短信服务配置校验通过", gin.H{})
+}
+
+// GetWithdrawRule GET /system/config/withdraw-rule。
+func (h *Handler) GetWithdrawRule(c *gin.Context) {
+	cfg, err := h.System.GetWithdrawRule(c.Request.Context())
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OK(c, gin.H{
+		"enabled":     cfg.Enabled,
+		"fee_rate":    cfg.FeeRate,
+		"min_amount":  cfg.MinAmount,
+		"max_amount":  cfg.MaxAmount,
+		"daily_limit": cfg.DailyLimit,
+		"mode":        cfg.Mode,
+		"settle_days": cfg.SettleDays,
+	})
+}
+
+type withdrawRuleBody struct {
+	Enabled    bool    `json:"enabled"`
+	FeeRate    float64 `json:"fee_rate"`
+	MinAmount  float64 `json:"min_amount"`
+	MaxAmount  float64 `json:"max_amount"`
+	DailyLimit int     `json:"daily_limit"`
+	Mode       string  `json:"mode"`
+	SettleDays int     `json:"settle_days"`
+}
+
+// UpdateWithdrawRule PUT /system/config/withdraw-rule。
+func (h *Handler) UpdateWithdrawRule(c *gin.Context) {
+	var in withdrawRuleBody
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	err := h.System.UpdateWithdrawRule(c.Request.Context(), system.WithdrawRuleConfig{
+		Enabled: in.Enabled, FeeRate: in.FeeRate, MinAmount: in.MinAmount,
+		MaxAmount: in.MaxAmount, DailyLimit: in.DailyLimit, Mode: in.Mode, SettleDays: in.SettleDays,
+	}, u.ID)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "提现规则已保存", gin.H{})
+}
+
 // GetOSS GET /system/config/oss。
 func (h *Handler) GetOSS(c *gin.Context) {
 	cfg, err := h.System.GetOSS(c.Request.Context())

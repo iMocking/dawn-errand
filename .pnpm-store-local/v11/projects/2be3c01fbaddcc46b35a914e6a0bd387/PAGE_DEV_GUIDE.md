@@ -208,10 +208,20 @@ export function getOrderDetail(id: string) {
 }
 ```
 
-### 系统配置 API（`src/api/system.ts`，设置页「邮箱 SMTP / 短信服务」）
+### 系统配置 API（`src/api/system.ts`，设置页「邮箱 SMTP / 短信服务 / 提现规则」）
 - SMTP 已对接真实后端：`getSmtpConfig`（GET `/system/config/smtp`，password 已配置时为掩码 `******`）、`updateSmtpConfig`（PUT，密码留空/掩码时后端保留原值）、`testSmtpConfig`（POST `/system/config/smtp/test`，不落库）。
-- 短信契约（`getSmsConfig/updateSmsConfig/testSmsConfig`）按与 SMTP 对称的 `/system/config/sms*` 预留，**后端暂未实现**：页面请求 404 时显示「接口未提供」提示条并禁用保存/测试；后端实现后前端零改动即可用。
-- 设置页 tab 约定：配送费率、公告管理已在左侧菜单有独立入口（`/settings/fee-rules`、`/settings/announcements`），**不要在「系统设置」页重复放置这两个 tab**；系统设置页 tabs = 服务区域 / 邮箱 SMTP 服务配置 / 短信服务配置 / 提现规则(占位) / 账号权限(占位)。
+- 短信已对接真实后端：`getSmsConfig/updateSmsConfig/testSmsConfig`（GET/PUT/POST `/system/config/sms*`）。返回字段 `{enabled, provider, access_key, secret_key(掩码******), sign_name, template_code}`；PUT 时 secret_key 留空/掩码保留原密文；必填 access_key+sign_name。权限 `system:config`（仅超管）。
+- 提现规则：`getWithdrawRule/updateWithdrawRule`（GET/PUT `/system/config/withdraw-rule`）。字段 `{enabled, fee_rate, min_amount, max_amount, daily_limit, mode: auto|manual, settle_days}`；未配置时后端返回懒默认 `{enabled:true, fee_rate:0.006, min:10, max:5000, daily:5, manual, T+1}`。权限 `system:config`。
+- 设置页 tab 约定：配送费率、公告管理已在左侧菜单有独立入口（`/settings/fee-rules`、`/settings/announcements`），**不要在「系统设置」页重复放置这两个 tab**；账号权限已并入用户管理，不要新增账号权限 tab。系统设置页 tabs = 服务区域 / 邮箱 SMTP 服务配置 / 短信服务配置 / 提现规则。
+
+### 商家 / 骑手新增与用户详情 API（本轮新增，已对接真实后端）
+- 商家新增：`createMerchant`（POST `/merchants`，`src/api/merchants.ts`）。请求体 `{name, phone, category?, contact?, address?, addressSub?, openHours?, deliveryRange?, commission?, deliveryMethod?, regionId?}`；**name 与 phone 必填**，后端缺省校验 400。返回 `{id, applyNo, auditStatus:"pending"}`——创建即提交入驻申请，进「入驻审核」tab，审核通过前不营业。
+- 骑手新增：`createRider`（POST `/riders`，`src/api/riders.ts`）。请求体 `{name, phone, area?, tool?, orderTypes?, idCard?, serviceType?, regionId?}`；name/phone 必填。返回结构同上。
+- 用户详情订单记录：`getUserOrders(id, q)`（GET `/users/:id/orders`，分页返回 `PageResult<UserRecentOrder>`）。
+- 用户详情投诉售后：`getUserComplaints(id, q)`（GET `/users/:id/complaints`，分页返回 `PageResult<ComplaintRow>`）。
+- 用户角色：列表与详情均带 `role`+`roleName`（`src/api/users.ts` 的 `BACKEND_ROLES` 映射展示）；`updateUserRole(id, role)`（POST `/users/:id/role`，body `{role}`）。角色即时生效；仅全局管理员可改（改自己 → 1105「不能修改自己的角色」）；role=system 禁改。权限 `user:role`。
+- 区域站长场景：创建接口不传 regionId 时后端自动用本区域；传了其他区域返回 403。
+- 权限：`merchant:create` / `rider:create`（`merchant:*`/`rider:*` 通配覆盖，super_admin 全量）；用户维度查询复用 `user:detail`。
 
 ---
 

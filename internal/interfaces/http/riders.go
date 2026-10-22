@@ -1,6 +1,8 @@
 package http
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 
 	"dawn-errand/internal/domain/rider"
@@ -24,6 +26,41 @@ func (h *Handler) ListRiders(c *gin.Context) {
 		list = append(list, toRiderRow(r))
 	}
 	pageResult(c, list, total, page, size)
+}
+
+type createRiderBody struct {
+	Name        string `json:"name"`
+	Phone       string `json:"phone"`
+	Area        string `json:"area"`
+	Tool        string `json:"tool"`
+	OrderTypes  string `json:"orderTypes"`
+	IDCard      string `json:"idCard"`
+	ServiceType string `json:"serviceType"`
+	RegionID    string `json:"regionId"`
+}
+
+// CreateRider POST /riders。
+func (h *Handler) CreateRider(c *gin.Context) {
+	var in createRiderBody
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	if strings.TrimSpace(in.Name) == "" || strings.TrimSpace(in.Phone) == "" {
+		response.ErrStatus(c, 400, 1301, "骑手姓名与联系电话为必填项")
+		return
+	}
+	r := &rider.Rider{
+		RegionID: in.RegionID, Name: strings.TrimSpace(in.Name), Phone: in.Phone,
+		Area: in.Area, Tool: in.Tool, OrderTypes: in.OrderTypes, IDCard: in.IDCard,
+		ServiceType: in.ServiceType,
+		Status: rider.RiderOffline, IDCheck: "待补充", NoticeType: "none",
+	}
+	if err := h.Riders.Create(c.Request.Context(), r, scope(c)); err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "已提交入驻申请", gin.H{"id": r.ID, "applyNo": r.ApplyNo, "auditStatus": "pending"})
 }
 
 // GetRiderStats GET /riders/stats。

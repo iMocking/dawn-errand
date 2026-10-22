@@ -12,8 +12,8 @@ const route = useRoute()
 const auth = useAuthStore()
 const toast = useToast()
 
-const account = ref('admin@shuguang')
-const password = ref('shuguang2026')
+const account = ref('')
+const password = ref('')
 const captcha = ref('8A6K')
 const loading = ref(false)
 

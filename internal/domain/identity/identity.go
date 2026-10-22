@@ -120,6 +120,8 @@ type UserRepository interface {
 	List(q UserQuery, sc tenant.Scope) ([]*User, int64, error)
 	// UpdateStatus 更新状态并递增会话版本（封禁/解封）。
 	UpdateStatus(id string, status UserStatus) error
+	// UpdateRole 更新后台角色（角色变更即时生效，下次请求按新角色鉴权）。
+	UpdateRole(id string, role string) error
 	// CountRegisteredSince 统计指定时间后注册的用户数（scope 隔离）。
 	CountRegisteredSince(sc tenant.Scope, since int64) (int64, error)
 	// CountStatus 统计指定状态的用户数（scope 隔离）。

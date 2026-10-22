@@ -84,7 +84,7 @@ async function onTest() {
   testing.value = true
   try {
     await testSmsConfig(buildPayload())
-    toast.success('短信服务连接成功')
+    toast.success('短信服务配置校验通过')
   } finally {
     testing.value = false
   }

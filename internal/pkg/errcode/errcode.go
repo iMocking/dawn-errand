@@ -38,6 +38,7 @@ const (
 	CodeSettingInvalid   = 1105 // 配置不合法
 	CodeSMTPTestFailed   = 1106 // SMTP 测试连接失败
 	CodeOSSTestFailed    = 1107 // OSS 测试连接失败
+	CodeSMSTestFailed    = 1108 // 短信服务配置校验失败
 
 	// 业务域 15xx
 	CodeMerchantNotFound  = 1501

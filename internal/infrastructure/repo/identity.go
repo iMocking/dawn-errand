@@ -138,6 +138,13 @@ func (r UserRepo) UpdateStatus(id string, status identity.UserStatus) error {
 	return err
 }
 
+func (r UserRepo) UpdateRole(id string, role string) error {
+	err := r.client.User.UpdateOneID(id).
+		SetRole(role).SetUpdatedAt(nowSec()).
+		Exec(context.Background())
+	return err
+}
+
 func (r UserRepo) CountRegisteredSince(sc tenant.Scope, since int64) (int64, error) {
 	bq := r.client.User.Query()
 	scopeUser(bq, sc)

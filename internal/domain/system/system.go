@@ -5,11 +5,13 @@ package system
 type SettingKey string
 
 const (
-	KeySMTP      SettingKey = "smtp"
-	KeyOSS       SettingKey = "oss"
-	KeyLocal     SettingKey = "storage.local"
-	KeyCasbin    SettingKey = "casbin"
-	KeyBootstrap SettingKey = "bootstrap"
+	KeySMTP          SettingKey = "smtp"
+	KeySMS           SettingKey = "sms"
+	KeyOSS           SettingKey = "oss"
+	KeyLocal         SettingKey = "storage.local"
+	KeyCasbin        SettingKey = "casbin"
+	KeyWithdrawRule  SettingKey = "withdraw.rule"
+	KeyBootstrap     SettingKey = "bootstrap"
 )
 
 // SettingStatus 配置启用状态。
@@ -39,6 +41,26 @@ type SMTPConfig struct {
 	FromName   string `json:"from_name"`
 	Encryption string `json:"encryption"` // tls / ssl / none
 	TimeoutSec int    `json:"timeout_sec"`
+}
+
+// SMSConfig 短信服务配置。
+type SMSConfig struct {
+	Provider     string `json:"provider"` // aliyun / tencent / other
+	AccessKey    string `json:"access_key"`
+	SecretKey    string `json:"secret_key,omitempty"` // 密文
+	SignName     string `json:"sign_name"`
+	TemplateCode string `json:"template_code"`
+}
+
+// WithdrawRuleConfig 提现规则配置。
+type WithdrawRuleConfig struct {
+	Enabled     bool    `json:"enabled"`      // 是否启用提现
+	FeeRate     float64 `json:"fee_rate"`     // 提现手续费率（0.006 = 0.6%）
+	MinAmount   float64 `json:"min_amount"`   // 单笔最低提现金额（元）
+	MaxAmount   float64 `json:"max_amount"`   // 单笔最高提现金额（元）
+	DailyLimit  int     `json:"daily_limit"`  // 每日提现次数上限
+	Mode        string  `json:"mode"`         // auto 自动审核 / manual 人工审核
+	SettleDays  int     `json:"settle_days"`  // 到账周期（T+N 个工作日）
 }
 
 // OSSConfig 对象存储配置。

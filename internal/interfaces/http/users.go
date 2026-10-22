@@ -62,6 +62,46 @@ func (h *Handler) GetUser(c *gin.Context) {
 	response.OK(c, toUserDetail(d.User, d.Profile, d.TotalOrders, d.MonthOrders, d.TotalSpent, d.ComplaintCount, d.RecentOrders))
 }
 
+// GetUserOrders GET /users/:id/orders（用户详情订单记录，分页）。
+func (h *Handler) GetUserOrders(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	page, size := parsePage(c)
+	rows, total, err := h.Users.OrdersByUser(c.Request.Context(), id, page, size, scope(c))
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	list := make([]UserRecentOrderDto, 0, len(rows))
+	for _, o := range rows {
+		list = append(list, toRecentOrder(o))
+	}
+	pageResult(c, list, total, page, size)
+}
+
+// GetUserComplaints GET /users/:id/complaints（用户详情投诉售后，分页）。
+func (h *Handler) GetUserComplaints(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	page, size := parsePage(c)
+	rows, total, err := h.Users.ComplaintsByUser(c.Request.Context(), id, page, size, scope(c))
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	list := make([]ComplaintRowDto, 0, len(rows))
+	for _, cc := range rows {
+		list = append(list, toComplaintRow(cc))
+	}
+	pageResult(c, list, total, page, size)
+}
+
 // BanUser POST /users/:id/ban。
 func (h *Handler) BanUser(c *gin.Context) {
 	id, err := pathID(c)
@@ -90,4 +130,26 @@ func (h *Handler) UnbanUser(c *gin.Context) {
 		return
 	}
 	response.OKMsg(c, "已解封", gin.H{"id": id, "status": "正常"})
+}
+
+// UpdateUserRole POST /users/:id/role（账号权限集成到用户管理）。
+func (h *Handler) UpdateUserRole(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	var in struct {
+		Role string `json:"role"`
+	}
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	if err := h.Users.SetRole(c.Request.Context(), id, in.Role, u.ID, scope(c)); err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "角色已更新", gin.H{"id": id, "role": in.Role})
 }

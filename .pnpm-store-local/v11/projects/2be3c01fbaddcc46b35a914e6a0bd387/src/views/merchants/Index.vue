@@ -1,15 +1,18 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable, { type Column } from '@/components/DataTable.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import Pagination from '@/components/Pagination.vue'
+import Modal from '@/components/Modal.vue'
+import AppInput from '@/components/AppInput.vue'
 import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
 import { formatNumber } from '@/utils/format'
 import {
   getMerchants,
   getMerchantStats,
+  createMerchant,
   type MerchantRow,
   type MerchantStats,
 } from '@/api/merchants'
@@ -101,6 +104,73 @@ function onToggleStatus(row: MerchantRow) {
   }
 }
 
+/** ---- 新增商家 ---- */
+const createOpen = ref(false)
+const creating = ref(false)
+const categoryOptions = ['餐饮', '商超', '药店', '其他']
+const form = reactive({
+  name: '',
+  phone: '',
+  contact: '',
+  category: '' as string,
+  address: '',
+  addressSub: '',
+  openHours: '',
+  deliveryRange: '',
+  commission: '' as string | number,
+  deliveryMethod: '' as string,
+})
+
+function resetForm() {
+  form.name = ''
+  form.phone = ''
+  form.contact = ''
+  form.category = ''
+  form.address = ''
+  form.addressSub = ''
+  form.openHours = ''
+  form.deliveryRange = ''
+  form.commission = ''
+  form.deliveryMethod = ''
+}
+
+function openCreate() {
+  resetForm()
+  createOpen.value = true
+}
+
+async function onCreate() {
+  if (creating.value) return
+  if (!form.name.trim()) {
+    toast.warning('请填写商家名称')
+    return
+  }
+  if (!form.phone.trim()) {
+    toast.warning('请填写联系电话')
+    return
+  }
+  creating.value = true
+  try {
+    await createMerchant({
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      contact: form.contact.trim() || undefined,
+      category: form.category || undefined,
+      address: form.address.trim() || undefined,
+      addressSub: form.addressSub.trim() || undefined,
+      openHours: form.openHours.trim() || undefined,
+      deliveryRange: form.deliveryRange.trim() || undefined,
+      commission: form.commission === '' ? undefined : Number(form.commission),
+      deliveryMethod: form.deliveryMethod.trim() || undefined,
+    })
+    toast.success('已提交入驻申请，待审核')
+    createOpen.value = false
+    load()
+  } finally {
+    creating.value = false
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -158,7 +228,7 @@ onMounted(load)
       <div class="text-[16px] font-bold text-ink-1">商家列表</div>
       <div class="ml-auto flex gap-3">
         <AppButton variant="secondary" icon="download">导出列表</AppButton>
-        <AppButton class="shadow-[0_4px_12px_rgba(255,107,44,.3)]">+ 新增商家</AppButton>
+        <AppButton class="shadow-[0_4px_12px_rgba(255,107,44,.3)]" @click="openCreate">+ 新增商家</AppButton>
       </div>
     </div>
 
@@ -265,5 +335,66 @@ onMounted(load)
         />
       </div>
     </div>
+
+    <!-- 新增商家弹窗 -->
+    <Modal
+      v-model:open="createOpen"
+      title="新增商家"
+      :width="600"
+      confirm-text="提交申请"
+      :loading="creating"
+      @confirm="onCreate"
+    >
+      <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">商家名称 <span class="text-[#FF4D4F]">*</span></div>
+          <AppInput v-model="form.name" placeholder="如：村口老陈家常菜" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">联系电话 <span class="text-[#FF4D4F]">*</span></div>
+          <AppInput v-model="form.phone" placeholder="商家联系电话" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">联系人</div>
+          <AppInput v-model="form.contact" placeholder="负责人姓名" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">经营类型</div>
+          <div class="flex gap-2">
+            <AppButton
+              v-for="c in categoryOptions"
+              :key="c"
+              variant="text"
+              class="!rounded-md !px-3 !py-1 !text-[12px]"
+              :class="form.category === c ? '!bg-primary-bg !font-semibold !text-primary' : '!bg-head !font-normal !text-ink-2'"
+              @click="form.category = form.category === c ? '' : c"
+            >{{ c }}</AppButton>
+          </div>
+        </div>
+        <div class="col-span-2">
+          <div class="mb-1.5 text-[13px] text-ink-2">详细地址</div>
+          <AppInput v-model="form.address" placeholder="街道 / 门牌号" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">营业时间</div>
+          <AppInput v-model="form.openHours" placeholder="如 08:00-22:00" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">配送范围</div>
+          <AppInput v-model="form.deliveryRange" placeholder="如 3km" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">佣金比例（%）</div>
+          <AppInput v-model="form.commission" type="number" placeholder="如 8" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">配送方式</div>
+          <AppInput v-model="form.deliveryMethod" placeholder="如 平台配送" clearable />
+        </div>
+      </div>
+      <div class="mt-3 rounded-lg bg-head px-3 py-2.5 text-[12px] text-ink-3">
+        提交后将进入入驻审核，审核通过后商家方可营业。
+      </div>
+    </Modal>
   </div>
 </template>

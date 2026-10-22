@@ -98,8 +98,20 @@ func (s *MerchantsService) UpdateStatus(ctx context.Context, id string, status m
 
 // Create 创建商家（含入驻申请）。
 func (s *MerchantsService) Create(ctx context.Context, m *merchant.Merchant, sc tenant.Scope) error {
-	if sc.RegionOnly() && m.RegionID != sc.RegionID {
-		return tenantDenied()
+	if sc.RegionOnly() {
+		if m.RegionID == "" {
+			m.RegionID = sc.RegionID
+		}
+		if m.RegionID != sc.RegionID {
+			return tenantDenied()
+		}
+	} else if m.RegionID == "" {
+		// 超管未指定区域：使用第一个服务区域（ent schema region_id NotEmpty）。
+		regions, err := s.Repos.Regions.List()
+		if err != nil || len(regions) == 0 {
+			return errcode.New(errcode.CodeBadRequest, "未配置服务区域，无法创建商家")
+		}
+		m.RegionID = regions[0].ID
 	}
 	now := time.Now().Unix()
 	if m.ID == "" {

@@ -101,8 +101,20 @@ func (s *RidersService) Freeze(ctx context.Context, id, action, operator string,
 
 // Create 创建骑手（含入驻申请）。
 func (s *RidersService) Create(ctx context.Context, r *rider.Rider, sc tenant.Scope) error {
-	if sc.RegionOnly() && r.RegionID != sc.RegionID {
-		return tenantDenied()
+	if sc.RegionOnly() {
+		if r.RegionID == "" {
+			r.RegionID = sc.RegionID
+		}
+		if r.RegionID != sc.RegionID {
+			return tenantDenied()
+		}
+	} else if r.RegionID == "" {
+		// 超管未指定区域：使用第一个服务区域（ent schema region_id NotEmpty）。
+		regions, err := s.Repos.Regions.List()
+		if err != nil || len(regions) == 0 {
+			return errcode.New(errcode.CodeBadRequest, "未配置服务区域，无法创建骑手")
+		}
+		r.RegionID = regions[0].ID
 	}
 	now := time.Now().Unix()
 	if r.ID == "" {

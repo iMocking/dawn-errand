@@ -61,6 +61,11 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			sys.GET("/config/smtp", h.GetSMTP)
 			sys.PUT("/config/smtp", h.UpdateSMTP)
 			sys.POST("/config/smtp/test", h.TestSMTP)
+			sys.GET("/config/sms", h.GetSMS)
+			sys.PUT("/config/sms", h.UpdateSMS)
+			sys.POST("/config/sms/test", h.TestSMS)
+			sys.GET("/config/withdraw-rule", h.GetWithdrawRule)
+			sys.PUT("/config/withdraw-rule", h.UpdateWithdrawRule)
 			sys.GET("/config/oss", h.GetOSS)
 			sys.PUT("/config/oss", h.UpdateOSS)
 			sys.GET("/config/storage/local", h.GetLocalStorage)
@@ -83,6 +88,7 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			// 商家
 			merchants := authd.Group("/merchants")
 			merchants.GET("", mw.RequirePerm("merchant", "list"), h.ListMerchants)
+			merchants.POST("", mw.RequirePerm("merchant", "create"), h.CreateMerchant)
 			merchants.GET("/stats", mw.RequirePerm("merchant", "list"), h.GetMerchantStats)
 			merchants.GET("/audit", mw.RequirePerm("merchant", "audit"), h.ListMerchantAudit)
 			merchants.POST("/audit/:id", mw.RequirePerm("merchant", "audit"), h.AuditMerchant)
@@ -91,6 +97,7 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			// 骑手
 			riders := authd.Group("/riders")
 			riders.GET("", mw.RequirePerm("rider", "list"), h.ListRiders)
+			riders.POST("", mw.RequirePerm("rider", "create"), h.CreateRider)
 			riders.GET("/stats", mw.RequirePerm("rider", "list"), h.GetRiderStats)
 			riders.GET("/audit", mw.RequirePerm("rider", "audit"), h.ListRiderAudit)
 			riders.POST("/audit", mw.RequirePerm("rider", "audit"), h.AuditRider)
@@ -103,6 +110,9 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			users.GET("/overview", mw.RequirePerm("user", "list"), h.GetUsersOverview)
 			users.POST("/:id/ban", mw.RequirePerm("user", "ban"), h.BanUser)
 			users.POST("/:id/unban", mw.RequirePerm("user", "unban"), h.UnbanUser)
+			users.POST("/:id/role", mw.RequirePerm("user", "role"), h.UpdateUserRole)
+			users.GET("/:id/orders", mw.RequirePerm("user", "detail"), h.GetUserOrders)
+			users.GET("/:id/complaints", mw.RequirePerm("user", "detail"), h.GetUserComplaints)
 			users.GET("/:id", mw.RequirePerm("user", "detail"), h.GetUser)
 
 			// 财务

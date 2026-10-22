@@ -1,6 +1,8 @@
 package http
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 
 	"dawn-errand/internal/domain/merchant"
@@ -26,9 +28,47 @@ func (h *Handler) ListMerchants(c *gin.Context) {
 	pageResult(c, list, total, page, size)
 }
 
+type createMerchantBody struct {
+	Name           string  `json:"name"`
+	Category       string  `json:"category"`
+	Contact        string  `json:"contact"`
+	Phone          string  `json:"phone"`
+	Address        string  `json:"address"`
+	AddressSub     string  `json:"addressSub"`
+	OpenHours      string  `json:"openHours"`
+	DeliveryRange  string  `json:"deliveryRange"`
+	Commission     float64 `json:"commission"`
+	DeliveryMethod string  `json:"deliveryMethod"`
+	RegionID       string  `json:"regionId"`
+}
+
+// CreateMerchant POST /merchants。
+func (h *Handler) CreateMerchant(c *gin.Context) {
+	var in createMerchantBody
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	if strings.TrimSpace(in.Name) == "" || strings.TrimSpace(in.Phone) == "" {
+		response.ErrStatus(c, 400, 1301, "商家名称与联系电话为必填项")
+		return
+	}
+	m := &merchant.Merchant{
+		RegionID: in.RegionID, Name: strings.TrimSpace(in.Name), Category: in.Category,
+		Contact: in.Contact, Phone: in.Phone, Address: in.Address, AddressSub: in.AddressSub,
+		OpenHours: in.OpenHours, DeliveryRange: in.DeliveryRange, Commission: in.Commission,
+		DeliveryMethod: in.DeliveryMethod,
+		Status: merchant.MerchantStatusRest, Operator: in.Contact,
+	}
+	if err := h.Merchants.Create(c.Request.Context(), m, scope(c)); err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "已提交入驻申请", gin.H{"id": m.ID, "applyNo": m.ApplyNo, "auditStatus": "pending"})
+}
+
 // GetMerchantStats GET /merchants/stats。
-func (h *Handler) GetMerchantStats(c *gin.Context) {
-	st, err := h.Merchants.Stats(c.Request.Context(), scope(c))
+func (h *Handler) GetMerchantStats(c *gin.Context) {	st, err := h.Merchants.Stats(c.Request.Context(), scope(c))
 	if err != nil {
 		response.Err(c, err)
 		return
