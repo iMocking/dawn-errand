@@ -1,0 +1,140 @@
+import { http } from '@/utils/request'
+import type { PageQuery, PageResult } from '@/types'
+
+/** 服务区域卡片行（系统设置 · 服务区域管理） */
+export interface ServiceArea extends Record<string, unknown> {
+  /** 区域 ID */
+  id: string
+  /** 区域名称，如 王家湾镇 */
+  name: string
+  /** 运营中 / 筹备中 */
+  status: string
+  /** 下辖村组数 */
+  villages: number
+  /** 服务半径（km） */
+  radius_km: number
+  /** 在线商家；筹备中区域为 null（页面展示 —） */
+  online_merchants: number | null
+  /** 活跃骑手；筹备中区域为 null */
+  active_riders: number | null
+  /** 今日订单；筹备中区域为 null */
+  today_orders: number | null
+  /** 起步价（元） */
+  start_fee: number
+  /** 起步含里程（km） */
+  free_km: number
+  /** 开通提示，如「预计 11 月 1 日开通」；运营中为 null */
+  notice: string | null
+  /** 底部操作：停用 / 删除 */
+  action: '停用' | '删除'
+  /** 图标底色 / 图标线色（设计稿四色） */
+  icon_bg: string
+  icon_color: string
+}
+
+/** 系统设置对象：GET /api/settings */
+export interface SystemSettings {
+  /** 已开通乡镇总数 */
+  total_towns: number
+  /** 服务区域列表 */
+  areas: ServiceArea[]
+}
+
+/** 费率规则行：按 category 分组渲染到状态条 / 基础费 / 阶梯表 / 特殊规则 / 适用范围 */
+export interface FeeRuleRow extends Record<string, unknown> {
+  id: string
+  /** summary=状态条 · basic=基础配送费 · ladder=阶梯明细 · special=特殊规则 · scope=适用范围 */
+  category: 'summary' | 'basic' | 'ladder' | 'special' | 'scope'
+  name: string
+  /** 已启用 / 已停用 */
+  status: string
+  /** 展示值（¥3.00 / +30% / 标准费率 等） */
+  value?: string
+  desc?: string
+  /** 首卡橙色高亮 */
+  accent?: boolean
+  /** 适用范围偏远乡黄色高亮 */
+  highlight?: boolean
+  /** 阶梯列：计费规则 */
+  rule?: string
+  /** 阶梯列：示例订单 */
+  example?: string
+  /** 阶梯列：配送费 */
+  fee?: string
+  /** 阶梯列：骑手分成 */
+  rider_share?: string
+  /** 特殊规则图标线色 */
+  icon_color?: string
+  /** summary 行：生效版本号 */
+  version?: string
+  /** summary 行：更新时间（Unix 秒） */
+  updated_at?: number
+  /** summary 行：下次自动生效时间（Unix 秒） */
+  next_effective_at?: number
+  /** summary 行：规则是否启用 */
+  enabled?: boolean
+}
+
+/** 公告推送统计行 */
+export interface AnnouncementStat {
+  label: string
+  value: string
+  /** 末行橙色高亮 */
+  highlight?: boolean
+}
+
+/** 公告列表行 */
+export interface AnnouncementRow extends Record<string, unknown> {
+  id: string
+  title: string
+  /** 费率 / 活动 / 提醒 / 协议 */
+  type: string
+  /** 类型标签配色：orange / blue / yellow / purple */
+  type_tone: 'orange' | 'blue' | 'yellow' | 'purple'
+  /** 发布对象，如 商家 / 骑手、全部用户 */
+  audience: string
+  /** 已发布 / 待发布 / 审核中 */
+  status: string
+  /** 发布时间（Unix 秒）；待发布为空 */
+  published_at: number | null
+  /** 待发布 / 审核中的时间说明，如「计划 11-01 发布」 */
+  planned_text: string
+  /** 行内次操作：下线 / 发布 / 撤回 */
+  action_name: string
+  /** 正文（右侧预览） */
+  content: string
+  /** 标签 chips */
+  tags: string[]
+  /** 推送统计（右侧预览） */
+  stats: AnnouncementStat[]
+}
+
+/** 系统设置：GET /api/settings */
+export function getSettings() {
+  return http.get<SystemSettings>('/settings')
+}
+
+/** 区域新增 / 编辑 / 停用 / 删除：POST /api/settings（mock 回显请求体） */
+export function saveSettings(payload: Record<string, unknown>) {
+  return http.post<Record<string, unknown>>('/settings', payload)
+}
+
+/** 费率规则：GET /api/settings/fee-rules */
+export function getFeeRules(q: PageQuery = {}) {
+  return http.get<PageResult<FeeRuleRow>>('/settings/fee-rules', q as Record<string, unknown>)
+}
+
+/** 编辑规则 / 启用切换：POST /api/settings/fee-rules（mock 回显请求体） */
+export function saveFeeRule(payload: Record<string, unknown>) {
+  return http.post<Record<string, unknown>>('/settings/fee-rules', payload)
+}
+
+/** 公告列表：GET /api/settings/announcements */
+export function getAnnouncements(q: PageQuery = {}) {
+  return http.get<PageResult<AnnouncementRow>>('/settings/announcements', q as Record<string, unknown>)
+}
+
+/** 发布 / 编辑 / 下线 / 撤回公告：POST /api/settings/announcements（mock 回显请求体） */
+export function saveAnnouncement(payload: Record<string, unknown>) {
+  return http.post<Record<string, unknown>>('/settings/announcements', payload)
+}

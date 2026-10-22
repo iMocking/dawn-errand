@@ -22,7 +22,7 @@
   }
   .grid {
     display:flex; flex-wrap:wrap; gap:32px; justify-content:center;
-    max-width:1600px; margin:0 auto;
+    max-width:2000px; margin:0 auto;
   }
   .phone-wrap { text-align:center; }
   .phone {
@@ -31,8 +31,7 @@
     background:#fff; position:relative;
   }
   .phone iframe {
-    width:100%; height:100%; border:none; display:block;
-    overflow:hidden;
+    width:100%; height:100%; border:none; display:block; overflow:hidden;
   }
   .phone-label {
     margin-top:16px; font-size:14px; color:#4E5969; font-weight:500;
@@ -43,55 +42,73 @@
 <body>
   <div class="header">
     <h1>曙光跑腿 · 用户端 App UI</h1>
-    <p>乡镇农村外卖跑腿SaaS平台 · 移动端用户端高保真设计稿</p>
+    <p>乡镇农村外卖跑腿 · 三端统一曙光橙色系 · 375 × 812</p>
     <div class="brand-info">
       <span><span class="swatch" style="background:#FF6B2C"></span>主色 #FF6B2C</span>
-      <span><span class="swatch" style="background:#00B578"></span>成功 #00B578</span>
       <span><span class="swatch" style="background:#FF4D4F"></span>价格 #FF4D4F</span>
-      <span><span class="swatch" style="background:#F5F6F8"></span>背景 #F5F6F8</span>
-      <span>375 × 812</span>
+      <span><span class="swatch" style="background:#00B578"></span>成功 #00B578</span>
     </div>
   </div>
   <div class="grid">
     <div class="phone-wrap">
       <div class="phone"><iframe src="splash.html" scrolling="no"></iframe></div>
-      <div class="phone-label">启动页<small>Splash</small></div>
+      <div class="phone-label">启动页<small>品牌 Logo / 品牌slogan</small></div>
     </div>
     <div class="phone-wrap">
       <div class="phone"><iframe src="login.html" scrolling="no"></iframe></div>
-      <div class="phone-label">登录页<small>Login · 手机号验证码</small></div>
+      <div class="phone-label">登录页<small>手机号验证码登录</small></div>
     </div>
     <div class="phone-wrap">
       <div class="phone"><iframe src="home.html" scrolling="no"></iframe></div>
-      <div class="phone-label">首页<small>定位 / 服务入口 / 附近商家</small></div>
+      <div class="phone-label">首页<small>问候 / 场景入口 / 推荐 / 附近商家</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="search.html" scrolling="no"></iframe></div>
+      <div class="phone-label">搜索页<small>热门搜索 / 搜索历史</small></div>
     </div>
     <div class="phone-wrap">
       <div class="phone"><iframe src="merchant-detail.html" scrolling="no"></iframe></div>
-      <div class="phone-label">商家详情<small>菜单 / 购物车</small></div>
+      <div class="phone-label">商家详情<small>菜单 / 加购 / 购物车</small></div>
     </div>
     <div class="phone-wrap">
       <div class="phone"><iframe src="order-confirm.html" scrolling="no"></iframe></div>
-      <div class="phone-label">确认订单<small>地址 / 明细 / 支付</small></div>
+      <div class="phone-label">确认订单<small>地址 / 明细 / 支付方式</small></div>
     </div>
     <div class="phone-wrap">
-      <div class="phone"><iframe src="errand.html" scrolling="no"></iframe></div>
-      <div class="phone-label">跑腿下单<small>帮我买 / 送 / 取 / 办</small></div>
+      <div class="phone"><iframe src="pay-success.html" scrolling="no"></iframe></div>
+      <div class="phone-label">支付成功<small>订单确认 / 预计送达</small></div>
     </div>
     <div class="phone-wrap">
       <div class="phone"><iframe src="order-track.html" scrolling="no"></iframe></div>
-      <div class="phone-label">订单追踪<small>实时地图 / 骑手信息</small></div>
+      <div class="phone-label">订单追踪<small>实时地图 / 骑手位置</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="errand.html" scrolling="no"></iframe></div>
+      <div class="phone-label">跑腿下单<small>代买代取代送</small></div>
     </div>
     <div class="phone-wrap">
       <div class="phone"><iframe src="orders.html" scrolling="no"></iframe></div>
       <div class="phone-label">我的订单<small>进行中 / 已完成</small></div>
     </div>
     <div class="phone-wrap">
-      <div class="phone"><iframe src="profile.html" scrolling="no"></iframe></div>
-      <div class="phone-label">个人中心<small>资产 / 订单 / 设置</small></div>
+      <div class="phone"><iframe src="review.html" scrolling="no"></iframe></div>
+      <div class="phone-label">评价订单<small>星级 / 标签 / 评论</small></div>
     </div>
     <div class="phone-wrap">
       <div class="phone"><iframe src="address.html" scrolling="no"></iframe></div>
-      <div class="phone-label">地址管理<small>村组详细地址</small></div>
+      <div class="phone-label">地址管理<small>村组多场景地址</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="address-edit.html" scrolling="no"></iframe></div>
+      <div class="phone-label">编辑地址<small>收货人 / 地标 / 标签</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="coupons.html" scrolling="no"></iframe></div>
+      <div class="phone-label">我的优惠券<small>可用 / 已过期</small></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><iframe src="profile.html" scrolling="no"></iframe></div>
+      <div class="phone-label">个人中心<small>用户信息 / 资产 / 菜单</small></div>
     </div>
   </div>
 </body>

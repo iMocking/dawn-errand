@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿 - 支付成功</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .success-circle {
+    width:72px; height:72px; border-radius:50%; background:#00B578;
+    display:flex; align-items:center; justify-content:center;
+    margin:100px 0 20px;
+  }
+  .success-title { font-size:22px; font-weight:700; margin-bottom:8px; }
+  .success-desc { font-size:14px; color:#86909C; margin-bottom:40px; }
+  .order-info-card {
+    width:calc(100% - 32px); background:#fff; border-radius:12px; padding:16px;
+    margin-bottom:20px;
+  }
+  .info-row {
+    display:flex; justify-content:space-between; padding:8px 0; font-size:14px;
+  }
+  .info-row .k { color:#86909C; }
+  .info-row .v { color:#1D2129; font-weight:500; }
+  .info-row .v.red { color:#FF4D4F; font-weight:700; font-size:16px; }
+  .btn-group { width:calc(100% - 32px); display:flex; gap:10px; }
+  .btn {
+    flex:1; height:46px; border-radius:23px; font-size:15px; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .btn-outline { border:1px solid #E5E6EB; color:#4E5969; background:#fff; }
+  .btn-primary { background:#FF6B2C; color:#fff; }
+</style>
+</head>
+<body>
+  <div class="success-circle">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div class="success-title">支付成功</div>
+  <div class="success-desc">骑手正在赶往商家取餐，请耐心等待</div>
+  <div class="order-info-card">
+    <div class="info-row"><span class="k">订单编号</span><span class="v">20261022001</span></div>
+    <div class="info-row"><span class="k">下单商家</span><span class="v">村口老陈家常菜</span></div>
+    <div class="info-row"><span class="k">收货地址</span><span class="v">王家湾村三组26号</span></div>
+    <div class="info-row"><span class="k">支付金额</span><span class="v red">¥30.8</span></div>
+    <div class="info-row"><span class="k">预计送达</span><span class="v" style="color:#FF6B2C">12:55 前</span></div>
+  </div>
+  <div class="btn-group">
+    <div class="btn btn-outline">返回首页</div>
+    <div class="btn btn-primary">查看配送</div>
+  </div>
+</body>
+</html>

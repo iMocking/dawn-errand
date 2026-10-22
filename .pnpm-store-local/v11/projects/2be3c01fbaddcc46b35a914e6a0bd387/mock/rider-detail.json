@@ -1,0 +1,36 @@
+{
+  "id": "R00086",
+  "name": "赵铁柱",
+  "status": "在线",
+  "serviceType": "外卖/帮送",
+  "joinedAt": 1750176000,
+  "rating": 4.9,
+  "todayOrders": 32,
+  "onlineHours": 8.5,
+  "monthIncome": 4682,
+  "onTimeRate": "98.6%",
+  "avatarBg": "linear-gradient(135deg,#FF8A3D,#FF6B2C)",
+  "profile": {
+    "name": "赵铁柱",
+    "phone": "139-8890-2211",
+    "idCard": "4211 ********** 0032",
+    "area": "王家湾镇 · 一组",
+    "vehicle": "电动三轮车（鄂A·D8652）",
+    "orderTypes": "外卖 / 帮送 / 帮取",
+    "account": "中国农业银行 6217 **** **** 2211（王**）",
+    "joinedAt": "2025-06-18",
+    "serviceMonths": 16
+  },
+  "todayOverview": {
+    "todayOrders": 32,
+    "todayOrdersDelta": "+5 较昨日",
+    "onTimeRate": "98.6%",
+    "onTimeTarget": "目标 ≥ 95%",
+    "avgMinutes": "18min",
+    "platformAvg": "平台均值 21min",
+    "complaints": 0,
+    "complaintNote": "无异常记录"
+  },
+  "lastAction": "上线接单",
+  "lastActionAt": 1792635960
+}

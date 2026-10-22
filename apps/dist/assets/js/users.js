@@ -1,0 +1,1 @@
+import{A as e}from"./index.js";function r(s){return e.get("/users",s)}function n(){return e.get("/users/overview")}function u(s){return e.get(`/users/${s}`)}function a(s){return e.post(`/users/${s}/ban`,{id:s,status:"已封禁"})}function o(s){return e.post(`/users/${s}/unban`,{id:s,status:"正常"})}export{n as a,a as b,u as c,r as g,o as u};

@@ -1,0 +1,36 @@
+{
+  "id": "TX20261022016",
+  "amount": 1280.0,
+  "fee": 0,
+  "feeNote": "平台补贴",
+  "status": "待审核",
+  "kind": "骑手提现",
+  "applicant": "赵铁柱",
+  "applicantNo": "R00086",
+  "created_at": 1792631100,
+  "withdrawType": "配送收入",
+  "bankInfo": "中国农业银行 6217 **** **** 2211（王**）",
+  "accountHolder": "王翠花（骑手亲属代收）",
+  "arriveExpect": "审核通过后 2 小时内（T+0）",
+  "purpose": "日常收入提现",
+  "balance": 1486,
+  "balanceNote": "配送收入累计",
+  "usedPercentText": "占可提现 86.1%",
+  "remainBalance": 206,
+  "remainNote": "高于最低保留 ¥50",
+  "monthOrders": 286,
+  "monthIncome": 4682.5,
+  "lastMonthNote": "2 次 · 无异常",
+  "riskItems": [
+    "身份核验：身份证与收款账户开户人一致",
+    "收入核对：提现金额 ≤ 可提现余额，流水无异常",
+    "账户安全：近 7 天无异地登录 / 改绑记录",
+    "频次检查：单日提现 ≤ 2 次，金额在限额内"
+  ],
+  "riskWarning": "收款账户开户名为亲属（王翠花），系统已记录关系备注",
+  "timeline": [
+    { "time": 1792631100, "text": "提现申请提交", "operator": "赵铁柱" },
+    { "time": 1792631160, "text": "风控检查全部通过", "operator": "系统" },
+    { "time": 1792631400, "text": "等待运营打款", "operator": "陈运营" }
+  ]
+}

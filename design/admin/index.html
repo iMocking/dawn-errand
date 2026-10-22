@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曙光跑腿管理端 · 后台管理界面 UI 总览</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#F0F1F3; }
+  .head { background:linear-gradient(135deg,#FF8A3D,#FF6B2C); padding:28px 32px 22px; color:#fff; }
+  .head h1 { font-size:24px; font-weight:700; letter-spacing:1px; }
+  .head p { font-size:13px; opacity:.9; margin-top:8px; line-height:1.7; }
+  .meta { display:flex; gap:24px; margin-top:14px; font-size:12px; opacity:.92; }
+  .meta span b { font-weight:600; margin-right:4px; }
+  .wrap { padding:20px 28px 40px; }
+  .section { margin-bottom:28px; }
+  .section-title { font-size:15px; font-weight:700; color:#1D2129; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .section-title::before { content:""; width:4px; height:16px; border-radius:2px; background:linear-gradient(180deg,#FF8A3D,#FF6B2C); display:inline-block; }
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+  .card { background:#fff; border-radius:12px; overflow:hidden; border:1px solid #E5E6EB; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+  .card-title { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #F2F3F5; }
+  .card-title .name { font-size:14px; font-weight:600; color:#1D2129; }
+  .card-title .file { font-size:12px; color:#86909C; }
+  .card iframe { width:100%; height:520px; border:none; display:block; background:#F5F6F8; }
+  .single .card iframe { height:640px; }
+  .tip { font-size:12px; color:#86909C; margin-top:10px; line-height:1.8; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>曙光跑腿 · 平台运营管理端 UI</h1>
+    <p>覆盖乡镇农村的跑腿与外卖一体化平台配套后台管理界面，与用户端 / 商家端 / 骑手端共用曙光橙品牌体系（#FF6B2C）。<br/>包含登录、数据总览、订单、商家、骑手、用户、财务、售后与系统设置共 11 个页面，统一 1440 × 900 桌面画布。</p>
+    <div class="meta">
+      <span><b>主色</b>曙光橙 #FF6B2C</span>
+      <span><b>画布</b>1440 × 900</span>
+      <span><b>页面</b>11 张</span>
+      <span><b>图标</b>内嵌 SVG 线框</span>
+      <span><b>输出目录</b>design/admin/</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="section">
+      <div class="section-title">入口与总览</div>
+      <div class="grid single">
+        <div class="card">
+          <div class="card-title"><span class="name">后台登录</span><span class="file">login.html</span></div>
+          <iframe src="login.html"></iframe>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="name">数据总览</span><span class="file">dashboard.html</span></div>
+          <iframe src="dashboard.html"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">交易管理</div>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title"><span class="name">订单管理</span><span class="file">orders.html</span></div>
+          <iframe src="orders.html"></iframe>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="name">订单详情</span><span class="file">order-detail.html</span></div>
+          <iframe src="order-detail.html"></iframe>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="name">投诉售后</span><span class="file">complaints.html</span></div>
+          <iframe src="complaints.html"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">主体管理</div>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title"><span class="name">商家管理</span><span class="file">merchants.html</span></div>
+          <iframe src="merchants.html"></iframe>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="name">商家入驻审核</span><span class="file">merchant-audit.html</span></div>
+          <iframe src="merchant-audit.html"></iframe>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="name">骑手管理</span><span class="file">riders.html</span></div>
+          <iframe src="riders.html"></iframe>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="name">用户管理</span><span class="file">users.html</span></div>
+          <iframe src="users.html"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">资金与系统管理</div>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title"><span class="name">财务结算</span><span class="file">finance.html</span></div>
+          <iframe src="finance.html"></iframe>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="name">系统设置</span><span class="file">settings.html</span></div>
+          <iframe src="settings.html"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <p class="tip">提示：iframe 内页面为 1440×900 固定画布设计稿，本页仅作总览预览；单个页面请直接打开对应 .html 文件查看完整效果。</p>
+  </div>
+</body>
+</html>

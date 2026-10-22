@@ -1,0 +1,16 @@
+{
+  "total": 104,
+  "online": 86,
+  "onlineRate": "82.7%",
+  "pendingAudit": 5,
+  "frozen": 6,
+  "frozenNote": "含 2 封禁",
+  "weekDelta": "+5 本周",
+  "audit": {
+    "todayNew": 3,
+    "approved": 78,
+    "rejected": 9,
+    "monthApproved": 78,
+    "momRate": "+12.4%"
+  }
+}

@@ -1,0 +1,287 @@
+[
+  {
+    "id": "ann-001",
+    "title": "关于三岔口乡配送费率调整的通知",
+    "type": "费率",
+    "type_tone": "orange",
+    "audience": "商家 / 骑手",
+    "status": "已发布",
+    "published_at": 1792546200,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "三岔口乡自 11 月 1 日起纳入平台配送范围，起步价在标准费率基础上上浮 ¥2，远途段保持 ¥1.50/km。商家接单后请按新规则结算，骑手可在 App 侧查看该区域专项补贴。",
+    "tags": ["调整时间：2026-11-01 起", "影响范围：三岔口乡"],
+    "stats": [
+      { "label": "送达商家 / 骑手", "value": "1,280 人" },
+      { "label": "已读人数", "value": "986 人（77.0%）" },
+      { "label": "咨询工单", "value": "23 条" },
+      { "label": "起步价调整", "value": "+¥2.00", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-002",
+    "title": "双十一乡村集市配送补贴活动",
+    "type": "活动",
+    "type_tone": "blue",
+    "audience": "全部用户",
+    "status": "已发布",
+    "published_at": 1792479600,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "为回馈乡镇用户，双十一期间（11.1 - 11.11）下单外卖 / 帮买 / 帮送，每单立减配送费 2 元；帮办服务满 1 小时额外补贴 5 元。补贴由平台承担，骑手配送费不受影响。",
+    "tags": ["活动时间：2026-11-01 ~ 2026-11-11", "预算上限：¥20,000"],
+    "stats": [
+      { "label": "送达用户数", "value": "12,480 人" },
+      { "label": "已读人数", "value": "9,632 人（77.2%）" },
+      { "label": "活动参与订单", "value": "286 单" },
+      { "label": "补贴消耗", "value": "¥572.00 / ¥20,000", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-003",
+    "title": "骑手健康证临期提醒（10 月批次）",
+    "type": "提醒",
+    "type_tone": "yellow",
+    "audience": "骑手（12 人）",
+    "status": "已发布",
+    "published_at": 1792288800,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "10 月批次共 12 名骑手健康证将于 30 天内到期，请相关骑手尽快通过 App 上传新的健康证明材料。证件过期未更新的账号将暂停派单，恢复后自动解除限制。",
+    "tags": ["截止时间：2026-11-17", "办理入口：App - 骑手资料"],
+    "stats": [
+      { "label": "送达骑手", "value": "12 人" },
+      { "label": "已完成更新", "value": "7 人" },
+      { "label": "待更新", "value": "5 人" },
+      { "label": "暂停派单", "value": "0 人", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-004",
+    "title": "新商家入驻激励计划（11 月试行）",
+    "type": "活动",
+    "type_tone": "blue",
+    "audience": "新入驻商家",
+    "status": "待发布",
+    "published_at": null,
+    "planned_text": "计划 11-01 发布",
+    "action_name": "发布",
+    "content": "11 月起新入驻商家享首月佣金减半、专属新店流量包及免配送费试运营 7 天。激励名单由平台运营统一审核后生效，试行期一个月。",
+    "tags": ["试行时间：2026-11-01 ~ 2026-11-30", "审核方式：运营审核"],
+    "stats": [
+      { "label": "预计覆盖商家", "value": "36 家" },
+      { "label": "申请商家", "value": "14 家" },
+      { "label": "激励预算", "value": "¥15,000" },
+      { "label": "状态", "value": "待发布", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-005",
+    "title": "平台服务协议更新公告（v4.2）",
+    "type": "协议",
+    "type_tone": "purple",
+    "audience": "全部用户",
+    "status": "审核中",
+    "published_at": 1792371600,
+    "planned_text": "2026-10-19 提交",
+    "action_name": "撤回",
+    "content": "本次更新主要完善隐私数据使用范围、骑手服务责任边界及异常订单处理流程，协议全文将在审核通过后随 App 版本同步推送，请用户在登录时确认阅读。",
+    "tags": ["版本：v4.2", "审核周期：3 个工作日"],
+    "stats": [
+      { "label": "提交时间", "value": "2026-10-19" },
+      { "label": "审核状态", "value": "审核中" },
+      { "label": "影响用户", "value": "全部用户" },
+      { "label": "当前状态", "value": "等待法务审核", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-006",
+    "title": "夜间配送服务费上调说明",
+    "type": "费率",
+    "type_tone": "orange",
+    "audience": "全部用户",
+    "status": "已发布",
+    "published_at": 1792033200,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "自 10 月 15 日起，22:00 - 06:00 时段订单在原配送费基础上加收 30% 夜间服务费，费用全额归骑手所有，平台不抽成，用于补贴夜间出勤。",
+    "tags": ["生效时间：2026-10-15 起", "时段：22:00 - 06:00"],
+    "stats": [
+      { "label": "送达用户数", "value": "11,206 人" },
+      { "label": "已读人数", "value": "8,045 人（71.8%）" },
+      { "label": "夜间订单占比", "value": "12.4%" },
+      { "label": "夜间补贴支出", "value": "¥1,286.00", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-007",
+    "title": "国庆假期配送时效安排通知",
+    "type": "提醒",
+    "type_tone": "yellow",
+    "audience": "全部用户",
+    "status": "已发布",
+    "published_at": 1791784800,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "国庆假期期间（10.1 - 10.7）乡镇道路车流人流增大，预计配送时长较平日增加 10 - 20 分钟，平台已为值班骑手开放假期补贴，敬请谅解。",
+    "tags": ["假期：2026-10-01 ~ 2026-10-07", "时效预计：+15 分钟"],
+    "stats": [
+      { "label": "送达用户数", "value": "10,532 人" },
+      { "label": "已读人数", "value": "7,120 人（67.6%）" },
+      { "label": "假期值班骑手", "value": "26 人" },
+      { "label": "超时订单", "value": "18 单", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-008",
+    "title": "骑手提现手续费下调公告",
+    "type": "费率",
+    "type_tone": "orange",
+    "audience": "骑手",
+    "status": "已发布",
+    "published_at": 1791594000,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "为降低骑手提现成本，自 10 月 10 日起单笔提现手续费由 1% 下调至 0.5%，单日提现次数上限提升至 3 次，余额低于 ¥50 免手续费提现。",
+    "tags": ["生效时间：2026-10-10 起", "手续费：0.5%"],
+    "stats": [
+      { "label": "送达骑手", "value": "78 人" },
+      { "label": "已读人数", "value": "61 人（78.2%）" },
+      { "label": "周提现笔数", "value": "204 笔" },
+      { "label": "节省手续费", "value": "¥326.50", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-009",
+    "title": "李家湾村组新增配送点位",
+    "type": "提醒",
+    "type_tone": "yellow",
+    "audience": "全部用户",
+    "status": "已发布",
+    "published_at": 1791448200,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "李家湾村三、四组已新增为配送点位，下单地址选择对应村组即可享受上门服务。新增点位首周下单立减 ¥1，活动限前 200 单。",
+    "tags": ["新增点位：李家湾村三组 / 四组", "开业礼：首周立减 ¥1"],
+    "stats": [
+      { "label": "送达用户数", "value": "8,460 人" },
+      { "label": "已读人数", "value": "5,218 人（61.7%）" },
+      { "label": "新点位订单", "value": "96 单" },
+      { "label": "立减补贴", "value": "¥200.00", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-010",
+    "title": "平台反诈骗安全提示",
+    "type": "提醒",
+    "type_tone": "yellow",
+    "audience": "全部用户",
+    "status": "已发布",
+    "published_at": 1791165600,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "近期出现冒充平台客服引导转账的诈骗行为，平台官方不会以任何理由索要验证码或转账，所有活动与退款均通过 App 内官方渠道办理，请提高警惕。",
+    "tags": ["防骗提醒", "官方渠道：App 内客服"],
+    "stats": [
+      { "label": "送达用户数", "value": "12,086 人" },
+      { "label": "已读人数", "value": "8,902 人（73.7%）" },
+      { "label": "可疑举报", "value": "4 起" },
+      { "label": "拦截转账", "value": "¥1,300.00", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-011",
+    "title": "商家结算周期调整说明（Q4）",
+    "type": "费率",
+    "type_tone": "orange",
+    "audience": "商家",
+    "status": "已发布",
+    "published_at": 1790997600,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "Q4 起商家结算由周结调整为 T+1 结算，每日凌晨自动结算前一日已完成订单，商家可在账单中心下载明细，节假日顺延至下一工作日。",
+    "tags": ["生效时间：2026-10-08 起", "结算周期：T+1"],
+    "stats": [
+      { "label": "送达商家", "value": "86 家" },
+      { "label": "已读商家", "value": "72 家（83.7%）" },
+      { "label": "T+1 结算订单", "value": "1,206 单" },
+      { "label": "在途结算金额", "value": "¥9,860.00", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-012",
+    "title": "用户端积分兑换功能上线",
+    "type": "活动",
+    "type_tone": "blue",
+    "audience": "全部用户",
+    "status": "已发布",
+    "published_at": 1790581200,
+    "planned_text": "",
+    "action_name": "下线",
+    "content": "用户端积分商城正式上线，完成订单、评价、分享均可获积分，积分可兑换配送费红包与商家优惠券，兑换比例与明细请在 App「我的积分」查看。",
+    "tags": ["上线时间：2026-09-28", "入口：我的 - 积分商城"],
+    "stats": [
+      { "label": "送达用户数", "value": "11,930 人" },
+      { "label": "已读人数", "value": "7,864 人（65.9%）" },
+      { "label": "兑换红包", "value": "428 个" },
+      { "label": "积分消耗", "value": "86,500 分", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-013",
+    "title": "恶劣天气配送保护规则更新",
+    "type": "协议",
+    "type_tone": "purple",
+    "audience": "骑手",
+    "status": "审核中",
+    "published_at": 1790298600,
+    "planned_text": "2026-09-25 提交",
+    "action_name": "撤回",
+    "content": "拟新增暴雨 / 大雾 / 大雪天气下的订单保护条款：极端天气自动上浮 20% 配送费，骑手可在 App 端一键改派，平台承担改派损失，规则随下次版本发布生效。",
+    "tags": ["版本：v2.4", "生效方式：随 App 版本发布"],
+    "stats": [
+      { "label": "提交时间", "value": "2026-09-25" },
+      { "label": "审核状态", "value": "审核中" },
+      { "label": "意见反馈", "value": "骑手 32 条" },
+      { "label": "当前状态", "value": "等待运营评审", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-014",
+    "title": "年终骑手冲单奖励方案（12 月）",
+    "type": "活动",
+    "type_tone": "blue",
+    "audience": "骑手",
+    "status": "待发布",
+    "published_at": null,
+    "planned_text": "计划 12-01 发布",
+    "action_name": "发布",
+    "content": "12 月冲单奖励：月完成单量 Top 10 骑手分别发放 ¥800 / ¥500 / ¥200 阶梯奖励，全勤出勤额外奖励 ¥150，奖励与夜间补贴可叠加领取。",
+    "tags": ["活动时间：2026-12-01 ~ 2026-12-31", "奖励池：¥6,000"],
+    "stats": [
+      { "label": "覆盖骑手", "value": "78 人" },
+      { "label": "预计奖励支出", "value": "¥6,000.00" },
+      { "label": "报名骑手", "value": "45 人" },
+      { "label": "状态", "value": "待发布", "highlight": true }
+    ]
+  },
+  {
+    "id": "ann-015",
+    "title": "用户隐私政策更新提示（v3.1）",
+    "type": "协议",
+    "type_tone": "purple",
+    "audience": "全部用户",
+    "status": "审核中",
+    "published_at": 1792634400,
+    "planned_text": "2026-10-22 提交",
+    "action_name": "撤回",
+    "content": "本次更新补充位置信息采集范围与数据保留期限说明，新增用户数据导出与注销入口，合规材料已同步法务审核，通过后将强制弹窗提示用户重新确认。",
+    "tags": ["版本：v3.1", "审核材料：合规说明 + 法务意见"],
+    "stats": [
+      { "label": "提交时间", "value": "2026-10-22" },
+      { "label": "审核状态", "value": "审核中" },
+      { "label": "影响用户", "value": "全部用户" },
+      { "label": "当前状态", "value": "等待合规复核", "highlight": true }
+    ]
+  }
+]

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿 - 评价订单</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .content { flex:1; overflow-y:auto; padding:16px; }
+  .card { background:#fff; border-radius:12px; padding:16px; margin-bottom:12px; }
+  .merchant-row { display:flex; gap:12px; align-items:center; margin-bottom:16px; }
+  .m-img {
+    width:48px; height:48px; border-radius:8px; background:#FFE8D6;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .m-name { font-size:15px; font-weight:600; }
+  .stars { display:flex; gap:8px; margin-bottom:8px; }
+  .star { width:32px; height:32px; }
+  .star-label { font-size:14px; color:#4E5969; margin-bottom:12px; }
+  .tag-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .rtag {
+    padding:6px 12px; border-radius:16px; background:#F5F6F8; font-size:13px; color:#4E5969;
+  }
+  .rtag.active { background:#FFF3E8; color:#FF6B2C; }
+  .review-input {
+    width:100%; min-height:100px; border:1px solid #E5E6EB; border-radius:8px;
+    padding:12px; font-size:14px; resize:none; font-family:inherit;
+  }
+  .submit-btn {
+    margin:16px; background:linear-gradient(135deg,#FF8A3D,#FF5A1F); color:#fff;
+    height:48px; border-radius:24px; display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:600;
+  }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    评价订单
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="merchant-row">
+        <div class="m-img">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF8A3D" stroke-width="1.5"><path d="M3 11h18M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M4 11l1 9h14l1-9"/></svg>
+        </div>
+        <div class="m-name">村口老陈家常菜</div>
+      </div>
+      <div class="star-label">口味怎么样？</div>
+      <div class="stars">
+        <svg class="star" viewBox="0 0 24 24" fill="#FFB020"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg class="star" viewBox="0 0 24 24" fill="#FFB020"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg class="star" viewBox="0 0 24 24" fill="#FFB020"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg class="star" viewBox="0 0 24 24" fill="#FFB020"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg class="star" viewBox="0 0 24 24" fill="#FFB020"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div class="tag-row">
+        <div class="rtag active">味道好</div>
+        <div class="rtag active">分量足</div>
+        <div class="rtag">上菜快</div>
+        <div class="rtag">包装好</div>
+        <div class="rtag">骑手准时</div>
+        <div class="rtag">价格实惠</div>
+      </div>
+      <textarea class="review-input" placeholder="说说菜品味道、服务怎么样？（选填）"></textarea>
+    </div>
+  </div>
+  <div class="submit-btn">提交评价</div>
+</body>
+</html>

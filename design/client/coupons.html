@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>曙光跑腿 - 我的优惠券</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body { width:375px; height:812px; overflow:hidden; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:#F5F6F8; color:#1D2129;
+    display:flex; flex-direction:column;
+  }
+  .nav {
+    height:44px; background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; position:relative; flex-shrink:0;
+  }
+  .nav .back { position:absolute; left:16px; display:flex; align-items:center; }
+  .list { flex:1; overflow-y:auto; padding:16px; }
+  .coupon-card {
+    background:#fff; border-radius:12px; margin-bottom:12px; display:flex;
+    overflow:hidden;
+  }
+  .coupon-left {
+    width:100px; background:linear-gradient(135deg,#FF8A3D,#FF5A1F); color:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:20px 0; flex-shrink:0;
+  }
+  .coupon-amount { font-size:28px; font-weight:700; }
+  .coupon-amount small { font-size:14px; }
+  .coupon-cond { font-size:11px; opacity:.9; margin-top:4px; }
+  .coupon-right { flex:1; padding:16px; display:flex; flex-direction:column; justify-content:space-between; }
+  .coupon-title { font-size:15px; font-weight:600; margin-bottom:4px; }
+  .coupon-desc { font-size:12px; color:#86909C; }
+  .coupon-expire { font-size:11px; color:#C9CDD4; margin-top:8px; }
+  .coupon-btn {
+    align-self:flex-end; padding:6px 16px; border-radius:14px;
+    background:#FFF3E8; color:#FF6B2C; font-size:12px; font-weight:600;
+  }
+  .coupon-card.disabled { opacity:.5; }
+  .coupon-card.disabled .coupon-left { background:#C9CDD4; }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <span class="back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </span>
+    我的优惠券
+  </div>
+  <div class="list">
+    <div class="coupon-card">
+      <div class="coupon-left">
+        <div class="coupon-amount"><small>¥</small>5</div>
+        <div class="coupon-cond">满20可用</div>
+      </div>
+      <div class="coupon-right">
+        <div>
+          <div class="coupon-title">新用户立减券</div>
+          <div class="coupon-desc">全场通用 · 外卖跑腿均可使用</div>
+          <div class="coupon-expire">有效期至 2026-10-29</div>
+        </div>
+        <div class="coupon-btn">去使用</div>
+      </div>
+    </div>
+
+    <div class="coupon-card">
+      <div class="coupon-left">
+        <div class="coupon-amount"><small>¥</small>3</div>
+        <div class="coupon-cond">无门槛</div>
+      </div>
+      <div class="coupon-right">
+        <div>
+          <div class="coupon-title">骑手好评奖励券</div>
+          <div class="coupon-desc">完成订单评价后获得</div>
+          <div class="coupon-expire">有效期至 2026-10-25</div>
+        </div>
+        <div class="coupon-btn">去使用</div>
+      </div>
+    </div>
+
+    <div class="coupon-card disabled">
+      <div class="coupon-left">
+        <div class="coupon-amount"><small>¥</small>8</div>
+        <div class="coupon-cond">满30可用</div>
+      </div>
+      <div class="coupon-right">
+        <div>
+          <div class="coupon-title">周末专享券</div>
+          <div class="coupon-desc">仅限周六周日使用</div>
+          <div class="coupon-expire">已过期 2026-10-20</div>
+        </div>
+        <div class="coupon-btn" style="background:#F2F3F5;color:#86909C">已过期</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
