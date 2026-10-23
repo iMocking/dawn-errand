@@ -1,1 +1,0 @@
-import{z as n}from"./index.js";function i(){return n.get("/finance")}function r(t){return n.get("/finance/settlement",t)}function c(t){return n.get(`/finance/withdraw/${t}`)}function u(t,e){return n.post(`/finance/withdraw/${t}/audit`,e)}export{u as a,r as b,c,i as g};
