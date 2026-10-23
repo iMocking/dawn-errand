@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 银行卡渐变卡：对齐主视觉橙色主题 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="45"
+        android:endColor="#FF5A1F"
+        android:startColor="#FF8A3D" />
+    <corners android:radius="16dp" />
+</shape>

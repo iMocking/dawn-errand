@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DawnClient">
+
+        <activity
+            android:name=".ui.screens.splash.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DawnClient">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.screens.login.LoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.main.MainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.errand.ErrandActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.orders.OrdersActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.search.SearchActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.merchant.MerchantDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.orderconfirm.OrderConfirmActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.paysuccess.PaySuccessActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.ordertrack.OrderTrackActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.review.ReviewActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.address.AddressActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.addressedit.AddressEditActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.coupons.CouponsActivity"
+            android:exported="false" />
+    </application>
+</manifest>

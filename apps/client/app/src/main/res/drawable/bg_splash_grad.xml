@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 紫→橙 渐变启动背景 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="90"
+        android:centerColor="#7B3F9E"
+        android:endColor="#FF6B2C"
+        android:startColor="#2A1B4A" />
+</shape>

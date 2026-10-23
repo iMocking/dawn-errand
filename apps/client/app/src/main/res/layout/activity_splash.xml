@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_splash_grad">
+
+    <!-- 星星点缀 -->
+    <View
+        android:layout_width="3dp"
+        android:layout_height="3dp"
+        android:layout_gravity="top|left"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="40dp"
+        android:background="@drawable/bg_star" />
+    <View
+        android:layout_width="2dp"
+        android:layout_height="2dp"
+        android:layout_gravity="top|left"
+        android:layout_marginTop="100dp"
+        android:layout_marginLeft="280dp"
+        android:background="@drawable/bg_star" />
+    <View
+        android:layout_width="2dp"
+        android:layout_height="2dp"
+        android:layout_gravity="top|left"
+        android:layout_marginTop="150dp"
+        android:layout_marginLeft="180dp"
+        android:background="@drawable/bg_star" />
+    <View
+        android:layout_width="2dp"
+        android:layout_height="2dp"
+        android:layout_gravity="top|left"
+        android:layout_marginTop="80dp"
+        android:layout_marginLeft="200dp"
+        android:background="@drawable/bg_star" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_gravity="top|left"
+        android:layout_marginTop="200dp"
+        android:layout_marginLeft="80dp"
+        android:background="@drawable/bg_star" />
+    <View
+        android:layout_width="2dp"
+        android:layout_height="2dp"
+        android:layout_gravity="top|left"
+        android:layout_marginTop="120dp"
+        android:layout_marginLeft="330dp"
+        android:background="@drawable/bg_star" />
+
+    <!-- Logo 区 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_logo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="14dp"
+            android:text="曙光跑腿"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:letterSpacing="0.3"
+            android:text="DAWN ERRAND"
+            android:textColor="#B3FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Slogan -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="120dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="30dp"
+            android:layout_height="1dp"
+            android:background="#80FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:letterSpacing="0.2"
+            android:text="乡镇跑腿 · 随叫随到"
+            android:textColor="#E6FFFFFF"
+            android:textSize="15sp" />
+
+        <View
+            android:layout_width="30dp"
+            android:layout_height="1dp"
+            android:background="#80FFFFFF" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="40dp"
+        android:text="v1.0.0"
+        android:textColor="#99FFFFFF"
+        android:textSize="12sp" />
+</FrameLayout>

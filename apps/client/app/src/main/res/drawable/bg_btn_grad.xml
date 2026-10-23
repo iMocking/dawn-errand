@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 水平渐变主按钮（登录/下单/新增） -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="0"
+        android:endColor="#FF5A1F"
+        android:startColor="#FF8A3D" />
+    <corners android:radius="24dp" />
+</shape>
