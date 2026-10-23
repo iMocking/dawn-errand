@@ -148,6 +148,7 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/chartTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="近7天营业额趋势（元）"
@@ -155,13 +156,11 @@
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
-                <LinearLayout
+                <com.dawnerrand.store.ui.components.BarChartView
                     android:id="@+id/barChart"
                     android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:layout_marginTop="12dp"
-                    android:gravity="bottom"
-                    android:orientation="horizontal" />
+                    android:layout_height="130dp"
+                    android:layout_marginTop="12dp" />
             </LinearLayout>
 
             <!-- 热销排行 -->

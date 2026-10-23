@@ -1,8 +1,8 @@
 package com.dawnerrand.store.ui.screens.statistics
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -12,9 +12,10 @@ import com.dawnerrand.store.databinding.ActivityStatisticsBinding
 import com.dawnerrand.store.ui.adapter.RankAdapter
 import com.dawnerrand.store.ui.theme.Design
 import com.dawnerrand.store.ui.util.dp
+import com.dawnerrand.store.ui.util.setLightStatusBars
 
 /**
- * 经营数据：时间范围 + 概览 + 近7天营业额柱状图 + 热销 TOP5（statistics 稿）。
+ * 经营数据：时间范围 + 概览 + 营业额趋势柱状图 + 热销 TOP5（statistics 稿）。
  */
 class StatisticsActivity : AppCompatActivity() {
 
@@ -27,13 +28,9 @@ class StatisticsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityStatisticsBinding.inflate(layoutInflater)
         setContentView(b.root)
+        setLightStatusBars(true)
 
         b.backBtn.setOnClickListener { finish() }
-
-        // 概览
-        b.revenueValue.text = vm.overview.revenue
-        b.ordersValue.text = vm.overview.orders
-        b.avgValue.text = vm.overview.avgOrder
 
         // 排行
         b.rankList.layoutManager = LinearLayoutManager(this)
@@ -42,9 +39,7 @@ class StatisticsActivity : AppCompatActivity() {
 
         // 范围 Tab
         buildRangeTabs()
-
-        // 柱状图
-        buildBarChart()
+        applyStats()
     }
 
     private fun buildRangeTabs() {
@@ -54,15 +49,12 @@ class StatisticsActivity : AppCompatActivity() {
                 text = range
                 textSize = 13f
                 gravity = Gravity.CENTER
-                layoutParams = LinearLayout.LayoutParams(
-                    0,
-                    dp(32),
-                    1f
-                )
+                layoutParams = LinearLayout.LayoutParams(0, dp(32), 1f)
                 isClickable = true
                 setOnClickListener {
-                    vm.rangeIndex = index
+                    vm.select(index)
                     refreshRangeTabs()
+                    applyStats()
                 }
             }
             b.rangeTabs.addView(tab)
@@ -80,42 +72,16 @@ class StatisticsActivity : AppCompatActivity() {
                 else com.dawnerrand.store.R.drawable.bg_card_white
             )
             tab.setTextColor(if (active) Design.WHITE else Design.TEXT_SECONDARY)
-            tab.setTypeface(
-                tab.typeface,
-                if (active) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
-            )
+            tab.setTypeface(tab.typeface, if (active) Typeface.BOLD else Typeface.NORMAL)
         }
     }
 
-    private fun buildBarChart() {
-        b.barChart.removeAllViews()
-        val max = vm.trend.values.maxOrNull()?.takeIf { it > 0f } ?: 1f
-        vm.trend.labels.zip(vm.trend.values).forEach { (label, value) ->
-            val col = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER_HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
-            }
-            val bar = View(this).apply {
-                setBackgroundResource(com.dawnerrand.store.R.drawable.bg_bar_grad)
-                val h = dp((value / max * 100).toInt().coerceIn(8, 100))
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    h
-                )
-            }
-            val text = TextView(this).apply {
-                text = label
-                textSize = 10f
-                setTextColor(Design.TEXT_TERTIARY)
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = dp(4) }
-            }
-            col.addView(bar, 0)
-            col.addView(text)
-            b.barChart.addView(col)
-        }
+    private fun applyStats() {
+        val stats = vm.current
+        b.revenueValue.text = stats.overview.revenue
+        b.ordersValue.text = stats.overview.orders
+        b.avgValue.text = stats.overview.avgOrder
+        b.chartTitle.text = stats.title
+        b.barChart.setData(stats.trend.labels, stats.trend.values)
     }
 }

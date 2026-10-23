@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingTop="8dp"
+    android:paddingRight="20dp"
+    android:paddingBottom="4dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="持卡人"
+        android:textColor="@color/text_tertiary"
+        android:textSize="12sp" />
+
+    <EditText
+        android:id="@+id/holderInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入持卡人姓名"
+        android:importantForAutofill="no"
+        android:inputType="textPersonName"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_faint"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="开户银行"
+        android:textColor="@color/text_tertiary"
+        android:textSize="12sp" />
+
+    <EditText
+        android:id="@+id/bankInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="如：招商银行"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_faint"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="银行卡号"
+        android:textColor="@color/text_tertiary"
+        android:textSize="12sp" />
+
+    <EditText
+        android:id="@+id/cardInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入银行卡号"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        android:maxLength="24"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_faint"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:lineSpacingExtra="2dp"
+        android:text="银行卡需与商家主体一致，绑定后可用于提现。"
+        android:textColor="@color/text_tertiary"
+        android:textSize="11sp" />
+</LinearLayout>

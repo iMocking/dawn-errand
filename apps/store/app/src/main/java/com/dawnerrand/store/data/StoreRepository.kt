@@ -1,6 +1,5 @@
 package com.dawnerrand.store.data
 
-import android.content.Context
 import android.graphics.Color
 import com.dawnerrand.store.R
 
@@ -46,6 +45,7 @@ data class Dish(
     val iconColor: Int,
     val bgRes: Int,
     val onSale: Boolean,
+    val desc: String = "",
 )
 
 data class DishCategory(
@@ -277,19 +277,4 @@ object StoreRepository {
         ProfileMenuItem("商家客服", null, R.drawable.ic_comment, 0xFFFA8C16.toInt()),
         ProfileMenuItem("设置", null, R.drawable.ic_settings, 0xFF86909C.toInt()),
     )
-
-    // ---------- 会话 ----------
-    private const val SESSION = "store_session"
-
-    fun isLoggedIn(ctx: Context): Boolean =
-        ctx.getSharedPreferences(SESSION, Context.MODE_PRIVATE).getString("token", null) != null
-
-    fun saveLogin(ctx: Context, token: String, phone: String) {
-        ctx.getSharedPreferences(SESSION, Context.MODE_PRIVATE)
-            .edit().putString("token", token).putString("phone", phone).apply()
-    }
-
-    fun logout(ctx: Context) {
-        ctx.getSharedPreferences(SESSION, Context.MODE_PRIVATE).edit().clear().apply()
-    }
 }

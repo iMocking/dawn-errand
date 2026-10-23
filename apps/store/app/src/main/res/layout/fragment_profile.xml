@@ -69,18 +69,15 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 菜单 -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/menuList"
+        <!-- 菜单（分组卡片，由 ProfileFragment 动态填充） -->
+        <LinearLayout
+            android:id="@+id/menuContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="-8dp"
-            android:background="@drawable/bg_card_white"
-            android:nestedScrollingEnabled="false"
-            android:overScrollMode="never"
+            android:orientation="vertical"
             android:paddingLeft="16dp"
-            android:paddingRight="16dp" />
+            android:paddingRight="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="20dp" />
     </LinearLayout>
 </ScrollView>

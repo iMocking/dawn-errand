@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.dawnerrand.store.R
 import com.dawnerrand.store.data.GridItem
+import com.dawnerrand.store.data.StoreSettings
 import com.dawnerrand.store.databinding.FragmentDashboardBinding
 import com.dawnerrand.store.ui.screens.business.BusinessActivity
 import com.dawnerrand.store.ui.screens.finance.FinanceActivity
@@ -44,11 +45,10 @@ class DashboardFragment : Fragment() {
         b.topBox.padTopWithStatusBar()
 
         // 店铺信息与今日数据
-        b.shopName.text = vm.shop.name
-        b.shopStatus.text = vm.shop.statusText
-        b.todayRevenue.text = vm.shop.todayRevenue
-        b.todayOrders.text = vm.shop.todayOrders
-        b.goodRate.text = vm.shop.goodRate
+        refreshShop()
+        b.shopStatus.setOnClickListener { openBusiness() }
+        b.shopAvatar.setOnClickListener { openBusiness() }
+        StoreSettings.revision.observe(viewLifecycleOwner) { refreshShop() }
 
         // 待接单提醒
         b.urgentBar.setOnClickListener { openOrders() }
@@ -63,6 +63,23 @@ class DashboardFragment : Fragment() {
         }
         vm.cookingCount.observe(viewLifecycleOwner) { refreshGrids() }
         refreshGrids()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (_b != null) refreshShop()
+    }
+
+    private fun refreshShop() {
+        b.shopName.text = vm.shop.name
+        b.shopStatus.text = if (StoreSettings.open) "营业中" else "已歇业"
+        b.todayRevenue.text = vm.shop.todayRevenue
+        b.todayOrders.text = vm.shop.todayOrders
+        b.goodRate.text = vm.shop.goodRate
+    }
+
+    private fun openBusiness() {
+        startActivity(Intent(requireContext(), BusinessActivity::class.java))
     }
 
     private fun refreshGrids() {

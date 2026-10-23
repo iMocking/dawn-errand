@@ -5,11 +5,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".StoreApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DawnStore">
+        android:theme="@style/Theme.DawnStore"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".ui.screens.login.LoginActivity"
@@ -51,6 +53,26 @@
 
         <activity
             android:name=".ui.screens.finance.FinanceActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.qualification.QualificationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.settlement.SettlementActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.reviews.ReviewsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.support.SupportActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.screens.settings.SettingsActivity"
             android:exported="false" />
     </application>
 </manifest>

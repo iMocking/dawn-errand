@@ -4,46 +4,52 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingTop="14dp"
-    android:paddingBottom="14dp">
+    android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/menuIcon"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginRight="12dp"
-        android:importantForAccessibility="no" />
-
-    <TextView
-        android:id="@+id/menuLabel"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:id="@+id/rowContent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textColor="@color/text_primary"
-        android:textSize="14sp" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp">
 
-    <TextView
-        android:id="@+id/menuValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="6dp"
-        android:textColor="@color/text_tertiary"
-        android:textSize="12sp" />
+        <ImageView
+            android:id="@+id/menuIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginRight="12dp"
+            android:importantForAccessibility="no" />
 
-    <ImageView
-        android:layout_width="14dp"
-        android:layout_height="14dp"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_chevron_right"
-        app:tint="@color/text_faint" />
+        <TextView
+            android:id="@+id/menuLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/menuValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="6dp"
+            android:textColor="@color/text_tertiary"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_chevron_right"
+            app:tint="@color/text_faint" />
+    </LinearLayout>
 
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="14dp"
-        android:background="@color/divider"
-        android:visibility="gone" />
+        android:layout_marginLeft="32dp"
+        android:background="@color/divider" />
 </LinearLayout>

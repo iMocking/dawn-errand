@@ -11,6 +11,7 @@ import com.dawnerrand.store.ui.screens.menu.MenuActivity
 import com.dawnerrand.store.ui.screens.orders.OrdersActivity
 import com.dawnerrand.store.ui.screens.profile.ProfileFragment
 import com.dawnerrand.store.ui.util.padBottomWithNavBar
+import com.dawnerrand.store.ui.util.setLightStatusBars
 
 /**
  * 主容器：底部四 Tab（工作台/订单/菜品/我的）。
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
+        setLightStatusBars(false)
 
         b.tabBar.padBottomWithNavBar()
 

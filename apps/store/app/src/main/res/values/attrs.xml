@@ -4,4 +4,9 @@
         <!-- true 为大号 48×28（营业设置），false 为小号 44×24（菜品上架） -->
         <attr name="big" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="NavBarView">
+        <attr name="navTitle" format="string" />
+        <attr name="showBack" format="boolean" />
+    </declare-styleable>
 </resources>

@@ -12,6 +12,7 @@ import com.dawnerrand.store.data.StoreOrder
 import com.dawnerrand.store.databinding.ActivityOrdersBinding
 import com.dawnerrand.store.ui.adapter.OrderAdapter
 import com.dawnerrand.store.ui.theme.Design
+import com.dawnerrand.store.ui.util.setLightStatusBars
 import com.dawnerrand.store.ui.util.toast
 
 /**
@@ -40,6 +41,7 @@ class OrdersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityOrdersBinding.inflate(layoutInflater)
         setContentView(b.root)
+        setLightStatusBars(true)
 
         b.orderList.layoutManager = LinearLayoutManager(this)
         b.orderList.adapter = adapter
@@ -99,7 +101,7 @@ class OrdersActivity : AppCompatActivity() {
                 vm.notifyReady(order.id)
                 toast("已通知骑手取餐")
             }
-            "查看配送" -> toast("配送详情演示：骑手正在配送中")
+            "查看配送" -> openDetail(order)
             "再来一单" -> openDetail(order)
             else -> openDetail(order)
         }

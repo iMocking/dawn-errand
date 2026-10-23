@@ -156,13 +156,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
                 android:background="@drawable/bg_btn_white_22"
                 android:gravity="center"
                 android:text="提现到微信钱包"
                 android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/feeTip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:text="提现手续费 0.6% · 预计 1 个工作日内到账"
+                android:textColor="@color/text_tertiary"
+                android:textSize="11sp" />
 
             <TextView
                 android:layout_width="wrap_content"

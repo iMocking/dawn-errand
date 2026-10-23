@@ -14,8 +14,8 @@ import com.dawnerrand.store.data.ORDER_PENDING
 import com.dawnerrand.store.data.StoreOrder
 import com.dawnerrand.store.databinding.ItemOrderBinding
 import com.dawnerrand.store.ui.theme.Design
+import com.dawnerrand.store.ui.util.dial
 import com.dawnerrand.store.ui.util.dp
-import com.dawnerrand.store.ui.util.toast
 
 /**
  * 订单列表 Adapter：状态色 + 动态操作按钮（拒单/接单/通知出餐/查看配送/再来一单）。
@@ -51,7 +51,7 @@ class OrderAdapter(
         b.orderItems.text = order.items
         b.orderTotal.text = order.total
         b.callBtn.setOnClickListener {
-            b.root.context.toast("拨打 ${order.customerName} ${order.customerPhone}")
+            b.root.context.dial(order.customerPhone)
         }
 
         // 动态操作按钮
