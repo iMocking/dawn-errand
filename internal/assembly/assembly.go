@@ -145,7 +145,8 @@ func Build(cfg *config.Config) (*App, error) {
 
 	authSvc := &auth.Service{
 		Repos: repos, Tx: store, Hasher: hasher, Tokens: tokens,
-		Mailer: sender, Cfg: cfg, Enforcer: enforcer, Limiter: limiter,
+		Mailer: sender, Cipher: cipher, Cfg: cfg, Enforcer: enforcer, Limiter: limiter,
+		Codes: redisc.NewCodeStore(rdb),
 	}
 	systemSvc := &system.Service{
 		Repos: repos, Tx: store, Hasher: hasher, Cipher: cipher,
@@ -163,7 +164,7 @@ func Build(cfg *config.Config) (*App, error) {
 		Orders:     &admin.OrdersService{Repos: repos},
 		Merchants:  &admin.MerchantsService{Repos: repos},
 		Riders:     &admin.RidersService{Repos: repos},
-		Users:      &admin.UsersService{Repos: repos},
+		Users:      &admin.UsersService{Repos: repos, Tx: store, Cipher: cipher},
 		Finance:    &admin.FinanceService{Repos: repos},
 		Complaints: &admin.ComplaintsService{Repos: repos},
 		Settings:   &admin.SettingsService{Repos: repos},

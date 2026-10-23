@@ -39,6 +39,9 @@ type Order func(*sql.Selector)
 // PasswordResetToken is the predicate function for passwordresettoken builders.
 type PasswordResetToken func(*sql.Selector)
 
+// RealNameVerification is the predicate function for realnameverification builders.
+type RealNameVerification func(*sql.Selector)
+
 // Region is the predicate function for region builders.
 type Region func(*sql.Selector)
 

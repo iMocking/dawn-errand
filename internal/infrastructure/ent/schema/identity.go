@@ -161,3 +161,31 @@ func (UserProfile) Fields() []ent.Field {
 		field.Int64("updated_at").DefaultFunc(now),
 	}
 }
+
+// RealNameVerification 用户实名认证申请（一人仅一条当前申请）。
+type RealNameVerification struct {
+	ent.Schema
+}
+
+func (RealNameVerification) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("id").MaxLen(26).DefaultFunc(ulid),
+		field.String("user_id").MaxLen(26).NotEmpty().Unique(),
+		field.String("real_name").MaxLen(64).NotEmpty(),
+		// id_card 存储加密密文；对外仅返回脱敏（前 6 后 4）。
+		field.String("id_card_cipher").MaxLen(512).NotEmpty(),
+		field.String("status").MaxLen(16).Default("待审核"),
+		field.String("reject_reason").MaxLen(255).Default(""),
+		field.String("reviewed_by").MaxLen(26).Default(""),
+		field.Int64("applied_at").DefaultFunc(now),
+		field.Int64("reviewed_at").Default(0),
+		field.Int64("updated_at").DefaultFunc(now),
+	}
+}
+
+func (RealNameVerification) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("user_id").Unique(),
+		index.Fields("status"),
+	}
+}

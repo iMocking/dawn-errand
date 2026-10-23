@@ -5,6 +5,7 @@ import type { AuthUser } from '@/api/auth'
 import { hasPermission as checkPerm } from '@/utils/permission'
 
 const TOKEN_KEY = 'admin_token'
+const REFRESH_KEY = 'admin_refresh_token'
 const USER_KEY = 'admin_user'
 const PERM_KEY = 'admin_permissions'
 
@@ -30,6 +31,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = res.user
     permissions.value = res.permissions
     localStorage.setItem(TOKEN_KEY, res.token)
+    localStorage.setItem(REFRESH_KEY, res.refreshToken)
     localStorage.setItem(USER_KEY, JSON.stringify(res.user))
     localStorage.setItem(PERM_KEY, JSON.stringify(res.permissions))
   }
@@ -49,6 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     permissions.value = []
     localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(REFRESH_KEY)
     localStorage.removeItem(USER_KEY)
     localStorage.removeItem(PERM_KEY)
   }

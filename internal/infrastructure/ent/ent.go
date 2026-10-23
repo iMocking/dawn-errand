@@ -15,6 +15,7 @@ import (
 	"dawn-errand/internal/infrastructure/ent/merchant"
 	"dawn-errand/internal/infrastructure/ent/order"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
+	"dawn-errand/internal/infrastructure/ent/realnameverification"
 	"dawn-errand/internal/infrastructure/ent/region"
 	"dawn-errand/internal/infrastructure/ent/rider"
 	"dawn-errand/internal/infrastructure/ent/settlement"
@@ -101,6 +102,7 @@ func checkColumn(table, column string) error {
 			merchant.Table:               merchant.ValidColumn,
 			order.Table:                  order.ValidColumn,
 			passwordresettoken.Table:     passwordresettoken.ValidColumn,
+			realnameverification.Table:   realnameverification.ValidColumn,
 			region.Table:                 region.ValidColumn,
 			rider.Table:                  rider.ValidColumn,
 			settlement.Table:             settlement.ValidColumn,

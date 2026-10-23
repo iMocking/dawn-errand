@@ -371,6 +371,37 @@ var (
 			},
 		},
 	}
+	// RealNameVerificationsColumns holds the columns for the "real_name_verifications" table.
+	RealNameVerificationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "user_id", Type: field.TypeString, Unique: true, Size: 26},
+		{Name: "real_name", Type: field.TypeString, Size: 64},
+		{Name: "id_card_cipher", Type: field.TypeString, Size: 512},
+		{Name: "status", Type: field.TypeString, Size: 16, Default: "待审核"},
+		{Name: "reject_reason", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "reviewed_by", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "applied_at", Type: field.TypeInt64},
+		{Name: "reviewed_at", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// RealNameVerificationsTable holds the schema information for the "real_name_verifications" table.
+	RealNameVerificationsTable = &schema.Table{
+		Name:       "real_name_verifications",
+		Columns:    RealNameVerificationsColumns,
+		PrimaryKey: []*schema.Column{RealNameVerificationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "realnameverification_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{RealNameVerificationsColumns[1]},
+			},
+			{
+				Name:    "realnameverification_status",
+				Unique:  false,
+				Columns: []*schema.Column{RealNameVerificationsColumns[4]},
+			},
+		},
+	}
 	// RegionsColumns holds the columns for the "regions" table.
 	RegionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 26},
@@ -627,6 +658,7 @@ var (
 		MerchantsTable,
 		OrdersTable,
 		PasswordResetTokensTable,
+		RealNameVerificationsTable,
 		RegionsTable,
 		RidersTable,
 		SettlementsTable,

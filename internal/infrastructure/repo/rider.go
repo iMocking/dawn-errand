@@ -157,8 +157,13 @@ func (r RiderRepo) UpdateAudit(id string, approved bool, reason, operator string
 	if !approved {
 		status = string(rider.AuditRejected)
 	}
+	// 身份核验随审核联动：通过 → 已通过；驳回 → 已驳回（重新提交时恢复待补充）。
+	idCheck := "已驳回"
+	if approved {
+		idCheck = "已通过"
+	}
 	upd := r.client.Rider.UpdateOneID(id).
-		SetAuditStatus(status).SetUpdatedAt(now)
+		SetAuditStatus(status).SetIDCheck(idCheck).SetUpdatedAt(now)
 	if approved {
 		upd.SetStatus(string(rider.RiderOffline)).SetJoinedAt(now)
 	}

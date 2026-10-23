@@ -1,4 +1,5 @@
 // cmd/migrate 执行手工 SQL 迁移（up/down），以 schema_migrations 表记录已执行迁移。
+// 按 migrations/ 目录内 *.up.sql / *.down.sql 文件名排序逐版本执行（如 001_init、002_xxx）。
 // 用法：go run ./cmd/migrate up|down
 package main
 
@@ -7,6 +8,8 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -46,63 +49,110 @@ func run(ctx context.Context, dsn, dir string) error {
 	}
 
 	if dir == "up" {
-		return applyUp(ctx, db)
+		return apply(ctx, db, "up")
 	}
-	return applyDown(ctx, db)
+	return apply(ctx, db, "down")
 }
 
-func applyUp(ctx context.Context, db *sql.DB) error {
-	var exists int
-	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM schema_migrations WHERE version='001_init'`).Scan(&exists); err != nil {
-		return err
-	}
-	if exists > 0 {
-		fmt.Println("001_init 已应用，跳过")
-		return nil
-	}
-	script, err := os.ReadFile("migrations/001_init.up.sql")
+// listVersions 读取 migrations/ 下全部迁移版本（去掉 .up.sql/.down.sql 后缀），升序。
+func listVersions() ([]string, error) {
+	entries, err := os.ReadDir("migrations")
 	if err != nil {
-		return fmt.Errorf("读取迁移文件: %w", err)
+		return nil, fmt.Errorf("读取 migrations 目录: %w", err)
 	}
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
+	seen := map[string]bool{}
+	for _, e := range entries {
+		name := e.Name()
+		if e.IsDir() {
+			continue
+		}
+		if strings.HasSuffix(name, ".up.sql") {
+			seen[strings.TrimSuffix(name, ".up.sql")] = true
+		} else if strings.HasSuffix(name, ".down.sql") {
+			seen[strings.TrimSuffix(name, ".down.sql")] = true
+		}
 	}
-	defer func() { _ = tx.Rollback() }()
-	if _, err := tx.ExecContext(ctx, string(script)); err != nil {
-		return fmt.Errorf("执行 001_init.up.sql: %w", err)
+	vers := make([]string, 0, len(seen))
+	for v := range seen {
+		vers = append(vers, v)
 	}
-	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO schema_migrations (version, applied_at) VALUES ('001_init', $1)`,
-		time.Now().Unix()); err != nil {
-		return err
-	}
-	return tx.Commit()
+	sort.Strings(vers)
+	return vers, nil
 }
 
-func applyDown(ctx context.Context, db *sql.DB) error {
-	var exists int
-	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM schema_migrations WHERE version='001_init'`).Scan(&exists); err != nil {
-		return err
-	}
-	if exists == 0 {
-		fmt.Println("schema_migrations 无 001_init 记录，跳过回滚")
-		return nil
-	}
-	script, err := os.ReadFile("migrations/001_init.down.sql")
+func appliedVersions(ctx context.Context, db *sql.DB) (map[string]bool, error) {
+	rows, err := db.QueryContext(ctx, `SELECT version FROM schema_migrations`)
 	if err != nil {
-		return fmt.Errorf("读取回滚文件: %w", err)
+		return nil, err
 	}
-	tx, err := db.BeginTx(ctx, nil)
+	defer rows.Close()
+	out := map[string]bool{}
+	for rows.Next() {
+		var v string
+		if err := rows.Scan(&v); err != nil {
+			return nil, err
+		}
+		out[v] = true
+	}
+	return out, rows.Err()
+}
+
+func apply(ctx context.Context, db *sql.DB, dir string) error {
+	vers, err := listVersions()
 	if err != nil {
 		return err
 	}
-	defer func() { _ = tx.Rollback() }()
-	if _, err := tx.ExecContext(ctx, string(script)); err != nil {
-		return fmt.Errorf("执行 001_init.down.sql: %w", err)
-	}
-	if _, err := tx.ExecContext(ctx, `DELETE FROM schema_migrations WHERE version='001_init'`); err != nil {
+	done, err := appliedVersions(ctx, db)
+	if err != nil {
 		return err
 	}
-	return tx.Commit()
+	// down 反向执行。
+	if dir == "down" {
+		for i, j := 0, len(vers)-1; i < j; i, j = i+1, j-1 {
+			vers[i], vers[j] = vers[j], vers[i]
+		}
+	}
+	for _, v := range vers {
+		if dir == "up" && done[v] {
+			fmt.Println(v, "已应用，跳过")
+			continue
+		}
+		if dir == "down" && !done[v] {
+			continue
+		}
+		suffix := ".up.sql"
+		if dir == "down" {
+			suffix = ".down.sql"
+		}
+		script, err := os.ReadFile("migrations/" + v + suffix)
+		if err != nil {
+			return fmt.Errorf("读取迁移文件 %s: %w", v+suffix, err)
+		}
+		tx, err := db.BeginTx(ctx, nil)
+		if err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, string(script)); err != nil {
+			_ = tx.Rollback()
+			return fmt.Errorf("执行 %s: %w", v+suffix, err)
+		}
+		if dir == "up" {
+			if _, err := tx.ExecContext(ctx,
+				`INSERT INTO schema_migrations (version, applied_at) VALUES ($1, $2)`,
+				v, time.Now().Unix()); err != nil {
+				_ = tx.Rollback()
+				return err
+			}
+		} else {
+			if _, err := tx.ExecContext(ctx, `DELETE FROM schema_migrations WHERE version=$1`, v); err != nil {
+				_ = tx.Rollback()
+				return err
+			}
+		}
+		if err := tx.Commit(); err != nil {
+			return err
+		}
+		fmt.Println("已执行:", v, suffix)
+	}
+	return nil
 }

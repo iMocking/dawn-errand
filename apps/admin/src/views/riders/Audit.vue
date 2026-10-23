@@ -34,7 +34,22 @@ async function loadStats() {
   stats.value = await getRiderStats()
 }
 
-/** 通过：确认弹窗 → POST */
+/** 身份证核验状态语义色 */
+function idCheckTone(s: string): 'green' | 'orange' | 'red' {
+  if (s === '已通过') return 'green'
+  if (s === '已驳回') return 'red'
+  return 'orange'
+}
+
+/** 证件/身份信息查看弹窗 */
+const infoTarget = ref<RiderAuditRow | null>(null)
+const infoOpen = ref(false)
+function askInfo(row: RiderAuditRow) {
+  infoTarget.value = row
+  infoOpen.value = true
+}
+
+/** 通过：确认弹窗 → POST（联动身份证核验状态） */
 const approveTarget = ref<RiderAuditRow | null>(null)
 const approveOpen = ref(false)
 const submitting = ref(false)
@@ -135,7 +150,7 @@ onMounted(() => {
           <div class="flex justify-between text-[12px] text-ink-3"><span>接单类型</span><span class="text-ink-1">{{ row.orderTypes }}</span></div>
           <div class="flex justify-between text-[12px] text-ink-3">
             <span>身份证核验</span>
-            <span :style="row.idCheck === '已通过' ? 'color:#00B578;' : 'color:#D48806;'">{{ row.idCheck }}</span>
+            <StatusTag :tone="idCheckTone(row.idCheck)">{{ row.idCheck }}</StatusTag>
           </div>
         </div>
 
@@ -155,7 +170,7 @@ onMounted(() => {
             <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="M21 15l-5-5L5 21" />
           </svg>
           <span class="text-[12px] text-ink-2">证件已上传 {{ row.docCount }} 张：{{ row.docs }}</span>
-          <span class="ml-auto cursor-pointer text-[12px] font-semibold" style="color:#2B7FFF;">查看</span>
+          <span class="ml-auto cursor-pointer text-[12px] font-semibold" style="color:#2B7FFF;" @click="askInfo(row)">查看</span>
         </div>
 
         <div class="mt-2 flex gap-2">
@@ -197,6 +212,23 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- 身份信息查看 -->
+    <Modal v-model:open="infoOpen" title="身份信息核验" :width="460">
+      <div v-if="infoTarget" class="flex flex-col gap-3 py-1">
+        <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]">
+          <div class="flex justify-between text-ink-3"><span>姓名</span><span class="font-semibold text-ink-1">{{ infoTarget.name }}</span></div>
+          <div class="flex justify-between text-ink-3"><span>身份证号</span><span class="text-ink-1">{{ infoTarget.idCardMasked || '未填写' }}</span></div>
+          <div class="flex justify-between text-ink-3"><span>联系电话</span><span class="text-ink-1">{{ infoTarget.phone }}</span></div>
+          <div class="flex justify-between text-ink-3"><span>核验状态</span><StatusTag :tone="idCheckTone(infoTarget.idCheck)">{{ infoTarget.idCheck }}</StatusTag></div>
+        </div>
+        <div class="rounded-lg bg-head px-3 py-2.5 text-[12px] leading-[1.8] text-ink-2">
+          <div class="mb-1 font-semibold text-ink-1">已上传材料（{{ infoTarget.docCount }} 张）</div>
+          <div>{{ infoTarget.docs || '—' }}</div>
+          <div class="mt-1.5 text-ink-4">通过入驻后，身份证核验状态将自动更新为「已通过」；驳回后为「已驳回」，骑手重新提交资料后恢复「待补充」。</div>
+        </div>
+      </div>
+    </Modal>
+
     <!-- 通过确认 -->
     <Modal
       v-model:open="approveOpen"
@@ -206,6 +238,13 @@ onMounted(() => {
       @confirm="onApprove"
     >
       <p class="text-sm text-ink-2">确认通过骑手 {{ approveTarget?.name }}（{{ approveTarget?.applyNo }}）的入驻申请？通过后该骑手将自动上线接单。</p>
+      <div
+        v-if="approveTarget?.idCheck !== '已通过'"
+        class="mt-3 rounded-lg border px-3 py-2.5 text-[12px] leading-[1.8]"
+        style="background:#FFF7E6;border-color:#FFE7BA;color:#D48806;"
+      >
+        该骑手身份证核验状态为「{{ approveTarget?.idCheck }}」。通过入驻将同时把身份证核验状态置为「已通过」，请确认证件真实有效。
+      </div>
     </Modal>
 
     <!-- 驳回 -->
@@ -216,7 +255,7 @@ onMounted(() => {
       :loading="submitting"
       @confirm="onReject"
     >
-      <p class="text-sm text-ink-2">确认驳回骑手 {{ rejectTarget?.name }}（{{ rejectTarget?.applyNo }}）的入驻申请？</p>
+      <p class="text-sm text-ink-2">确认驳回骑手 {{ rejectTarget?.name }}（{{ rejectTarget?.applyNo }}）的入驻申请？驳回后身份证核验状态将置为「已驳回」，骑手重新提交资料后恢复「待补充」。</p>
       <textarea
         v-model="reason"
         rows="3"

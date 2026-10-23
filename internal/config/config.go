@@ -40,7 +40,7 @@ func Load() *Config {
 		RedisPassword: getStr("REDIS_PASSWORD", "dawn_dev_only"),
 
 		JWTSecret:       getStr("JWT_SECRET", "dev_only_jwt_secret_change_me_0123456789abcdef"),
-		AccessTokenTTL:  time.Duration(getInt("ACCESS_TOKEN_TTL", 900)) * time.Second,
+		AccessTokenTTL:  time.Duration(getInt("ACCESS_TOKEN_TTL", 900)) * time.Second, // 默认 15min；生产建议用 ACCESS_TOKEN_TTL 覆盖（前端已接入 refresh 自动续期）
 		RefreshTokenTTL: time.Duration(getInt("REFRESH_TOKEN_TTL", 1209600)) * time.Second,
 		ConfigCipherKey: getStr("CONFIG_ENCRYPTION_KEY", "dev_only_config_key_0123456789abcdef0123456789"),
 		BootstrapToken:  getStr("BOOTSTRAP_TOKEN", "dev_bootstrap_token_2026"),

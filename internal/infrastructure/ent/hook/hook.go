@@ -140,6 +140,18 @@ func (f PasswordResetTokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PasswordResetTokenMutation", m)
 }
 
+// The RealNameVerificationFunc type is an adapter to allow the use of ordinary
+// function as RealNameVerification mutator.
+type RealNameVerificationFunc func(context.Context, *ent.RealNameVerificationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RealNameVerificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RealNameVerificationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RealNameVerificationMutation", m)
+}
+
 // The RegionFunc type is an adapter to allow the use of ordinary
 // function as Region mutator.
 type RegionFunc func(context.Context, *ent.RegionMutation) (ent.Value, error)

@@ -41,6 +41,8 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 		authPub.POST("/email/resend", mw.RateLimit("auth:resend", 10, time.Minute), h.ResendVerification)
 		authPub.POST("/password/forgot", mw.RateLimit("auth:forgot", 10, time.Minute), h.ForgotPassword)
 		authPub.POST("/password/reset", mw.RateLimit("auth:reset", 10, time.Minute), h.ResetPassword)
+		authPub.POST("/sms/send", mw.RateLimit("auth:sms:send", 30, time.Minute), h.SendSMSCode)
+		authPub.POST("/sms/login", mw.RateLimit("auth:sms:login", 30, time.Minute), h.LoginBySMS)
 
 		// ---- 公开：初始化 ----
 		sysPub := api.Group("/system")
@@ -55,6 +57,8 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			auth.POST("/logout", h.Logout)
 			auth.GET("/me", h.Me)
 			auth.POST("/password/change", h.ChangePassword)
+			auth.GET("/realname-verification", h.MyRealName)
+			auth.POST("/realname-verification", h.SubmitRealName)
 
 			// 系统配置（仅 super_admin）
 			sys := authd.Group("/system", mw.RequirePerm("system", "config"))
@@ -111,6 +115,8 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			users.POST("/:id/ban", mw.RequirePerm("user", "ban"), h.BanUser)
 			users.POST("/:id/unban", mw.RequirePerm("user", "unban"), h.UnbanUser)
 			users.POST("/:id/role", mw.RequirePerm("user", "role"), h.UpdateUserRole)
+			users.GET("/realname-verifications", mw.RequirePerm("user", "audit"), h.ListRealNames)
+			users.POST("/realname-verifications/:id/audit", mw.RequirePerm("user", "audit"), h.AuditRealName)
 			users.GET("/:id/orders", mw.RequirePerm("user", "detail"), h.GetUserOrders)
 			users.GET("/:id/complaints", mw.RequirePerm("user", "detail"), h.GetUserComplaints)
 			users.GET("/:id", mw.RequirePerm("user", "detail"), h.GetUser)

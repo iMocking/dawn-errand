@@ -62,8 +62,10 @@ export interface RiderAuditRow {
   tool: string
   /** 接单类型 */
   orderTypes: string
-  /** 身份证核验：已通过 / 待补充 */
+  /** 身份证核验：已通过 / 待补充 / 已驳回 */
   idCheck: string
+  /** 身份证号（脱敏，如 110101********7733） */
+  idCardMasked: string
   /** 材料提示条：null 无 / warning 黄色警告 */
   noticeType: 'none' | 'warning'
   notice: string

@@ -18,6 +18,17 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/users/realname',
+    name: 'user-realname',
+    component: () => import('@/views/users/RealName.vue'),
+    meta: {
+      title: '实名认证',
+      icon: 'check-circle',
+      group: '主体管理',
+      permission: 'user:audit',
+    },
+  },
+  {
     path: '/users/:id',
     name: 'user-detail',
     component: () => import('@/views/users/Detail.vue'),

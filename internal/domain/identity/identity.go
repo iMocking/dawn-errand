@@ -2,6 +2,7 @@
 package identity
 
 import (
+	"regexp"
 	"time"
 
 	"dawn-errand/internal/domain/tenant"
@@ -50,6 +51,11 @@ var RoleDisplayName = map[string]string{
 	RoleUser:          "正式会员",
 	RoleSystem:        "系统服务",
 }
+
+var phoneRe = regexp.MustCompile(`^1[3-9]\d{9}$`)
+
+// ValidatePhone 校验中国大陆手机号格式（11 位，1 开头，第二位 3-9）。
+func ValidatePhone(phone string) bool { return phoneRe.MatchString(phone) }
 
 // UserStatus 用户状态。
 type UserStatus string

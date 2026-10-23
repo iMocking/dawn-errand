@@ -17,7 +17,7 @@ pnpm build        # 产物 dist/
 ```
 
 - 默认账号：`admin@shuguang` / 密码 `shuguang2026` / 验证码 `8A6K`（任意值也可登录，dev mock 不校验）。
-- 真实后端（proxy 模式）种子超管：`admin@shuguang.local` / 一次性密码（以 seed 输出为准，当前见 `internal/integration/api_test.go` 头部常量）；验证码后端不校验，任意非空即可。
+- 真实后端（proxy 模式）种子超管：`jsongkey@outlook.com` / `1076236bb`（当前库内，已于 2026-10-23 由 seed 输出的一次性账号变更而来；若重置 seed 则恢复为 `admin@shuguang.local` + 一次性密码）；验证码后端不校验，任意非空即可。
 - 提/交/自测前 `pnpm typecheck && pnpm lint && pnpm build` 必须全绿；自测完 dev server 必须停止，**不要占用 8080**。
 
 ---
@@ -220,6 +220,8 @@ export function getOrderDetail(id: string) {
 - 用户详情订单记录：`getUserOrders(id, q)`（GET `/users/:id/orders`，分页返回 `PageResult<UserRecentOrder>`）。
 - 用户详情投诉售后：`getUserComplaints(id, q)`（GET `/users/:id/complaints`，分页返回 `PageResult<ComplaintRow>`）。
 - 用户角色：列表与详情均带 `role`+`roleName`（`src/api/users.ts` 的 `BACKEND_ROLES` 映射展示）；`updateUserRole(id, role)`（POST `/users/:id/role`，body `{role}`）。角色即时生效；仅全局管理员可改（改自己 → 1105「不能修改自己的角色」）；role=system 禁改。权限 `user:role`。
+- 用户实名认证：用户端 `submitRealName/realNameStatus`（POST/GET `/auth/realname-verification`，提交入参 **`{realName, idCard}`**，与返回字段统一驼峰；身份证号接口只回掩码 `前6********后4`；已实名重复提交 409）；管理端 `getRealNameVerifications(q)`（GET `/users/realname-verifications`，分页 + `status` 过滤）+ `auditRealName(id, 'approve'|'reject', reason?)`（POST `/users/realname-verifications/:id/audit`，通过后用户详情 `verified=已实名` 并同步 `realName`）。权限 `user:audit`。页面：`/users/realname`（views/users/RealName.vue，主体管理菜单「实名认证」：状态 tab 筛选/审核弹窗/驳回原因展示）；用户详情 `realNameVerify` 字段（null=无申请；status=待审核 显示「审核」入口；已驳回 显示原因）。
+- 骑手审核身份信息：`RiderAuditRow.idCardMasked`（脱敏）；通过入驻 → 后端把 `id_check` 置「已通过」，驳回 → 「已驳回」，骑手重提恢复「待补充」；Audit.vue「查看」弹窗展示证件/材料/核验状态。
 - 区域站长场景：创建接口不传 regionId 时后端自动用本区域；传了其他区域返回 403。
 - 权限：`merchant:create` / `rider:create`（`merchant:*`/`rider:*` 通配覆盖，super_admin 全量）；用户维度查询复用 `user:detail`。
 

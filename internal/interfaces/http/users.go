@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"dawn-errand/internal/domain/identity"
+	"dawn-errand/internal/domain/realname"
 	"dawn-errand/internal/interfaces/middleware"
 	"dawn-errand/internal/pkg/response"
 )
@@ -59,7 +60,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 		response.Err(c, err)
 		return
 	}
-	response.OK(c, toUserDetail(d.User, d.Profile, d.TotalOrders, d.MonthOrders, d.TotalSpent, d.ComplaintCount, d.RecentOrders))
+	response.OK(c, toUserDetail(d.User, d.Profile, d.TotalOrders, d.MonthOrders, d.TotalSpent, d.ComplaintCount, d.RecentOrders, d.RealName))
 }
 
 // GetUserOrders GET /users/:id/orders（用户详情订单记录，分页）。
@@ -152,4 +153,50 @@ func (h *Handler) UpdateUserRole(c *gin.Context) {
 		return
 	}
 	response.OKMsg(c, "角色已更新", gin.H{"id": id, "role": in.Role})
+}
+
+// ListRealNames GET /users/realname-verifications（实名认证审核列表）。
+func (h *Handler) ListRealNames(c *gin.Context) {
+	page, size := parsePage(c)
+	rows, total, err := h.Users.RealNames(c.Request.Context(), realname.Query{
+		Page: page, PageSize: size, Status: c.Query("status"),
+	}, scope(c))
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	list := make([]RealNameVerifyDto, 0, len(rows))
+	for _, v := range rows {
+		list = append(list, *toRealNameVerification(v))
+	}
+	pageResult(c, list, total, page, size)
+}
+
+type auditRealNameBody struct {
+	Action string `json:"action"`
+	Reason string `json:"reason"`
+}
+
+// AuditRealName POST /users/realname-verifications/:id/audit（通过/驳回实名认证）。
+func (h *Handler) AuditRealName(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	var in auditRealNameBody
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	if err := h.Users.AuditRealName(c.Request.Context(), id, in.Action, in.Reason, u.ID, scope(c)); err != nil {
+		response.Err(c, err)
+		return
+	}
+	msg := "已通过实名认证"
+	if in.Action == "reject" {
+		msg = "已驳回实名认证申请"
+	}
+	response.OKMsg(c, msg, gin.H{"id": id, "action": in.Action})
 }

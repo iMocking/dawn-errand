@@ -13,6 +13,7 @@ import (
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/merchant"
 	"dawn-errand/internal/domain/order"
+	"dawn-errand/internal/domain/realname"
 	"dawn-errand/internal/domain/rider"
 	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/domain/userprofile"
@@ -499,10 +500,20 @@ type RiderAuditRowDto struct {
 	Tool        string `json:"tool"`
 	OrderTypes  string `json:"orderTypes"`
 	IDCheck     string `json:"idCheck"`
-	NoticeType  string `json:"noticeType"`
-	Notice      string `json:"notice"`
-	DocCount    int    `json:"docCount"`
-	Docs        string `json:"docs"`
+	// IDCardMasked 身份证号脱敏（明文直存字段，脱敏后展示）。
+	IDCardMasked string `json:"idCardMasked"`
+	NoticeType   string `json:"noticeType"`
+	Notice       string `json:"notice"`
+	DocCount     int    `json:"docCount"`
+	Docs         string `json:"docs"`
+}
+
+func maskIDCard(s string) string {
+	runes := []rune(s)
+	if len(runes) <= 8 {
+		return "******"
+	}
+	return string(runes[:6]) + "********" + string(runes[len(runes)-4:])
 }
 
 func toRiderAuditRow(r *rider.Rider) RiderAuditRowDto {
@@ -515,7 +526,7 @@ func toRiderAuditRow(r *rider.Rider) RiderAuditRowDto {
 		ID: r.ID, Status: riderAuditText(r.AuditStatus), Name: r.Name,
 		AvatarBg: bg, AvatarColor: color, ApplyNo: r.ApplyNo, SubmittedAt: r.SubmittedAt,
 		Area: r.Area, Phone: r.Phone, Tool: r.Tool, OrderTypes: r.OrderTypes,
-		IDCheck: r.IDCheck, NoticeType: noticeType, Notice: r.Notice,
+		IDCheck: r.IDCheck, IDCardMasked: maskIDCard(r.IDCard), NoticeType: noticeType, Notice: r.Notice,
 		DocCount: r.DocCount, Docs: r.Docs,
 	}
 }
@@ -707,6 +718,7 @@ type UserDetailDto struct {
 	OrderRecordCount int64                `json:"orderRecordCount"`
 	ComplaintCount   int64                `json:"complaintCount"`
 	RecentOrders     []UserRecentOrderDto `json:"recentOrders"`
+	RealNameVerify   *RealNameVerifyDto   `json:"realNameVerify"`
 }
 
 type UserRecentOrderDto struct {
@@ -740,7 +752,7 @@ func toRecentOrder(o *order.Order) UserRecentOrderDto {
 	}
 }
 
-func toUserDetail(u *identity.User, p *userprofile.Profile, totalOrders, monthOrders int64, totalSpent float64, complaintCount int64, recent []*order.Order) UserDetailDto {
+func toUserDetail(u *identity.User, p *userprofile.Profile, totalOrders, monthOrders int64, totalSpent float64, complaintCount int64, recent []*order.Order, rn *realname.View) UserDetailDto {
 	bg, color := userAvatarColors(u)
 	level := "Lv.1 新用户"
 	verified := "未实名"
@@ -777,7 +789,31 @@ func toUserDetail(u *identity.User, p *userprofile.Profile, totalOrders, monthOr
 		Balance: balance, RedPacketBalance: redPacket,
 		RecentActiveAt:   u.UpdatedAt,
 		OrderRecordCount: totalOrders, ComplaintCount: complaintCount,
-		RecentOrders: recentOrders,
+		RecentOrders:   recentOrders,
+		RealNameVerify: toRealNameVerification(rn),
+	}
+}
+
+// RealNameVerifyDto 实名认证申请（身份证号脱敏：保留前 6 后 4）。
+type RealNameVerifyDto struct {
+	ID           string `json:"id"`
+	UserID       string `json:"userId"`
+	RealName     string `json:"realName"`
+	IDCardMasked string `json:"idCardMasked"`
+	Status       string `json:"status"`
+	RejectReason string `json:"rejectReason"`
+	AppliedAt    int64  `json:"appliedAt"`
+	ReviewedAt   int64  `json:"reviewedAt"`
+}
+
+func toRealNameVerification(v *realname.View) *RealNameVerifyDto {
+	if v == nil {
+		return nil
+	}
+	return &RealNameVerifyDto{
+		ID: v.ID, UserID: v.UserID, RealName: v.RealName,
+		IDCardMasked: v.IDCardMasked, Status: v.Status,
+		RejectReason: v.RejectReason, AppliedAt: v.AppliedAt, ReviewedAt: v.ReviewedAt,
 	}
 }
 

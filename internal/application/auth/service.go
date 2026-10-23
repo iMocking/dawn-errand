@@ -5,9 +5,11 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -16,6 +18,7 @@ import (
 	"dawn-errand/internal/config"
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/tenant"
+	"dawn-errand/internal/domain/userprofile"
 	"dawn-errand/internal/pkg/errcode"
 	"dawn-errand/internal/pkg/ulidgen"
 )
@@ -27,7 +30,9 @@ type Service struct {
 	Hasher   application.PasswordHasher
 	Tokens   application.TokenManager
 	Mailer   application.MailerPort
+	Cipher   application.ConfigCipher
 	Cfg      *config.Config
+	Codes    application.CodeStore
 	Enforcer interface {
 		PermissionsForRole(role string) []string
 	}
@@ -248,8 +253,117 @@ func (s *Service) Login(ctx context.Context, account, password string) (*LoginRe
 		return nil, errcode.NewStatus(403, errcode.CodeEmailNotVerified, "请先验证邮箱后再登录")
 	}
 
+	return s.issueTokens(ctx, u, "auth.login")
+}
+
+// SendSMSCodeResult 发送验证码结果；dev 环境回显验证码便于联调（不落日志）。
+type SendSMSCodeResult struct {
+	DevCode string `json:"dev_code,omitempty"`
+}
+
+// SendSMSCode 发送手机验证码：60 秒限流一次，验证码有效期 5 分钟。
+// 短信服务商 SDK 未接入前（配置仅校验完整性），dev 环境直接回显验证码；
+// prod 环境发送通道为占位，接入服务商后替换为真实下发（见实施进度记录）。
+func (s *Service) SendSMSCode(ctx context.Context, phone string) (*SendSMSCodeResult, error) {
+	phone = strings.TrimSpace(phone)
+	if !identity.ValidatePhone(phone) {
+		return nil, errcode.New(errcode.CodeBadRequest, "手机号格式不正确")
+	}
+	ok, err := s.Limiter.Allow(ctx, "auth:sms:send:"+phone, 1, time.Minute)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, errcode.New(errcode.CodeTooManyRequest, "发送过于频繁，请 60 秒后再试")
+	}
+	code := smsCode()
+	if err := s.Codes.Set(ctx, "dawn:sms:code:"+phone, code, 5*time.Minute); err != nil {
+		return nil, errcode.Wrap(err, errcode.CodeSMSSendFailed, "验证码发送失败，请稍后再试")
+	}
+	s.Repos.Audit.Record(ctx, application.AuditEntry{
+		Action: "auth.sms.send", Object: phone, Result: "success",
+		RequestID: reqID(ctx), IP: ipFrom(ctx),
+	})
+	if s.Cfg.IsDev() {
+		return &SendSMSCodeResult{DevCode: code}, nil
+	}
+	return &SendSMSCodeResult{}, nil
+}
+
+// LoginBySMS 手机号 + 验证码登录；手机号未注册时自动创建账号并登录。
+// 验证码校验成功后立即作废（一次性）。
+func (s *Service) LoginBySMS(ctx context.Context, phone, code string) (*LoginResult, error) {
+	phone = strings.TrimSpace(phone)
+	if !identity.ValidatePhone(phone) {
+		return nil, errcode.New(errcode.CodeBadRequest, "手机号格式不正确")
+	}
+	code = strings.TrimSpace(code)
+	key := "dawn:sms:code:" + phone
+	stored, err := s.Codes.Get(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	if stored == "" || len(code) != 6 || subtle.ConstantTimeCompare([]byte(stored), []byte(code)) != 1 {
+		s.Repos.Audit.Record(ctx, application.AuditEntry{
+			Action: "auth.sms.login", Object: phone, Result: "fail",
+			RequestID: reqID(ctx), IP: ipFrom(ctx),
+		})
+		return nil, errcode.NewStatus(401, errcode.CodeCaptchaInvalid, "验证码错误或已过期")
+	}
+	if err := s.Codes.Delete(ctx, key); err != nil {
+		return nil, err
+	}
+	u, err := s.Repos.Users.FindByPhone(phone)
+	if errors.Is(err, application.ErrNotFound) {
+		u, err = s.autoRegisterByPhone(ctx, phone)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !u.IsActive() {
+		return nil, errcode.NewStatus(403, errcode.CodeUserBanned, "账号已被封禁")
+	}
+	return s.issueTokens(ctx, u, "auth.sms.login")
+}
+
+// autoRegisterByPhone 手机号验证码登录时自动注册（邮箱生成占位地址，实名/密码后续可补）。
+func (s *Service) autoRegisterByPhone(ctx context.Context, phone string) (*identity.User, error) {
+	now := time.Now().Unix()
+	u := &identity.User{
+		ID:            ulidgen.New(),
+		Email:         "sms." + phone + "@shuguang.local",
+		Name:          "用户" + phone[len(phone)-4:],
+		Phone:         phone,
+		Status:        identity.UserStatusActive,
+		Role:          identity.RoleUser,
+		EmailVerified: true, // 手机验证即完成身份验证
+		RegisteredAt:  now,
+		UpdatedAt:     now,
+	}
+	err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
+		if err := tx.Users.Save(u); err != nil {
+			return err
+		}
+		// 初始化用户资料行（个人中心展示余额/积分等资产）。
+		return tx.Profiles.Save(&userprofile.Profile{
+			UserID: u.ID, Level: "Lv.1 新用户", Verified: "未实名",
+			RegisterChannel: "sms_login", UpdatedAt: now,
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+// issueTokens 统一签发访问/刷新令牌并记录审计。
+func (s *Service) issueTokens(ctx context.Context, u *identity.User, action string) (*LoginResult, error) {
+	sv := int64(0)
+	if cred, err := s.Repos.Credentials.FindByUserID(u.ID); err == nil {
+		sv = cred.SessionVersion
+	}
 	access, err := s.Tokens.IssueAccessToken(application.TokenClaims{
-		UserID: u.ID, Role: u.Role, SessionVersion: cred.SessionVersion,
+		UserID: u.ID, Role: u.Role, SessionVersion: sv,
 	}, s.Cfg.AccessTokenTTL)
 	if err != nil {
 		return nil, err
@@ -259,7 +373,7 @@ func (s *Service) Login(ctx context.Context, account, password string) (*LoginRe
 		return nil, err
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
-		UserID: u.ID, Action: "auth.login", Object: u.ID, Result: "success",
+		UserID: u.ID, Action: action, Object: u.ID, Result: "success",
 		RequestID: reqID(ctx), IP: ipFrom(ctx), Operator: u.Name,
 	})
 	return &LoginResult{
@@ -453,6 +567,15 @@ func newToken() string {
 		return ulidgen.New() + ulidgen.New()
 	}
 	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+// smsCode 生成 6 位数字验证码（crypto/rand 安全随机源）。
+func smsCode() string {
+	b := make([]byte, 6)
+	if _, err := rand.Read(b); err != nil {
+		return "000000"
+	}
+	return fmt.Sprintf("%d%d%d%d%d%d", b[0]%10, b[1]%10, b[2]%10, b[3]%10, b[4]%10, b[5]%10)
 }
 
 func hashToken(t string) string {

@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"regexp"
 	"strings"
 	"testing"
@@ -24,6 +25,8 @@ import (
 	"dawn-errand/internal/infrastructure/ent/credential"
 	"dawn-errand/internal/infrastructure/ent/emailverificationtoken"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
+	entuserprofile "dawn-errand/internal/infrastructure/ent/userprofile"
+	"dawn-errand/internal/infrastructure/ent/realnameverification"
 	"dawn-errand/internal/infrastructure/ent/systemsetting"
 	"dawn-errand/internal/infrastructure/ent/user"
 	"dawn-errand/internal/infrastructure/passwd"
@@ -31,8 +34,8 @@ import (
 )
 
 const (
-	adminEmail    = "admin@shuguang.local"
-	adminPassword = "PxqHfrNFzTXupfaB"
+	adminEmail    = "jsongkey@outlook.com"
+	adminPassword = "1076236bb"
 )
 
 var (
@@ -737,4 +740,118 @@ func TestAdminSmsWithdrawRuleAndUserRole(t *testing.T) {
 	// 清理：删除测试写入的两个配置键
 	ctx := context.Background()
 	_, _ = client.SystemSetting.Delete().Where(systemsetting.KeyIn("sms", "withdraw.rule")).Exec(ctx)
+}
+
+// TestRealNameVerificationFlow 实名认证闭环：提交 → 管理端审核通过 → 状态回读/资料同步 → 幂等拒绝。
+func TestRealNameVerificationFlow(t *testing.T) {
+	setup()
+	email := "realname-it@shuguang.local"
+	cleanUser(t, email)
+	do(t, http.MethodPost, "/api/auth/register", "", map[string]string{
+		"email": email, "password": "RealName123", "name": "实名测试用户",
+	})
+	vt := mailToken(t, email, "验证您的邮箱")
+	do(t, http.MethodGet, "/api/auth/email/verify?token="+vt, "", nil)
+	lg, _ := do(t, http.MethodPost, "/api/auth/login", "", map[string]string{
+		"account": email, "password": "RealName123",
+	})
+	if lg.Code != 0 {
+		t.Fatalf("login code=%d msg=%s", lg.Code, lg.Message)
+	}
+	var lb struct {
+		Token string `json:"token"`
+		User  struct {
+			ID string `json:"id"`
+		} `json:"user"`
+	}
+	_ = json.Unmarshal(lg.Body, &lb)
+
+	// 1) 未提交：GET 返回 null
+	g0, _ := do(t, http.MethodGet, "/api/auth/realname-verification", lb.Token, nil)
+	if g0.Code != 0 || string(g0.Body) != "null" {
+		t.Fatalf("未提交应返回 null, code=%d body=%s", g0.Code, string(g0.Body))
+	}
+
+	// 2) 非法身份证 → 1301
+	bad, _ := do(t, http.MethodPost, "/api/auth/realname-verification", lb.Token, map[string]string{
+		"realName": "张三", "idCard": "abc123",
+	})
+	if bad.Code != 1301 {
+		t.Fatalf("非法身份证应 1301, got %d", bad.Code)
+	}
+
+	// 3) 提交 → 待审核 + 脱敏
+	sub, _ := do(t, http.MethodPost, "/api/auth/realname-verification", lb.Token, map[string]string{
+		"realName": "张三", "idCard": "110101199003077733",
+	})
+	if sub.Code != 0 {
+		t.Fatalf("submit code=%d msg=%s", sub.Code, sub.Message)
+	}
+	var sv struct {
+		ID           string `json:"id"`
+		RealName     string `json:"realName"`
+		IDCardMasked string `json:"idCardMasked"`
+		Status       string `json:"status"`
+	}
+	if err := json.Unmarshal(sub.Body, &sv); err != nil {
+		t.Fatal(err)
+	}
+	if sv.Status != "待审核" || sv.RealName != "张三" || sv.IDCardMasked != "110101********7733" {
+		t.Fatalf("提交回读不符: %+v", sv)
+	}
+
+	// 4) 管理端列表可见（待审核）
+	ls, _ := do(t, http.MethodGet, "/api/users/realname-verifications?status="+url.QueryEscape("待审核"), loginAdmin(t), nil)
+	if ls.Code != 0 || !bytes.Contains(ls.Body, []byte(sv.ID)) {
+		t.Fatalf("管理端列表未包含申请: code=%d body=%s", ls.Code, string(ls.Body))
+	}
+
+	// 5) 审核通过 → 用户状态已通过 + 详情 verified=已实名
+	ap, _ := do(t, http.MethodPost, "/api/users/realname-verifications/"+sv.ID+"/audit", loginAdmin(t), map[string]string{
+		"action": "approve",
+	})
+	if ap.Code != 0 {
+		t.Fatalf("approve code=%d msg=%s", ap.Code, ap.Message)
+	}
+	du, _ := do(t, http.MethodGet, "/api/users/"+lb.User.ID, loginAdmin(t), nil)
+	if du.Code != 0 {
+		t.Fatalf("detail code=%d", du.Code)
+	}
+	var dv struct {
+		Verified string `json:"verified"`
+		RealName string `json:"realName"`
+		RealNameVerify *struct {
+			Status string `json:"status"`
+		} `json:"realNameVerify"`
+	}
+	if err := json.Unmarshal(du.Body, &dv); err != nil {
+		t.Fatal(err)
+	}
+	if dv.Verified != "已实名" || dv.RealName != "张三" || dv.RealNameVerify == nil || dv.RealNameVerify.Status != "已通过" {
+		t.Fatalf("审核后详情不符: %+v", dv)
+	}
+
+	// 6) 已通过后再提交 → 1402 拒绝
+	again, _ := do(t, http.MethodPost, "/api/auth/realname-verification", lb.Token, map[string]string{
+		"realName": "张三", "idCard": "110101199003077733",
+	})
+	if again.Code != 1402 {
+		t.Fatalf("已实名重复提交应 1402, got %d", again.Code)
+	}
+
+	// 7) 用户 GET 回读 → 已通过
+	g1, _ := do(t, http.MethodGet, "/api/auth/realname-verification", lb.Token, nil)
+	var gv struct {
+		Status string `json:"status"`
+	}
+	_ = json.Unmarshal(g1.Body, &gv)
+	if gv.Status != "已通过" {
+		t.Fatalf("用户回读状态=%q", gv.Status)
+	}
+
+	// 8) 清理：删除申请记录并还原资料（实名状态回退，避免污染其他用例）
+	ctx := context.Background()
+	_, _ = client.RealNameVerification.Delete().Where(realnameverification.UserID(lb.User.ID)).Exec(ctx)
+	_, _ = client.UserProfile.Delete().Where(entuserprofile.UserID(lb.User.ID)).Exec(ctx)
+	_ = client.User.DeleteOneID(lb.User.ID).Exec(ctx)
 }

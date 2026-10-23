@@ -8,6 +8,7 @@ import (
 	"dawn-errand/internal/domain/complaint"
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/order"
+	"dawn-errand/internal/domain/realname"
 	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/domain/userprofile"
 	"dawn-errand/internal/pkg/errcode"
@@ -15,7 +16,29 @@ import (
 
 // UsersService 用户管理。
 type UsersService struct {
-	Repos *application.RepoUnit
+	Repos  *application.RepoUnit
+	Tx     application.TxRunner
+	Cipher application.ConfigCipher
+}
+
+// realNameView 解密身份证号并构造脱敏视图；解密失败返回空掩码（不阻断查询）。
+func (s *UsersService) realNameView(v *realname.Verification) *realname.View {
+	if v == nil {
+		return nil
+	}
+	masked := "******"
+	if plain, err := s.Cipher.Decrypt(v.IDCardCipher); err == nil {
+		masked = maskIDCard(plain)
+	}
+	return realname.ToView(v, masked)
+}
+
+func maskIDCard(s string) string {
+	runes := []rune(s)
+	if len(runes) <= 8 {
+		return "******"
+	}
+	return string(runes[:6]) + "********" + string(runes[len(runes)-4:])
 }
 
 // List 用户列表。
@@ -76,6 +99,7 @@ func startOfToday(now int64) int64 {
 type UserDetail struct {
 	User           *identity.User
 	Profile        *userprofile.Profile
+	RealName       *realname.View
 	TotalOrders    int64
 	TotalSpent     float64
 	MonthOrders    int64
@@ -100,13 +124,14 @@ func (s *UsersService) Detail(ctx context.Context, id string, sc tenant.Scope) (
 	}
 	now := time.Now().Unix()
 	prof, _ := s.Repos.Profiles.FindByUserID(id)
+	rn, _ := s.Repos.RealNames.FindByUserID(ctx, id)
 	totalOrders, _ := s.Repos.Orders.CountUserOrders(id)
 	totalSpent, _ := s.Repos.Orders.CountUserSpent(id)
 	monthOrders, _ := s.Repos.Orders.CountUserMonth(id, now)
 	recent, _ := s.Repos.Orders.ListByUser(id, 10)
 	complaintCount, _ := s.Repos.Complaints.CountByUserID(id)
 	return &UserDetail{
-		User: u, Profile: prof,
+		User: u, Profile: prof, RealName: s.realNameView(rn),
 		TotalOrders: totalOrders, TotalSpent: totalSpent, MonthOrders: monthOrders,
 		RecentOrders: recent, ComplaintCount: complaintCount,
 	}, nil
@@ -223,6 +248,88 @@ func (s *UsersService) SetRole(ctx context.Context, id, role, operator string, s
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
 		UserID: operator, Action: "user.role.update", Object: id, Result: "success",
+		RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx),
+	})
+	return nil
+}
+
+// RealNames 实名认证申请列表（scope 隔离；返回脱敏视图）。
+func (s *UsersService) RealNames(ctx context.Context, q realname.Query, sc tenant.Scope) ([]*realname.View, int64, error) {
+	if q.Page < 1 {
+		q.Page = 1
+	}
+	if q.PageSize < 1 || q.PageSize > 100 {
+		q.PageSize = 20
+	}
+	if sc.RegionOnly() || sc.UserOnly() {
+		return nil, 0, tenantDenied()
+	}
+	rows, total, err := s.Repos.RealNames.List(ctx, q)
+	if err != nil {
+		return nil, 0, err
+	}
+	views := make([]*realname.View, 0, len(rows))
+	for _, r := range rows {
+		views = append(views, s.realNameView(r))
+	}
+	return views, total, nil
+}
+
+// AuditRealName 审核实名认证申请；通过时同步 UserProfile（real_name + verified=已实名）。
+func (s *UsersService) AuditRealName(ctx context.Context, id, action, reason, operator string, sc tenant.Scope) error {
+	if sc.RegionOnly() || sc.UserOnly() {
+		return tenantDenied()
+	}
+	v, err := s.Repos.RealNames.FindByID(ctx, id)
+	if err != nil {
+		if err == application.ErrNotFound {
+			return errcode.NewStatus(404, errcode.CodeUserNotFound, "认证申请不存在")
+		}
+		return err
+	}
+	if v.Status != realname.StatusPending {
+		return errcode.NewStatus(409, errcode.CodeConflict, "该申请已处理")
+	}
+	now := time.Now().Unix()
+	if action == "approve" {
+		// 事务：更新申请状态 + 同步用户资料。
+		err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
+			if err := tx.RealNames.UpdateReview(ctx, id, realname.StatusApproved, "", operator, now); err != nil {
+				return err
+			}
+			prof, err := tx.Profiles.FindByUserID(v.UserID)
+			if err != nil && err != application.ErrNotFound {
+				return err
+			}
+			p := &userprofile.Profile{
+				UserID: v.UserID, RealName: v.RealName, Verified: realname.VerifiedDone,
+				UpdatedAt: now,
+			}
+			if prof != nil {
+				p.Level = prof.Level
+				p.Nickname = prof.Nickname
+				p.Region = prof.Region
+				p.Address = prof.Address
+				p.RegisterChannel = prof.RegisterChannel
+				p.BizTypes = prof.BizTypes
+				p.Balance = prof.Balance
+				p.RedPacketBalance = prof.RedPacketBalance
+				p.RecentActiveAt = prof.RecentActiveAt
+			}
+			return tx.Profiles.Save(p)
+		})
+		if err != nil {
+			return err
+		}
+	} else if action == "reject" {
+		if err := s.Repos.RealNames.UpdateReview(ctx, id, realname.StatusRejected, reason, operator, now); err != nil {
+			return err
+		}
+	} else {
+		return errcode.New(errcode.CodeBadRequest, "action 仅支持 approve/reject")
+	}
+	s.Repos.Audit.Record(ctx, application.AuditEntry{
+		UserID: operator, Action: "user.realname." + action, Object: id, Result: "success",
 		RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx),
 	})
 	return nil

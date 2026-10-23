@@ -15,6 +15,7 @@ import {
   banUser,
   unbanUser,
   updateUserRole,
+  auditRealName,
   BACKEND_ROLES,
   type UserDetail,
   type UserRecentOrder,
@@ -95,6 +96,49 @@ function roleTone(role: string): 'orange' | 'blue' | 'green' | 'gray' | 'red' | 
       return 'green'
     default:
       return 'gray'
+  }
+}
+
+/* 实名认证审核（账号状态 tab） */
+const realNameOpen = ref(false)
+const realNameSubmitting = ref(false)
+const realNameRejectReason = ref('')
+
+function openRealNameModal() {
+  realNameRejectReason.value = ''
+  realNameOpen.value = true
+}
+
+async function onRealNameApprove() {
+  const d = detail.value
+  const v = d?.realNameVerify
+  if (!v || realNameSubmitting.value) return
+  realNameSubmitting.value = true
+  try {
+    await auditRealName(v.id, 'approve')
+    d.verified = '已实名'
+    d.realName = v.realName
+    d.realNameVerify.status = '已通过'
+    toast.success('已通过实名认证')
+    realNameOpen.value = false
+  } finally {
+    realNameSubmitting.value = false
+  }
+}
+
+async function onRealNameReject() {
+  const d = detail.value
+  const v = d?.realNameVerify
+  if (!v || realNameSubmitting.value) return
+  realNameSubmitting.value = true
+  try {
+    await auditRealName(v.id, 'reject', realNameRejectReason.value)
+    d.realNameVerify.status = '已驳回'
+    d.realNameVerify.rejectReason = realNameRejectReason.value
+    toast.info('已驳回实名认证申请')
+    realNameOpen.value = false
+  } finally {
+    realNameSubmitting.value = false
   }
 }
 
@@ -570,8 +614,23 @@ onMounted(async () => {
             </div>
             <div>
               <div class="mb-1.5 text-[12px] text-ink-3">实名认证</div>
-              <div class="flex h-8 items-center rounded-lg border border-line bg-head px-3 text-[13px] text-ink-1">
-                {{ detail.verified }}
+              <div class="flex h-8 items-center gap-2 rounded-lg border border-line bg-head px-3">
+                <span class="text-[13px] text-ink-1">{{ detail.verified }}</span>
+                <span
+                  v-if="detail.realNameVerify?.status === '待审核' && detail.verified === '未实名'"
+                  v-permission="'user:audit'"
+                  class="cursor-pointer text-[12px] font-semibold text-primary"
+                  @click="openRealNameModal"
+                >
+                  审核
+                </span>
+              </div>
+              <div
+                v-if="detail.realNameVerify?.status === '已驳回' && detail.verified === '未实名'"
+                class="mt-1.5 text-[12px]"
+                style="color:#FF4D4F;"
+              >
+                已驳回：{{ detail.realNameVerify.rejectReason || '材料不通过，请重新提交' }}
               </div>
             </div>
             <div>
@@ -615,6 +674,42 @@ onMounted(async () => {
       @confirm="onConfirm"
     >
       <p class="text-sm text-ink-2">{{ confirmMessage() }}</p>
+    </Modal>
+
+    <!-- 实名认证审核 -->
+    <Modal
+      v-model:open="realNameOpen"
+      title="实名认证审核"
+      confirm-text="确认通过"
+      :loading="realNameSubmitting"
+      :width="460"
+      @confirm="onRealNameApprove"
+    >
+      <div v-if="detail?.realNameVerify" class="flex flex-col gap-3.5 py-1">
+        <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]">
+          <div class="flex justify-between text-ink-3"><span>申请人</span><span class="font-semibold text-ink-1">{{ detail.realNameVerify.realName }}</span></div>
+          <div class="flex justify-between text-ink-3"><span>身份证号</span><span class="text-ink-1">{{ detail.realNameVerify.idCardMasked }}</span></div>
+          <div class="flex justify-between text-ink-3"><span>提交时间</span><span class="text-ink-1">{{ formatTime(detail.realNameVerify.appliedAt) }}</span></div>
+          <div class="flex justify-between text-ink-3"><span>当前状态</span><span class="text-[#D48806]">{{ detail.realNameVerify.status }}</span></div>
+        </div>
+        <p class="text-[12px] leading-[1.8] text-ink-4">
+          确认该用户身份信息真实有效？通过后该账号将标记为「已实名」，实名信息同步到用户资料；驳回后用户可修改后重新提交。
+        </p>
+        <div class="flex items-center gap-2 rounded-lg bg-head px-3 py-2.5">
+          <span class="text-[12px] text-ink-3">或选择驳回</span>
+          <input
+            v-model="realNameRejectReason"
+            placeholder="填写驳回原因（选填）"
+            class="flex-1 rounded-lg border border-line bg-white px-2.5 py-1.5 text-[12px] outline-none placeholder:text-ink-4"
+          />
+          <button
+            type="button"
+            class="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            style="background:#FFF3E8;color:#FF6B2C;"
+            @click="onRealNameReject"
+          >驳回</button>
+        </div>
+      </div>
     </Modal>
 
     <!-- 修改后台角色 -->

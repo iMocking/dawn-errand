@@ -43,6 +43,7 @@ func (s *Store) Repos() *application.RepoUnit {
 		Announcements:  AnnouncementRepo{client: s.client},
 		FeeRules:       FeeRuleRepo{client: s.client},
 		Profiles:       ProfileRepo{client: s.client},
+		RealNames:      RealNameRepo{client: s.client},
 		Audit:          AuditRepo{client: s.client},
 	}
 }

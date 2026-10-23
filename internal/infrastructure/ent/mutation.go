@@ -16,6 +16,7 @@ import (
 	"dawn-errand/internal/infrastructure/ent/order"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
 	"dawn-errand/internal/infrastructure/ent/predicate"
+	"dawn-errand/internal/infrastructure/ent/realnameverification"
 	"dawn-errand/internal/infrastructure/ent/region"
 	"dawn-errand/internal/infrastructure/ent/rider"
 	"dawn-errand/internal/infrastructure/ent/settlement"
@@ -51,6 +52,7 @@ const (
 	TypeMerchant               = "Merchant"
 	TypeOrder                  = "Order"
 	TypePasswordResetToken     = "PasswordResetToken"
+	TypeRealNameVerification   = "RealNameVerification"
 	TypeRegion                 = "Region"
 	TypeRider                  = "Rider"
 	TypeSettlement             = "Settlement"
@@ -12363,6 +12365,872 @@ func (m *PasswordResetTokenMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PasswordResetTokenMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown PasswordResetToken edge %s", name)
+}
+
+// RealNameVerificationMutation represents an operation that mutates the RealNameVerification nodes in the graph.
+type RealNameVerificationMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *string
+	user_id        *string
+	real_name      *string
+	id_card_cipher *string
+	status         *string
+	reject_reason  *string
+	reviewed_by    *string
+	applied_at     *int64
+	addapplied_at  *int64
+	reviewed_at    *int64
+	addreviewed_at *int64
+	updated_at     *int64
+	addupdated_at  *int64
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*RealNameVerification, error)
+	predicates     []predicate.RealNameVerification
+}
+
+var _ ent.Mutation = (*RealNameVerificationMutation)(nil)
+
+// realnameverificationOption allows management of the mutation configuration using functional options.
+type realnameverificationOption func(*RealNameVerificationMutation)
+
+// newRealNameVerificationMutation creates new mutation for the RealNameVerification entity.
+func newRealNameVerificationMutation(c config, op Op, opts ...realnameverificationOption) *RealNameVerificationMutation {
+	m := &RealNameVerificationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRealNameVerification,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRealNameVerificationID sets the ID field of the mutation.
+func withRealNameVerificationID(id string) realnameverificationOption {
+	return func(m *RealNameVerificationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *RealNameVerification
+		)
+		m.oldValue = func(ctx context.Context) (*RealNameVerification, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().RealNameVerification.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRealNameVerification sets the old RealNameVerification of the mutation.
+func withRealNameVerification(node *RealNameVerification) realnameverificationOption {
+	return func(m *RealNameVerificationMutation) {
+		m.oldValue = func(context.Context) (*RealNameVerification, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RealNameVerificationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RealNameVerificationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of RealNameVerification entities.
+func (m *RealNameVerificationMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RealNameVerificationMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RealNameVerificationMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().RealNameVerification.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *RealNameVerificationMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *RealNameVerificationMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *RealNameVerificationMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetRealName sets the "real_name" field.
+func (m *RealNameVerificationMutation) SetRealName(s string) {
+	m.real_name = &s
+}
+
+// RealName returns the value of the "real_name" field in the mutation.
+func (m *RealNameVerificationMutation) RealName() (r string, exists bool) {
+	v := m.real_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRealName returns the old "real_name" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldRealName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRealName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRealName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRealName: %w", err)
+	}
+	return oldValue.RealName, nil
+}
+
+// ResetRealName resets all changes to the "real_name" field.
+func (m *RealNameVerificationMutation) ResetRealName() {
+	m.real_name = nil
+}
+
+// SetIDCardCipher sets the "id_card_cipher" field.
+func (m *RealNameVerificationMutation) SetIDCardCipher(s string) {
+	m.id_card_cipher = &s
+}
+
+// IDCardCipher returns the value of the "id_card_cipher" field in the mutation.
+func (m *RealNameVerificationMutation) IDCardCipher() (r string, exists bool) {
+	v := m.id_card_cipher
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIDCardCipher returns the old "id_card_cipher" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldIDCardCipher(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIDCardCipher is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIDCardCipher requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIDCardCipher: %w", err)
+	}
+	return oldValue.IDCardCipher, nil
+}
+
+// ResetIDCardCipher resets all changes to the "id_card_cipher" field.
+func (m *RealNameVerificationMutation) ResetIDCardCipher() {
+	m.id_card_cipher = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *RealNameVerificationMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *RealNameVerificationMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *RealNameVerificationMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetRejectReason sets the "reject_reason" field.
+func (m *RealNameVerificationMutation) SetRejectReason(s string) {
+	m.reject_reason = &s
+}
+
+// RejectReason returns the value of the "reject_reason" field in the mutation.
+func (m *RealNameVerificationMutation) RejectReason() (r string, exists bool) {
+	v := m.reject_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRejectReason returns the old "reject_reason" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldRejectReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRejectReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRejectReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRejectReason: %w", err)
+	}
+	return oldValue.RejectReason, nil
+}
+
+// ResetRejectReason resets all changes to the "reject_reason" field.
+func (m *RealNameVerificationMutation) ResetRejectReason() {
+	m.reject_reason = nil
+}
+
+// SetReviewedBy sets the "reviewed_by" field.
+func (m *RealNameVerificationMutation) SetReviewedBy(s string) {
+	m.reviewed_by = &s
+}
+
+// ReviewedBy returns the value of the "reviewed_by" field in the mutation.
+func (m *RealNameVerificationMutation) ReviewedBy() (r string, exists bool) {
+	v := m.reviewed_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewedBy returns the old "reviewed_by" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldReviewedBy(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewedBy: %w", err)
+	}
+	return oldValue.ReviewedBy, nil
+}
+
+// ResetReviewedBy resets all changes to the "reviewed_by" field.
+func (m *RealNameVerificationMutation) ResetReviewedBy() {
+	m.reviewed_by = nil
+}
+
+// SetAppliedAt sets the "applied_at" field.
+func (m *RealNameVerificationMutation) SetAppliedAt(i int64) {
+	m.applied_at = &i
+	m.addapplied_at = nil
+}
+
+// AppliedAt returns the value of the "applied_at" field in the mutation.
+func (m *RealNameVerificationMutation) AppliedAt() (r int64, exists bool) {
+	v := m.applied_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppliedAt returns the old "applied_at" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldAppliedAt(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppliedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppliedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppliedAt: %w", err)
+	}
+	return oldValue.AppliedAt, nil
+}
+
+// AddAppliedAt adds i to the "applied_at" field.
+func (m *RealNameVerificationMutation) AddAppliedAt(i int64) {
+	if m.addapplied_at != nil {
+		*m.addapplied_at += i
+	} else {
+		m.addapplied_at = &i
+	}
+}
+
+// AddedAppliedAt returns the value that was added to the "applied_at" field in this mutation.
+func (m *RealNameVerificationMutation) AddedAppliedAt() (r int64, exists bool) {
+	v := m.addapplied_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAppliedAt resets all changes to the "applied_at" field.
+func (m *RealNameVerificationMutation) ResetAppliedAt() {
+	m.applied_at = nil
+	m.addapplied_at = nil
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (m *RealNameVerificationMutation) SetReviewedAt(i int64) {
+	m.reviewed_at = &i
+	m.addreviewed_at = nil
+}
+
+// ReviewedAt returns the value of the "reviewed_at" field in the mutation.
+func (m *RealNameVerificationMutation) ReviewedAt() (r int64, exists bool) {
+	v := m.reviewed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewedAt returns the old "reviewed_at" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldReviewedAt(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewedAt: %w", err)
+	}
+	return oldValue.ReviewedAt, nil
+}
+
+// AddReviewedAt adds i to the "reviewed_at" field.
+func (m *RealNameVerificationMutation) AddReviewedAt(i int64) {
+	if m.addreviewed_at != nil {
+		*m.addreviewed_at += i
+	} else {
+		m.addreviewed_at = &i
+	}
+}
+
+// AddedReviewedAt returns the value that was added to the "reviewed_at" field in this mutation.
+func (m *RealNameVerificationMutation) AddedReviewedAt() (r int64, exists bool) {
+	v := m.addreviewed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetReviewedAt resets all changes to the "reviewed_at" field.
+func (m *RealNameVerificationMutation) ResetReviewedAt() {
+	m.reviewed_at = nil
+	m.addreviewed_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *RealNameVerificationMutation) SetUpdatedAt(i int64) {
+	m.updated_at = &i
+	m.addupdated_at = nil
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *RealNameVerificationMutation) UpdatedAt() (r int64, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the RealNameVerification entity.
+// If the RealNameVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RealNameVerificationMutation) OldUpdatedAt(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// AddUpdatedAt adds i to the "updated_at" field.
+func (m *RealNameVerificationMutation) AddUpdatedAt(i int64) {
+	if m.addupdated_at != nil {
+		*m.addupdated_at += i
+	} else {
+		m.addupdated_at = &i
+	}
+}
+
+// AddedUpdatedAt returns the value that was added to the "updated_at" field in this mutation.
+func (m *RealNameVerificationMutation) AddedUpdatedAt() (r int64, exists bool) {
+	v := m.addupdated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *RealNameVerificationMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	m.addupdated_at = nil
+}
+
+// Where appends a list predicates to the RealNameVerificationMutation builder.
+func (m *RealNameVerificationMutation) Where(ps ...predicate.RealNameVerification) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the RealNameVerificationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RealNameVerificationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.RealNameVerification, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *RealNameVerificationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RealNameVerificationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (RealNameVerification).
+func (m *RealNameVerificationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RealNameVerificationMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.user_id != nil {
+		fields = append(fields, realnameverification.FieldUserID)
+	}
+	if m.real_name != nil {
+		fields = append(fields, realnameverification.FieldRealName)
+	}
+	if m.id_card_cipher != nil {
+		fields = append(fields, realnameverification.FieldIDCardCipher)
+	}
+	if m.status != nil {
+		fields = append(fields, realnameverification.FieldStatus)
+	}
+	if m.reject_reason != nil {
+		fields = append(fields, realnameverification.FieldRejectReason)
+	}
+	if m.reviewed_by != nil {
+		fields = append(fields, realnameverification.FieldReviewedBy)
+	}
+	if m.applied_at != nil {
+		fields = append(fields, realnameverification.FieldAppliedAt)
+	}
+	if m.reviewed_at != nil {
+		fields = append(fields, realnameverification.FieldReviewedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, realnameverification.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RealNameVerificationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case realnameverification.FieldUserID:
+		return m.UserID()
+	case realnameverification.FieldRealName:
+		return m.RealName()
+	case realnameverification.FieldIDCardCipher:
+		return m.IDCardCipher()
+	case realnameverification.FieldStatus:
+		return m.Status()
+	case realnameverification.FieldRejectReason:
+		return m.RejectReason()
+	case realnameverification.FieldReviewedBy:
+		return m.ReviewedBy()
+	case realnameverification.FieldAppliedAt:
+		return m.AppliedAt()
+	case realnameverification.FieldReviewedAt:
+		return m.ReviewedAt()
+	case realnameverification.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RealNameVerificationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case realnameverification.FieldUserID:
+		return m.OldUserID(ctx)
+	case realnameverification.FieldRealName:
+		return m.OldRealName(ctx)
+	case realnameverification.FieldIDCardCipher:
+		return m.OldIDCardCipher(ctx)
+	case realnameverification.FieldStatus:
+		return m.OldStatus(ctx)
+	case realnameverification.FieldRejectReason:
+		return m.OldRejectReason(ctx)
+	case realnameverification.FieldReviewedBy:
+		return m.OldReviewedBy(ctx)
+	case realnameverification.FieldAppliedAt:
+		return m.OldAppliedAt(ctx)
+	case realnameverification.FieldReviewedAt:
+		return m.OldReviewedAt(ctx)
+	case realnameverification.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown RealNameVerification field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RealNameVerificationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case realnameverification.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case realnameverification.FieldRealName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRealName(v)
+		return nil
+	case realnameverification.FieldIDCardCipher:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIDCardCipher(v)
+		return nil
+	case realnameverification.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case realnameverification.FieldRejectReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRejectReason(v)
+		return nil
+	case realnameverification.FieldReviewedBy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewedBy(v)
+		return nil
+	case realnameverification.FieldAppliedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppliedAt(v)
+		return nil
+	case realnameverification.FieldReviewedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewedAt(v)
+		return nil
+	case realnameverification.FieldUpdatedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown RealNameVerification field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RealNameVerificationMutation) AddedFields() []string {
+	var fields []string
+	if m.addapplied_at != nil {
+		fields = append(fields, realnameverification.FieldAppliedAt)
+	}
+	if m.addreviewed_at != nil {
+		fields = append(fields, realnameverification.FieldReviewedAt)
+	}
+	if m.addupdated_at != nil {
+		fields = append(fields, realnameverification.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RealNameVerificationMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case realnameverification.FieldAppliedAt:
+		return m.AddedAppliedAt()
+	case realnameverification.FieldReviewedAt:
+		return m.AddedReviewedAt()
+	case realnameverification.FieldUpdatedAt:
+		return m.AddedUpdatedAt()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RealNameVerificationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case realnameverification.FieldAppliedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAppliedAt(v)
+		return nil
+	case realnameverification.FieldReviewedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddReviewedAt(v)
+		return nil
+	case realnameverification.FieldUpdatedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown RealNameVerification numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RealNameVerificationMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RealNameVerificationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RealNameVerificationMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown RealNameVerification nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RealNameVerificationMutation) ResetField(name string) error {
+	switch name {
+	case realnameverification.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case realnameverification.FieldRealName:
+		m.ResetRealName()
+		return nil
+	case realnameverification.FieldIDCardCipher:
+		m.ResetIDCardCipher()
+		return nil
+	case realnameverification.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case realnameverification.FieldRejectReason:
+		m.ResetRejectReason()
+		return nil
+	case realnameverification.FieldReviewedBy:
+		m.ResetReviewedBy()
+		return nil
+	case realnameverification.FieldAppliedAt:
+		m.ResetAppliedAt()
+		return nil
+	case realnameverification.FieldReviewedAt:
+		m.ResetReviewedAt()
+		return nil
+	case realnameverification.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown RealNameVerification field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RealNameVerificationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RealNameVerificationMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RealNameVerificationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RealNameVerificationMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RealNameVerificationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RealNameVerificationMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RealNameVerificationMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown RealNameVerification unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RealNameVerificationMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown RealNameVerification edge %s", name)
 }
 
 // RegionMutation represents an operation that mutates the Region nodes in the graph.

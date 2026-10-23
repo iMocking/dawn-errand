@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiResponse } from '@/types'
 import { genRequestId } from './ulid'
 import { useToast } from '@/composables/useToast'
@@ -26,6 +26,38 @@ instance.interceptors.request.use((config) => {
   return config
 })
 
+/**
+ * 401 静默续期（单飞）：access token 过期时用 refresh_token 换新并重放原请求。
+ * 多个并发请求同时 401 时只发起一次刷新，其余排队等待同一个 Promise。
+ */
+let refreshing: Promise<string> | null = null
+
+async function doRefresh(): Promise<string> {
+  const rt = localStorage.getItem('admin_refresh_token')
+  if (!rt) throw new Error('缺少 refresh_token')
+  const resp = await axios.post<ApiResponse<{
+    token: string
+    refresh_token: string
+    user: { id: string; name: string; avatar: string; role: string }
+    permissions: string[]
+  }>>('/api/auth/refresh', { refresh_token: rt })
+  const body = resp.data?.body
+  if (!body?.token || !body?.refresh_token) throw new Error('刷新响应不完整')
+  localStorage.setItem('admin_token', body.token)
+  localStorage.setItem('admin_refresh_token', body.refresh_token)
+  localStorage.setItem('admin_user', JSON.stringify(body.user))
+  localStorage.setItem('admin_permissions', JSON.stringify(body.permissions))
+  return body.token
+}
+
+function clearSession(toast: ReturnType<typeof useToast>) {
+  localStorage.removeItem('admin_token')
+  localStorage.removeItem('admin_refresh_token')
+  localStorage.removeItem('admin_user')
+  localStorage.removeItem('admin_permissions')
+  if (location.pathname !== '/login') location.href = '/login'
+}
+
 instance.interceptors.response.use(
   ((resp: { data: ApiResponse }) => {
     const data = resp.data
@@ -38,17 +70,31 @@ instance.interceptors.response.use(
     return data
     // 拦截器统一解包 body，返回类型与 axios 默认 AxiosResponse 不同，用 never 断言绕过
   }) as (resp: unknown) => never,
-  (error) => {
+  async (error) => {
     const toast = useToast()
     const status: number = error?.response?.status ?? 0
+    const cfg = error?.config as InternalAxiosRequestConfig | undefined
     const requestId: string =
       (error?.response?.data?.request_id as string) || error?.config?.headers?.['X-Request-ID'] || '-'
+
+    if (status === 401 && cfg && !String(cfg.url).includes('/auth/refresh')) {
+      try {
+        refreshing = refreshing ?? doRefresh().finally(() => {
+          refreshing = null
+        })
+        const newToken = await refreshing
+        cfg.headers.set('Authorization', `Bearer ${newToken}`)
+        return instance(cfg)
+      } catch {
+        toast.error('登录已失效，请重新登录')
+        clearSession(toast)
+        return Promise.reject(error)
+      }
+    }
+
     if (status === 401) {
-      localStorage.removeItem('admin_token')
-      localStorage.removeItem('admin_user')
-      localStorage.removeItem('admin_permissions')
       toast.error('登录已失效，请重新登录')
-      if (location.pathname !== '/login') location.href = '/login'
+      clearSession(toast)
     } else if (status === 403) {
       toast.error('无权限访问')
       location.href = '/403'

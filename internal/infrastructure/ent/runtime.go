@@ -14,6 +14,7 @@ import (
 	"dawn-errand/internal/infrastructure/ent/merchant"
 	"dawn-errand/internal/infrastructure/ent/order"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
+	"dawn-errand/internal/infrastructure/ent/realnameverification"
 	"dawn-errand/internal/infrastructure/ent/region"
 	"dawn-errand/internal/infrastructure/ent/rider"
 	"dawn-errand/internal/infrastructure/ent/schema"
@@ -1074,6 +1075,98 @@ func init() {
 	passwordresettoken.DefaultID = passwordresettokenDescID.Default.(func() string)
 	// passwordresettoken.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	passwordresettoken.IDValidator = passwordresettokenDescID.Validators[0].(func(string) error)
+	realnameverificationFields := schema.RealNameVerification{}.Fields()
+	_ = realnameverificationFields
+	// realnameverificationDescUserID is the schema descriptor for user_id field.
+	realnameverificationDescUserID := realnameverificationFields[1].Descriptor()
+	// realnameverification.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	realnameverification.UserIDValidator = func() func(string) error {
+		validators := realnameverificationDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// realnameverificationDescRealName is the schema descriptor for real_name field.
+	realnameverificationDescRealName := realnameverificationFields[2].Descriptor()
+	// realnameverification.RealNameValidator is a validator for the "real_name" field. It is called by the builders before save.
+	realnameverification.RealNameValidator = func() func(string) error {
+		validators := realnameverificationDescRealName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(real_name string) error {
+			for _, fn := range fns {
+				if err := fn(real_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// realnameverificationDescIDCardCipher is the schema descriptor for id_card_cipher field.
+	realnameverificationDescIDCardCipher := realnameverificationFields[3].Descriptor()
+	// realnameverification.IDCardCipherValidator is a validator for the "id_card_cipher" field. It is called by the builders before save.
+	realnameverification.IDCardCipherValidator = func() func(string) error {
+		validators := realnameverificationDescIDCardCipher.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id_card_cipher string) error {
+			for _, fn := range fns {
+				if err := fn(id_card_cipher); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// realnameverificationDescStatus is the schema descriptor for status field.
+	realnameverificationDescStatus := realnameverificationFields[4].Descriptor()
+	// realnameverification.DefaultStatus holds the default value on creation for the status field.
+	realnameverification.DefaultStatus = realnameverificationDescStatus.Default.(string)
+	// realnameverification.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	realnameverification.StatusValidator = realnameverificationDescStatus.Validators[0].(func(string) error)
+	// realnameverificationDescRejectReason is the schema descriptor for reject_reason field.
+	realnameverificationDescRejectReason := realnameverificationFields[5].Descriptor()
+	// realnameverification.DefaultRejectReason holds the default value on creation for the reject_reason field.
+	realnameverification.DefaultRejectReason = realnameverificationDescRejectReason.Default.(string)
+	// realnameverification.RejectReasonValidator is a validator for the "reject_reason" field. It is called by the builders before save.
+	realnameverification.RejectReasonValidator = realnameverificationDescRejectReason.Validators[0].(func(string) error)
+	// realnameverificationDescReviewedBy is the schema descriptor for reviewed_by field.
+	realnameverificationDescReviewedBy := realnameverificationFields[6].Descriptor()
+	// realnameverification.DefaultReviewedBy holds the default value on creation for the reviewed_by field.
+	realnameverification.DefaultReviewedBy = realnameverificationDescReviewedBy.Default.(string)
+	// realnameverification.ReviewedByValidator is a validator for the "reviewed_by" field. It is called by the builders before save.
+	realnameverification.ReviewedByValidator = realnameverificationDescReviewedBy.Validators[0].(func(string) error)
+	// realnameverificationDescAppliedAt is the schema descriptor for applied_at field.
+	realnameverificationDescAppliedAt := realnameverificationFields[7].Descriptor()
+	// realnameverification.DefaultAppliedAt holds the default value on creation for the applied_at field.
+	realnameverification.DefaultAppliedAt = realnameverificationDescAppliedAt.Default.(func() int64)
+	// realnameverificationDescReviewedAt is the schema descriptor for reviewed_at field.
+	realnameverificationDescReviewedAt := realnameverificationFields[8].Descriptor()
+	// realnameverification.DefaultReviewedAt holds the default value on creation for the reviewed_at field.
+	realnameverification.DefaultReviewedAt = realnameverificationDescReviewedAt.Default.(int64)
+	// realnameverificationDescUpdatedAt is the schema descriptor for updated_at field.
+	realnameverificationDescUpdatedAt := realnameverificationFields[9].Descriptor()
+	// realnameverification.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	realnameverification.DefaultUpdatedAt = realnameverificationDescUpdatedAt.Default.(func() int64)
+	// realnameverificationDescID is the schema descriptor for id field.
+	realnameverificationDescID := realnameverificationFields[0].Descriptor()
+	// realnameverification.DefaultID holds the default value on creation for the id field.
+	realnameverification.DefaultID = realnameverificationDescID.Default.(func() string)
+	// realnameverification.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	realnameverification.IDValidator = realnameverificationDescID.Validators[0].(func(string) error)
 	regionFields := schema.Region{}.Fields()
 	_ = regionFields
 	// regionDescName is the schema descriptor for name field.

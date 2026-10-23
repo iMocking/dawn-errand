@@ -22,6 +22,7 @@ import (
 	"dawn-errand/internal/infrastructure/ent/merchant"
 	"dawn-errand/internal/infrastructure/ent/order"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
+	"dawn-errand/internal/infrastructure/ent/realnameverification"
 	"dawn-errand/internal/infrastructure/ent/region"
 	"dawn-errand/internal/infrastructure/ent/rider"
 	"dawn-errand/internal/infrastructure/ent/settlement"
@@ -62,6 +63,8 @@ type Client struct {
 	Order *OrderClient
 	// PasswordResetToken is the client for interacting with the PasswordResetToken builders.
 	PasswordResetToken *PasswordResetTokenClient
+	// RealNameVerification is the client for interacting with the RealNameVerification builders.
+	RealNameVerification *RealNameVerificationClient
 	// Region is the client for interacting with the Region builders.
 	Region *RegionClient
 	// Rider is the client for interacting with the Rider builders.
@@ -98,6 +101,7 @@ func (c *Client) init() {
 	c.Merchant = NewMerchantClient(c.config)
 	c.Order = NewOrderClient(c.config)
 	c.PasswordResetToken = NewPasswordResetTokenClient(c.config)
+	c.RealNameVerification = NewRealNameVerificationClient(c.config)
 	c.Region = NewRegionClient(c.config)
 	c.Rider = NewRiderClient(c.config)
 	c.Settlement = NewSettlementClient(c.config)
@@ -208,6 +212,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Merchant:               NewMerchantClient(cfg),
 		Order:                  NewOrderClient(cfg),
 		PasswordResetToken:     NewPasswordResetTokenClient(cfg),
+		RealNameVerification:   NewRealNameVerificationClient(cfg),
 		Region:                 NewRegionClient(cfg),
 		Rider:                  NewRiderClient(cfg),
 		Settlement:             NewSettlementClient(cfg),
@@ -245,6 +250,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Merchant:               NewMerchantClient(cfg),
 		Order:                  NewOrderClient(cfg),
 		PasswordResetToken:     NewPasswordResetTokenClient(cfg),
+		RealNameVerification:   NewRealNameVerificationClient(cfg),
 		Region:                 NewRegionClient(cfg),
 		Rider:                  NewRiderClient(cfg),
 		Settlement:             NewSettlementClient(cfg),
@@ -283,8 +289,8 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Announcement, c.AuditLog, c.CasbinRule, c.Complaint, c.Credential,
 		c.EmailVerificationToken, c.FeeRule, c.MailOutbox, c.Merchant, c.Order,
-		c.PasswordResetToken, c.Region, c.Rider, c.Settlement, c.SystemSetting, c.User,
-		c.UserProfile, c.Withdrawal,
+		c.PasswordResetToken, c.RealNameVerification, c.Region, c.Rider, c.Settlement,
+		c.SystemSetting, c.User, c.UserProfile, c.Withdrawal,
 	} {
 		n.Use(hooks...)
 	}
@@ -296,8 +302,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Announcement, c.AuditLog, c.CasbinRule, c.Complaint, c.Credential,
 		c.EmailVerificationToken, c.FeeRule, c.MailOutbox, c.Merchant, c.Order,
-		c.PasswordResetToken, c.Region, c.Rider, c.Settlement, c.SystemSetting, c.User,
-		c.UserProfile, c.Withdrawal,
+		c.PasswordResetToken, c.RealNameVerification, c.Region, c.Rider, c.Settlement,
+		c.SystemSetting, c.User, c.UserProfile, c.Withdrawal,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -328,6 +334,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Order.mutate(ctx, m)
 	case *PasswordResetTokenMutation:
 		return c.PasswordResetToken.mutate(ctx, m)
+	case *RealNameVerificationMutation:
+		return c.RealNameVerification.mutate(ctx, m)
 	case *RegionMutation:
 		return c.Region.mutate(ctx, m)
 	case *RiderMutation:
@@ -1810,6 +1818,139 @@ func (c *PasswordResetTokenClient) mutate(ctx context.Context, m *PasswordResetT
 	}
 }
 
+// RealNameVerificationClient is a client for the RealNameVerification schema.
+type RealNameVerificationClient struct {
+	config
+}
+
+// NewRealNameVerificationClient returns a client for the RealNameVerification from the given config.
+func NewRealNameVerificationClient(c config) *RealNameVerificationClient {
+	return &RealNameVerificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `realnameverification.Hooks(f(g(h())))`.
+func (c *RealNameVerificationClient) Use(hooks ...Hook) {
+	c.hooks.RealNameVerification = append(c.hooks.RealNameVerification, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `realnameverification.Intercept(f(g(h())))`.
+func (c *RealNameVerificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RealNameVerification = append(c.inters.RealNameVerification, interceptors...)
+}
+
+// Create returns a builder for creating a RealNameVerification entity.
+func (c *RealNameVerificationClient) Create() *RealNameVerificationCreate {
+	mutation := newRealNameVerificationMutation(c.config, OpCreate)
+	return &RealNameVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RealNameVerification entities.
+func (c *RealNameVerificationClient) CreateBulk(builders ...*RealNameVerificationCreate) *RealNameVerificationCreateBulk {
+	return &RealNameVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RealNameVerificationClient) MapCreateBulk(slice any, setFunc func(*RealNameVerificationCreate, int)) *RealNameVerificationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RealNameVerificationCreateBulk{err: fmt.Errorf("calling to RealNameVerificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RealNameVerificationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RealNameVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RealNameVerification.
+func (c *RealNameVerificationClient) Update() *RealNameVerificationUpdate {
+	mutation := newRealNameVerificationMutation(c.config, OpUpdate)
+	return &RealNameVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RealNameVerificationClient) UpdateOne(rnv *RealNameVerification) *RealNameVerificationUpdateOne {
+	mutation := newRealNameVerificationMutation(c.config, OpUpdateOne, withRealNameVerification(rnv))
+	return &RealNameVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RealNameVerificationClient) UpdateOneID(id string) *RealNameVerificationUpdateOne {
+	mutation := newRealNameVerificationMutation(c.config, OpUpdateOne, withRealNameVerificationID(id))
+	return &RealNameVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RealNameVerification.
+func (c *RealNameVerificationClient) Delete() *RealNameVerificationDelete {
+	mutation := newRealNameVerificationMutation(c.config, OpDelete)
+	return &RealNameVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RealNameVerificationClient) DeleteOne(rnv *RealNameVerification) *RealNameVerificationDeleteOne {
+	return c.DeleteOneID(rnv.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RealNameVerificationClient) DeleteOneID(id string) *RealNameVerificationDeleteOne {
+	builder := c.Delete().Where(realnameverification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RealNameVerificationDeleteOne{builder}
+}
+
+// Query returns a query builder for RealNameVerification.
+func (c *RealNameVerificationClient) Query() *RealNameVerificationQuery {
+	return &RealNameVerificationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRealNameVerification},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RealNameVerification entity by its id.
+func (c *RealNameVerificationClient) Get(ctx context.Context, id string) (*RealNameVerification, error) {
+	return c.Query().Where(realnameverification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RealNameVerificationClient) GetX(ctx context.Context, id string) *RealNameVerification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RealNameVerificationClient) Hooks() []Hook {
+	return c.hooks.RealNameVerification
+}
+
+// Interceptors returns the client interceptors.
+func (c *RealNameVerificationClient) Interceptors() []Interceptor {
+	return c.inters.RealNameVerification
+}
+
+func (c *RealNameVerificationClient) mutate(ctx context.Context, m *RealNameVerificationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RealNameVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RealNameVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RealNameVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RealNameVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RealNameVerification mutation op: %q", m.Op())
+	}
+}
+
 // RegionClient is a client for the Region schema.
 type RegionClient struct {
 	config
@@ -2746,13 +2887,13 @@ type (
 	hooks struct {
 		Announcement, AuditLog, CasbinRule, Complaint, Credential,
 		EmailVerificationToken, FeeRule, MailOutbox, Merchant, Order,
-		PasswordResetToken, Region, Rider, Settlement, SystemSetting, User,
-		UserProfile, Withdrawal []ent.Hook
+		PasswordResetToken, RealNameVerification, Region, Rider, Settlement,
+		SystemSetting, User, UserProfile, Withdrawal []ent.Hook
 	}
 	inters struct {
 		Announcement, AuditLog, CasbinRule, Complaint, Credential,
 		EmailVerificationToken, FeeRule, MailOutbox, Merchant, Order,
-		PasswordResetToken, Region, Rider, Settlement, SystemSetting, User,
-		UserProfile, Withdrawal []ent.Interceptor
+		PasswordResetToken, RealNameVerification, Region, Rider, Settlement,
+		SystemSetting, User, UserProfile, Withdrawal []ent.Interceptor
 	}
 )

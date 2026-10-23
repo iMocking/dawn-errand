@@ -41,3 +41,30 @@ func (l *Limiter) Allow(ctx context.Context, key string, limit int, window time.
 	}
 	return incr.Val() <= int64(limit), nil
 }
+
+// CodeStore 基于 Redis 的一次性验证码存储，实现 application.CodeStore 端口。
+type CodeStore struct {
+	rdb *redis.Client
+}
+
+// NewCodeStore 构建验证码存储。
+func NewCodeStore(rdb *redis.Client) *CodeStore { return &CodeStore{rdb: rdb} }
+
+// Set 写入验证码并设置过期时间。
+func (s *CodeStore) Set(ctx context.Context, key, code string, ttl time.Duration) error {
+	return s.rdb.Set(ctx, key, code, ttl).Err()
+}
+
+// Get 读取验证码；不存在返回空串（不报错）。
+func (s *CodeStore) Get(ctx context.Context, key string) (string, error) {
+	v, err := s.rdb.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return "", nil
+	}
+	return v, err
+}
+
+// Delete 删除验证码（验证成功后作废）。
+func (s *CodeStore) Delete(ctx context.Context, key string) error {
+	return s.rdb.Del(ctx, key).Err()
+}

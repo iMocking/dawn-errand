@@ -34,6 +34,8 @@ type Tx struct {
 	Order *OrderClient
 	// PasswordResetToken is the client for interacting with the PasswordResetToken builders.
 	PasswordResetToken *PasswordResetTokenClient
+	// RealNameVerification is the client for interacting with the RealNameVerification builders.
+	RealNameVerification *RealNameVerificationClient
 	// Region is the client for interacting with the Region builders.
 	Region *RegionClient
 	// Rider is the client for interacting with the Rider builders.
@@ -190,6 +192,7 @@ func (tx *Tx) init() {
 	tx.Merchant = NewMerchantClient(tx.config)
 	tx.Order = NewOrderClient(tx.config)
 	tx.PasswordResetToken = NewPasswordResetTokenClient(tx.config)
+	tx.RealNameVerification = NewRealNameVerificationClient(tx.config)
 	tx.Region = NewRegionClient(tx.config)
 	tx.Rider = NewRiderClient(tx.config)
 	tx.Settlement = NewSettlementClient(tx.config)

@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -53,6 +54,49 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 	lr, err := h.Auth.Login(c.Request.Context(), in.Account, in.Password)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OK(c, h.toLoginResult(lr))
+}
+
+// SendSMSCode POST /auth/sms/send：发送手机验证码（dev 环境回显 dev_code）。
+func (h *Handler) SendSMSCode(c *gin.Context) {
+	var in struct {
+		Phone string `json:"phone"`
+	}
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	if strings.TrimSpace(in.Phone) == "" {
+		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "手机号必填")
+		return
+	}
+	res, err := h.Auth.SendSMSCode(c.Request.Context(), in.Phone)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "验证码已发送", res)
+}
+
+// LoginBySMS POST /auth/sms/login：手机号 + 验证码登录（未注册自动创建）。
+func (h *Handler) LoginBySMS(c *gin.Context) {
+	var in struct {
+		Phone string `json:"phone"`
+		Code  string `json:"code"`
+	}
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	if strings.TrimSpace(in.Phone) == "" || strings.TrimSpace(in.Code) == "" {
+		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "手机号与验证码必填")
+		return
+	}
+	lr, err := h.Auth.LoginBySMS(c.Request.Context(), in.Phone, in.Code)
 	if err != nil {
 		response.Err(c, err)
 		return
@@ -211,4 +255,36 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		return
 	}
 	response.OKMsg(c, "密码已修改，请重新登录", gin.H{})
+}
+
+// MyRealName GET /auth/realname-verification：查询当前用户实名认证状态。
+func (h *Handler) MyRealName(c *gin.Context) {
+	u := middleware.User(c)
+	v, err := h.Auth.MyRealName(c.Request.Context(), u.ID)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OK(c, toRealNameVerification(v))
+}
+
+type submitRealNameBody struct {
+	RealName string `json:"realName"`
+	IDCard   string `json:"idCard"`
+}
+
+// SubmitRealName POST /auth/realname-verification：提交实名认证申请。
+func (h *Handler) SubmitRealName(c *gin.Context) {
+	var in submitRealNameBody
+	if err := bind(c, &in); err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	v, err := h.Auth.SubmitRealName(c.Request.Context(), u.ID, in.RealName, in.IDCard)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "实名认证申请已提交，等待审核", toRealNameVerification(v))
 }

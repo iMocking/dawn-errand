@@ -12,6 +12,7 @@ import (
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/merchant"
 	"dawn-errand/internal/domain/order"
+	"dawn-errand/internal/domain/realname"
 	"dawn-errand/internal/domain/rider"
 	"dawn-errand/internal/domain/system"
 	"dawn-errand/internal/domain/tenant"
@@ -54,6 +55,7 @@ type RepoUnit struct {
 	Announcements  cms.AnnouncementRepository
 	FeeRules       cms.FeeRuleRepository
 	Profiles       userprofile.ProfileRepository
+	RealNames      realname.Repository
 	Audit          AuditLogger
 }
 
@@ -114,6 +116,16 @@ type TokenManager interface {
 type ConfigCipher interface {
 	Encrypt(plain string) (string, error)
 	Decrypt(cipher string) (string, error)
+}
+
+// CodeStore 一次性验证码存储端口（Redis 实现，手机号验证码登录用）。
+type CodeStore interface {
+	// Set 写入验证码并设置过期时间。
+	Set(ctx context.Context, key, code string, ttl time.Duration) error
+	// Get 读取验证码（不存在返回空串）。
+	Get(ctx context.Context, key string) (string, error)
+	// Delete 删除验证码（验证成功后作废）。
+	Delete(ctx context.Context, key string) error
 }
 
 // RateLimiter 限流端口（Redis 实现）。

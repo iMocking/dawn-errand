@@ -114,6 +114,37 @@ export interface UserDetail {
   /** 投诉售后数（左侧角标） */
   complaintCount: number
   recentOrders: UserRecentOrder[]
+  /** 实名认证申请（无申请为 null） */
+  realNameVerify: RealNameVerify | null
+}
+
+/** 实名认证申请（身份证号脱敏） */
+export interface RealNameVerify {
+  id: string
+  userId: string
+  realName: string
+  idCardMasked: string
+  /** 待审核 / 已通过 / 已驳回 */
+  status: string
+  rejectReason: string
+  appliedAt: number
+  reviewedAt: number
+}
+
+/** 实名认证审核动作 */
+export function auditRealName(id: string, action: 'approve' | 'reject', reason?: string) {
+  return http.post<{ id: string; action: string }>(`/users/realname-verifications/${id}/audit`, {
+    action,
+    reason,
+  })
+}
+
+/** 实名认证审核列表（分页 + status 过滤：待审核/已通过/已驳回） */
+export function getRealNameVerifications(q: PageQuery & { status?: string }) {
+  return http.get<PageResult<RealNameVerify>>(
+    '/users/realname-verifications',
+    q as Record<string, unknown>,
+  )
 }
 
 export function getUsers(q: PageQuery) {
