@@ -1,0 +1,30 @@
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/data/api/ApiClient.kt:81:1 Syntax error: Unclosed comment.所在位置 行:4 字符: 1+ & "C:\Users\jsong\.gradle-dist\gradle-9.8.2\bin\gradle.bat" assembleD ...+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    + CategoryInfo          : NotSpecified: (
+e: file:///D:/c...closed comment.:String) [], RemoteException    + FullyQualifiedErrorId : NativeCommandError 
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:25:37 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:fun Context.dp(v: Int): Int
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:25:45 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:fun Context.dp(v: Int): Int
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:28:42 Unresolved reference 'bg_switch_thumb'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:29:37 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:fun Context.dp(v: Int): Int
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:29:45 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:fun Context.dp(v: Int): Int
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:31:27 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:fun Context.dp(v: Int): Int
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:60:39 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:fun Context.dp(v: Int): Int
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:60:51 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:fun Context.dp(v: Int): Int
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:24:25 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:24:25 Not enough information to infer type argument for 'T'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:9 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:9 Not enough information to infer type argument for 'C'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:36 No value passed for parameter 'third'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:9 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:9 Not enough information to infer type argument for 'C'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:37 No value passed for parameter 'third'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:9 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:9 Not enough information to infer type argument for 'C'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:37 No value passed for parameter 'third'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:9 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:9 Not enough information to infer type argument for 'C'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:36 No value passed for parameter 'third'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:17 Unresolved reference 'View'.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:17 Argument type mismatch: actual type is 'T (of fun <T> T.apply)', but 'View!' was expected.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:31 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:37 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:15 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///D:/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:15 Not enough information to infer type argument for 'T'.

@@ -1,0 +1,2 @@
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:51:9 | Platform declaration clash: The following declarations have the same JVM signature (setChecked(Z)V):所在位置 行:4 字
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:56:5 | Platform declaration clash: The following declarations have the same JVM signature (setChecked(Z)V):    fun `<

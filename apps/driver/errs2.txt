@@ -1,0 +1,81 @@
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/data/api/ApiClient.kt:81:1 | Syntax error: Unclosed comment.所在位置 行:4 字符: 1+ & "C:\Users\jsong\.gradle-dist\gradle-9.8.2
+e: file:///D:/c...closed comment.:String) [], RemoteException    + FullyQualifiedErrorId : NativeCommandError 
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:25:37 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:25:45 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:28:42 | Unresolved reference 'bg_switch_thumb'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:29:37 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:29:45 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:31:27 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:60:39 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/SwitchView.kt:60:51 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:24:25 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:24:25 | Not enough information to infer type argument for 'T'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:36 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:37 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:37 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:36 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:17 | Unresolved reference 'View'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:17 | Argument type mismatch: actual type is 'T (of fun <T> T.apply)', but 'View!' was expected.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:31 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:38:37 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:15 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:15 | Not enough information to infer type argument for 'T'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:39 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:39 | Function 'component1()' is ambiguous for this expression: fun <T> Array<out T>.component1(
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:39 | Function 'component2()' is ambiguous for this expression: fun <T> Array<out T>.component2(
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:53:27 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:53:37 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:64:41 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:64:49 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:77:15 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:77:15 | Not enough information to infer type argument for 'T'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:77:39 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/home/HomeFragment.kt:44:30 | Unresolved reference 'isOn'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/home/HomeFragment.kt:45:30 | Unresolved reference 'onCheckedChange'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/home/HomeFragment.kt:45:50 | An explicit type is required on a value parameter.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:7:39 | Unresolved reference 'ApiClient'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:31:17 | Unresolved reference 'ApiClient'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:45:19 | Unresolved reference 'ApiClient'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:46:17 | Unresolved reference 'ApiClient'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:47:17 | Unresolved reference 'ApiClient'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:67:13 | Unresolved reference 'ApiClient'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:73:22 | Unresolved reference 'ApiClient'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/main/MainActivity.kt:36:24 | Unresolved reference 'setTabs'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/main/MainActivity.kt:48:40 | Argument type mismatch: actual type is 'Int', but 'Boolean' was expected.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/main/MainActivity.kt:51:40 | Argument type mismatch: actual type is 'Int', but 'Boolean' was expected.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/main/MainActivity.kt:60:55 | Unresolved reference 'selectedIndexForSave'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderdetail/OrderDetailActivity.kt:32:17 | Unresolved reference 'navBar'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderdetail/OrderDetailActivity.kt:51:17 | Unresolved reference 'navBar'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderpool/OrderPoolFragment.kt:45:13 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderpool/OrderPoolFragment.kt:62:28 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderpool/OrderPoolFragment.kt:62:36 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderpool/OrderPoolFragment.kt:62:43 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderpool/OrderPoolFragment.kt:62:51 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orderpool/OrderPoolFragment.kt:67:45 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orders/OrdersFragment.kt:59:31 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orders/OrdersFragment.kt:59:42 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orders/OrdersFragment.kt:69:58 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/orders/OrdersFragment.kt:69:66 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:59:17 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:72:17 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:77:17 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:85:17 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:90:17 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:99:27 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:99:38 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:104:54 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:104:62 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:110:54 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:110:62 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:134:58 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:134:66 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:142:58 | Unresolved reference. None of the following candidates is applicable because of a receiver
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/profile/ProfileFragment.kt:142:66 | Unresolved reference. None of the following candidates is applicable because of a receiver

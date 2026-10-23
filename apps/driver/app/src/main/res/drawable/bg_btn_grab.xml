@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 抢单按钮：还原 order-pool.html .grab-btn（border-radius:18px） -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="135"
+        android:endColor="#FF5A1F"
+        android:startColor="#FF6B2C" />
+    <corners android:radius="18dp" />
+</shape>

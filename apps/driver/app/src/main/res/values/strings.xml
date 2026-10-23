@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">曙光骑手</string>
+
+    <!-- 登录 -->
+    <string name="login_title">骑手端登录</string>
+    <string name="login_subtitle">跑遍乡镇每个村，多劳多得日结</string>
+    <string name="login_phone_label">手机号</string>
+    <string name="login_phone_hint">请输入骑手手机号</string>
+    <string name="login_code_label">验证码</string>
+    <string name="login_code_hint">请输入6位验证码</string>
+    <string name="login_get_code">获取验证码</string>
+    <string name="login_tab_phone">手机号登录</string>
+    <string name="login_tab_email">邮箱登录</string>
+    <string name="login_email_label">邮箱</string>
+    <string name="login_email_hint">请输入邮箱</string>
+    <string name="login_password_label">密码</string>
+    <string name="login_password_hint">请输入密码</string>
+    <string name="login_submit">登录 / 注册骑手</string>
+    <string name="login_agreement_prefix">我已阅读并同意</string>
+    <string name="login_agreement_name">《骑手入驻协议》</string>
+    <string name="login_agreement_suffix">，需上传身份证和健康证完成审核</string>
+    <string name="login_footer_prefix">还没成为骑手？</string>
+    <string name="login_footer_link">免费注册加盟</string>
+
+    <!-- 工作台 -->
+    <string name="home_online_title">上线状态</string>
+    <string name="home_online_sub">● 正在接单 · 绿杨乡片区</string>
+    <string name="home_active_title">🚴 进行中订单</string>
+    <string name="home_active_status">待取货</string>
+    <string name="home_go_nav">🧭 导航去取餐</string>
+    <string name="home_today_label">今日已赚</string>
+    <string name="home_done_label">已完成单</string>
+    <string name="home_score_label">服务评分</string>
+
+    <!-- 接单大厅 -->
+    <string name="pool_title">接单大厅</string>
+
+    <!-- 配送详情 -->
+    <string name="detail_title">配送详情</string>
+    <string name="detail_contact_merchant">联系顾客</string>
+    <string name="detail_confirm">确认送达</string>
+
+    <!-- 导航 -->
+    <string name="nav_title_from">当前位置 → 取餐点</string>
+    <string name="nav_title_to">村口老陈家常菜</string>
+    <string name="nav_eta_big">5分钟</string>
+    <string name="nav_eta_small">预计到达取餐点</string>
+    <string name="nav_dist_big">1.2 km</string>
+    <string name="nav_dist_small">剩余距离</string>
+    <string name="nav_start">开始导航</string>
+
+    <!-- 我的订单 -->
+    <string name="orders_title">我的订单</string>
+
+    <!-- 每日签到 -->
+    <string name="checkin_title">每日签到</string>
+    <string name="checkin_hero_title">连续签到赚奖励</string>
+    <string name="checkin_hero_sub">每天上线跑单，额外奖励翻倍</string>
+    <string name="checkin_done">今日已签到</string>
+
+    <!-- 收入提现 -->
+    <string name="finance_title">收入提现</string>
+    <string name="finance_withdraw">提现到微信钱包（日结免手续费）</string>
+    <string name="finance_section">今日流水</string>
+
+    <!-- 我的 -->
+    <string name="profile_income">收入提现</string>
+    <string name="profile_range">我的配送范围</string>
+    <string name="profile_checkin">每日签到</string>
+    <string name="profile_level">骑手等级</string>
+    <string name="profile_cert">卡包管理</string>
+    <string name="profile_service">骑手客服</string>
+    <string name="profile_settings">设置</string>
+
+    <!-- 卡包管理 -->
+    <string name="wallet_title">卡包管理</string>
+    <string name="wallet_health">健康证</string>
+    <string name="wallet_health_note">唯一证件 · 骑手执业必须</string>
+    <string name="wallet_id">身份证</string>
+    <string name="wallet_id_note">唯一证件 · 实名认证</string>
+    <string name="wallet_cert_status">已认证</string>
+    <string name="wallet_banks">银行卡</string>
+    <string name="wallet_banks_note">支持绑定多张银行卡，用于收入提现到账</string>
+    <string name="wallet_add_bank">+ 添加银行卡</string>
+    <string name="wallet_empty">暂未绑定银行卡，请先添加</string>
+    <string name="wallet_bind_success">银行卡绑定成功</string>
+    <string name="wallet_unbind_success">银行卡已解绑</string>
+    <string name="wallet_unbind_title">解绑银行卡</string>
+    <string name="wallet_unbind_msg">解绑后该卡将无法用于提现到账，确认解绑？</string>
+    <string name="wallet_dialog_holder">持卡人姓名</string>
+    <string name="wallet_dialog_cardno">银行卡号</string>
+    <string name="wallet_dialog_bank">开户银行</string>
+    <string name="wallet_confirm">确认</string>
+    <string name="wallet_cancel">取消</string>
+</resources>

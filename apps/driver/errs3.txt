@@ -1,0 +1,24 @@
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:24:25 | Cannot infer type for this parameter. Specify it explicitly.所在位置 行:4 字符: 1+ & "C:\Users\jsong\.gradl
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:24:25 | Not enough information to infer type argument for 'T'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:25:36 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:26:37 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:27:37 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:9 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:9 | Not enough information to infer type argument for 'C'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:28:36 | No value passed for parameter 'third'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:15 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:15 | Not enough information to infer type argument for 'T'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:42:39 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:43:36 | Function 'component1()' is ambiguous for this expression: fun <T> Array<out T>.component1(): Tfun By
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:43:36 | Function 'component2()' is ambiguous for this expression: fun <T> Array<out T>.component2(): Tfun By
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:78:15 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:78:15 | Not enough information to infer type argument for 'T'.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/components/TabBarView.kt:78:39 | Cannot infer type for this parameter. Specify it explicitly.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:6:39 | Conflicting import: imported name 'ApiClient' is ambiguous.
+/code/github/dawn-errand/apps/driver/app/src/main/java/com/dawnerrand/driver/ui/screens/login/LoginViewModel.kt:8:39 | Conflicting import: imported name 'ApiClient' is ambiguous.[Incubating] Problems report is available

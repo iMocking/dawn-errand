@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 曙光跑腿骑手端 · 设计令牌（design/driver） -->
+    <!-- 主色系 -->
+    <color name="primary">#FF6B2C</color>
+    <color name="primary_light">#FF8A3D</color>
+    <color name="primary_dark">#FF5A1F</color>
+    <color name="reward">#FF4D4F</color>
+    <color name="success">#00B578</color>
+    <!-- 背景 -->
+    <color name="bg">#F5F6F8</color>
+    <color name="map_bg">#E8ECEB</color>
+    <!-- 文字层级 -->
+    <color name="text_primary">#1D2129</color>
+    <color name="text_secondary">#4E5969</color>
+    <color name="text_tertiary">#86909C</color>
+    <color name="text_faint">#C9CDD4</color>
+    <!-- 分割线 / 边框 -->
+    <color name="divider">#F2F3F5</color>
+    <color name="border">#E5E6EB</color>
+    <!-- 标签 / 状态 -->
+    <color name="chip_bg">#F2F3F5</color>
+    <color name="chip_active_bg">#FFF3E8</color>
+    <color name="drop_dot_bg">#E8F7F0</color>
+    <color name="gold_bg">#FFD666</color>
+    <color name="gold_text">#874D00</color>
+    <color name="purple">#722ED1</color>
+    <color name="orange_deep">#FA8C16</color>
+    <color name="blue">#2B7FFF</color>
+    <!-- 白色 / 半透明白 -->
+    <color name="white">#FFFFFF</color>
+    <color name="white_25">#40FFFFFF</color>
+    <color name="white_20">#33FFFFFF</color>
+    <color name="white_90">#E6FFFFFF</color>
+    <color name="white_85">#D9FFFFFF</color>
+    <!-- 图标深色 -->
+    <color name="ink">#141414</color>
+    <!-- 地图覆盖渐变 -->
+    <color name="scrim_top">#4D000000</color>
+    <color name="transparent">#00000000</color>
+</resources>
