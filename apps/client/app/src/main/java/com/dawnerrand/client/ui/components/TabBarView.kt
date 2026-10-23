@@ -22,8 +22,8 @@ class TabBarView @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
     private val items = listOf(
-        Pair(R.drawable.ic_tab_home, "首页"),
-        Pair(R.drawable.ic_tab_errand, "跑腿"),
+        Pair(R.drawable.ic_tab_home_bowl, "首页"),
+        Pair(R.drawable.ic_tab_errand_scooter, "跑腿"),
         Pair(R.drawable.ic_tab_orders, "订单"),
         Pair(R.drawable.ic_user, "我的"),
     )

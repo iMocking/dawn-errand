@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dawnerrand.client.R
@@ -16,12 +17,13 @@ import com.dawnerrand.client.data.Dish
 import com.dawnerrand.client.data.Merchant
 import com.dawnerrand.client.ui.screens.orderconfirm.OrderConfirmActivity
 import com.dawnerrand.client.ui.theme.Design
+import com.dawnerrand.client.ui.util.confirmDialog
 import com.dawnerrand.client.ui.util.dp
 import com.dawnerrand.client.ui.util.padBottomWithNavBar
 import com.dawnerrand.client.ui.util.padTopWithStatusBar
 import com.dawnerrand.client.ui.util.toast
 
-/** 商家详情：渐变 Hero + 信息卡 + 分类 chips + 菜品 + 深色购物车栏 */
+/** 商家详情：渐变 Hero + 信息卡 + 分类 chips + 菜品 + 深色购物车栏。 */
 class MerchantDetailActivity : AppCompatActivity() {
     private val ctx: android.content.Context get() = this
 
@@ -31,6 +33,8 @@ class MerchantDetailActivity : AppCompatActivity() {
     private lateinit var tvTotal: TextView
     private lateinit var tvBadge: TextView
     private lateinit var btnCheckout: TextView
+    private lateinit var dishList: LinearLayout
+    private var categories: List<String> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,13 +43,25 @@ class MerchantDetailActivity : AppCompatActivity() {
         window.decorView.padBottomWithNavBar()
 
         val id = intent.getStringExtra("merchant_id") ?: "m1"
-        merchant = DemoRepository.merchants.first { it.id == id }
+        merchant = DemoRepository.merchantById(id)
 
         findViewById<View>(R.id.btnBack).setOnClickListener { finish() }
         tvTotal = findViewById(R.id.cartTotal)
         tvBadge = findViewById(R.id.cartBadge)
         btnCheckout = findViewById(R.id.btnCheckout)
+        dishList = findViewById(R.id.dishList)
         btnCheckout.setOnClickListener { checkout() }
+        findViewById<View>(R.id.cartBar).setOnLongClickListener {
+            if (DemoRepository.cartCountFor(merchant.id) > 0) {
+                ctx.confirmDialog("清空购物车", "确定清空当前商家的购物车吗？") {
+                    DemoRepository.clearCart(merchant.id)
+                    renderCart()
+                    renderDishes()
+                    ctx.toast("购物车已清空")
+                }
+            }
+            true
+        }
 
         // Hero 渐变
         val hero = findViewById<View>(R.id.hero)
@@ -67,19 +83,23 @@ class MerchantDetailActivity : AppCompatActivity() {
         tags.addView(stag("新用户立减3元", Design.SUCCESS))
 
         // 分类 chips
-        val cats = listOf("🔥 热销爆款", "招牌炒菜", "家常小炒", "汤类炖菜", "主食米饭")
+        categories = DemoRepository.categoriesFor(merchant.id)
         val catRow = findViewById<LinearLayout>(R.id.catRow)
-        cats.forEachIndexed { i, c ->
+        categories.forEachIndexed { i, c ->
             catTabs.add(buildCatChip(i, c))
             catRow.addView(catTabs[i])
         }
         renderCats()
-
-        // 菜品
-        val dishList = findViewById<LinearLayout>(R.id.dishList)
-        DemoRepository.dishes.forEach { dishList.addView(buildDishCard(it)) }
-
+        renderDishes()
         renderCart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::dishList.isInitialized) {
+            renderDishes()
+            renderCart()
+        }
     }
 
     private fun stag(text: String, color: Int): TextView = TextView(this).apply {
@@ -105,6 +125,7 @@ class MerchantDetailActivity : AppCompatActivity() {
             setOnClickListener {
                 currentCat = index
                 renderCats()
+                renderDishes()
             }
         }
         chip.addView(TextView(this).apply {
@@ -127,6 +148,23 @@ class MerchantDetailActivity : AppCompatActivity() {
                 if (active) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
             )
         }
+    }
+
+    private fun renderDishes() {
+        dishList.removeAllViews()
+        val category = categories.getOrElse(currentCat) { categories.firstOrNull() ?: "🔥 热销爆款" }
+        val dishes = DemoRepository.dishesForCategory(merchant.id, category)
+        if (dishes.isEmpty()) {
+            dishList.addView(TextView(this).apply {
+                text = "该分类暂无商品，看看其他分类吧"
+                setTextColor(Design.TEXT_FAINT)
+                textSize = 13f
+                gravity = Gravity.CENTER
+                setPadding(0, ctx.dp(60), 0, ctx.dp(60))
+            })
+            return
+        }
+        dishes.forEach { dishList.addView(buildDishCard(it)) }
     }
 
     private fun buildDishCard(dish: Dish): LinearLayout {
@@ -179,27 +217,77 @@ class MerchantDetailActivity : AppCompatActivity() {
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         })
-        bottom.addView(ImageView(this).apply {
-            setImageResource(R.drawable.ic_add)
-            background = ContextCompat.getDrawable(this@MerchantDetailActivity, R.drawable.bg_btn)
-            layoutParams = LinearLayout.LayoutParams(ctx.dp(28), ctx.dp(28))
-            setColorFilter(Design.WHITE)
-            scaleType = ImageView.ScaleType.CENTER_INSIDE
-            isClickable = true
-            setOnClickListener {
-                DemoRepository.addDish(dish)
-                renderCart()
-                ctx.toast("已加入购物车：${dish.name}")
-            }
-        })
+        bottom.addView(buildQtyControl(dish))
         info.addView(bottom)
         card.addView(info)
         return card
     }
 
+    private fun buildQtyControl(dish: Dish): LinearLayout {
+        val count = DemoRepository.cartCountOf(dish.id)
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        if (count > 0) {
+            box.addView(TextView(this).apply {
+                text = "−"
+                textSize = 18f
+                gravity = Gravity.CENTER
+                setTextColor(Design.PRIMARY)
+                background = ContextCompat.getDrawable(this@MerchantDetailActivity, R.drawable.bg_chip)
+                layoutParams = LinearLayout.LayoutParams(ctx.dp(26), ctx.dp(26))
+                isClickable = true
+                setOnClickListener {
+                    DemoRepository.removeDish(dish)
+                    renderDishes()
+                    renderCart()
+                }
+            })
+            box.addView(TextView(this).apply {
+                text = count.toString()
+                textSize = 14f
+                gravity = Gravity.CENTER
+                setTextColor(Design.TEXT_PRIMARY)
+                typeface = android.graphics.Typeface.DEFAULT_BOLD
+                layoutParams = LinearLayout.LayoutParams(ctx.dp(30), ctx.dp(26))
+            })
+        }
+        box.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_add)
+            background = ContextCompat.getDrawable(this@MerchantDetailActivity, R.drawable.bg_btn)
+            layoutParams = LinearLayout.LayoutParams(ctx.dp(26), ctx.dp(26))
+            setColorFilter(Design.WHITE)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            isClickable = true
+            setOnClickListener { addDish(dish) }
+        })
+        return box
+    }
+
+    private fun addDish(dish: Dish) {
+        if (DemoRepository.addDish(merchant.id, dish)) {
+            renderDishes()
+            renderCart()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle("购物车已有其他商家的商品")
+            .setMessage("添加当前商家的商品将清空原购物车，是否继续？")
+            .setNegativeButton("取消", null)
+            .setPositiveButton("清空并添加") { _, _ ->
+                DemoRepository.clearCart(merchant.id)
+                DemoRepository.addDish(merchant.id, dish)
+                renderDishes()
+                renderCart()
+                ctx.toast("已加入购物车：${dish.name}")
+            }
+            .show()
+    }
+
     private fun renderCart() {
-        val count = DemoRepository.cartCount()
-        val total = DemoRepository.cartTotal()
+        val count = DemoRepository.cartCountFor(merchant.id)
+        val total = DemoRepository.cartTotalFor(merchant.id)
         tvTotal.text = "¥${if (count > 0) "%.1f".format(total) else "0"}"
         if (count > 0) {
             tvBadge.visibility = View.VISIBLE
@@ -210,7 +298,7 @@ class MerchantDetailActivity : AppCompatActivity() {
     }
 
     private fun checkout() {
-        if (DemoRepository.cart.isEmpty()) {
+        if (DemoRepository.cartCountFor(merchant.id) == 0) {
             ctx.toast("购物车为空，先加几道菜吧")
             return
         }

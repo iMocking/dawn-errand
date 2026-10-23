@@ -2,4 +2,7 @@
 <!-- 优惠券左区（过期 灰） -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="#F2F3F5" />
+    <corners
+        android:topLeftRadius="14dp"
+        android:bottomLeftRadius="14dp" />
 </shape>

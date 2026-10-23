@@ -7,10 +7,12 @@
 
     <!-- 导航栏 -->
     <LinearLayout
+        android:id="@+id/navBar"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="wrap_content"
         android:background="@color/white"
         android:gravity="center_vertical"
+        android:minHeight="44dp"
         android:orientation="horizontal">
 
         <ImageView
@@ -63,10 +65,13 @@
                 android:padding="16dp">
 
                 <LinearLayout
+                    android:id="@+id/rowPick"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
                     <View
                         android:layout_width="10dp"
@@ -98,6 +103,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvPickSub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
@@ -125,6 +131,7 @@
                     android:background="@color/divider" />
 
                 <LinearLayout
+                    android:id="@+id/rowDrop"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
@@ -161,6 +168,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvDropSub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
@@ -168,6 +176,12 @@
                             android:textColor="@color/text_tertiary"
                             android:textSize="12sp" />
                     </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:contentDescription="选择地址"
+                        android:src="@drawable/ic_chevron_right" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -277,6 +291,7 @@
                     android:orientation="horizontal">
 
                     <TextView
+                        android:id="@+id/tvFeeLabel"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -285,6 +300,7 @@
                         android:textSize="13sp" />
 
                     <TextView
+                        android:id="@+id/tvFee"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="¥8.0"
@@ -337,6 +353,7 @@
                         android:textSize="13sp" />
 
                     <TextView
+                        android:id="@+id/tvPrepay"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="¥8.0"
@@ -375,6 +392,7 @@
                 android:textSize="11sp" />
 
             <TextView
+                android:id="@+id/tvBottomFee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="¥8.0"

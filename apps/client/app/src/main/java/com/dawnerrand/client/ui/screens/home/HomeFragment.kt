@@ -18,7 +18,9 @@ import androidx.fragment.app.Fragment
 import com.dawnerrand.client.R
 import com.dawnerrand.client.data.DemoRepository
 import com.dawnerrand.client.data.Merchant
+import com.dawnerrand.client.ui.screens.address.AddressActivity
 import com.dawnerrand.client.ui.screens.errand.ErrandActivity
+import com.dawnerrand.client.ui.screens.main.MainActivity
 import com.dawnerrand.client.ui.screens.merchant.MerchantDetailActivity
 import com.dawnerrand.client.ui.screens.search.SearchActivity
 import com.dawnerrand.client.ui.theme.Design
@@ -55,6 +57,22 @@ class HomeFragment : Fragment() {
         return scroll
     }
 
+    override fun onResume() {
+        super.onResume()
+        refreshHeader()
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) refreshHeader()
+    }
+
+    private fun refreshHeader() {
+        view?.findViewById<TextView>(R.id.tvGreeting)?.text = DemoRepository.greeting() + "，"
+        view?.findViewById<TextView>(R.id.tvName)?.text = DemoRepository.currentUser.name + " 👋"
+        view?.findViewById<TextView>(R.id.tvLocation)?.text = DemoRepository.shortLocation()
+    }
+
     // ---------- 渐变问候区 ----------
     private fun buildHeader(): LinearLayout {
         val header = LinearLayout(requireContext()).apply {
@@ -68,13 +86,15 @@ class HomeFragment : Fragment() {
             gravity = Gravity.CENTER_VERTICAL
         }
         helloRow.addView(TextView(requireContext()).apply {
-            text = "中午好，"
+            id = R.id.tvGreeting
+            text = DemoRepository.greeting() + "，"
             setTextColor(Design.WHITE)
             textSize = 28f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
         })
         helloRow.addView(TextView(requireContext()).apply {
-            text = "王建国 👋"
+            id = R.id.tvName
+            text = DemoRepository.currentUser.name + " 👋"
             setTextColor(Design.WHITE)
             textSize = 28f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
@@ -85,6 +105,10 @@ class HomeFragment : Fragment() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, ctx.dp(8), 0, 0)
+            isClickable = true
+            setOnClickListener {
+                startActivity(Intent(requireContext(), AddressActivity::class.java))
+            }
         }
         locRow.addView(ImageView(requireContext()).apply {
             setImageResource(R.drawable.ic_pin)
@@ -92,7 +116,8 @@ class HomeFragment : Fragment() {
             layoutParams = LinearLayout.LayoutParams(ctx.dp(12), ctx.dp(12))
         })
         locRow.addView(TextView(requireContext()).apply {
-            text = "王家湾村三组 · 红砖大铁门"
+            id = R.id.tvLocation
+            text = DemoRepository.shortLocation()
             setTextColor(Design.WHITE)
             textSize = 13f
             setPadding(ctx.dp(6), 0, 0, 0)
@@ -143,7 +168,8 @@ class HomeFragment : Fragment() {
                 .putExtra("merchant_id", "m1"))
         })
         row.addView(buildSceneCard("🏃 跑个腿", "代买代取代送", R.drawable.bg_scene_run) {
-            startActivity(Intent(requireContext(), ErrandActivity::class.java))
+            (activity as? MainActivity)?.selectTab(1)
+                ?: startActivity(Intent(requireContext(), ErrandActivity::class.java))
         })
         return row
     }
@@ -158,7 +184,7 @@ class HomeFragment : Fragment() {
             setPadding(ctx.dp(16), 0, ctx.dp(14), 0)
             layoutParams = LinearLayout.LayoutParams(0, ctx.dp(76), 1f)
             (layoutParams as LinearLayout.LayoutParams).let {
-                if (title.contains("跑")) it.rightMargin = ctx.dp(10) else it.leftMargin = ctx.dp(10)
+                if (title.contains("跑")) it.leftMargin = ctx.dp(10) else it.rightMargin = ctx.dp(10)
             }
             isClickable = true
             setOnClickListener { onClick() }
@@ -197,6 +223,12 @@ class HomeFragment : Fragment() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(ctx.dp(16), ctx.dp(20), ctx.dp(16), ctx.dp(10))
+            if (more != null) {
+                isClickable = true
+                setOnClickListener {
+                    startActivity(Intent(requireContext(), SearchActivity::class.java))
+                }
+            }
         }
         head.addView(TextView(requireContext()).apply {
             text = title

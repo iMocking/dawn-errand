@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tvGreeting" type="id" />
+    <item name="tvName" type="id" />
+    <item name="tvLocation" type="id" />
+</resources>

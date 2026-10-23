@@ -118,6 +118,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/tvTrackStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="骑手正在取货，马上送到"
@@ -126,6 +127,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvTrackEta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
@@ -135,6 +137,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/btnCallRider"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:contentDescription="电话"
@@ -150,12 +153,14 @@
             android:orientation="horizontal">
 
             <View
+                android:id="@+id/progress1"
                 android:layout_width="0dp"
                 android:layout_height="3dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_progress_done" />
 
             <View
+                android:id="@+id/progress2"
                 android:layout_width="0dp"
                 android:layout_height="3dp"
                 android:layout_weight="1"
@@ -169,6 +174,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvStep1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -177,6 +183,7 @@
                 android:textSize="11sp" />
 
             <TextView
+                android:id="@+id/tvStep2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -186,6 +193,7 @@
                 android:textSize="11sp" />
 
             <TextView
+                android:id="@+id/tvStep3"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -198,6 +206,7 @@
 
     <!-- 骑手卡 -->
     <LinearLayout
+        android:id="@+id/riderCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
@@ -215,7 +224,8 @@
                 android:layout_width="26dp"
                 android:layout_height="26dp"
                 android:contentDescription="头像"
-                android:src="@drawable/ic_user" />
+                android:src="@drawable/ic_user"
+                android:tint="@color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -226,6 +236,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tvRiderName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="李师傅 · 鄂J 8D621"
@@ -234,6 +245,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvRiderMeta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"

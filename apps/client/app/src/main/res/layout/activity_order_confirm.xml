@@ -43,6 +43,7 @@
 
             <!-- 地址卡 -->
             <LinearLayout
+                android:id="@+id/cardAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -74,18 +75,20 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tvAddressName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="王建国 138****8888"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvAddressDetail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="王家湾村三组26号 · 红砖大铁门，门口有棵樟树"
+                        android:ellipsize="end"
+                        android:maxLines="1"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -180,6 +183,7 @@
                     android:background="@color/divider" />
 
                 <LinearLayout
+                    android:id="@+id/rowRemark"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -196,9 +200,10 @@
                         android:textSize="13sp" />
 
                     <TextView
+                        android:id="@+id/tvRemark"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="少辣，米饭要热的"
+                        android:text="选填"
                         android:textColor="@color/text_tertiary"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -217,6 +222,7 @@
                 android:paddingRight="16dp">
 
                 <LinearLayout
+                    android:id="@+id/rowPay"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -233,6 +239,7 @@
                         android:textSize="13sp" />
 
                     <TextView
+                        android:id="@+id/tvPay"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="微信支付"
@@ -253,6 +260,7 @@
                     android:background="@color/divider" />
 
                 <LinearLayout
+                    android:id="@+id/rowCoupon"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -269,11 +277,19 @@
                         android:textSize="13sp" />
 
                     <TextView
+                        android:id="@+id/tvCoupon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="已减 ¥3"
-                        android:textColor="@color/primary"
+                        android:text="选择优惠券"
+                        android:textColor="@color/text_tertiary"
                         android:textSize="13sp" />
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginLeft="4dp"
+                        android:contentDescription="选择"
+                        android:src="@drawable/ic_chevron_right" />
                 </LinearLayout>
             </LinearLayout>
 
