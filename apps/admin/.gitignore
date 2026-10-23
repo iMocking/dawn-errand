@@ -3,3 +3,4 @@ verify-shots
 dist
 *.log
 .DS_Store
+dist
