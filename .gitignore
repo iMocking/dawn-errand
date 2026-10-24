@@ -8,3 +8,4 @@ go.sum
 
 # 日志
 *.log
+/tools

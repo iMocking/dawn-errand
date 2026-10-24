@@ -80,7 +80,7 @@ export default defineConfig(({ mode }) => {
       open: true,
       host: '0.0.0.0',
       cors: true,
-      port: 5173,
+      port: 3000,
       proxy: useMock
         ? undefined
         : {

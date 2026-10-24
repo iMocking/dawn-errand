@@ -17,7 +17,9 @@ onMounted(() => {
   <div class="flex min-h-screen flex-col bg-page">
     <SiteNav />
     <main class="flex-1">
-      <router-view />
+      <transition name="fade" mode="out-in">
+        <router-view />
+      </transition>
     </main>
     <SiteFooter />
   </div>
