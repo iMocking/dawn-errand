@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>常见问题 · 曙光跑腿 Dawn Errand</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6B2C'/%3E%3Cpath d='M9 19c4 0 6-2 6-6' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='21' cy='13' r='4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#F5F6F8; color:#1D2129; -webkit-font-smoothing:antialiased; line-height:1.6; }
+  a { color:inherit; text-decoration:none; }
+  img, svg { display:block; }
+  .wrap { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+  .nav { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #E5E6EB; }
+  .nav-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand-logo { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#FF8A3D,#FF6B2C); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .brand-name { font-size:18px; font-weight:700; color:#1D2129; letter-spacing:.5px; }
+  .brand-sub { font-size:11px; color:#86909C; }
+  .nav-links { display:none; align-items:center; gap:4px; }
+  .nav-links a { display:block; padding:9px 14px; border-radius:8px; font-size:14px; color:#4E5969; transition:background .15s,color .15s; }
+  .nav-links a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .nav-links a.on { color:#FF6B2C; font-weight:600; }
+  .nav-cta { display:none; align-items:center; gap:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; cursor:pointer; font-family:inherit; border-radius:8px; font-size:14px; font-weight:600; transition:filter .15s,box-shadow .15s,background .15s; }
+  .btn:active { transform:translateY(1px); }
+  .btn-primary { background:linear-gradient(135deg,#FF8A3D,#FF6B2C); color:#fff; box-shadow:0 6px 16px rgba(255,107,44,.32); }
+  .btn-primary:hover { filter:brightness(1.05); box-shadow:0 8px 20px rgba(255,107,44,.4); }
+  .btn-ghost { background:#FFF3E8; color:#FF6B2C; }
+  .btn-ghost:hover { background:#FFE9D5; }
+  .btn-sm { height:38px; padding:0 16px; }
+  .nav .btn { height:38px; padding:0 18px; }
+  .burger { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:none; background:none; cursor:pointer; border-radius:8px; }
+  .burger:hover { background:#F5F6F8; }
+  .mobile-menu { display:none; background:#fff; border-top:1px solid #E5E6EB; padding:8px 0 16px; }
+  .mobile-menu.open { display:block; }
+  .mobile-menu a { display:block; padding:13px 20px; font-size:15px; color:#4E5969; }
+  .mobile-menu a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .mobile-menu .btn { margin:10px 20px 4px; width:calc(100% - 40px); }
+
+  .page-head { background:linear-gradient(150deg,#FF8A3D 0%,#FF6B2C 60%,#F2531C 100%); color:#fff; padding:52px 0 48px; position:relative; overflow:hidden; }
+  .page-head::before { content:""; position:absolute; right:-90px; top:-90px; width:280px; height:280px; border-radius:50%; background:rgba(255,255,255,.10); }
+  .page-head .kicker { display:inline-block; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 12px; border-radius:20px; letter-spacing:1px; }
+  .page-head h1 { margin-top:14px; font-size:28px; font-weight:800; letter-spacing:.5px; }
+  .page-head p { margin-top:10px; font-size:14px; color:rgba(255,255,255,.9); max-width:560px; }
+
+  section.block { padding:44px 0; }
+  .faq-col { display:grid; grid-template-columns:1fr; gap:12px; }
+  .faq-item { background:#fff; border:1px solid #E5E6EB; border-radius:12px; }
+  .faq-item summary { list-style:none; cursor:pointer; padding:17px 18px; font-size:14px; font-weight:600; color:#1D2129; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .faq-item summary::-webkit-details-marker { display:none; }
+  .faq-item summary .plus { color:#FF6B2C; font-size:18px; line-height:1; transition:transform .2s; flex-shrink:0; }
+  .faq-item[open] summary .plus { transform:rotate(45deg); }
+  .faq-item .body { padding:0 18px 17px; font-size:13px; color:#4E5969; line-height:1.8; }
+  .faq-item .body a { color:#FF6B2C; font-weight:600; }
+  .faq-note { margin-top:24px; background:#FFF3E8; border:1px solid #FFD9BD; border-radius:14px; padding:18px 20px; font-size:13px; color:#4E5969; line-height:1.8; text-align:center; }
+  .faq-note b { color:#FF6B2C; }
+
+  .footer { background:#fff; border-top:1px solid #E5E6EB; padding:40px 0 28px; margin-top:44px; }
+  .footer-grid { display:grid; grid-template-columns:1fr; gap:24px; }
+  .footer h4 { font-size:14px; font-weight:700; color:#1D2129; margin-bottom:12px; }
+  .footer a.link { display:block; font-size:13px; color:#4E5969; padding:4px 0; }
+  .footer a.link:hover { color:#FF6B2C; }
+  .footer .brand-about { font-size:13px; color:#86909C; line-height:1.8; margin-top:8px; }
+  .footer-bottom { border-top:1px solid #E5E6EB; margin-top:28px; padding-top:18px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:#86909C; }
+
+  @media (min-width:768px) {
+    .wrap { padding:0 32px; }
+    .page-head { padding:64px 0 56px; }
+    .page-head h1 { font-size:34px; }
+    .faq-col { grid-template-columns:1fr 1fr; column-gap:16px; }
+    .footer-grid { grid-template-columns:2fr 1fr 1fr 1fr; }
+    .footer-bottom { flex-direction:row; justify-content:space-between; }
+  }
+  @media (min-width:1024px) {
+    .nav-links { display:flex; }
+    .nav-cta { display:flex; }
+    .burger { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="曙光跑腿首页">
+      <span class="brand-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+      <span><span class="brand-name">曙光跑腿</span><span class="brand-sub">Dawn Errand</span></span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      <a href="index.html">首页</a>
+      <a href="download.html">下载中心</a>
+      <a href="faq.html" class="on">常见问题</a>
+      <a href="contact.html">商务合作</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="download.html">立即下载</a>
+      <a class="btn btn-primary btn-sm" href="contact.html">商务合作</a>
+    </div>
+    <button class="burger" id="burger" aria-label="打开菜单" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">首页</a>
+    <a href="download.html">下载中心</a>
+    <a href="faq.html">常见问题</a>
+    <a href="contact.html">商务合作</a>
+    <a class="btn btn-primary" href="download.html">立即下载</a>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="kicker">FAQ</span>
+    <h1>常见问题</h1>
+    <p>入驻、配送、结算与安全相关的常见疑问，帮助用户、商家与骑手快速上手。</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="faq-col">
+
+      <div class="faq-item">
+        <details open>
+          <summary><span>平台如何收费？</span><span class="plus">+</span></summary>
+          <div class="body">平台按区域配置配送费率与抽成规则，具体费率由各区域站根据当地运力与订单规模设定。入驻前可与商务团队确认当前区域的费率方案。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>商家如何入驻？需要什么资质？</span><span class="plus">+</span></summary>
+          <div class="body">在商家端提交入驻资料（营业执照、门店信息、联系人等），平台审核通过后即可开店。支持资质上传与在线审核，商家可自主管理菜单与营业状态。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>骑手如何结算？多久可以提现？</span><span class="plus">+</span></summary>
+          <div class="body">骑手按单结算，收入明细实时可见；平台按结算周期统一核算，支持提现申请与审核。具体结算周期以所在区域站规则为准。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>支持哪些区域运营？</span><span class="plus">+</span></summary>
+          <div class="body">平台采用多租户架构，支持多城市、多区域站独立运营。各区域可独立配置费率、运力与运营策略，适合乡镇、县城与社区等本地市场。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>用户如何下单与支付？</span><span class="plus">+</span></summary>
+          <div class="body">用户下载 App 后填写取送信息即可下单，支持跑腿与外卖两种场景。当前版本支持在线支付与货到付款，支付网关能力规划中。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>订单配送如何保障时效？</span><span class="plus">+</span></summary>
+          <div class="body">系统按距离与运力自动派单，支持骑手抢单与后台指派。配送调度引擎（地图 LBS、路线规划与 ETA）规划中，将进一步优化配送时效。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>账号安全如何保障？</span><span class="plus">+</span></summary>
+          <div class="body">采用邮箱 / 短信验证码登录，JWT 会话轮换机制，AES-GCM 加密敏感数据，全链路 HTTPS 传输，并支持审计日志追溯。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>遇到问题如何联系客服？</span><span class="plus">+</span></summary>
+          <div class="body">可联系所在区域站的运营人员，或通过官网商务合作页提交需求。演示站点请通过 <a href="contact.html">商务合作</a> 页联系方式联系。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>是否支持自定义品牌与区域费率？</span><span class="plus">+</span></summary>
+          <div class="body">支持。平台面向多租户运营，各区域站可配置独立费率、公告与运营策略，满足本地化运营需求。</div>
+        </details>
+      </div>
+      <div class="faq-item">
+        <details>
+          <summary><span>平台有哪些角色与权限？</span><span class="plus">+</span></summary>
+          <div class="body">平台内置七角色 RBAC 权限体系，覆盖平台管理员、区域管理员、商家、骑手、用户等角色，数据相互隔离、权限细粒度可控。</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="faq-note">
+      <b>仍有疑问？</b> 查看 <a href="contact.html" style="color:#FF6B2C;font-weight:600;">商务合作与联系方式</a>，提交你的问题，我们会尽快回复。
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <span class="brand-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span><span class="brand-name" style="font-size:16px;">曙光跑腿</span><span class="brand-sub" style="display:block;">Dawn Errand</span></span>
+        </div>
+        <p class="brand-about">面向乡镇与本地市场的跑腿 / 外卖 SaaS 平台，多端覆盖、可商用的本地即时配送解决方案。</p>
+      </div>
+      <div>
+        <h4>产品</h4>
+        <a class="link" href="index.html">产品介绍</a>
+        <a class="link" href="download.html">多端下载</a>
+        <a class="link" href="index.html#roadmap">版本动态</a>
+        <a class="link" href="faq.html">常见问题</a>
+      </div>
+      <div>
+        <h4>合作</h4>
+        <a class="link" href="contact.html">商务合作</a>
+        <a class="link" href="contact.html#city">城市合伙人</a>
+        <a class="link" href="contact.html#merchant">商家入驻</a>
+        <a class="link" href="contact.html#rider">骑手招募</a>
+      </div>
+      <div>
+        <h4>联系与支持</h4>
+        <a class="link" href="contact.html">联系我们</a>
+        <a class="link" href="faq.html">帮助中心</a>
+        <a class="link" href="download.html">管理后台入口</a>
+        <a class="link" href="mailto:hello@shuguang.local" style="font-size:13px;">hello@shuguang.local</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 曙光跑腿 Dawn Errand · 项目演示官网</span>
+      <span>本站为产品设计稿，联系方式为演示占位，实际合作请通过正式渠道联系。</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  menu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ menu.classList.remove('open'); burger.setAttribute('aria-expanded','false'); });
+  });
+})();
+</script>
+</body>
+</html>

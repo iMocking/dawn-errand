@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>历史版本 · 曙光跑腿 Dawn Errand</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6B2C'/%3E%3Cpath d='M9 19c4 0 6-2 6-6' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='21' cy='13' r='4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#F5F6F8; color:#1D2129; -webkit-font-smoothing:antialiased; line-height:1.6; }
+  a { color:inherit; text-decoration:none; }
+  img, svg { display:block; }
+  .wrap { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+  .nav { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #E5E6EB; }
+  .nav-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand-logo { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#FF8A3D,#FF6B2C); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .brand-name { font-size:18px; font-weight:700; color:#1D2129; letter-spacing:.5px; }
+  .brand-sub { font-size:11px; color:#86909C; }
+  .nav-links { display:none; align-items:center; gap:4px; }
+  .nav-links a { display:block; padding:9px 14px; border-radius:8px; font-size:14px; color:#4E5969; transition:background .15s,color .15s; }
+  .nav-links a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .nav-links a.on { color:#FF6B2C; font-weight:600; }
+  .nav-cta { display:none; align-items:center; gap:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; cursor:pointer; font-family:inherit; border-radius:8px; font-size:14px; font-weight:600; transition:filter .15s,box-shadow .15s,background .15s; }
+  .btn:active { transform:translateY(1px); }
+  .btn-primary { background:linear-gradient(135deg,#FF8A3D,#FF6B2C); color:#fff; box-shadow:0 6px 16px rgba(255,107,44,.32); }
+  .btn-primary:hover { filter:brightness(1.05); box-shadow:0 8px 20px rgba(255,107,44,.4); }
+  .btn-ghost { background:#FFF3E8; color:#FF6B2C; }
+  .btn-ghost:hover { background:#FFE9D5; }
+  .btn-sm { height:38px; padding:0 16px; }
+  .nav .btn { height:38px; padding:0 18px; }
+  .burger { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:none; background:none; cursor:pointer; border-radius:8px; }
+  .burger:hover { background:#F5F6F8; }
+  .mobile-menu { display:none; background:#fff; border-top:1px solid #E5E6EB; padding:8px 0 16px; }
+  .mobile-menu.open { display:block; }
+  .mobile-menu a { display:block; padding:13px 20px; font-size:15px; color:#4E5969; }
+  .mobile-menu a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .mobile-menu .btn { margin:10px 20px 4px; width:calc(100% - 40px); }
+
+  /* 页头 */
+  .page-head { background:linear-gradient(150deg,#FF8A3D 0%,#FF6B2C 60%,#F2531C 100%); color:#fff; padding:52px 0 48px; position:relative; overflow:hidden; }
+  .page-head::before { content:""; position:absolute; right:-90px; top:-90px; width:280px; height:280px; border-radius:50%; background:rgba(255,255,255,.10); }
+  .page-head .kicker { display:inline-block; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 12px; border-radius:20px; letter-spacing:1px; }
+  .page-head h1 { margin-top:14px; font-size:28px; font-weight:800; letter-spacing:.5px; }
+  .page-head p { margin-top:10px; font-size:14px; color:rgba(255,255,255,.9); max-width:560px; line-height:1.8; }
+  .page-head .back { display:inline-flex; align-items:center; gap:6px; margin-top:18px; font-size:13px; color:rgba(255,255,255,.95); background:rgba(255,255,255,.16); padding:8px 14px; border-radius:8px; transition:background .15s; }
+  .page-head .back:hover { background:rgba(255,255,255,.28); }
+  .page-head .back svg { transform:rotate(180deg); }
+
+  section.block { padding:44px 0; }
+  .sec-head { margin-bottom:26px; }
+  .sec-head h2 { font-size:20px; font-weight:800; color:#1D2129; }
+  .sec-head p { margin-top:8px; font-size:13px; color:#86909C; }
+  .ver-head { margin-top:44px; }
+
+  /* 端切换 */
+  .app-tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:26px; }
+  .app-tabs .tab { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:10px; border:1px solid #E5E6EB; background:#fff; font-size:13px; font-weight:600; color:#4E5969; cursor:pointer; transition:border-color .15s,color .15s,background .15s; }
+  .app-tabs .tab:hover { border-color:#FF8A3D; color:#FF6B2C; }
+  .app-tabs .tab.on { border-color:#FF6B2C; background:#FFF3E8; color:#FF6B2C; }
+  .app-tabs .tab svg { width:16px; height:16px; stroke:#86909C; }
+  .app-tabs .tab.on svg { stroke:#FF6B2C; }
+
+  /* 平台卡 */
+  .grid-plat { display:grid; grid-template-columns:1fr; gap:14px; }
+  .plat { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:20px; display:flex; flex-direction:column; }
+  .plat .row { display:flex; align-items:center; gap:12px; }
+  .plat .p-ico { width:46px; height:46px; border-radius:11px; background:#FFF3E8; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .plat .p-ico svg { stroke:#FF6B2C; }
+  .plat h3 { font-size:15px; font-weight:700; }
+  .plat .p-note { font-size:12px; color:#86909C; }
+  .plat .p-latest { margin:14px 0; font-size:13px; color:#4E5969; }
+  .plat .p-latest b { margin-left:6px; font-size:15px; color:#1D2129; font-weight:700; }
+  .plat .btn { width:100%; height:46px; padding:0 18px; }
+  .plat.coming .p-ico { background:#F5F6F8; } .plat.coming .p-ico svg { stroke:#86909C; }
+  .btn-disabled { background:#F5F6F8; color:#86909C; cursor:not-allowed; }
+
+  /* 历史版本 */
+  .ver-list { display:flex; flex-direction:column; gap:12px; }
+  .ver { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+  .ver-main { flex:1; min-width:0; }
+  .ver-tags { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .ver-tag { font-size:13px; font-weight:700; color:#FF6B2C; background:#FFF3E8; border:1px solid #FFD9BD; padding:3px 10px; border-radius:6px; letter-spacing:.3px; }
+  .ver-date { font-size:12px; color:#86909C; }
+  .ver-note { margin-top:8px; font-size:13px; color:#4E5969; line-height:1.7; }
+  .ver-pkgs { display:flex; gap:8px; flex-wrap:wrap; }
+  .pkg { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; font-family:inherit; border-radius:6px; padding:6px 11px; cursor:pointer; transition:background .15s,filter .15s; }
+  .pkg svg { width:14px; height:14px; }
+  .pkg.on { background:#FFF3E8; color:#FF6B2C; border:1px solid #FFD9BD; } .pkg.on svg { stroke:#FF6B2C; }
+  .pkg.on:hover { filter:brightness(.97); }
+  .pkg.off { background:#F5F6F8; color:#A9AEB8; border:1px solid #E5E6EB; cursor:not-allowed; } .pkg.off svg { stroke:#A9AEB8; }
+
+  /* 扫码说明 */
+  .scan-note { background:#FFF3E8; border:1px solid #FFD9BD; border-radius:14px; padding:18px 20px; font-size:13px; color:#4E5969; line-height:1.8; margin-top:28px; }
+  .scan-note b { color:#FF6B2C; }
+
+  .footer { background:#fff; border-top:1px solid #E5E6EB; padding:40px 0 28px; margin-top:44px; }
+  .footer-grid { display:grid; grid-template-columns:1fr; gap:24px; }
+  .footer h4 { font-size:14px; font-weight:700; color:#1D2129; margin-bottom:12px; }
+  .footer a.link { display:block; font-size:13px; color:#4E5969; padding:4px 0; }
+  .footer a.link:hover { color:#FF6B2C; }
+  .footer .brand-about { font-size:13px; color:#86909C; line-height:1.8; margin-top:8px; }
+  .footer-bottom { border-top:1px solid #E5E6EB; margin-top:28px; padding-top:18px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:#86909C; }
+
+  .toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); background:#1D2129; color:#fff; font-size:13px; padding:11px 18px; border-radius:10px; opacity:0; pointer-events:none; transition:opacity .25s,transform .25s; z-index:100; max-width:88vw; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (min-width:768px) {
+    .wrap { padding:0 32px; }
+    .page-head { padding:64px 0 56px; }
+    .page-head h1 { font-size:34px; }
+    .grid-plat { grid-template-columns:repeat(3,1fr); }
+    .footer-grid { grid-template-columns:2fr 1fr 1fr 1fr; }
+    .footer-bottom { flex-direction:row; justify-content:space-between; }
+  }
+  @media (min-width:1024px) {
+    .nav-links { display:flex; }
+    .nav-cta { display:flex; }
+    .burger { display:none; }
+    .ver { flex-direction:row; align-items:center; gap:24px; }
+    .ver-pkgs { flex-shrink:0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="曙光跑腿首页">
+      <span class="brand-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+      <span><span class="brand-name">曙光跑腿</span><span class="brand-sub">Dawn Errand</span></span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      <a href="index.html">首页</a>
+      <a href="download.html" class="on">下载中心</a>
+      <a href="faq.html">常见问题</a>
+      <a href="contact.html">商务合作</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="download.html">立即下载</a>
+      <a class="btn btn-primary btn-sm" href="contact.html">商务合作</a>
+    </div>
+    <button class="burger" id="burger" aria-label="打开菜单" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">首页</a>
+    <a href="download.html">下载中心</a>
+    <a href="faq.html">常见问题</a>
+    <a href="contact.html">商务合作</a>
+    <a class="btn btn-primary" href="download.html">立即下载</a>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="kicker" id="kicker">VERSION HISTORY</span>
+    <h1 id="headTitle">曙光跑腿 · 用户端 · 历史版本</h1>
+    <p id="headSub">下单跑腿与外卖、实时跟踪订单、地址管理、优惠券与订单评价</p>
+    <a class="back" href="download.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12h15M13 6l6 6-6 6"/></svg>
+      返回下载中心
+    </a>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <!-- 端切换（设计稿演示：三端共用同一子页模板） -->
+    <div class="app-tabs" id="appTabs" aria-label="切换客户端"></div>
+
+    <!-- 平台下载 -->
+    <div class="sec-head">
+      <h2>选择平台下载</h2>
+      <p>支持 Android、iOS 与鸿蒙 HarmonyOS，安装包在演示站点暂以提示代替。</p>
+    </div>
+    <div class="grid-plat" id="platGrid"></div>
+
+    <!-- 历史版本 -->
+    <div class="sec-head ver-head">
+      <h2>历史版本</h2>
+      <p>按发布时间倒序展示，支持 Android / iOS / 鸿蒙 平台安装包。</p>
+    </div>
+    <div class="ver-list" id="verList"></div>
+
+    <div class="scan-note">
+      <b>扫码直达：</b>正式发布后，用户可在官网首页 / 宣传物料中扫码直接下载对应客户端；当前为设计稿演示，下载与后台链接暂以提示代替。
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <span class="brand-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span><span class="brand-name" style="font-size:16px;">曙光跑腿</span><span class="brand-sub" style="display:block;">Dawn Errand</span></span>
+        </div>
+        <p class="brand-about">面向乡镇与本地市场的跑腿 / 外卖 SaaS 平台，多端覆盖、可商用的本地即时配送解决方案。</p>
+      </div>
+      <div>
+        <h4>产品</h4>
+        <a class="link" href="index.html">产品介绍</a>
+        <a class="link" href="download.html">多端下载</a>
+        <a class="link" href="index.html#roadmap">版本动态</a>
+        <a class="link" href="faq.html">常见问题</a>
+      </div>
+      <div>
+        <h4>合作</h4>
+        <a class="link" href="contact.html">商务合作</a>
+        <a class="link" href="contact.html#city">城市合伙人</a>
+        <a class="link" href="contact.html#merchant">商家入驻</a>
+        <a class="link" href="contact.html#rider">骑手招募</a>
+      </div>
+      <div>
+        <h4>联系与支持</h4>
+        <a class="link" href="contact.html">联系我们</a>
+        <a class="link" href="faq.html">帮助中心</a>
+        <a class="link" href="download.html">管理后台入口</a>
+        <a class="link" href="mailto:hello@shuguang.local" style="font-size:13px;">hello@shuguang.local</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 曙光跑腿 Dawn Errand · 项目演示官网</span>
+      <span>本站为产品设计稿，联系方式为演示占位，实际合作请通过正式渠道联系。</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  /* —— 三端版本数据（与工程 mock/download.json 的 appVersions 同步） —— */
+  var APPS = {
+    client: {
+      key:'client', name:'曙光跑腿 · 用户端', sub:'下单跑腿与外卖、实时跟踪订单、地址管理、优惠券与订单评价',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3.5" width="10" height="17" rx="2.4"/><path d="M11 18.5h2"/></svg>',
+      platforms:[
+        { id:'android', label:'Android', note:'Android 7.0+', state:'ready' },
+        { id:'ios', label:'iOS', note:'iOS 13+', state:'ready' },
+        { id:'harmony', label:'鸿蒙 HarmonyOS', note:'HarmonyOS NEXT', state:'ready' }
+      ],
+      versions:[
+        { version:'v1.4.0', date:'2026-10-18', note:'多租户区域费率支持，订单消息中心上线，支持乡镇 / 县城独立计价与免密支付。', pkgs:{android:true, ios:true, harmony:true} },
+        { version:'v1.3.2', date:'2026-09-30', note:'实名认证流程优化，骑手位置实时刷新，减少送达异常。', pkgs:{android:true, ios:true, harmony:false} },
+        { version:'v1.3.0', date:'2026-08-25', note:'新增优惠券与订单评价，地址管理改版，支持常用地址智能排序。', pkgs:{android:true, ios:true, harmony:false} },
+        { version:'v1.2.1', date:'2026-07-10', note:'修复 Android 12 通知权限兼容问题，优化弱网环境下单体验。', pkgs:{android:true, ios:false, harmony:false} },
+        { version:'v1.0.0', date:'2026-04-20', note:'首版发布：下单 / 派单 / 跟踪 / 结算全链路可用。', pkgs:{android:true, ios:false, harmony:false} }
+      ]
+    },
+    store: {
+      key:'store', name:'曙光跑腿 · 商家端', sub:'门店管理、接单出餐、菜单上下架、营业状态切换与经营统计',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="#2B7FFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9.5h15l-1 8.5h-13z"/><path d="M4.5 9.5l1.5-4.5h12l1.5 4.5"/><path d="M9.5 18v-4.5h5V18"/></svg>',
+      platforms:[
+        { id:'android', label:'Android', note:'Android 7.0+', state:'ready' },
+        { id:'ios', label:'iOS', note:'iOS 13+', state:'ready' },
+        { id:'harmony', label:'鸿蒙 HarmonyOS', note:'HarmonyOS NEXT', state:'ready' }
+      ],
+      versions:[
+        { version:'v1.3.0', date:'2026-10-12', note:'经营统计看板上线，出餐超时提醒，营业数据一键导出。', pkgs:{android:true, ios:true, harmony:true} },
+        { version:'v1.2.2', date:'2026-09-05', note:'菜单批量上下架，库存预警提醒，打印小票格式优化。', pkgs:{android:true, ios:true, harmony:false} },
+        { version:'v1.2.0', date:'2026-07-28', note:'营业状态定时切换，多门店切换与管理，配送费规则可视化配置。', pkgs:{android:true, ios:true, harmony:false} },
+        { version:'v1.1.1', date:'2026-06-15', note:'修复低内存设备图片加载问题，接单语音播报升级。', pkgs:{android:true, ios:false, harmony:false} },
+        { version:'v1.0.0', date:'2026-04-25', note:'首版发布：门店管理 / 接单出餐 / 订单列表可用。', pkgs:{android:true, ios:false, harmony:false} }
+      ]
+    },
+    driver: {
+      key:'driver', name:'曙光跑腿 · 骑手端', sub:'抢单接单、配送导航、送达回执、按单结算与每日收入明细',
+      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="16.5" r="3"/><circle cx="16.5" cy="16.5" r="3"/><path d="M10 16.5h3.6L17 12.5H13.8L10 16.5zM13.8 12.5l-1.3-3h-2.6"/><path d="M8.5 6.5h2.5"/></svg>',
+      platforms:[
+        { id:'android', label:'Android', note:'Android 7.0+', state:'ready' },
+        { id:'ios', label:'iOS', note:'iOS 13+', state:'ready' },
+        { id:'harmony', label:'鸿蒙 HarmonyOS', note:'HarmonyOS NEXT', state:'ready' }
+      ],
+      versions:[
+        { version:'v1.4.0', date:'2026-10-20', note:'按单结算明细与每日收入汇总页上线，接单奖励可视化。', pkgs:{android:true, ios:true, harmony:true} },
+        { version:'v1.3.1', date:'2026-09-18', note:'配送导航优化，送达回执支持拍照，异常上报流程完善。', pkgs:{android:true, ios:true, harmony:false} },
+        { version:'v1.3.0', date:'2026-08-08', note:'抢单大厅与单量筛选，在线 / 忙碌状态一键切换。', pkgs:{android:true, ios:true, harmony:false} },
+        { version:'v1.2.0', date:'2026-06-30', note:'新单语音提醒，订单卡片快捷操作（接单 / 送达 / 异常）。', pkgs:{android:true, ios:false, harmony:false} },
+        { version:'v1.0.0', date:'2026-04-18', note:'首版发布：抢单 / 配送导航 / 按单结算可用。', pkgs:{android:true, ios:false, harmony:false} }
+      ]
+    }
+  };
+
+  var PLAT_ICONS = {
+    android: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="10.5" r="1.3"/><circle cx="16" cy="10.5" r="1.3"/><path d="M12 9.5c-3.5 0-6.5 1.4-6.5 3.6v3.4h13v-3.4c0-2.2-3-3.6-6.5-3.6z"/><path d="M6.5 5.5L5 3.8M17.5 5.5L19 3.8"/><path d="M5.5 19.5h13"/></svg>',
+    ios: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2c1.8-1.6 4.2-1.8 5.5-.6.8.8.6 2.3-.2 3.8-1.3 2.2-4.1 2.8-5.3 2.8s-4-.6-5.3-2.8c-.8-1.5-1-3-.2-3.8 1.3-1.2 3.7-1 5.5.6z"/><path d="M12 7.2v-1.7c0-1.4 1-2.2 2.2-2.2"/></svg>',
+    harmony: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9 7.5v9M15 7.5v9M9 12h6"/></svg>'
+  };
+
+  var toastEl = document.getElementById('toast');
+  var timer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2400);
+  }
+
+  function latest(app, id){
+    for (var i = 0; i < app.versions.length; i++) {
+      if (app.versions[i].pkgs[id]) return app.versions[i].version;
+    }
+    return null;
+  }
+
+  var q = {};
+  (location.search || '').replace(/[?&]([^=]+)=([^&]*)/g, function(m, k, v){ q[decodeURIComponent(k)] = decodeURIComponent(v); });
+  var current = q.app in APPS ? q.app : 'client';
+
+  function render(){
+    var app = APPS[current];
+    document.getElementById('headTitle').textContent = app.name + ' · 历史版本';
+    document.getElementById('headSub').textContent = app.sub;
+
+    var tabs = document.getElementById('appTabs');
+    tabs.innerHTML = '';
+    Object.keys(APPS).forEach(function(k){
+      var a = APPS[k];
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tab' + (k === current ? ' on' : '');
+      b.innerHTML = a.icon + '<span>' + a.name.replace('曙光跑腿 · ', '') + '</span>';
+      b.addEventListener('click', function(){ current = k; render(); });
+      tabs.appendChild(b);
+    });
+
+    var plat = document.getElementById('platGrid');
+    plat.innerHTML = '';
+    app.platforms.forEach(function(p){
+      var card = document.createElement('div');
+      card.className = 'plat' + (p.state === 'coming' ? ' coming' : '');
+      var ver = latest(app, p.id) || '—';
+      var btn;
+      if (p.state === 'ready') {
+        btn = '<button type="button" class="btn btn-primary" data-dl="' + app.name + ' ' + p.label + ' 最新版 ' + ver + '（演示站点：安装包待正式发布）">下载最新版</button>';
+      } else {
+        btn = '<button type="button" class="btn btn-disabled" disabled>即将上线</button>';
+      }
+      card.innerHTML =
+        '<div class="row"><span class="p-ico">' + PLAT_ICONS[p.id] + '</span>' +
+        '<span><h3>' + p.label + '</h3><span class="p-note">' + p.note + '</span></span></div>' +
+        '<p class="p-latest">最新版本<b>' + ver + '</b></p>' + btn;
+      plat.appendChild(card);
+    });
+    plat.querySelectorAll('[data-dl]').forEach(function(el){
+      el.addEventListener('click', function(){ toast(el.getAttribute('data-dl')); });
+    });
+
+    var list = document.getElementById('verList');
+    list.innerHTML = '';
+    app.versions.forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'ver';
+      var pkgs = '';
+      app.platforms.forEach(function(p){
+        var on = !!v.pkgs[p.id];
+        pkgs += (on
+          ? '<button type="button" class="pkg on" data-dl="' + app.name + ' ' + p.label + ' ' + v.version + '（演示站点：安装包待正式发布）">' + PLAT_ICONS[p.id] + v.version + ' 下载</button>'
+          : '<span class="pkg off">' + PLAT_ICONS[p.id] + '暂无</span>');
+      });
+      row.innerHTML =
+        '<div class="ver-main"><div class="ver-tags"><span class="ver-tag">' + v.version + '</span><span class="ver-date">' + v.date + '</span></div>' +
+        '<p class="ver-note">' + v.note + '</p></div>' +
+        '<div class="ver-pkgs">' + pkgs + '</div>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-dl]').forEach(function(el){
+      el.addEventListener('click', function(){ toast(el.getAttribute('data-dl')); });
+    });
+  }
+  render();
+
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  menu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ menu.classList.remove('open'); burger.setAttribute('aria-expanded','false'); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "siteName": "曙光跑腿",
+  "siteSub": "Dawn Errand",
+  "navLinks": [
+    { "label": "首页", "to": "/" },
+    { "label": "下载中心", "to": "/download" },
+    { "label": "常见问题", "to": "/faq" },
+    { "label": "商务合作", "to": "/contact" }
+  ],
+  "navCta": [
+    { "label": "立即下载", "to": "/download", "style": "ghost" },
+    { "label": "商务合作", "to": "/contact", "style": "primary" }
+  ],
+  "footer": {
+    "about": "面向乡镇与本地市场的跑腿 / 外卖 SaaS 平台，多端覆盖、可商用的本地即时配送解决方案。",
+    "columns": [
+      {
+        "title": "产品",
+        "links": [
+          { "label": "产品介绍", "to": "/" },
+          { "label": "多端下载", "to": "/download" },
+          { "label": "版本动态", "to": "/#roadmap" },
+          { "label": "常见问题", "to": "/faq" }
+        ]
+      },
+      {
+        "title": "合作",
+        "links": [
+          { "label": "商务合作", "to": "/contact" },
+          { "label": "城市合伙人", "to": "/contact#city" },
+          { "label": "商家入驻", "to": "/contact#merchant" },
+          { "label": "骑手招募", "to": "/contact#rider" }
+        ]
+      },
+      {
+        "title": "联系与支持",
+        "links": [
+          { "label": "联系我们", "to": "/contact" },
+          { "label": "帮助中心", "to": "/faq" },
+          { "label": "管理后台入口", "to": "/download" },
+          { "label": "hello@shuguang.local", "to": "mailto:hello@shuguang.local", "external": true }
+        ]
+      }
+    ],
+    "bottomLeft": "© 2026 曙光跑腿 Dawn Errand · 项目演示官网",
+    "bottomRight": "本站为产品设计稿，联系方式为演示占位，实际合作请通过正式渠道联系。"
+  }
+}

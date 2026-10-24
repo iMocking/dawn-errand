@@ -1,0 +1,55 @@
+{
+  "pageHead": {
+    "kicker": "PARTNERSHIP",
+    "title": "商务合作",
+    "desc": "把曙光跑腿带到你的城市，共建本地即时配送生态。"
+  },
+  "modes": {
+    "title": "合作模式",
+    "desc": "面向城市合伙人、商家、骑手与渠道伙伴的四种合作方式。",
+    "items": [
+      { "id": "city", "icon": "pin", "tone": "orange", "title": "城市合伙人", "desc": "负责区域市场的运营与拓展，平台提供系统、运维与运营支持，共同服务本地跑腿 / 外卖市场。", "tag": "适合：区域运营团队" },
+      { "id": "merchant", "icon": "shop", "tone": "blue", "title": "商家入驻", "desc": "餐饮、零售、便利店等商家入驻开店，获得线上订单与门店管理能力，拓展本地生意。", "tag": "适合：本地商家门店" },
+      { "id": "rider", "icon": "bike", "tone": "green", "title": "骑手招募", "desc": "兼职 / 全职骑手入驻接单，按单结算、收入透明，平台提供配送工具与保障支持。", "tag": "适合：配送员 / 运力团队" },
+      { "icon": "handshake", "tone": "purple", "title": "渠道合作", "desc": "系统集成商、SaaS 渠道伙伴与行业方案商，共同向更多本地市场推广平台能力。", "tag": "适合：渠道与方案伙伴" }
+    ]
+  },
+  "steps": {
+    "title": "合作流程",
+    "desc": "四步完成合作对接，简单透明。",
+    "items": [
+      { "num": "1", "title": "提交意向", "desc": "通过下方表单或联系方式提交合作意向与合作区域。" },
+      { "num": "2", "title": "方案沟通", "desc": "商务团队与您沟通区域情况、合作模式与运营方案。" },
+      { "num": "3", "title": "签约部署", "desc": "确认合作细则并签约，平台完成区域站部署与初始化。" },
+      { "num": "4", "title": "启动运营", "desc": "商家入驻、骑手招募、市场推广，正式启动本地运营。" }
+    ]
+  },
+  "contactSection": {
+    "title": "联系我们",
+    "desc": "留下你的需求，商务团队将尽快与你联系。",
+    "cards": [
+      { "icon": "mail", "label": "商务邮箱（演示占位）", "value": "hello@shuguang.local" },
+      { "icon": "tel", "label": "联系电话（演示占位）", "value": "400-000-0000" },
+      { "icon": "chat", "label": "在线沟通", "value": "工作日 9:00–18:00 回复（演示）" },
+      { "icon": "clock", "label": "产品体验", "value": "下载客户端体验完整产品流程" }
+    ],
+    "form": {
+      "fields": [
+        { "name": "name", "label": "你的称呼 *", "type": "text", "placeholder": "请输入称呼" },
+        { "name": "contact", "label": "联系方式 *", "type": "text", "placeholder": "手机号 / 邮箱" },
+        {
+          "name": "intent",
+          "label": "合作意向",
+          "type": "select",
+          "options": ["城市合伙人", "商家入驻", "骑手招募", "渠道合作", "其他合作"]
+        },
+        { "name": "region", "label": "合作区域", "type": "text", "placeholder": "如：湖北省武汉市" },
+        { "name": "message", "label": "需求描述", "type": "textarea", "placeholder": "简单描述你的合作需求与情况" }
+      ],
+      "submitLabel": "提交合作意向",
+      "submitTip": "演示站点：提交功能待上线，请通过邮箱 / 电话联系。",
+      "demo": "演示站点：提交功能待上线，请通过邮箱 / 电话联系。"
+    }
+  },
+  "notice": "说明：本站为项目演示官网，以上联系方式均为占位信息。正式合作请以项目方发布渠道为准。"
+}

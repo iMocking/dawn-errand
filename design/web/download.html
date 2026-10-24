@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>下载中心 · 曙光跑腿 Dawn Errand</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6B2C'/%3E%3Cpath d='M9 19c4 0 6-2 6-6' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='21' cy='13' r='4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#F5F6F8; color:#1D2129; -webkit-font-smoothing:antialiased; line-height:1.6; }
+  a { color:inherit; text-decoration:none; }
+  img, svg { display:block; }
+  .wrap { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+  .nav { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #E5E6EB; }
+  .nav-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand-logo { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#FF8A3D,#FF6B2C); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .brand-name { font-size:18px; font-weight:700; color:#1D2129; letter-spacing:.5px; }
+  .brand-sub { font-size:11px; color:#86909C; }
+  .nav-links { display:none; align-items:center; gap:4px; }
+  .nav-links a { display:block; padding:9px 14px; border-radius:8px; font-size:14px; color:#4E5969; transition:background .15s,color .15s; }
+  .nav-links a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .nav-links a.on { color:#FF6B2C; font-weight:600; }
+  .nav-cta { display:none; align-items:center; gap:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; cursor:pointer; font-family:inherit; border-radius:8px; font-size:14px; font-weight:600; transition:filter .15s,box-shadow .15s,background .15s; }
+  .btn:active { transform:translateY(1px); }
+  .btn-primary { background:linear-gradient(135deg,#FF8A3D,#FF6B2C); color:#fff; box-shadow:0 6px 16px rgba(255,107,44,.32); }
+  .btn-primary:hover { filter:brightness(1.05); box-shadow:0 8px 20px rgba(255,107,44,.4); }
+  .btn-ghost { background:#FFF3E8; color:#FF6B2C; }
+  .btn-ghost:hover { background:#FFE9D5; }
+  .btn-lg { height:52px; padding:0 26px; font-size:15px; border-radius:10px; }
+  .btn-sm { height:38px; padding:0 16px; }
+  .nav .btn { height:38px; padding:0 18px; }
+  .burger { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:none; background:none; cursor:pointer; border-radius:8px; }
+  .burger:hover { background:#F5F6F8; }
+  .mobile-menu { display:none; background:#fff; border-top:1px solid #E5E6EB; padding:8px 0 16px; }
+  .mobile-menu.open { display:block; }
+  .mobile-menu a { display:block; padding:13px 20px; font-size:15px; color:#4E5969; }
+  .mobile-menu a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .mobile-menu .btn { margin:10px 20px 4px; width:calc(100% - 40px); }
+
+  /* 页头 */
+  .page-head { background:linear-gradient(150deg,#FF8A3D 0%,#FF6B2C 60%,#F2531C 100%); color:#fff; padding:52px 0 48px; position:relative; overflow:hidden; }
+  .page-head::before { content:""; position:absolute; right:-90px; top:-90px; width:280px; height:280px; border-radius:50%; background:rgba(255,255,255,.10); }
+  .page-head .kicker { display:inline-block; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 12px; border-radius:20px; letter-spacing:1px; }
+  .page-head h1 { margin-top:14px; font-size:28px; font-weight:800; letter-spacing:.5px; }
+  .page-head p { margin-top:10px; font-size:14px; color:rgba(255,255,255,.9); max-width:560px; }
+
+  section.block { padding:44px 0; }
+  .sec-head { margin-bottom:26px; }
+  .sec-head h2 { font-size:20px; font-weight:800; color:#1D2129; }
+  .sec-head p { margin-top:8px; font-size:13px; color:#86909C; }
+
+  /* 下载卡 */
+  .grid-dl { display:grid; grid-template-columns:1fr; gap:14px; }
+  .dl { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:22px; display:flex; flex-direction:column; }
+  .dl .row { display:flex; align-items:center; gap:12px; }
+  .dl .ico { width:46px; height:46px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dl h3 { font-size:15px; font-weight:700; }
+  .dl .role { font-size:12px; color:#86909C; }
+  .dl .desc { margin:10px 0 14px; font-size:13px; color:#4E5969; line-height:1.7; flex:1; }
+  .dl .meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .dl .meta span { font-size:11px; color:#86909C; background:#F5F6F8; border:1px solid #E5E6EB; padding:3px 9px; border-radius:6px; }
+  .dl .btn { width:100%; }
+  .dl .qrcode { display:none; }
+  .i-orange { background:#FFF3E8; } .i-orange svg { stroke:#FF6B2C; }
+  .i-blue { background:#EEF4FF; } .i-blue svg { stroke:#2B7FFF; }
+  .i-green { background:#E8F9F0; } .i-green svg { stroke:#00B578; }
+  .i-purple { background:#F4EEFF; } .i-purple svg { stroke:#722ED1; }
+
+  /* 后台入口 */
+  .admin-entry { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:22px; display:flex; flex-direction:column; gap:14px; }
+  .admin-entry .row { display:flex; align-items:center; gap:12px; }
+  .admin-entry p { font-size:13px; color:#4E5969; line-height:1.7; }
+  .admin-entry .btn { width:100%; }
+
+  /* 扫码说明 */
+  .scan-note { background:#FFF3E8; border:1px solid #FFD9BD; border-radius:14px; padding:18px 20px; font-size:13px; color:#4E5969; line-height:1.8; }
+  .scan-note b { color:#FF6B2C; }
+
+  .footer { background:#fff; border-top:1px solid #E5E6EB; padding:40px 0 28px; margin-top:44px; }
+  .footer-grid { display:grid; grid-template-columns:1fr; gap:24px; }
+  .footer h4 { font-size:14px; font-weight:700; color:#1D2129; margin-bottom:12px; }
+  .footer a.link { display:block; font-size:13px; color:#4E5969; padding:4px 0; }
+  .footer a.link:hover { color:#FF6B2C; }
+  .footer .brand-about { font-size:13px; color:#86909C; line-height:1.8; margin-top:8px; }
+  .footer-bottom { border-top:1px solid #E5E6EB; margin-top:28px; padding-top:18px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:#86909C; }
+
+  .toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); background:#1D2129; color:#fff; font-size:13px; padding:11px 18px; border-radius:10px; opacity:0; pointer-events:none; transition:opacity .25s,transform .25s; z-index:100; max-width:88vw; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (min-width:768px) {
+    .wrap { padding:0 32px; }
+    .page-head { padding:64px 0 56px; }
+    .page-head h1 { font-size:34px; }
+    .grid-dl { grid-template-columns:repeat(2,1fr); }
+    .footer-grid { grid-template-columns:2fr 1fr 1fr 1fr; }
+    .footer-bottom { flex-direction:row; justify-content:space-between; }
+  }
+  @media (min-width:1024px) {
+    .nav-links { display:flex; }
+    .nav-cta { display:flex; }
+    .burger { display:none; }
+    .grid-dl { grid-template-columns:repeat(3,1fr); }
+    .admin-entry { flex-direction:row; align-items:center; }
+    .admin-entry p { flex:1; }
+    .admin-entry .btn { width:auto; }
+    .dl .qrcode { display:flex; width:78px; height:78px; border-radius:10px; background:#fff; border:1px solid #E5E6EB; align-items:center; justify-content:center; margin-left:auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="曙光跑腿首页">
+      <span class="brand-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+      <span><span class="brand-name">曙光跑腿</span><span class="brand-sub">Dawn Errand</span></span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      <a href="index.html">首页</a>
+      <a href="download.html" class="on">下载中心</a>
+      <a href="faq.html">常见问题</a>
+      <a href="contact.html">商务合作</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="download.html">立即下载</a>
+      <a class="btn btn-primary btn-sm" href="contact.html">商务合作</a>
+    </div>
+    <button class="burger" id="burger" aria-label="打开菜单" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">首页</a>
+    <a href="download.html">下载中心</a>
+    <a href="faq.html">常见问题</a>
+    <a href="contact.html">商务合作</a>
+    <a class="btn btn-primary" href="download.html">立即下载</a>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="kicker">DOWNLOAD CENTER</span>
+    <h1>多端下载中心</h1>
+    <p>选择你所在的角色，下载对应客户端，即刻开始使用曙光跑腿。</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>客户端下载</h2>
+      <p>用户端、商家端、骑手端均已上线，点击卡片进入各端版本页，选择 Android / iOS / 鸿蒙平台下载。</p>
+    </div>
+    <div class="grid-dl">
+      <div class="dl">
+        <div class="row">
+          <span class="ico i-orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+          <span><h3>曙光跑腿 · 用户端</h3><span class="role">Android · iOS · 鸿蒙</span></span>
+        </div>
+        <p class="desc">下单跑腿与外卖、实时跟踪订单、地址管理、优惠券与订单评价。</p>
+        <div class="meta"><span>Android / iOS / 鸿蒙</span><span>约 32 MB</span><span>v1.4.0</span></div>
+        <a class="btn btn-primary" href="download-app.html?app=client">查看历史版本</a>
+        <div class="qrcode" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 21 21" fill="none"><path d="M3 3h7v7H3zM11 3h7v7h-7zM3 11h7v7H3z" stroke="#FF6B2C" stroke-width="1.6"/><path d="M5 5h3v3H5zM13 5h3v3h-3zM5 13h3v3H5z" fill="#1D2129"/><path d="M13 13h1.5v1.5H13zM15 15h1.5v1.5H15zM13 17h1.5v1.5H13zM17 13h1.5v1.5H17z" fill="#1D2129"/></svg>
+        </div>
+      </div>
+      <div class="dl">
+        <div class="row">
+          <span class="ico i-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2B7FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          <span><h3>曙光跑腿 · 商家端</h3><span class="role">Android · iOS · 鸿蒙</span></span>
+        </div>
+        <p class="desc">门店管理、接单出餐、菜单上下架、营业状态切换与经营统计。</p>
+        <div class="meta"><span>Android / iOS / 鸿蒙</span><span>约 28 MB</span><span>v1.3.0</span></div>
+        <a class="btn btn-primary" href="download-app.html?app=store">查看历史版本</a>
+        <div class="qrcode" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 21 21" fill="none"><path d="M3 3h7v7H3zM11 3h7v7h-7zM3 11h7v7H3z" stroke="#2B7FFF" stroke-width="1.6"/><path d="M5 5h3v3H5zM13 5h3v3h-3zM5 13h3v3H5z" fill="#1D2129"/><path d="M13 13h1.5v1.5H13zM15 15h1.5v1.5H15zM13 17h1.5v1.5H13zM17 13h1.5v1.5H17z" fill="#1D2129"/></svg>
+        </div>
+      </div>
+      <div class="dl">
+        <div class="row">
+          <span class="ico i-green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="5.5" r="3.5"/><line x1="15.5" y1="7.5" x2="8.5" y2="15.5"/></svg></span>
+          <span><h3>曙光跑腿 · 骑手端</h3><span class="role">Android · iOS · 鸿蒙</span></span>
+        </div>
+        <p class="desc">抢单接单、配送导航、送达回执、按单结算与每日收入明细。</p>
+        <div class="meta"><span>Android / iOS / 鸿蒙</span><span>约 30 MB</span><span>v1.4.0</span></div>
+        <a class="btn btn-primary" href="download-app.html?app=driver">查看历史版本</a>
+        <div class="qrcode" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 21 21" fill="none"><path d="M3 3h7v7H3zM11 3h7v7h-7zM3 11h7v7H3z" stroke="#00B578" stroke-width="1.6"/><path d="M5 5h3v3H5zM13 5h3v3h-3zM5 13h3v3H5z" fill="#1D2129"/><path d="M13 13h1.5v1.5H13zM15 15h1.5v1.5H15zM13 17h1.5v1.5H13zM17 13h1.5v1.5H17z" fill="#1D2129"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:28px;">
+      <div class="sec-head">
+        <h2>管理后台与入口</h2>
+        <p>平台运营方通过 Web 管理后台完成全量运营管理。</p>
+      </div>
+      <div class="admin-entry">
+        <div class="row">
+          <span class="ico i-purple"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#722ED1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+          <span><h3>曙光跑腿 · 管理后台</h3><span class="role">Web · 建议桌面浏览器访问</span></span>
+        </div>
+        <p>用户 / 商家 / 骑手 / 订单 / 财务 / 设置全量运营管理，含数据总览、入驻审核、财务结算与区域费率配置。</p>
+        <a class="btn btn-primary" href="#" data-demo="演示站点：管理后台部署后开放访问">进入管理后台</a>
+      </div>
+    </div>
+
+    <div class="scan-note" style="margin-top:28px;">
+      <b>扫码直达：</b>正式发布后，用户可在官网首页 / 宣传物料中扫码直接下载对应客户端；当前为设计稿演示，下载与后台链接暂以提示代替。
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <span class="brand-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span><span class="brand-name" style="font-size:16px;">曙光跑腿</span><span class="brand-sub" style="display:block;">Dawn Errand</span></span>
+        </div>
+        <p class="brand-about">面向乡镇与本地市场的跑腿 / 外卖 SaaS 平台，多端覆盖、可商用的本地即时配送解决方案。</p>
+      </div>
+      <div>
+        <h4>产品</h4>
+        <a class="link" href="index.html">产品介绍</a>
+        <a class="link" href="download.html">多端下载</a>
+        <a class="link" href="index.html#roadmap">版本动态</a>
+        <a class="link" href="faq.html">常见问题</a>
+      </div>
+      <div>
+        <h4>合作</h4>
+        <a class="link" href="contact.html">商务合作</a>
+        <a class="link" href="contact.html#city">城市合伙人</a>
+        <a class="link" href="contact.html#merchant">商家入驻</a>
+        <a class="link" href="contact.html#rider">骑手招募</a>
+      </div>
+      <div>
+        <h4>联系与支持</h4>
+        <a class="link" href="contact.html">联系我们</a>
+        <a class="link" href="faq.html">帮助中心</a>
+        <a class="link" href="download.html">管理后台入口</a>
+        <a class="link" href="mailto:hello@shuguang.local" style="font-size:13px;">hello@shuguang.local</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 曙光跑腿 Dawn Errand · 项目演示官网</span>
+      <span>本站为产品设计稿，联系方式为演示占位，实际合作请通过正式渠道联系。</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  var toastEl = document.getElementById('toast');
+  var timer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2400);
+  }
+  burger.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  menu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ menu.classList.remove('open'); burger.setAttribute('aria-expanded','false'); });
+  });
+  document.querySelectorAll('a[data-demo]').forEach(function(a){
+    a.addEventListener('click', function(e){ e.preventDefault(); toast(a.getAttribute('data-demo')); });
+  });
+})();
+</script>
+</body>
+</html>

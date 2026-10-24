@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>商务合作 · 曙光跑腿 Dawn Errand</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6B2C'/%3E%3Cpath d='M9 19c4 0 6-2 6-6' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='21' cy='13' r='4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#F5F6F8; color:#1D2129; -webkit-font-smoothing:antialiased; line-height:1.6; }
+  a { color:inherit; text-decoration:none; }
+  img, svg { display:block; }
+  .wrap { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+  .nav { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #E5E6EB; }
+  .nav-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand-logo { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#FF8A3D,#FF6B2C); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .brand-name { font-size:18px; font-weight:700; color:#1D2129; letter-spacing:.5px; }
+  .brand-sub { font-size:11px; color:#86909C; }
+  .nav-links { display:none; align-items:center; gap:4px; }
+  .nav-links a { display:block; padding:9px 14px; border-radius:8px; font-size:14px; color:#4E5969; transition:background .15s,color .15s; }
+  .nav-links a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .nav-links a.on { color:#FF6B2C; font-weight:600; }
+  .nav-cta { display:none; align-items:center; gap:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; cursor:pointer; font-family:inherit; border-radius:8px; font-size:14px; font-weight:600; transition:filter .15s,box-shadow .15s,background .15s; }
+  .btn:active { transform:translateY(1px); }
+  .btn-primary { background:linear-gradient(135deg,#FF8A3D,#FF6B2C); color:#fff; box-shadow:0 6px 16px rgba(255,107,44,.32); }
+  .btn-primary:hover { filter:brightness(1.05); box-shadow:0 8px 20px rgba(255,107,44,.4); }
+  .btn-ghost { background:#FFF3E8; color:#FF6B2C; }
+  .btn-ghost:hover { background:#FFE9D5; }
+  .btn-sm { height:38px; padding:0 16px; }
+  .nav .btn { height:38px; padding:0 18px; }
+  .burger { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:none; background:none; cursor:pointer; border-radius:8px; }
+  .burger:hover { background:#F5F6F8; }
+  .mobile-menu { display:none; background:#fff; border-top:1px solid #E5E6EB; padding:8px 0 16px; }
+  .mobile-menu.open { display:block; }
+  .mobile-menu a { display:block; padding:13px 20px; font-size:15px; color:#4E5969; }
+  .mobile-menu a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .mobile-menu .btn { margin:10px 20px 4px; width:calc(100% - 40px); }
+
+  .page-head { background:linear-gradient(150deg,#FF8A3D 0%,#FF6B2C 60%,#F2531C 100%); color:#fff; padding:52px 0 48px; position:relative; overflow:hidden; }
+  .page-head::before { content:""; position:absolute; right:-90px; top:-90px; width:280px; height:280px; border-radius:50%; background:rgba(255,255,255,.10); }
+  .page-head .kicker { display:inline-block; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 12px; border-radius:20px; letter-spacing:1px; }
+  .page-head h1 { margin-top:14px; font-size:28px; font-weight:800; letter-spacing:.5px; }
+  .page-head p { margin-top:10px; font-size:14px; color:rgba(255,255,255,.9); max-width:560px; }
+
+  section.block { padding:44px 0; }
+  .sec-head { margin-bottom:26px; }
+  .sec-head h2 { font-size:20px; font-weight:800; color:#1D2129; }
+  .sec-head p { margin-top:8px; font-size:13px; color:#86909C; }
+
+  /* 合作模式 */
+  .grid-mode { display:grid; grid-template-columns:1fr; gap:14px; }
+  .mode { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:22px; display:flex; flex-direction:column; }
+  .mode .ico { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; }
+  .mode h3 { font-size:15px; font-weight:700; margin-top:14px; }
+  .mode p { margin-top:8px; font-size:13px; color:#4E5969; line-height:1.7; flex:1; }
+  .mode .tag { margin-top:12px; font-size:11px; color:#86909C; background:#F5F6F8; border:1px solid #E5E6EB; display:inline-block; padding:3px 10px; border-radius:6px; }
+  .i-orange { background:#FFF3E8; } .i-orange svg { stroke:#FF6B2C; }
+  .i-blue { background:#EEF4FF; } .i-blue svg { stroke:#2B7FFF; }
+  .i-green { background:#E8F9F0; } .i-green svg { stroke:#00B578; }
+  .i-purple { background:#F4EEFF; } .i-purple svg { stroke:#722ED1; }
+
+  /* 合作流程 */
+  .grid-step { display:grid; grid-template-columns:1fr; gap:0; }
+  .step { display:flex; gap:16px; position:relative; padding-bottom:22px; }
+  .step::before { content:""; position:absolute; left:17px; top:40px; bottom:0; width:2px; background:#E5E6EB; }
+  .step:last-child::before { display:none; }
+  .step .num { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#FF8A3D,#FF6B2C); color:#fff; font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; z-index:1; }
+  .step h3 { font-size:15px; font-weight:700; color:#1D2129; }
+  .step p { margin-top:5px; font-size:13px; color:#4E5969; line-height:1.7; }
+
+  /* 联系方式 */
+  .contact-card { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:22px; display:flex; flex-direction:column; gap:16px; }
+  .contact-row { display:flex; align-items:flex-start; gap:12px; }
+  .contact-row .ico { width:40px; height:40px; border-radius:9px; background:#FFF3E8; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .contact-row .ico svg { stroke:#FF6B2C; }
+  .contact-row .lb { font-size:12px; color:#86909C; }
+  .contact-row .vl { font-size:14px; color:#1D2129; font-weight:600; margin-top:2px; }
+  .contact-row .vl.sub { font-size:13px; color:#4E5969; font-weight:400; }
+
+  .form-card { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:22px; }
+  .form-card label { display:block; font-size:13px; color:#4E5969; margin-bottom:6px; }
+  .form-card .field { margin-bottom:16px; }
+  .form-card input, .form-card textarea, .form-card select { width:100%; height:46px; border:1px solid #E5E6EB; border-radius:8px; padding:0 14px; font-size:16px; font-family:inherit; color:#1D2129; background:#fff; outline:none; }
+  .form-card textarea { height:110px; padding:12px 14px; resize:vertical; }
+  .form-card input:focus, .form-card textarea:focus, .form-card select:focus { border-color:#FF6B2C; box-shadow:0 0 0 3px rgba(255,107,44,.12); }
+  .form-card .btn { width:100%; height:46px; font-size:15px; }
+  .form-tip { font-size:12px; color:#86909C; margin-top:12px; text-align:center; }
+
+  .notice { margin-top:24px; background:#FFF3E8; border:1px solid #FFD9BD; border-radius:14px; padding:18px 20px; font-size:13px; color:#4E5969; line-height:1.8; }
+  .notice b { color:#FF6B2C; }
+
+  .footer { background:#fff; border-top:1px solid #E5E6EB; padding:40px 0 28px; margin-top:44px; }
+  .footer-grid { display:grid; grid-template-columns:1fr; gap:24px; }
+  .footer h4 { font-size:14px; font-weight:700; color:#1D2129; margin-bottom:12px; }
+  .footer a.link { display:block; font-size:13px; color:#4E5969; padding:4px 0; }
+  .footer a.link:hover { color:#FF6B2C; }
+  .footer .brand-about { font-size:13px; color:#86909C; line-height:1.8; margin-top:8px; }
+  .footer-bottom { border-top:1px solid #E5E6EB; margin-top:28px; padding-top:18px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:#86909C; }
+
+  .toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); background:#1D2129; color:#fff; font-size:13px; padding:11px 18px; border-radius:10px; opacity:0; pointer-events:none; transition:opacity .25s,transform .25s; z-index:100; max-width:88vw; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (min-width:768px) {
+    .wrap { padding:0 32px; }
+    .page-head { padding:64px 0 56px; }
+    .page-head h1 { font-size:34px; }
+    .grid-mode { grid-template-columns:repeat(2,1fr); }
+    .footer-grid { grid-template-columns:2fr 1fr 1fr 1fr; }
+    .footer-bottom { flex-direction:row; justify-content:space-between; }
+  }
+  @media (min-width:1024px) {
+    .nav-links { display:flex; }
+    .nav-cta { display:flex; }
+    .burger { display:none; }
+    .grid-mode { grid-template-columns:repeat(4,1fr); }
+    .grid-step { grid-template-columns:repeat(4,1fr); gap:18px; }
+    .step { flex-direction:column; padding-bottom:0; }
+    .step::before { left:18px; top:44px; bottom:-14px; width:2px; }
+    .step:last-child::before { display:none; }
+    .contact-layout { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="曙光跑腿首页">
+      <span class="brand-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+      <span><span class="brand-name">曙光跑腿</span><span class="brand-sub">Dawn Errand</span></span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      <a href="index.html">首页</a>
+      <a href="download.html">下载中心</a>
+      <a href="faq.html">常见问题</a>
+      <a href="contact.html" class="on">商务合作</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="download.html">立即下载</a>
+      <a class="btn btn-primary btn-sm" href="contact.html">商务合作</a>
+    </div>
+    <button class="burger" id="burger" aria-label="打开菜单" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">首页</a>
+    <a href="download.html">下载中心</a>
+    <a href="faq.html">常见问题</a>
+    <a href="contact.html">商务合作</a>
+    <a class="btn btn-primary" href="download.html">立即下载</a>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="kicker">PARTNERSHIP</span>
+    <h1>商务合作</h1>
+    <p>把曙光跑腿带到你的城市，共建本地即时配送生态。</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>合作模式</h2>
+      <p>面向城市合伙人、商家、骑手与渠道伙伴的四种合作方式。</p>
+    </div>
+    <div class="grid-mode">
+      <div class="mode" id="city">
+        <div class="ico i-orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3>城市合伙人</h3>
+        <p>负责区域市场的运营与拓展，平台提供系统、运维与运营支持，共同服务本地跑腿 / 外卖市场。</p>
+        <span class="tag">适合：区域运营团队</span>
+      </div>
+      <div class="mode" id="merchant">
+        <div class="ico i-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B7FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <h3>商家入驻</h3>
+        <p>餐饮、零售、便利店等商家入驻开店，获得线上订单与门店管理能力，拓展本地生意。</p>
+        <span class="tag">适合：本地商家门店</span>
+      </div>
+      <div class="mode" id="rider">
+        <div class="ico i-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="5.5" r="3.5"/><line x1="15.5" y1="7.5" x2="8.5" y2="15.5"/></svg></div>
+        <h3>骑手招募</h3>
+        <p>兼职 / 全职骑手入驻接单，按单结算、收入透明，平台提供配送工具与保障支持。</p>
+        <span class="tag">适合：配送员 / 运力团队</span>
+      </div>
+      <div class="mode">
+        <div class="ico i-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#722ED1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>渠道合作</h3>
+        <p>系统集成商、SaaS 渠道伙伴与行业方案商，共同向更多本地市场推广平台能力。</p>
+        <span class="tag">适合：渠道与方案伙伴</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block bg-soft" style="background:#fff;">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>合作流程</h2>
+      <p>四步完成合作对接，简单透明。</p>
+    </div>
+    <div class="grid-step">
+      <div class="step">
+        <span class="num">1</span>
+        <div><h3>提交意向</h3><p>通过下方表单或联系方式提交合作意向与合作区域。</p></div>
+      </div>
+      <div class="step">
+        <span class="num">2</span>
+        <div><h3>方案沟通</h3><p>商务团队与您沟通区域情况、合作模式与运营方案。</p></div>
+      </div>
+      <div class="step">
+        <span class="num">3</span>
+        <div><h3>签约部署</h3><p>确认合作细则并签约，平台完成区域站部署与初始化。</p></div>
+      </div>
+      <div class="step">
+        <span class="num">4</span>
+        <div><h3>启动运营</h3><p>商家入驻、骑手招募、市场推广，正式启动本地运营。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>联系我们</h2>
+      <p>留下你的需求，商务团队将尽快与你联系。</p>
+    </div>
+    <div class="contact-layout">
+      <div class="contact-card">
+        <div class="contact-row">
+          <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+          <span><span class="lb">商务邮箱（演示占位）</span><span class="vl">hello@shuguang.local</span></span>
+        </div>
+        <div class="contact-row">
+          <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+          <span><span class="lb">联系电话（演示占位）</span><span class="vl">400-000-0000</span></span>
+        </div>
+        <div class="contact-row">
+          <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+          <span><span class="lb">在线沟通</span><span class="vl sub">工作日 9:00–18:00 回复（演示）</span></span>
+        </div>
+        <div class="contact-row">
+          <span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span><span class="lb">产品体验</span><span class="vl sub">下载客户端体验完整产品流程</span></span>
+        </div>
+      </div>
+      <div class="form-card">
+        <div class="field">
+          <label>你的称呼 *</label>
+          <input type="text" placeholder="请输入称呼" value="">
+        </div>
+        <div class="field">
+          <label>联系方式 *</label>
+          <input type="text" placeholder="手机号 / 邮箱" value="">
+        </div>
+        <div class="field">
+          <label>合作意向</label>
+          <select>
+            <option>城市合伙人</option>
+            <option>商家入驻</option>
+            <option>骑手招募</option>
+            <option>渠道合作</option>
+            <option>其他合作</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>合作区域</label>
+          <input type="text" placeholder="如：湖北省武汉市">
+        </div>
+        <div class="field">
+          <label>需求描述</label>
+          <textarea placeholder="简单描述你的合作需求与情况"></textarea>
+        </div>
+        <button class="btn btn-primary" type="button" id="submitBtn">提交合作意向</button>
+        <div class="form-tip">演示站点：提交功能待上线，请通过邮箱 / 电话联系。</div>
+      </div>
+    </div>
+
+    <div class="notice">
+      <b>说明：</b>本站为项目演示官网，以上联系方式均为占位信息。正式合作请以项目方发布渠道为准。
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <span class="brand-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span><span class="brand-name" style="font-size:16px;">曙光跑腿</span><span class="brand-sub" style="display:block;">Dawn Errand</span></span>
+        </div>
+        <p class="brand-about">面向乡镇与本地市场的跑腿 / 外卖 SaaS 平台，多端覆盖、可商用的本地即时配送解决方案。</p>
+      </div>
+      <div>
+        <h4>产品</h4>
+        <a class="link" href="index.html">产品介绍</a>
+        <a class="link" href="download.html">多端下载</a>
+        <a class="link" href="index.html#roadmap">版本动态</a>
+        <a class="link" href="faq.html">常见问题</a>
+      </div>
+      <div>
+        <h4>合作</h4>
+        <a class="link" href="contact.html">商务合作</a>
+        <a class="link" href="contact.html#city">城市合伙人</a>
+        <a class="link" href="contact.html#merchant">商家入驻</a>
+        <a class="link" href="contact.html#rider">骑手招募</a>
+      </div>
+      <div>
+        <h4>联系与支持</h4>
+        <a class="link" href="contact.html">联系我们</a>
+        <a class="link" href="faq.html">帮助中心</a>
+        <a class="link" href="download.html">管理后台入口</a>
+        <a class="link" href="mailto:hello@shuguang.local" style="font-size:13px;">hello@shuguang.local</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 曙光跑腿 Dawn Errand · 项目演示官网</span>
+      <span>本站为产品设计稿，联系方式为演示占位，实际合作请通过正式渠道联系。</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  var toastEl = document.getElementById('toast');
+  var timer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2400);
+  }
+  burger.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  menu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ menu.classList.remove('open'); burger.setAttribute('aria-expanded','false'); });
+  });
+  document.getElementById('submitBtn').addEventListener('click', function(){
+    toast('演示站点：提交功能待上线，请通过邮箱 / 电话联系。');
+  });
+})();
+</script>
+</body>
+</html>

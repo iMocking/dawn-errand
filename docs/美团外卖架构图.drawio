@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-10-24T08:30:00.000Z" agent="Doubao" version="24.0.0" type="device">
+  <diagram id="meituan-arch" name="美团外卖架构图">
+    <mxGraphModel dx="1400" dy="950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 标题 -->
+        <mxCell id="2" value="美团外卖 · 即时配送整体架构（竞品对标）" style="text;html=1;fontSize=24;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="350" y="15" width="700" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- ① 终端与用户层 -->
+        <mxCell id="10" value="① 终端与用户层（多端触达）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F2B600;verticalAlign=top;align=center;fontSize=14;fontStyle=1;fontColor=#7A5B12;spacingTop=8;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="1320" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="美团 App（C 端）&#10;iOS / Android&#10;下单 · 订单跟踪" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="130" width="280" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="小程序&#10;微信 · 支付宝&#10;轻量触达" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="130" width="280" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="美团外卖商家版（B 端）&#10;门店 · 接单 · 营业管理" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="710" y="130" width="280" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="美团骑手 App&#10;接单 · 配送 · 结算" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="130" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ② 接入与网关层 -->
+        <mxCell id="20" value="② 接入与网关层（统一入口 · 服务治理）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F2B600;verticalAlign=top;align=center;fontSize=14;fontStyle=1;fontColor=#7A5B12;spacingTop=8;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="275" width="1320" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="统一接入网关（自研 API 网关）&#10;认证鉴权 · 限流 · 路由转发 · 协议转换 · 风控前置" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="330" width="700" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="OCTO 服务治理&#10;注册中心 · 分布式 RPC&#10;服务发现 · 负载均衡" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="830" y="330" width="220" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="Lion 配置中心&#10;配置下发 · 动态开关&#10;多环境管理" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="330" width="230" height="115" as="geometry" />
+        </mxCell>
+
+        <!-- ③ 业务服务层 -->
+        <mxCell id="30" value="③ 业务服务层（交易 · 履约 · 营销中台）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F2B600;verticalAlign=top;align=center;fontSize=14;fontStyle=1;fontColor=#7A5B12;spacingTop=8;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="510" width="1320" height="255" as="geometry" />
+        </mxCell>
+        <mxCell id="31" value="用户中心&#10;账号 · 会员 · 地址" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="570" width="172" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="商家中心&#10;门店 · 菜品 · 营业" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="272" y="570" width="172" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="33" value="交易订单中心&#10;下单链路 · 状态机&#10;订单履约协同" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="454" y="570" width="172" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="34" value="支付中心&#10;支付 · 退款 · 清结算&#10;钱包 · 渠道路由" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="636" y="570" width="172" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="35" value="配送中心 · 超脑&#10;智能派单 · 路径规划&#10;ETA 预估 · 供需预测" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF1C2;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="818" y="570" width="172" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="36" value="营销中心&#10;优惠券 · 活动&#10;会员体系 · 补贴" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="570" width="172" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="37" value="履约与售后&#10;评价 · 投诉 · 客服&#10;退款售后流程" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F2B600;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1182" y="570" width="172" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- ④ 技术平台与中间件层 -->
+        <mxCell id="40" value="④ 技术平台与中间件层（基础架构）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F2B600;verticalAlign=top;align=center;fontSize=14;fontStyle=1;fontColor=#7A5B12;spacingTop=8;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="810" width="1320" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="41" value="服务框架与中间件&#10;OCTO RPC · Mafka 消息队列&#10;SIA 分布式任务调度" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="865" width="295" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="42" value="数据存储&#10;MySQL 分库分表（Zebra）&#10;Squirrel / Redis 缓存 · Cellar KV&#10;Elasticsearch 搜索" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="410" y="865" width="295" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="43" value="可观测与稳定性&#10;CAT 监控 · 链路追踪&#10;日志平台 · 全链路压测" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="730" y="865" width="295" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="44" value="容器与基础设施&#10;Kubernetes · 容器化部署&#10;弹性伸缩 · 多机房容灾" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="865" width="295" height="115" as="geometry" />
+        </mxCell>
+
+        <!-- ⑤ 数据与智能平台层 -->
+        <mxCell id="50" value="⑤ 数据与智能平台层（算法 · 大数据 · AI）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F2B600;verticalAlign=top;align=center;fontSize=14;fontStyle=1;fontColor=#7A5B12;spacingTop=8;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1045" width="1320" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="51" value="数据仓库与计算&#10;Hive 离线 · Flink 实时&#10;Doris / StarRocks OLAP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1100" width="390" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="52" value="智能调度算法平台（配送超脑核心）&#10;智能派单 · 路线优化 · ETA 预估 · 供需预测" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF1C2;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="505" y="1100" width="390" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="53" value="风控与搜索推荐&#10;实时风控 · 搜索 · 推荐 · 广告" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E8A33D;shadow=1;fontColor=#7A5B12;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1100" width="390" height="115" as="geometry" />
+        </mxCell>
+
+        <!-- 横切关注点 -->
+        <mxCell id="60" value="横切关注点：高可用（多活 · 限流降级 · 容灾）｜ 安全（实时风控 · 反爬 · 数据安全）｜ 发布治理（灰度发布 · 全链路压测）｜ 服务治理（OCTO 全链路 · CAT 可观测）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF6CC;strokeColor=#D9B64E;fontColor=#7A5B12;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1285" width="1320" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- 层间连接：请求主链路 -->
+        <mxCell id="70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#8A6D1E;strokeWidth=3;endArrow=blockThin;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#8A6D1E;strokeWidth=3;endArrow=blockThin;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="20" target="30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="72" value="依赖" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#8A6D1E;strokeWidth=3;endArrow=blockThin;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="30" target="40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 数据沉淀与智能反哺 -->
+        <mxCell id="73" value="数据沉淀" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#B9A05C;strokeWidth=2;dashed=1;endArrow=blockThin;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="40" target="50">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="74" value="AI / 数据反哺" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#B9A05C;strokeWidth=2;dashed=1;endArrow=blockThin;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="50" target="30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

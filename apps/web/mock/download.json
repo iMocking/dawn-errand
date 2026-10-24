@@ -1,0 +1,193 @@
+{
+  "pageHead": {
+    "kicker": "DOWNLOAD CENTER",
+    "title": "多端下载中心",
+    "desc": "选择你所在的角色，进入对应客户端的版本下载页，获取 Android、iOS 与鸿蒙安装包及历史版本。"
+  },
+  "androidSection": {
+    "title": "客户端下载",
+    "desc": "用户端、商家端、骑手端均已上线，点击卡片进入各端版本页，选择 Android / iOS / 鸿蒙平台下载。"
+  },
+  "apps": [
+    {
+      "key": "client",
+      "icon": "phone",
+      "tone": "orange",
+      "name": "曙光跑腿 · 用户端",
+      "role": "Android · iOS · 鸿蒙",
+      "desc": "下单跑腿与外卖、实时跟踪订单、地址管理、优惠券与订单评价。",
+      "meta": ["Android / iOS / 鸿蒙", "约 32 MB", "v1.4.0"],
+      "btnLabel": "下载 APK",
+      "linkLabel": "查看历史版本"
+    },
+    {
+      "key": "store",
+      "icon": "shop",
+      "tone": "blue",
+      "name": "曙光跑腿 · 商家端",
+      "role": "Android · iOS · 鸿蒙",
+      "desc": "门店管理、接单出餐、菜单上下架、营业状态切换与经营统计。",
+      "meta": ["Android / iOS / 鸿蒙", "约 28 MB", "v1.3.0"],
+      "btnLabel": "下载 APK",
+      "linkLabel": "查看历史版本"
+    },
+    {
+      "key": "driver",
+      "icon": "bike",
+      "tone": "green",
+      "name": "曙光跑腿 · 骑手端",
+      "role": "Android · iOS · 鸿蒙",
+      "desc": "抢单接单、配送导航、送达回执、按单结算与每日收入明细。",
+      "meta": ["Android / iOS / 鸿蒙", "约 30 MB", "v1.4.0"],
+      "btnLabel": "下载 APK",
+      "linkLabel": "查看历史版本"
+    }
+  ],
+  "adminSection": {
+    "title": "管理后台与入口",
+    "desc": "平台运营方通过 Web 管理后台完成全量运营管理。",
+    "entry": {
+      "icon": "console",
+      "name": "曙光跑腿 · 管理后台",
+      "role": "Web · 建议桌面浏览器访问",
+      "desc": "用户 / 商家 / 骑手 / 订单 / 财务 / 设置全量运营管理，含数据总览、入驻审核、财务结算与区域费率配置。",
+      "btnLabel": "进入管理后台",
+      "demo": "演示站点：管理后台部署后开放访问"
+    }
+  },
+  "scanNote": "扫码直达：正式发布后，用户可在官网首页 / 宣传物料中扫码直接下载对应客户端；当前为设计稿演示，下载与后台链接暂以提示代替。",
+  "appVersions": [
+    {
+      "key": "client",
+      "name": "曙光跑腿 · 用户端",
+      "sub": "下单跑腿与外卖、实时跟踪订单、地址管理、优惠券与订单评价",
+      "icon": "phone",
+      "tone": "orange",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "鸿蒙 HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.4.0",
+          "date": "2026-10-18",
+          "note": "多租户区域费率支持，订单消息中心上线，支持乡镇 / 县城独立计价与免密支付。",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.3.2",
+          "date": "2026-09-30",
+          "note": "实名认证流程优化，骑手位置实时刷新，减少送达异常。",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.3.0",
+          "date": "2026-08-25",
+          "note": "新增优惠券与订单评价，地址管理改版，支持常用地址智能排序。",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.1",
+          "date": "2026-07-10",
+          "note": "修复 Android 12 通知权限兼容问题，优化弱网环境下单体验。",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-20",
+          "note": "首版发布：下单 / 派单 / 跟踪 / 结算全链路可用。",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    },
+    {
+      "key": "store",
+      "name": "曙光跑腿 · 商家端",
+      "sub": "门店管理、接单出餐、菜单上下架、营业状态切换与经营统计",
+      "icon": "shop",
+      "tone": "blue",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "鸿蒙 HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.3.0",
+          "date": "2026-10-12",
+          "note": "经营统计看板上线，出餐超时提醒，营业数据一键导出。",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.2.2",
+          "date": "2026-09-05",
+          "note": "菜单批量上下架，库存预警提醒，打印小票格式优化。",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.0",
+          "date": "2026-07-28",
+          "note": "营业状态定时切换，多门店切换与管理，配送费规则可视化配置。",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.1.1",
+          "date": "2026-06-15",
+          "note": "修复低内存设备图片加载问题，接单语音播报升级。",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-25",
+          "note": "首版发布：门店管理 / 接单出餐 / 订单列表可用。",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    },
+    {
+      "key": "driver",
+      "name": "曙光跑腿 · 骑手端",
+      "sub": "抢单接单、配送导航、送达回执、按单结算与每日收入明细",
+      "icon": "bike",
+      "tone": "green",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "鸿蒙 HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.4.0",
+          "date": "2026-10-20",
+          "note": "按单结算明细与每日收入汇总页上线，接单奖励可视化。",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.3.1",
+          "date": "2026-09-18",
+          "note": "配送导航优化，送达回执支持拍照，异常上报流程完善。",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.3.0",
+          "date": "2026-08-08",
+          "note": "抢单大厅与单量筛选，在线 / 忙碌状态一键切换。",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.0",
+          "date": "2026-06-30",
+          "note": "新单语音提醒，订单卡片快捷操作（接单 / 送达 / 异常）。",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-18",
+          "note": "首版发布：抢单 / 配送导航 / 按单结算可用。",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    }
+  ]
+}

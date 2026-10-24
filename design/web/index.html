@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>曙光跑腿 · Dawn Errand — 乡镇外卖与跑腿 SaaS 平台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6B2C'/%3E%3Cpath d='M9 19c4 0 6-2 6-6' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='21' cy='13' r='4' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:#F5F6F8; color:#1D2129; -webkit-font-smoothing:antialiased; line-height:1.6;
+  }
+  a { color:inherit; text-decoration:none; }
+  img, svg { display:block; }
+  .wrap { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+  /* ===== 顶部导航 ===== */
+  .nav { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #E5E6EB; }
+  .nav-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand-logo { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#FF8A3D,#FF6B2C); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .brand-name { font-size:18px; font-weight:700; color:#1D2129; letter-spacing:.5px; }
+  .brand-sub { font-size:11px; color:#86909C; }
+  .nav-links { display:none; align-items:center; gap:4px; }
+  .nav-links a { display:block; padding:9px 14px; border-radius:8px; font-size:14px; color:#4E5969; transition:background .15s,color .15s; }
+  .nav-links a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .nav-links a.on { color:#FF6B2C; font-weight:600; }
+  .nav-cta { display:none; align-items:center; gap:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; cursor:pointer; font-family:inherit; border-radius:8px; font-size:14px; font-weight:600; transition:filter .15s,box-shadow .15s,background .15s; }
+  .btn:active { transform:translateY(1px); }
+  .btn-primary { background:linear-gradient(135deg,#FF8A3D,#FF6B2C); color:#fff; box-shadow:0 6px 16px rgba(255,107,44,.32); }
+  .btn-primary:hover { filter:brightness(1.05); box-shadow:0 8px 20px rgba(255,107,44,.4); }
+  .btn-ghost { background:#FFF3E8; color:#FF6B2C; }
+  .btn-ghost:hover { background:#FFE9D5; }
+  .btn-lg { height:52px; padding:0 26px; font-size:15px; border-radius:10px; }
+  .btn-sm { height:38px; padding:0 16px; }
+  .nav .btn { height:38px; padding:0 18px; }
+  .burger { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border:none; background:none; cursor:pointer; border-radius:8px; }
+  .burger:hover { background:#F5F6F8; }
+  .burger svg line { transition:stroke .2s; }
+  .mobile-menu { display:none; background:#fff; border-top:1px solid #E5E6EB; padding:8px 0 16px; }
+  .mobile-menu.open { display:block; }
+  .mobile-menu a { display:block; padding:13px 20px; font-size:15px; color:#4E5969; }
+  .mobile-menu a:hover { background:#FFF3E8; color:#FF6B2C; }
+  .mobile-menu .btn { margin:10px 20px 4px; width:calc(100% - 40px); }
+
+  /* ===== Hero ===== */
+  .hero { position:relative; overflow:hidden; background:linear-gradient(150deg,#FF8A3D 0%,#FF6B2C 55%,#F2531C 100%); color:#fff; }
+  .hero::before { content:""; position:absolute; right:-120px; top:-120px; width:380px; height:380px; border-radius:50%; background:rgba(255,255,255,.10); }
+  .hero::after { content:""; position:absolute; left:-70px; bottom:-110px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,.08); }
+  .hero-inner { position:relative; z-index:1; padding-block:64px 56px; display:flex; flex-direction:column; gap:36px; }
+  .hero h1 { font-size:32px; font-weight:800; line-height:1.3; letter-spacing:1px; }
+  .hero p.lead { margin-top:16px; font-size:15px; line-height:1.8; color:rgba(255,255,255,.92); max-width:560px; }
+  .hero .btn-ghost-invert { background:rgba(255,255,255,.16); color:#fff; }
+  .hero .btn-ghost-invert:hover { background:rgba(255,255,255,.26); }
+  .hero-stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:36px; }
+  .stat { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:14px 18px; flex:1 1 30%; min-width:140px; }
+  .stat b { display:block; font-size:22px; font-weight:800; letter-spacing:.5px; }
+  .stat span { font-size:12px; color:rgba(255,255,255,.85); }
+  .hero-devices { display:none; }
+
+  /* ===== 通用区段 ===== */
+  section.block { padding:56px 0; }
+  .sec-head { text-align:center; max-width:640px; margin:0 auto 36px; }
+  .sec-head .kicker { display:inline-block; font-size:12px; font-weight:600; color:#FF6B2C; background:#FFF3E8; padding:5px 12px; border-radius:20px; letter-spacing:1px; }
+  .sec-head h2 { margin-top:14px; font-size:24px; font-weight:800; color:#1D2129; letter-spacing:.5px; }
+  .sec-head p { margin-top:10px; font-size:14px; color:#86909C; }
+
+  /* ===== 能力全景 ===== */
+  .grid-cap { display:grid; grid-template-columns:1fr; gap:14px; }
+  .cap { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:20px; display:flex; gap:14px; align-items:flex-start; }
+  .cap-ico { width:44px; height:44px; border-radius:10px; background:#FFF3E8; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .cap h3 { font-size:15px; font-weight:700; color:#1D2129; }
+  .cap p { margin-top:5px; font-size:13px; color:#86909C; line-height:1.7; }
+
+  /* ===== 适用场景 ===== */
+  .bg-soft { background:#fff; }
+  .grid-scene { display:grid; grid-template-columns:1fr; gap:14px; }
+  .scene { background:#FFF3E8; border-radius:14px; padding:24px 20px; position:relative; overflow:hidden; }
+  .scene h3 { font-size:16px; font-weight:700; color:#1D2129; }
+  .scene p { margin-top:8px; font-size:13px; color:#4E5969; line-height:1.7; }
+  .scene .num { position:absolute; right:16px; top:10px; font-size:40px; font-weight:800; color:rgba(255,107,44,.16); }
+
+  /* ===== 核心功能 ===== */
+  .grid-feat { display:grid; grid-template-columns:1fr; gap:14px; }
+  .feat { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:20px; }
+  .feat .ico { width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+  .feat h3 { font-size:15px; font-weight:700; margin-top:12px; }
+  .feat p { margin-top:6px; font-size:13px; color:#86909C; line-height:1.7; }
+  .i-orange { background:#FFF3E8; } .i-orange svg { stroke:#FF6B2C; }
+  .i-blue { background:#EEF4FF; } .i-blue svg { stroke:#2B7FFF; }
+  .i-green { background:#E8F9F0; } .i-green svg { stroke:#00B578; }
+  .i-purple { background:#F4EEFF; } .i-purple svg { stroke:#722ED1; }
+  .i-yellow { background:#FFF8E6; } .i-yellow svg { stroke:#D48806; }
+
+  /* 架构链路 */
+  .pipeline { background:#1D2129; border-radius:16px; padding:24px 18px; margin-top:26px; }
+  .pipeline .t { font-size:13px; color:#A9B0BC; letter-spacing:1px; text-align:center; }
+  .pipeline-flow { display:flex; flex-direction:column; gap:10px; margin-top:16px; align-items:center; }
+  .pipe-node { background:#2C323C; border:1px solid rgba(255,255,255,.12); color:#E5E6EB; border-radius:10px; padding:12px 16px; font-size:13px; text-align:center; width:100%; }
+  .pipe-node b { color:#fff; }
+  .pipe-node .tag { display:inline-block; margin-top:4px; font-size:11px; color:#FFB98F; }
+  .pipe-arrow { color:#FF8A3D; font-size:14px; line-height:1; }
+
+  /* ===== 多端矩阵 ===== */
+  .grid-end { display:grid; grid-template-columns:1fr; gap:14px; }
+  .end { background:#fff; border:1px solid #E5E6EB; border-radius:14px; padding:22px 20px; display:flex; flex-direction:column; }
+  .end .row { display:flex; align-items:center; gap:12px; }
+  .end .ico { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .end h3 { font-size:15px; font-weight:700; }
+  .end .role { font-size:12px; color:#86909C; }
+  .end p { margin:10px 0 14px; font-size:13px; color:#4E5969; line-height:1.7; flex:1; }
+  .end .link { font-size:13px; font-weight:600; color:#FF6B2C; display:inline-flex; align-items:center; gap:4px; }
+
+  /* ===== 版本动态 ===== */
+  .grid-ver { display:grid; grid-template-columns:1fr; gap:0; }
+  .ver { display:flex; gap:16px; position:relative; padding-bottom:20px; }
+  .ver::before { content:""; position:absolute; left:13px; top:26px; bottom:0; width:2px; background:#E5E6EB; }
+  .ver:last-child::before { display:none; }
+  .ver .dot { width:28px; height:28px; border-radius:50%; background:#fff; border:2px solid #FF6B2C; flex-shrink:0; display:flex; align-items:center; justify-content:center; position:relative; z-index:1; }
+  .ver .dot.done { background:#FF6B2C; } .ver .dot.done svg { stroke:#fff; }
+  .ver .dot.plan { border-color:#C9CDD4; } .ver .dot.plan svg { stroke:#86909C; }
+  .ver b.time { display:block; font-size:12px; color:#86909C; font-weight:500; }
+  .ver h3 { font-size:14px; font-weight:700; color:#1D2129; margin-top:3px; }
+  .ver p { font-size:13px; color:#4E5969; margin-top:5px; line-height:1.7; }
+  .ver .state { display:inline-block; font-size:11px; padding:2px 9px; border-radius:10px; margin-top:7px; font-weight:600; }
+  .state-done { background:#E8F9F0; color:#00B578; }
+  .state-plan { background:#FFF3E8; color:#FF6B2C; }
+
+  /* ===== FAQ 摘要 ===== */
+  .faq-item { background:#fff; border:1px solid #E5E6EB; border-radius:12px; padding:0; }
+  .faq-item summary { list-style:none; cursor:pointer; padding:17px 18px; font-size:14px; font-weight:600; color:#1D2129; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .faq-item summary::-webkit-details-marker { display:none; }
+  .faq-item summary .plus { color:#FF6B2C; font-size:18px; line-height:1; transition:transform .2s; flex-shrink:0; }
+  .faq-item[open] summary .plus { transform:rotate(45deg); }
+  .faq-item .body { padding:0 18px 17px; font-size:13px; color:#4E5969; line-height:1.8; }
+  .faq-more { text-align:center; margin-top:20px; }
+
+  /* ===== 合作 CTA ===== */
+  .cta { background:linear-gradient(150deg,#FF8A3D,#FF6B2C); border-radius:20px; padding:36px 24px; color:#fff; text-align:center; }
+  .cta h2 { font-size:22px; font-weight:800; letter-spacing:.5px; }
+  .cta p { margin-top:10px; font-size:14px; color:rgba(255,255,255,.9); }
+  .cta .row { display:flex; flex-direction:column; gap:12px; margin-top:22px; align-items:center; justify-content:center; }
+  .cta .btn-white { background:#fff; color:#FF6B2C; }
+  .cta .btn-white:hover { background:#FFF3E8; }
+  .cta .btn-outline { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.55); }
+  .cta .btn-outline:hover { background:rgba(255,255,255,.14); }
+
+  /* ===== 页脚 ===== */
+  .footer { background:#fff; border-top:1px solid #E5E6EB; padding:40px 0 28px; margin-top:56px; }
+  .footer-grid { display:grid; grid-template-columns:1fr; gap:24px; }
+  .footer h4 { font-size:14px; font-weight:700; color:#1D2129; margin-bottom:12px; }
+  .footer a.link { display:block; font-size:13px; color:#4E5969; padding:4px 0; }
+  .footer a.link:hover { color:#FF6B2C; }
+  .footer .brand-about { font-size:13px; color:#86909C; line-height:1.8; margin-top:8px; }
+  .footer .brand-logo { width:36px; height:36px; border-radius:9px; }
+  .footer-bottom { border-top:1px solid #E5E6EB; margin-top:28px; padding-top:18px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:#86909C; }
+
+  /* toast */
+  .toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); background:#1D2129; color:#fff; font-size:13px; padding:11px 18px; border-radius:10px; opacity:0; pointer-events:none; transition:opacity .25s,transform .25s; z-index:100; max-width:88vw; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ===== 断点：≥768px ===== */
+  @media (min-width:768px) {
+    .wrap { padding:0 32px; }
+    .hero-inner { padding-block:88px 72px; }
+    .hero h1 { font-size:44px; }
+    .hero p.lead { font-size:16px; }
+    .hero-stats .stat { flex:1; }
+    .grid-cap { grid-template-columns:repeat(3,1fr); }
+    .grid-scene { grid-template-columns:repeat(3,1fr); }
+    .grid-feat { grid-template-columns:repeat(2,1fr); }
+    .grid-end { grid-template-columns:repeat(2,1fr); }
+    .pipeline-flow { flex-direction:row; justify-content:center; }
+    .pipe-node { width:auto; flex:0 1 auto; padding:12px 22px; }
+    .cta .row { flex-direction:row; gap:14px; }
+    .footer-grid { grid-template-columns:2fr 1fr 1fr 1fr; }
+    .footer-bottom { flex-direction:row; justify-content:space-between; }
+  }
+  /* ===== 断点：≥1024px ===== */
+  @media (min-width:1024px) {
+    .nav-links { display:flex; }
+    .nav-cta { display:flex; }
+    .burger { display:none; }
+    .hero-inner { flex-direction:row; align-items:center; gap:48px; padding-block:96px 80px; }
+    .hero-left { flex:1.15; }
+    .hero h1 { font-size:50px; }
+    .hero-devices { display:block; flex:1; position:relative; }
+    .hero-devices .pc { position:absolute; right:0; top:-55px; width:300px; background:#fff; border-radius:12px; padding:12px; border:6px solid #1D2129; box-shadow:0 24px 50px rgba(0,0,0,.28); transform:rotate(3deg); z-index:0; opacity:.95; }
+    .hero-devices .pc::after { content:""; position:absolute; left:50%; bottom:-14px; width:52px; height:7px; background:#1D2129; border-radius:3px; transform:translateX(-50%) rotate(-3deg); }
+    .hero-devices .pad { position:absolute; left:10px; top:-15px; width:240px; background:#fff; border-radius:20px; padding:14px; border:6px solid #1D2129; box-shadow:0 24px 50px rgba(0,0,0,.28); transform:rotate(-3deg); z-index:1; }
+    .hero-devices .phone { position:relative; left:150px; width:118px; background:#fff; border-radius:26px; padding:10px; border:5px solid #1D2129; box-shadow:0 24px 50px rgba(0,0,0,.28); transform:rotate(6deg); z-index:2; }
+    .hero-devices .p-screen { background:linear-gradient(160deg,#FF8A3D,#F2531C); color:#fff; }
+    .hero-devices .pc .p-screen { border-radius:8px; padding:12px; height:150px; }
+    .hero-devices .pad .p-screen { border-radius:12px; padding:14px; height:153px; }
+    .hero-devices .phone .p-screen { border-radius:16px; padding:10px; height:149px; }
+    .hero-devices .p-screen .bar { height:12px; border-radius:6px; background:rgba(255,255,255,.35); margin-bottom:8px; }
+    .hero-devices .pc .bar { height:14px; }
+    .hero-devices .phone .bar { height:10px; }
+    .hero-devices .p-screen .bar.w70 { width:70%; } .hero-devices .p-screen .bar.w90 { width:90%; } .hero-devices .p-screen .bar.w55 { width:55%; }
+    .hero-devices .p-cols { display:flex; gap:8px; margin-top:10px; }
+    .hero-devices .p-chip { background:#fff; border-radius:10px; padding:10px; margin-top:10px; display:flex; gap:8px; align-items:center; }
+    .hero-devices .p-cols .p-chip { margin-top:0; flex:1; }
+    .hero-devices .phone .p-chip { padding:8px; margin-top:8px; }
+    .hero-devices .p-chip .c-ico { width:30px; height:30px; border-radius:8px; background:#FFF3E8; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .hero-devices .phone .c-ico { width:24px; height:24px; }
+    .hero-devices .p-chip .c-line { height:8px; border-radius:4px; background:#E5E6EB; flex:1; }
+    .hero-devices .lbl { font-size:11px; color:rgba(255,255,255,.85); margin-top:12px; text-align:center; }
+    .grid-cap { grid-template-columns:repeat(3,1fr); }
+    .grid-end { grid-template-columns:repeat(4,1fr); }
+    .grid-ver { grid-template-columns:1fr 1fr; column-gap:40px; }
+    .footer-grid { grid-template-columns:2fr 1.2fr 1fr 1.4fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="曙光跑腿首页">
+      <span class="brand-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </span>
+      <span>
+        <span class="brand-name">曙光跑腿</span>
+        <span class="brand-sub">Dawn Errand</span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      <a href="index.html" class="on">首页</a>
+      <a href="download.html">下载中心</a>
+      <a href="faq.html">常见问题</a>
+      <a href="contact.html">商务合作</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="download.html">立即下载</a>
+      <a class="btn btn-primary btn-sm" href="contact.html">商务合作</a>
+    </div>
+    <button class="burger" id="burger" aria-label="打开菜单" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D2129" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">首页</a>
+    <a href="download.html">下载中心</a>
+    <a href="faq.html">常见问题</a>
+    <a href="contact.html">商务合作</a>
+    <a class="btn btn-primary" href="download.html">立即下载</a>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-left">
+      <h1>让每个乡镇的订单<br>都被认真送达</h1>
+      <p class="lead">曙光跑腿是一套覆盖用户下单、商家接单、骑手配送、平台运营全链路的跑腿 / 外卖 SaaS 平台，面向多城市、多区域站的多租户运营场景，开箱即用、可商用。</p>
+      <div class="hero-stats">
+        <div class="stat"><b>12,800+</b><span>覆盖乡镇</span></div>
+        <div class="stat"><b>8.6万+</b><span>服务用户</span></div>
+        <div class="stat"><b>4,320+</b><span>合作骑手</span></div>
+      </div>
+    </div>
+    <div class="hero-devices" aria-hidden="true">
+      <div class="pc">
+        <div class="p-screen">
+          <div class="bar w90"></div>
+          <div class="p-cols">
+            <div class="p-chip"><span class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="c-line"></span></div>
+            <div class="p-chip"><span class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span class="c-line"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="pad">
+        <div class="p-screen">
+          <div class="bar w70"></div><div class="bar w90"></div>
+          <div class="p-chip"><span class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="c-line"></span></div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="p-screen">
+          <div class="bar w90"></div><div class="bar w70"></div><div class="bar w55"></div>
+          <div class="p-chip"><span class="c-ico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="5.5" r="3.5"/><line x1="15.5" y1="7.5" x2="8.5" y2="15.5"/></svg></span><span class="c-line"></span></div>
+        </div>
+      </div>
+      <div class="lbl">用户端 · 商家端 · 骑手端 · 管理后台</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 能力全景 ===== -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">CAPABILITIES</span>
+      <h2>一套系统，跑通全链路</h2>
+      <p>从下单、派单到配送、结算，覆盖平台运营所需的核心能力。</p>
+    </div>
+    <div class="grid-cap">
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a2 2 0 1 1-2-2"/><path d="M18 9a2 2 0 1 1 2-2"/><path d="M4 9h16a1 1 0 0 1 1 1v1a3 3 0 0 1-3 3h-2v5a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-5H6a3 3 0 0 1-3-3v-1a1 1 0 0 1 1-1z"/></svg></div><div><h3>下单与派单</h3><p>用户一键下单，系统按距离、运力与区域费率自动匹配骑手，支持手动指派与抢单。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div><div><h3>实时配送</h3><p>骑手端抢单、取货、送达全流程引导，支持地图导航与送达回执。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><h3>订单跟踪</h3><p>用户端实时查看订单状态与骑手位置，商家端同步接单、出餐与配送进度。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></div><div><h3>财务结算</h3><p>骑手按单结算、商家货款分账、平台抽成透明可查，支持提现审核与流水导出。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><h3>多角色权限</h3><p>平台、商家、骑手、用户四端角色隔离，Casbin RBAC 七角色细粒度权限控制。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><h3>区域与费率</h3><p>按区域配置配送费、起步价与抽成规则，支持多城市、多区域站独立运营。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><h3>商家管理</h3><p>商家入驻审核、门店管理、菜单上下架、营业状态切换与经营统计。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="5.5" r="3.5"/><line x1="15.5" y1="7.5" x2="8.5" y2="15.5"/></svg></div><div><h3>骑手管理</h3><p>骑手入驻审核、在线状态、接单记录与配送评价，保障服务质量。</p></div></div>
+      <div class="cap"><div class="cap-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><h3>数据看板</h3><p>订单趋势、业务分布、实时订单流与待办事项，经营数据一目了然。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 适用场景 ===== -->
+<section class="block bg-soft">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">SCENARIOS</span>
+      <h2>适用场景</h2>
+      <p>从小镇到县城，从社区到商圈，曙光跑腿都能落地运营。</p>
+    </div>
+    <div class="grid-scene">
+      <div class="scene">
+        <span class="num">01</span>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        <h3>社区跑腿</h3>
+        <p>代买代送、帮取快递、代排队、应急取送——覆盖社区居民的日常跑腿需求。</p>
+      </div>
+      <div class="scene">
+        <span class="num">02</span>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h13"/><path d="M14 6v9a2 2 0 0 1-2 2H4"/><path d="M1 6l3-3h9v3"/><circle cx="7" cy="18" r="2"/><circle cx="16" cy="18" r="2"/><path d="M18 13h4l-1.5-4H14"/></svg>
+        <h3>同城配送</h3>
+        <p>文件、钥匙、证件等急件同城速递，定点取送、进度可见，时间可控。</p>
+      </div>
+      <div class="scene">
+        <span class="num">03</span>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+        <h3>餐饮外卖</h3>
+        <p>商家开店接单、骑手取餐配送，为乡镇餐饮商家搭建线上外卖生意。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 核心功能 ===== -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">HIGHLIGHTS</span>
+      <h2>核心功能亮点</h2>
+      <p>围绕「下单、派单、配送跟踪、财务结算、多角色权限」五大链路打造。</p>
+    </div>
+    <div class="grid-feat">
+      <div class="feat">
+        <div class="ico i-orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3>一键下单</h3>
+        <p>用户填写取送信息即可发起订单，跑腿 / 外卖场景统一入口，体验轻量。</p>
+      </div>
+      <div class="feat">
+        <div class="ico i-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B7FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>智能派单</h3>
+        <p>按距离与运力自动匹配，也支持骑手抢单与后台手动指派，调度灵活。</p>
+      </div>
+      <div class="feat">
+        <div class="ico i-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
+        <h3>配送跟踪</h3>
+        <p>订单状态全程可查，用户、商家、骑手三方实时同步配送进度。</p>
+      </div>
+      <div class="feat">
+        <div class="ico i-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#722ED1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <h3>财务结算</h3>
+        <p>骑手按单结算、商家货款分账、提现审核与流水导出，资金链路清晰。</p>
+      </div>
+      <div class="feat">
+        <div class="ico i-yellow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D48806" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>多角色权限</h3>
+        <p>七角色 RBAC 权限体系，平台、商家、骑手、用户数据相互隔离、安全合规。</p>
+      </div>
+      <div class="feat">
+        <div class="ico i-orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><polyline points="16 8 22 8 22 12 16 12"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <h3>稳定安全</h3>
+        <p>JWT 会话轮换、AES-GCM 敏感数据加密、邮箱 / 短信验证码登录，安全可审计。</p>
+      </div>
+    </div>
+
+    <!-- 架构链路 -->
+    <div class="pipeline">
+      <div class="t">系统架构 · 多端 → Go 后端 → 数据存储</div>
+      <div class="pipeline-flow">
+        <div class="pipe-node">官网 / 管理后台<br><span class="tag">Web · Vue 3</span></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">用户端 · 商家端 · 骑手端<br><span class="tag">Android · Kotlin</span></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node"><b>Go 后端</b> · Gin<br><span class="tag">DDD 四层 · JWT · Casbin RBAC</span></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">PostgreSQL 16 · Redis 7<br><span class="tag">业务数据 · 会话 / 限流 / 验证码</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 多端矩阵 ===== -->
+<section class="block bg-soft">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">MULTI-END</span>
+      <h2>多端产品矩阵</h2>
+      <p>一个平台，四端协同：用户下单、商家接单、骑手配送、平台运营。</p>
+    </div>
+    <div class="grid-end">
+      <div class="end">
+        <div class="row">
+          <span class="ico i-orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+          <span><h3>用户端</h3><span class="role">Android · MVVM</span></span>
+        </div>
+        <p>下单跑腿 / 外卖、实时跟踪订单、地址管理、优惠券与评价。</p>
+        <a class="link" href="download.html">下载用户端 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      </div>
+      <div class="end">
+        <div class="row">
+          <span class="ico i-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B7FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          <span><h3>商家端</h3><span class="role">Android · Kotlin</span></span>
+        </div>
+        <p>门店管理、接单出餐、菜单上下架、营业状态与经营统计。</p>
+        <a class="link" href="download.html">下载商家端 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      </div>
+      <div class="end">
+        <div class="row">
+          <span class="ico i-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="5.5" r="3.5"/><line x1="15.5" y1="7.5" x2="8.5" y2="15.5"/></svg></span>
+          <span><h3>骑手端</h3><span class="role">Android · Kotlin</span></span>
+        </div>
+        <p>抢单接单、配送导航、送达回执、按单结算与每日收入明细。</p>
+        <a class="link" href="download.html">下载骑手端 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      </div>
+      <div class="end">
+        <div class="row">
+          <span class="ico i-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#722ED1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+          <span><h3>管理后台</h3><span class="role">Web · Vue 3 + Tailwind</span></span>
+        </div>
+        <p>用户 / 商家 / 骑手 / 订单 / 财务 / 设置全量运营管理，数据看板总览。</p>
+        <a class="link" href="download.html">进入管理后台 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 版本动态 ===== -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">ROADMAP</span>
+      <h2>版本动态</h2>
+      <p>项目持续推进，关键能力陆续上线。</p>
+    </div>
+    <div class="grid-ver">
+      <div class="ver">
+        <span class="dot done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <div>
+          <b class="time">已上线</b>
+          <h3>多端核心闭环</h3>
+          <p>用户下单、商家接单、骑手配送、平台运营全链路贯通，四端 App 与后台可用。</p>
+          <span class="state state-done">已完成</span>
+        </div>
+      </div>
+      <div class="ver">
+        <span class="dot done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <div>
+          <b class="time">已上线</b>
+          <h3>身份与权限体系</h3>
+          <p>邮箱 / 短信验证码登录、JWT 会话轮换、Casbin RBAC 七角色与数据隔离。</p>
+          <span class="state state-done">已完成</span>
+        </div>
+      </div>
+      <div class="ver">
+        <span class="dot plan"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <div>
+          <b class="time">规划中</b>
+          <h3>支付网关与对账</h3>
+          <p>支付 / 退款 / 对账、商家结算分账能力规划落地。</p>
+          <span class="state state-plan">规划中</span>
+        </div>
+      </div>
+      <div class="ver">
+        <span class="dot plan"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <div>
+          <b class="time">规划中</b>
+          <h3>配送调度引擎</h3>
+          <p>地图 LBS、路线规划与 ETA 预测，派单调度更智能。</p>
+          <span class="state state-plan">规划中</span>
+        </div>
+      </div>
+      <div class="ver">
+        <span class="dot plan"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <div>
+          <b class="time">规划中</b>
+          <h3>消息推送与队列</h3>
+          <p>异步消息队列、订单超时任务、多端消息推送与实时通知。</p>
+          <span class="state state-plan">规划中</span>
+        </div>
+      </div>
+      <div class="ver">
+        <span class="dot plan"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <div>
+          <b class="time">规划中</b>
+          <h3>官网与云部署</h3>
+          <p>官网上线（介绍 + 多端下载中心）、HTTPS 与域名备案、监控告警与 CI/CD。</p>
+          <span class="state state-plan">规划中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ 摘要 ===== -->
+<section class="block bg-soft">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">FAQ</span>
+      <h2>常见问题</h2>
+      <p>关于入驻、配送、结算与合作的常见疑问。</p>
+    </div>
+    <div class="grid-ver" style="display:block;">
+      <div class="faq-item" style="margin-bottom:12px;">
+        <details>
+          <summary><span>平台如何收费？</span><span class="plus">+</span></summary>
+          <div class="body">平台按区域配置配送费率与抽成规则，具体费率由各区域站根据当地运力与订单规模设定，入驻前可与商务团队确认。</div>
+        </details>
+      </div>
+      <div class="faq-item" style="margin-bottom:12px;">
+        <details>
+          <summary><span>商家如何入驻？</span><span class="plus">+</span></summary>
+          <div class="body">在商家端提交入驻资料，平台审核通过后即可开店。支持资质上传与在线审核，商家可自主管理菜单与营业状态。</div>
+        </details>
+      </div>
+      <div class="faq-item" style="margin-bottom:12px;">
+        <details>
+          <summary><span>骑手如何结算？</span><span class="plus">+</span></summary>
+          <div class="body">骑手按单结算，收入明细实时可见；平台按结算周期统一核算，支持提现申请与审核。</div>
+        </details>
+      </div>
+      <div class="faq-item" style="margin-bottom:12px;">
+        <details>
+          <summary><span>支持哪些区域运营？</span><span class="plus">+</span></summary>
+          <div class="body">平台采用多租户架构，支持多城市、多区域站独立运营，各区域可独立配置费率、运力与运营策略。</div>
+        </details>
+      </div>
+    </div>
+    <div class="faq-more"><a class="btn btn-ghost" href="faq.html">查看更多问题</a></div>
+  </div>
+</section>
+
+<!-- ===== 合作 CTA ===== -->
+<section class="block">
+  <div class="wrap">
+    <div class="cta">
+      <h2>把曙光跑腿带到你的城市</h2>
+      <p>诚邀城市合伙人、区域运营方与商家伙伴加入，共同服务本地即时配送。</p>
+      <div class="row">
+        <a class="btn btn-white btn-lg" href="contact.html">联系我们</a>
+        <a class="btn btn-outline btn-lg" href="download.html">先体验产品</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <span class="brand-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span><span class="brand-name" style="font-size:16px;">曙光跑腿</span><span class="brand-sub" style="display:block;">Dawn Errand</span></span>
+        </div>
+        <p class="brand-about">面向乡镇与本地市场的跑腿 / 外卖 SaaS 平台，多端覆盖、可商用的本地即时配送解决方案。</p>
+      </div>
+      <div>
+        <h4>产品</h4>
+        <a class="link" href="index.html">产品介绍</a>
+        <a class="link" href="download.html">多端下载</a>
+        <a class="link" href="index.html#roadmap">版本动态</a>
+        <a class="link" href="faq.html">常见问题</a>
+      </div>
+      <div>
+        <h4>合作</h4>
+        <a class="link" href="contact.html">商务合作</a>
+        <a class="link" href="contact.html#city">城市合伙人</a>
+        <a class="link" href="contact.html#merchant">商家入驻</a>
+        <a class="link" href="contact.html#rider">骑手招募</a>
+      </div>
+      <div>
+        <h4>联系与支持</h4>
+        <a class="link" href="contact.html">联系我们</a>
+        <a class="link" href="faq.html">帮助中心</a>
+        <a class="link" href="download.html">管理后台入口</a>
+        <a class="link" href="mailto:hello@shuguang.local" style="font-size:13px;">hello@shuguang.local</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 曙光跑腿 Dawn Errand · 项目演示官网</span>
+      <span>本站为产品设计稿，联系方式为演示占位，实际合作请通过正式渠道联系。</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  var toastEl = document.getElementById('toast');
+  var timer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2400);
+  }
+  burger.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  menu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ menu.classList.remove('open'); burger.setAttribute('aria-expanded','false'); });
+  });
+  // 下载与后台入口演示提示
+  document.querySelectorAll('a[data-demo]').forEach(function(a){
+    a.addEventListener('click', function(e){ e.preventDefault(); toast(a.getAttribute('data-demo')); });
+  });
+})();
+</script>
+</body>
+</html>
