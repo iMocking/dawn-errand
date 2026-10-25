@@ -28,8 +28,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val vm: LoginViewModel by viewModels()
 
-    /** true=邮箱登录，false=手机号登录 */
-    private var emailMode = false
+    /** true=邮箱登录（默认优先），false=手机号/短信验证码登录 */
+    private var emailMode = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
@@ -43,7 +43,7 @@ class LoginActivity : AppCompatActivity() {
         buildAgreementText()
         bindEvents()
         observe()
-        switchMode(false)
+        switchMode(true)
     }
 
     private fun buildAgreementText() {

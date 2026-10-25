@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:name=".DriverApp"
@@ -11,6 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DawnDriver"
         android:usesCleartextTraffic="true">
+
+        <!-- 高德地图 API Key（console.amap.com 申请，包名 com.dawnerrand.driver + 发布版安全码 SHA1
+             40:C4:92:A9:F0:D7:B4:B2:60:7E:E9:CE:7D:1C:A1:D5:52:8B:F2:E3） -->
+        <meta-data
+            android:name="com.amap.v2.ApiKey"
+            android:value="13aaa6ec70fa6d0ad6a2fce03891dd82" />
 
         <activity
             android:name=".ui.screens.login.LoginActivity"

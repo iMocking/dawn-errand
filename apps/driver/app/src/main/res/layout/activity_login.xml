@@ -65,39 +65,11 @@
         android:paddingRight="20dp"
         android:paddingBottom="24dp">
 
-        <!-- 登录方式 Tab：手机号登录 / 邮箱登录 -->
+        <!-- 登录方式 Tab：邮箱登录（优先）/ 手机号登录（短信验证码） -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="44dp"
             android:orientation="horizontal">
-
-            <LinearLayout
-                android:id="@+id/tabPhone"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvTabPhone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/login_tab_phone"
-                    android:textColor="@color/primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:id="@+id/indPhone"
-                    android:layout_width="24dp"
-                    android:layout_height="3dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="2dp"
-                    android:background="@drawable/bg_tab_indicator" />
-            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tabEmail"
@@ -114,11 +86,39 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/login_tab_email"
+                    android:textColor="@color/primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:id="@+id/indEmail"
+                    android:layout_width="24dp"
+                    android:layout_height="3dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="2dp"
+                    android:background="@drawable/bg_tab_indicator" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tabPhone"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTabPhone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/login_tab_phone"
                     android:textColor="@color/text_faint"
                     android:textSize="15sp" />
 
                 <View
-                    android:id="@+id/indEmail"
+                    android:id="@+id/indPhone"
                     android:layout_width="24dp"
                     android:layout_height="3dp"
                     android:layout_gravity="center_horizontal"

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 取餐点（商家）地图标记：主题橙气泡图钉 + 白色餐盒图标，参照美团骑手/饿了么蜂鸟取货点视觉语言 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- 气泡针主体：上圆 + 底部尖角（尖角指向坐标点） -->
+    <path
+        android:fillColor="#FF6B2C"
+        android:pathData="M9,19a15,15 0 1,0 30,0a15,15 0 1,0 -30,0Z M17,32L24,46L31,32Z" />
+
+    <!-- 餐盒盖（弧形） -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,13C14,9 18,6 24,6C30,6 34,9 34,13Z" />
+
+    <!-- 餐盒身 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,13H34V24C34,27 32,29 29,29H19C16,29 14,27 14,24Z" />
+</vector>

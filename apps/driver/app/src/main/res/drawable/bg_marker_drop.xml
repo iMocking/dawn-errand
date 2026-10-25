@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 送达点（目的地）地图标记：绿色气泡图钉 + 白色房子图标，参照美团骑手/饿了么蜂鸟送货点视觉语言 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- 气泡针主体：上圆 + 底部尖角（尖角指向坐标点） -->
+    <path
+        android:fillColor="#00B578"
+        android:pathData="M9,19a15,15 0 1,0 30,0a15,15 0 1,0 -30,0Z M17,32L24,46L31,32Z" />
+
+    <!-- 屋顶 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,13L24,5L34,13Z" />
+
+    <!-- 屋身 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,13H32V27H16Z" />
+
+    <!-- 门（镂空，主题绿） -->
+    <path
+        android:fillColor="#00B578"
+        android:pathData="M22,27V21H26V27Z" />
+</vector>
