@@ -221,7 +221,7 @@ export function rejectRider(id: string, reason?: string) {
   })
 }
 
-/** 冻结 / 解冻骑手（mock 中间件回显请求体） */
+/** 冻结 / 解冻骑手 */
 export function freezeRider(id: string, action: 'freeze' | 'unfreeze') {
   return http.post<{ id: string; action: string }>('/riders/freeze', { id, action })
 }

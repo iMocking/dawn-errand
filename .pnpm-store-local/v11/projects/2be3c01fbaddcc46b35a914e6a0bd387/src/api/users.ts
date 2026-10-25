@@ -2,7 +2,7 @@ import { http } from '@/utils/request'
 import type { PageResult, PageQuery } from '@/types'
 import type { ComplaintRow } from './complaints'
 
-/** 用户状态（与设计稿 / mock 文案逐字一致） */
+/** 用户状态（与后端状态文案一致） */
 export type UserStatus = '正常' | '已封禁'
 
 /** 用户列表行 */
@@ -30,7 +30,7 @@ export interface UserRow extends Record<string, unknown> {
   roleName: string
 }
 
-/** 用户模块顶部概览指标（对应 mock/users-overview.json） */
+/** 用户模块顶部概览指标（对应后端 /users/overview） */
 export interface UsersOverview {
   /** 注册用户总数 */
   total: number
@@ -65,7 +65,7 @@ export interface UserRecentOrder extends Record<string, unknown> {
   orderedAt: number
 }
 
-/** 用户详情（对应 mock/user-detail.json） */
+/** 用户详情（对应后端 /users/:id） */
 export interface UserDetail {
   id: string
   /** 用户编号，如 U00088642 */
@@ -159,12 +159,12 @@ export function getUserDetail(id: string) {
   return http.get<UserDetail>(`/users/${id}`)
 }
 
-/** 封禁账号（写操作，mock 中间件回显请求体） */
+/** 封禁账号 */
 export function banUser(id: string) {
   return http.post<{ id: string; status: string }>(`/users/${id}/ban`, { id, status: '已封禁' })
 }
 
-/** 解封账号（写操作，mock 中间件回显请求体） */
+/** 解封账号 */
 export function unbanUser(id: string) {
   return http.post<{ id: string; status: string }>(`/users/${id}/unban`, { id, status: '正常' })
 }

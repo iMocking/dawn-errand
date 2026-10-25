@@ -222,7 +222,7 @@ onMounted(() => {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2B7FFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
             <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" />
           </svg>
-          本月已通过 {{ stats?.audit.monthApproved ?? 78 }} 人，较上月 {{ stats?.audit.momRate ?? '+12.4%' }}
+          本月已通过 {{ stats?.audit.monthApproved ?? 0 }} 人，较上月 {{ stats?.audit.momRate || '—' }}
         </div>
       </div>
     </div>

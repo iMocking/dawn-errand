@@ -41,7 +41,7 @@ const STATUS_TABS = [
 const AREA_TABS = ['王家湾镇', '李庄村', '柳树沟村'] as const
 const areaFilter = ref<(typeof AREA_TABS)[number] | ''>('')
 
-/** 常驻区域为前端演示筛选（mock 中间件不支持该参数），仅作用于当前页数据 */
+/** 常驻区域为前端筛选（后端当前未提供区域筛选参数），仅作用于当前页数据 */
 const displayRows = ref<UserRow[]>([])
 function applyArea(rows: UserRow[]) {
   if (!areaFilter.value) return rows

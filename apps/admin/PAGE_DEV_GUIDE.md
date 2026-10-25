@@ -16,8 +16,8 @@ pnpm lint         # eslint .
 pnpm build        # 产物 dist/
 ```
 
-- 默认账号：`admin@shuguang` / 密码 `shuguang2026` / 验证码 `8A6K`（任意值也可登录，dev mock 不校验）。
-- 真实后端（proxy 模式）种子超管：`jsongkey@outlook.com` / `1076236bb`（当前库内，已于 2026-10-23 由 seed 输出的一次性账号变更而来；若重置 seed 则恢复为 `admin@shuguang.local` + 一次性密码）；验证码后端不校验，任意非空即可。
+- 默认账号：`jsongkey@outlook.com` / 密码 `1076236bb` / 验证码 `8A6K`（当前联调库超管；验证码后端不校验，任意非空即可）。
+- 启动前必须先启动真实后端并完成迁移/种子：`docker compose up -d` → `go run ./cmd/migrate up` → `go run ./cmd/seed` → `go run ./cmd/server`。
 - 提/交/自测前 `pnpm typecheck && pnpm lint && pnpm build` 必须全绿；自测完 dev server 必须停止，**不要占用 8080**。
 
 ---
@@ -89,7 +89,7 @@ export default routes
 <button v-permission="'merchant:audit'">审核通过</button>
 <button v-permission="['merchant:audit','rider:audit']">批量审核</button>
 ```
-无权限元素直接被移除。权限常量命名空间见 `mock/auth.json`：`merchant:audit`、`rider:audit`、`withdraw:audit`、`complaint:handle`。演示账号 permissions 含 `*`（全量），按钮权限对所有人可见；接真实后端后再收窄。
+无权限元素直接被移除。权限常量命名空间以后端 Casbin 策略为准：`merchant:audit`、`rider:audit`、`withdraw:audit`、`complaint:handle`。联调超管 permissions 含 `*`（全量），按钮权限对所有人可见；生产按角色收窄。
 
 ---
 
@@ -227,58 +227,22 @@ export function getOrderDetail(id: string) {
 
 ---
 
-## 5. Mock 中间件契约（仅 VITE_USE_MOCK=1 时生效）
+## 5. 真实后端联调约定（无 Mock）
 
-`vite.config.ts` 已按 `VITE_USE_MOCK` 环境变量切换请求链路：
-- **默认（未设置或非 `'1'`）**：`/api/*` 由 `server.proxy` 转发到真实后端 `http://localhost:8080`，mock 中间件不注册。需后端已启动并完成 migrate + seed。
-- **`VITE_USE_MOCK=1`**：注册 dev 中间件，按下面规则从 `mock/*.json` 取数，无需后端即可开发。
+`vite.config.ts` 只注册 `server.proxy`：`/api/* → http://localhost:8080`。**不再内置 mock 中间件，也不读取 `VITE_USE_MOCK`。**
 
-mock 模式下**你的页面不要在组件里硬编码业务数据**，把数据写进对应 mock json，再通过 api 拉。
-
-### 5.1 文件 ↔ 路由映射（严格遵守）
-
-| 路由 | mock 文件 | 说明 |
-|---|---|---|
-| `POST /api/auth/login` | `auth.json` | 返回 `{token,user,permissions}` |
-| `GET /api/dashboard` | `dashboard.json` | 对象 |
-| `GET /api/orders` | `orders.json`（数组） | 列表 |
-| `GET /api/orders/:id` | `order-detail.json` | 对象（或数组按 id 查） |
-| `GET /api/complaints` | `complaints.json` | 列表 |
-| `GET /api/complaints/:id` | `complaint-detail.json` | |
-| `GET /api/merchants` | `merchants.json` | 列表 |
-| `GET /api/merchants/audit` | `merchant-audit.json` | 列表 |
-| `GET /api/merchants/:id` | `merchant-detail.json` | |
-| `GET /api/riders` | `riders.json` | 列表 |
-| `GET /api/riders/audit` | `rider-audit.json` | 列表 |
-| `GET /api/riders/:id` | `rider-detail.json` | |
-| `GET /api/users` | `users.json` | 列表 |
-| `GET /api/users/:id` | `user-detail.json` | |
-| `GET /api/finance` | `finance.json` | 对象/列表 |
-| `GET /api/finance/settlement` | `settlement.json` | 列表 |
-| `GET /api/finance/withdraw/:id` | `withdraw-detail.json` | |
-| `GET /api/settings` | `settings.json` | 对象 |
-| `GET /api/settings/fee-rules` | `fee-rules.json` | 列表 |
-| `GET /api/settings/announcements` | `announcements.json` | 列表 |
-
-> 命名规则：多段路径自动尝试「末段连字符组合 + 单复数归一」。你按上表命名文件即可命中；新增模块时文件名用 `<entity>[-<sub>].json`，详情加 `-detail`。
-
-### 5.2 列表查询参数（中间件已实现）
-- `page`（默认 1）、`pageSize`（默认 10）、`keyword`（对整行 JSON 字符串化模糊匹配）、`status`（精确匹配行内 `status` 字段）。
-- 数组响应：`body:{ list, total, page, pageSize }`，即 `PageResult<T>`。
-- 写操作（POST/PUT/DELETE）统一回显 `{code:0, body:<请求体>}`，刷新即复位。
-- 所有响应带 100–300ms 随机延迟 + `request_id`。
-
-### 5.3 列表 mock 数据规范
-- 数组每项是一个业务行，**必须含 `id: string` 和 `status: string`**（status 供筛选演示）。
-- 金额存「元」数字；时间存 Unix 秒数字。
-- 列表至少放 15+ 行以演示分页。
+- 启动前：`docker compose up -d` → `go run ./cmd/migrate up` → `go run ./cmd/seed` → `go run ./cmd/server`。
+- 所有数据必须通过 `src/api/*.ts` 请求真实接口；页面禁止内置 mock 数组/回退数据。
+- 列表参数：`page/pageSize/keyword/status`；响应 `{ list, total, page, pageSize }`。
+- 写操作必须处理 `code !== 0` 的业务错误，并加 loading/防重复提交。
+- 后端未实现的能力，前端展示空态或提示，不得用假数据填充。
 
 ---
 
 ## 6. 页面还原规范
 
 1. **以 `design/admin/<你的页面>.html` 为唯一视觉事实源，逐字还原**（间距/色值/文案/图标）。
-2. 数据从 mock 经 api 拉，**禁止在 SFC 里写死业务数字/文案**。
+2. 数据从真实 `src/api` 拉，**禁止在 SFC 里写死业务数字/文案**；后端无数据时用 `<Empty/>`。
 3. 时间用 `formatTime/formatDate`；金额用 `formatMoney/formatNumber`；ID 当 string。
 4. 列表页结构参考：页面头部 `<SearchBar/>` → 白色卡片内 `<DataTable/>` → 底部 `<Pagination/>`。
 5. 图表一律内联 SVG（参考 dashboard 的折线图写法），**禁止 echarts/任何图表库**。
@@ -292,14 +256,13 @@ mock 模式下**你的页面不要在组件里硬编码业务数据**，把数�
 - `src/views/<你的模块>/**`
 - `src/router/routes/<你的模块>.ts`
 - `src/api/<你的模块>.ts`
-- `mock/<对应文件名>.json`
 - 必要时在 `components/SvgIcon/icons.ts` **追加**图标（不要改已有项）。
 
 **禁止改动**（骨架 Agent 维护，并行改会冲突）：
 - `src/router/index.ts`、`src/router/routes/index.ts`、`src/router/types.ts`
 - `src/layouts/**`、`src/permission/**`、`src/utils/request.ts`、`src/utils/format.ts`、`src/utils/permission.ts`
 - `src/stores/auth.ts`、`types/index.ts`、`vite.config.ts`、`tailwind.config.js`
-- 已存在的 `src/views/login/**`、`src/views/dashboard/**`、`src/views/error/**`、`src/api/auth.ts`、`src/api/dashboard.ts`、`mock/auth.json`、`mock/dashboard.json`
+- 已存在的 `src/views/login/**`、`src/views/dashboard/**`、`src/views/error/**`、`src/api/auth.ts`、`src/api/dashboard.ts`
 
 ---
 
@@ -307,4 +270,4 @@ mock 模式下**你的页面不要在组件里硬编码业务数据**，把数�
 1. `pnpm typecheck`、`pnpm lint`、`pnpm build` 全绿。
 2. `pnpm dev` 起 5173，浏览器走一遍你页面的：进列表 → 搜索/分页 → 进详情 → 按钮权限显隐。
 3. **停止 dev server**，确认 5173 释放。
-4. 输出交付报告：变更文件、新增 api、mock 文件、自测截图/结果、未决问题。
+4. 输出交付报告：变更文件、新增 api、真实接口调用、自测截图/结果、未决问题。

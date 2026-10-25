@@ -52,14 +52,15 @@ pnpm install --store-dir "apps/web/node_modules/.store"   # 本机 pnpm 全局 s
 pnpm dev        # :5173，mock 数据渲染；与 apps/admin 同时开发时请错开端口
 ```
 
-管理后台（默认对接真实后端）：
+管理后台（只对接真实后端）：
 
 ```powershell
 cd apps/admin
 pnpm install
 pnpm dev        # :5173，/api 代理到 http://localhost:8080；需先启动后端
-# 纯 mock：VITE_USE_MOCK=1 pnpm dev
 ```
+
+管理端已移除 mock 中间件与 `mock/*.json`，所有页面数据均来自真实 `/api`。
 
 超管账号由 `go run ./cmd/seed` 初始化（默认 `admin@shuguang`，一次性密码见 seed 输出；联调库另有测试超管）。管理端与官网同时开发时请错开端口：`pnpm exec vite --port 5174`。
 
@@ -67,19 +68,23 @@ pnpm dev        # :5173，/api 代理到 http://localhost:8080；需先启动后
 
 ## 系统架构
 
-- 📐 **架构图（draw.io）**：[跑腿服务架构图（含商用缺失标注）](docs/跑腿服务架构图.drawio)
+- 📐 **架构图（draw.io）**：[跑腿服务架构图（M0–M5 已落地 + 外部接入待办）](docs/跑腿服务架构图.drawio)
 - 🏢 **竞品架构参考**：[美团外卖 · 即时配送整体架构](docs/美团外卖架构图.drawio)
 
 核心链路：
 
 ```
 多端（官网 / 管理后台 / 用户 / 商家 / 骑手）
-        │  HTTPS / REST
+        │  HTTPS / REST（管理端 /api，App /api/app）
         ▼
-Go 后端（Gin · :8080）—— JWT 认证 · Casbin RBAC · 限流 · 审计
+Go 后端（Gin · :8080）
+  身份与账号 · 商家/骑手入驻审核 · 商品目录 · 订单交易
+  配送履约（抢单/追踪/ETA） · 钱包结算/提现/对账 · 评价/退款/优惠券
+  消息中心 · 定时任务 · 审计 · 限流 · /readyz /metrics
         │  DDD 四层：interfaces → application → domain
         ▼
-PostgreSQL 16（业务数据） · Redis 7（会话 / 限流 / 验证码） · SMTP / 短信 / OSS
+PostgreSQL 16（migration 001–009） · Redis 7（会话/限流/GEO/锁）
+本地/OSS 文件存储 · SMTP / 短信 · Prometheus 指标
 ```
 
 ## 技术栈
@@ -87,9 +92,9 @@ PostgreSQL 16（业务数据） · Redis 7（会话 / 限流 / 验证码） · S
 | 层 | 技术 |
 |---|---|
 | 后端 | Go 1.27 · Gin · ent（ORM）· Casbin（RBAC）· zap · cron |
-| 存储 | PostgreSQL 16 · Redis 7 ·（规划：OSS 对象存储） |
+| 存储 | PostgreSQL 16（migration 001–009）· Redis 7 · 本地存储（可切 OSS） |
 | 身份与安全 | JWT（access + refresh 轮换 · 会话版本失效）· AES-GCM 敏感数据加密 · 邮箱 / 短信验证码 |
-| 数据模型 | ent 18 张表 · ULID 主键 · UTC int64 时间戳 |
+| 数据模型 | ent 31 张表 · ULID 主键 · UTC int64 时间戳 |
 | 可观测 | Prometheus（`/metrics`）· 审计日志（`audit_logs`） |
 | 前端 | Vue 3 · TailwindCSS · Vite（admin / web）· Android Kotlin · MVVM（client / store / driver） |
 

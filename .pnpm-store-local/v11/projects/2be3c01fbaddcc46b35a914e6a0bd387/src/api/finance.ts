@@ -134,7 +134,7 @@ export function getWithdrawDetail(id: string) {
   return http.get<WithdrawDetailDto>(`/finance/withdraw/${id}`)
 }
 
-/** POST /api/finance/withdraw/:id/audit 审核打款 / 驳回（dev mock 回显请求体） */
+/** POST /api/finance/withdraw/:id/audit 审核打款 / 驳回 */
 export function auditWithdraw(id: string, payload: AuditPayload) {
   return http.post<Record<string, unknown>>(`/finance/withdraw/${id}/audit`, payload)
 }

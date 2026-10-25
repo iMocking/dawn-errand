@@ -98,7 +98,7 @@ async function load() {
 }
 
 async function loadStats() {
-  // 今日新增：拉全量统计当日创建数（mock 中间件无日期参数）
+  // 今日新增：拉全量后按创建时间统计当日数量（后端列表暂无日期参数）
   const res = await getOrders({ page: 1, pageSize: 100 })
   const start = new Date()
   start.setHours(0, 0, 0, 0)
