@@ -6,14 +6,19 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dawnerrand.store.R
 import com.dawnerrand.store.data.StoreOrder
+import com.dawnerrand.store.data.StoreRemoteRepository
 import com.dawnerrand.store.databinding.ActivityOrdersBinding
 import com.dawnerrand.store.ui.adapter.OrderAdapter
 import com.dawnerrand.store.ui.theme.Design
 import com.dawnerrand.store.ui.util.setLightStatusBars
 import com.dawnerrand.store.ui.util.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 订单管理：四个状态 Tab + 订单卡片列表（orders 稿）。
@@ -89,17 +94,32 @@ class OrdersActivity : AppCompatActivity() {
 
     private fun handleAction(order: StoreOrder, action: String) {
         when (action) {
-            "接单" -> {
-                vm.accept(order.id)
-                toast("已接单，请尽快制作")
+            "接单" -> lifecycleScope.launch {
+                val ok = withContext(Dispatchers.IO) { StoreRemoteRepository.accept(order.id) }
+                if (ok) {
+                    vm.accept(order.id)
+                    toast("已接单，请尽快制作")
+                } else {
+                    toast("接单失败，请刷新后重试")
+                }
             }
-            "拒单" -> {
-                vm.reject(order.id)
-                toast("已拒单")
+            "拒单" -> lifecycleScope.launch {
+                val ok = withContext(Dispatchers.IO) { StoreRemoteRepository.reject(order.id) }
+                if (ok) {
+                    vm.reject(order.id)
+                    toast("已拒单")
+                } else {
+                    toast("拒单失败，请刷新后重试")
+                }
             }
-            "通知出餐" -> {
-                vm.notifyReady(order.id)
-                toast("已通知骑手取餐")
+            "通知出餐" -> lifecycleScope.launch {
+                val ok = withContext(Dispatchers.IO) { StoreRemoteRepository.ready(order.id) }
+                if (ok) {
+                    vm.notifyReady(order.id)
+                    toast("已通知骑手取餐")
+                } else {
+                    toast("出餐失败，请刷新后重试")
+                }
             }
             "查看配送" -> openDetail(order)
             "再来一单" -> openDetail(order)

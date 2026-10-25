@@ -28,6 +28,54 @@ object ApiClient {
 
     private val baseUrl: String = BuildConfig.API_BASE_URL.trimEnd('/')
 
+    /** 邮箱/密码登录：POST /api/auth/login（account 支持邮箱或手机号） */
+    suspend fun loginByPassword(account: String, password: String): SmsLoginResult =
+        withContext(Dispatchers.IO) {
+            val body = JSONObject().put("account", account).put("password", password)
+            val env = post("/api/auth/login", body)
+            val payload = env.body ?: throw ApiException(-1, "登录响应为空")
+            val user = payload.optJSONObject("user")
+            val token = payload.optString("token")
+            if (token.isBlank()) throw ApiException(-1, "登录响应缺少 token")
+            SmsLoginResult(
+                token = token,
+                refreshToken = payload.optString("refresh_token"),
+                userId = user?.optString("id").orEmpty(),
+                name = user?.optString("name").orEmpty(),
+                role = user?.optString("role").orEmpty(),
+            )
+        }
+
+    /** GET 请求（携带当前会话 token），返回 body 对象；失败返回 null */
+    suspend fun getObject(path: String): JSONObject? = withContext(Dispatchers.IO) {
+        val token = DemoRepository.session()?.token
+        if (token.isNullOrBlank()) return@withContext null
+        val url = URL(baseUrl + path)
+        val conn = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 8_000
+            readTimeout = 10_000
+            useCaches = false
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("Authorization", "Bearer $token")
+            setRequestProperty(
+                "X-Request-ID",
+                UUID.randomUUID().toString().replace("-", "").uppercase(),
+            )
+        }
+        try {
+            val httpCode = conn.responseCode
+            val stream = if (httpCode in 200..299) conn.inputStream else conn.errorStream
+            val text = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+            val json = runCatching { JSONObject(text) }.getOrNull() ?: return@withContext null
+            if (json.optInt("code", -1) == 0) json.optJSONObject("body") else null
+        } catch (e: Exception) {
+            null
+        } finally {
+            conn.disconnect()
+        }
+    }
+
     /** 发送短信验证码；dev 环境返回自动回显的验证码，正式环境返回 null */
     suspend fun sendSmsCode(phone: String): String? = withContext(Dispatchers.IO) {
         val body = JSONObject().put("phone", phone)

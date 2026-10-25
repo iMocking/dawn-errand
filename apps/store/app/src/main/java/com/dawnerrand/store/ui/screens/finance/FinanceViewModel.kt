@@ -16,7 +16,8 @@ class FinanceViewModel : ViewModel() {
 
     val balance: LiveData<Double> = FinanceStore.balance
     val records: LiveData<List<FinanceRecord>> = FinanceStore.records
-    val todayRevenue = StoreRepository.shop.todayRevenue
+    val todayRevenue: String
+        get() = StoreRepository.shop.todayRevenue
     val monthRevenue = StoreRepository.monthRevenue
     val monthOrders = StoreRepository.monthOrders
 

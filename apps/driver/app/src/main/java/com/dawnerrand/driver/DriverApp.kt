@@ -4,11 +4,14 @@ import android.app.Application
 import android.util.Log
 import com.amap.api.location.AMapLocationClient
 import com.amap.api.maps.MapsInitializer
+import com.dawnerrand.driver.data.api.ApiClient
 
 class DriverApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        ApiClient.accessToken = getSharedPreferences("driver_session", MODE_PRIVATE)
+            .getString("access_token", null)
         // 高德地图隐私合规声明（SDK 10.x 强制：未声明视为未同意，地图鉴权失败 errorCode 10001）
         // 地图与内置定位模块的合规接口需同时声明；正式版应接入真实隐私弹窗后置 true，演示版默认同意。
         try {

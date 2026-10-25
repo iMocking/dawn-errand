@@ -8,9 +8,10 @@ import com.dawnerrand.driver.data.repository.DriverRepository
 
 class OrdersViewModel : ViewModel() {
 
-    private val all = DriverRepository.orderHistory
+    private val all: List<OrderRecord>
+        get() = DriverRepository.orderHistory
 
-    private val _records = MutableLiveData(all)
+    private val _records = MutableLiveData(DriverRepository.orderHistory)
     val records: LiveData<List<OrderRecord>> = _records
 
     private val _selectedTab = MutableLiveData(0)

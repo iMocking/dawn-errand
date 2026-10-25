@@ -8,104 +8,82 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * 轻量 API 客户端（HttpURLConnection，无第三方依赖）。
- * 对接后端统一返回 {code, message, body, request_id}（code=0 成功）。
- * 邮箱/密码走真实接口 /api/auth/login；短信接口（/api/auth/sms 系列）后端未提供时会自动进入演示模式（任意 6 位验证码可登录）。
+ * 骑手端 API 客户端（HttpURLConnection，无第三方依赖）。
+ * 统一返回 {code, message, body, request_id}（code=0 成功）。
  */
 object ApiClient {
 
     var baseUrl: String = BuildConfig.API_BASE_URL
 
-    /** 演示模式：后端不可达或未提供短信接口时置为 true */
-    var demoMode: Boolean = false
-
-    /** 最近一次真实登录成功后的访问令牌（邮箱/密码登录） */
+    /** 登录成功后的访问令牌 */
     var accessToken: String? = null
 
-    private const val TIMEOUT_MS = 4000
+    private const val TIMEOUT_MS = 6000
 
     enum class SmsStatus { OK, DEMO_FALLBACK }
 
-    /** 邮箱/密码登录结果（真实接口 /api/auth/login） */
     data class PasswordLogin(val code: Int, val message: String, val token: String?)
 
+    /** GET，返回 body 对象；失败返回 null。 */
+    fun getObject(path: String): JSONObject? = request("GET", path, null)?.body
+
+    /** POST，返回 body 对象；失败返回 null。 */
+    fun postObject(path: String, body: JSONObject = JSONObject()): JSONObject? =
+        request("POST", path, body.toString())?.body
+
+    fun postOk(path: String, body: JSONObject = JSONObject()): Boolean =
+        request("POST", path, body.toString())?.code == 0
+
     fun sendSmsCode(phone: String): SmsStatus {
-        return try {
-            val resp = post("/api/auth/sms/send", """{"phone":"$phone"}""")
-            when {
-                resp == null -> { demoMode = true; SmsStatus.DEMO_FALLBACK }
-                resp.code == 0 -> SmsStatus.OK
-                else -> { demoMode = true; SmsStatus.DEMO_FALLBACK }
-            }
-        } catch (e: Exception) {
-            demoMode = true
-            SmsStatus.DEMO_FALLBACK
-        }
+        val resp = request("POST", "/api/auth/sms/send", """{"phone":"$phone"}""")
+        return if (resp?.code == 0) SmsStatus.OK else SmsStatus.DEMO_FALLBACK
     }
 
-    fun smsLogin(phone: String, code: String): Boolean {
-        return try {
-            val resp = post("/api/auth/sms/login", """{"phone":"$phone","code":"$code"}""")
-            resp?.code == 0
-        } catch (e: Exception) {
-            false
-        }
-    }
+    fun smsLogin(phone: String, code: String): Boolean =
+        request("POST", "/api/auth/sms/login", """{"phone":"$phone","code":"$code"}""")?.code == 0
 
-    /**
-     * 邮箱/密码登录：直连真实接口 POST /api/auth/login。
-     * 请求体 {account, password}（account 支持邮箱或手机号）；成功 body 含 {token, refresh_token, user, permissions}。
-     */
+    /** 邮箱/密码登录：POST /api/auth/login（account 支持邮箱或手机号）。 */
     fun loginWithPassword(account: String, password: String): PasswordLogin {
-        return try {
-            val body = """{"account":"$account","password":"$password"}"""
-            val resp = post("/api/auth/login", body)
-            if (resp == null) {
-                PasswordLogin(-1, "无法连接服务器，请检查网络后重试", null)
-            } else {
-                val token = try {
-                    JSONObject(resp.bodyRaw).optJSONObject("body")?.optString("token", "")
-                } catch (e: Exception) {
-                    null
-                }?.takeIf { it.isNotEmpty() }
-                if (resp.code == 0) accessToken = token
-                PasswordLogin(resp.code, resp.message, token)
-            }
-        } catch (e: Exception) {
-            PasswordLogin(-1, "无法连接服务器，请检查网络后重试", null)
-        }
+        val body = JSONObject().put("account", account).put("password", password).toString()
+        val resp = request("POST", "/api/auth/login", body)
+            ?: return PasswordLogin(-1, "无法连接服务器，请检查网络后重试", null)
+        val token = resp.body?.optString("token")?.takeIf { it.isNotBlank() }
+        if (resp.code == 0) accessToken = token
+        return PasswordLogin(resp.code, resp.message, token)
     }
 
-    private data class Resp(val code: Int, val httpCode: Int, val message: String, val bodyRaw: String)
+    data class Resp(val code: Int, val message: String, val body: JSONObject?)
 
-    private fun post(path: String, body: String): Resp? {
+    private fun request(method: String, path: String, body: String?): Resp? {
         var conn: HttpURLConnection? = null
         return try {
             conn = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
-                requestMethod = "POST"
+                requestMethod = method
                 connectTimeout = TIMEOUT_MS
                 readTimeout = TIMEOUT_MS
-                doOutput = true
+                doOutput = body != null
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
+                accessToken?.takeIf { it.isNotBlank() }?.let {
+                    setRequestProperty("Authorization", "Bearer $it")
+                }
             }
-            conn!!.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-            val httpCode = conn!!.responseCode
-            val stream = if (httpCode in 200..299) conn!!.inputStream else conn!!.errorStream
+            if (body != null) conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+            val httpCode = conn.responseCode
+            val stream = if (httpCode in 200..299) conn.inputStream else conn.errorStream
             val text = stream?.let {
-                BufferedReader(InputStreamReader(it, Charsets.UTF_8)).use { reader -> reader.readText() }
+                BufferedReader(InputStreamReader(it, Charsets.UTF_8)).use { r -> r.readText() }
             } ?: ""
-            val code = try {
-                JSONObject(text).optInt("code", -1)
+            val json = try {
+                JSONObject(text)
             } catch (e: Exception) {
-                -1
+                null
             }
-            val message = try {
-                JSONObject(text).optString("message", "")
-            } catch (e: Exception) {
-                ""
-            }
-            Resp(code, httpCode, message, text)
+            Resp(
+                code = json?.optInt("code", -1) ?: -1,
+                message = json?.optString("message").orEmpty(),
+                body = json?.optJSONObject("body"),
+            )
         } catch (e: Exception) {
             null
         } finally {

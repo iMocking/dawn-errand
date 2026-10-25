@@ -8,6 +8,7 @@ import com.dawnerrand.store.data.StoreRepository
  */
 class ProfileViewModel : ViewModel() {
 
-    val shop = StoreRepository.shop
+    val shop: com.dawnerrand.store.data.ShopInfo
+        get() = StoreRepository.shop
     val menus = StoreRepository.profileMenus
 }

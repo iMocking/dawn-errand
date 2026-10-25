@@ -20,13 +20,13 @@ enum class LoginMode { PHONE, EMAIL }
  */
 class LoginViewModel(app: Application) : AndroidViewModel(app) {
 
-    val mode = MutableLiveData(LoginMode.PHONE)
+    val mode = MutableLiveData(LoginMode.EMAIL)
 
     val phone = MutableLiveData("138 8888 8888")
     val code = MutableLiveData("")
 
-    val email = MutableLiveData("")
-    val password = MutableLiveData("")
+    val email = MutableLiveData("store.owner@dawnerrand.local")
+    val password = MutableLiveData("Store123456")
 
     private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
@@ -59,19 +59,23 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
             _message.value = "请输入正确的手机号"
             return
         }
-        _message.value = "验证码已发送（演示环境请输入任意 6 位数字）"
+        _message.value = "发送中…"
+        viewModelScope.launch {
+            val dev = withContext(Dispatchers.IO) { ApiClient.sendSmsCode(p) }
+            _message.value = if (dev.isNullOrBlank()) "验证码已发送，请查收短信" else "验证码已发送（开发环境：$dev）"
+        }
     }
 
     fun submit() {
         if (_loading.value == true) return
-        when (mode.value ?: LoginMode.PHONE) {
-            LoginMode.PHONE -> loginDemo()
+        when (mode.value ?: LoginMode.EMAIL) {
+            LoginMode.PHONE -> loginSms()
             LoginMode.EMAIL -> loginReal()
         }
     }
 
-    /** 演示登录：后端短信接口未部署，任意手机号 + 6 位验证码放行 */
-    private fun loginDemo() {
+    /** 手机验证码登录：真实 /api/auth/sms/login */
+    private fun loginSms() {
         val p = (phone.value ?: "").replace(" ", "")
         val c = code.value ?: ""
         if (!p.matches(Regex("^1[3-9]\\d{9}$"))) {
@@ -82,10 +86,26 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
             _message.value = "请输入 6 位数字验证码"
             return
         }
-        StoreSession.save(
-            getApplication(), "demo-token-$p", "陈老板", p, "", p, real = false
-        )
-        _loggedIn.value = true
+        _loading.value = true
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) { ApiClient.loginBySms(p, c) }
+            val token = result.token
+            if (result.code == 0 && !token.isNullOrBlank()) {
+                ApiClient.accessToken = token
+                StoreSession.save(
+                    getApplication(), token, result.name ?: "商家店主",
+                    p, result.role ?: "", phone = p, real = true,
+                )
+                withContext(Dispatchers.IO) {
+                    com.dawnerrand.store.data.StoreRemoteRepository.refresh(getApplication())
+                }
+                _loading.value = false
+                _loggedIn.value = true
+            } else {
+                _loading.value = false
+                _message.value = result.message.ifBlank { "验证码错误，请重试" }
+            }
+        }
     }
 
     /** 邮箱密码登录：真实后端接口 */
@@ -103,9 +123,9 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
         _loading.value = true
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) { ApiClient.login(account, pwd) }
-            _loading.value = false
             val token = result.token
             if (result.code == 0 && !token.isNullOrBlank()) {
+                ApiClient.accessToken = token
                 StoreSession.save(
                     getApplication(),
                     token,
@@ -115,8 +135,13 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
                     phone = if (account.matches(Regex("^1\\d{10}$"))) account else "138 8888 8888",
                     real = true,
                 )
+                withContext(Dispatchers.IO) {
+                    com.dawnerrand.store.data.StoreRemoteRepository.refresh(getApplication())
+                }
+                _loading.value = false
                 _loggedIn.value = true
             } else {
+                _loading.value = false
                 _message.value = result.message.ifBlank { "登录失败，请稍后重试" }
             }
         }

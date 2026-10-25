@@ -10,7 +10,7 @@ object StoreState {
     val ordersLive = MutableLiveData<List<StoreOrder>>()
 
     init {
-        ordersLive.value = StoreRepository.orders
+        ordersLive.postValue(StoreRepository.orders)
     }
 
     fun orderOf(id: String): StoreOrder? = ordersLive.value?.find { it.id == id }

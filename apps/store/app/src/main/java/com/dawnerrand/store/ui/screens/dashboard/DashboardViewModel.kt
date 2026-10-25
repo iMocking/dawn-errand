@@ -13,7 +13,8 @@ import com.dawnerrand.store.data.StoreState
  */
 class DashboardViewModel : ViewModel() {
 
-    val shop = StoreRepository.shop
+    val shop: com.dawnerrand.store.data.ShopInfo
+        get() = StoreRepository.shop
     val orderGrid = StoreRepository.orderGrid
     val shopGrid = StoreRepository.shopGrid
 

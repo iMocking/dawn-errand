@@ -8,9 +8,10 @@ import com.dawnerrand.driver.data.repository.DriverRepository
 
 class OrderPoolViewModel : ViewModel() {
 
-    private val allOrders = DriverRepository.orderPool
+    private val allOrders: List<OrderItem>
+        get() = DriverRepository.orderPool
 
-    private val _orders = MutableLiveData(allOrders)
+    private val _orders = MutableLiveData(DriverRepository.orderPool)
     val orders: LiveData<List<OrderItem>> = _orders
 
     private val _selectedFilter = MutableLiveData(0)

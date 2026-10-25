@@ -106,6 +106,26 @@ object StoreSettings {
         prefs.edit().putBoolean("systemNotify", value).apply()
     }
 
+    /** 后端 /api/app/store/me 的 business 覆盖本地展示值。 */
+    fun applyRemote(
+        open: Boolean,
+        hours: String,
+        autoAccept: Boolean,
+        minPrice: String,
+        deliveryRange: String,
+        deliveryFee: String,
+        announcement: String,
+    ) {
+        this.open = open
+        if (hours.isNotBlank()) this.hours = hours
+        this.autoAccept = autoAccept
+        if (minPrice.isNotBlank()) this.minPrice = minPrice
+        if (deliveryRange.isNotBlank()) this.deliveryRange = deliveryRange
+        if (deliveryFee.isNotBlank()) this.deliveryFee = deliveryFee
+        if (announcement.isNotBlank()) this.announcement = announcement
+        _revision.postValue((_revision.value ?: 0) + 1)
+    }
+
     /** 营业结束时间（用于工作台状态文案），从 hours 中解析 */
     fun closeTime(): String = hours.split("-").lastOrNull()?.trim().orEmpty().ifBlank { "21:00" }
 

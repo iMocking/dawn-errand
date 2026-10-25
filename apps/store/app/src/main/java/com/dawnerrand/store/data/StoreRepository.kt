@@ -110,8 +110,8 @@ object StoreRepository {
     private val DesignRed = 0xFFF5222D.toInt()
     private val DesignPurple = 0xFF722ED1.toInt()
 
-    // ---------- 店铺 ----------
-    val shop = ShopInfo(
+    // ---------- 店铺（登录后由真实 /api/app/store/me 覆盖） ----------
+    var shop = ShopInfo(
         name = "村口老陈家常菜",
         desc = "中餐 · 炒菜 · 月售856单",
         statusText = "营业中",

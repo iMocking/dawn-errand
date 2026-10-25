@@ -30,7 +30,7 @@ class LoginViewModel : ViewModel() {
     private var countdownJob: Job? = null
 
     val isDemoMode: Boolean
-        get() = ApiClient.demoMode
+        get() = false
 
     fun toggleAgreement() {
         agreementChecked = !agreementChecked
@@ -48,7 +48,7 @@ class LoginViewModel : ViewModel() {
             when (status) {
                 ApiClient.SmsStatus.OK -> _state.value = LoginUiState.Error("验证码已发送")
                 ApiClient.SmsStatus.DEMO_FALLBACK ->
-                    _state.value = LoginUiState.Error("后端未提供验证码接口，已进入演示模式：任意6位验证码可登录")
+                    _state.value = LoginUiState.Error("验证码发送失败，请检查后端短信服务")
             }
         }
     }
@@ -65,10 +65,6 @@ class LoginViewModel : ViewModel() {
         }
         if (!agreementChecked) {
             _state.value = LoginUiState.Error("请先阅读并同意《骑手入驻协议》")
-            return
-        }
-        if (ApiClient.demoMode) {
-            _state.value = LoginUiState.Success(true)
             return
         }
         _state.value = LoginUiState.Sending

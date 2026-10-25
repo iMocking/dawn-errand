@@ -97,7 +97,7 @@ object DemoRepository {
 
     // ---------------- 静态商家 / 菜品 ----------------
 
-    val merchants = listOf(
+    var merchants = listOf(
         Merchant(
             "m1", "村口老陈家常菜", "老陈家常菜", "4.8", "2.1km", "326", "25",
             listOf("🔥 本周热销"), "满25免配送费",

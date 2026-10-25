@@ -142,6 +142,13 @@ object DishStore {
 
     fun categoriesSnapshot(): List<DishCategory> = _categories.value ?: StoreRepository.dishCategories
 
+    /** 用后端 /api/app/store/menu 返回的分类/菜品覆盖本地缓存。 */
+    fun replaceFromApi(categories: List<DishCategory>) {
+        if (categories.isEmpty()) return
+        _categories.postValue(categories)
+        persist()
+    }
+
     private fun formatPrice(v: Double): String =
         if (v % 1.0 == 0.0) v.toInt().toString() else String.format("%.1f", v)
 

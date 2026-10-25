@@ -4,7 +4,11 @@ import android.app.Application
 import android.util.Log
 import com.amap.api.location.AMapLocationClient
 import com.amap.api.maps.MapsInitializer
+import com.dawnerrand.client.data.ClientRemoteRepository
 import com.dawnerrand.client.data.DemoRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * 应用入口：初始化本地数据仓库（会话 / 地址 / 订单 / 购物车 / 设置等）。
@@ -13,6 +17,9 @@ class ClientApp : Application() {
     override fun onCreate() {
         super.onCreate()
         DemoRepository.init(this)
+        if (DemoRepository.session()?.token != null) {
+            CoroutineScope(Dispatchers.IO).launch { ClientRemoteRepository.refresh() }
+        }
         initAmapPrivacy()
     }
 

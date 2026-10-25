@@ -53,6 +53,13 @@ object FinanceStore {
 
     fun balanceText(): String = formatMoney(_balance.value ?: 0.0)
 
+    /** 用后端 summary/records 覆盖余额与流水。 */
+    fun replaceFromApi(balance: Double, records: List<FinanceRecord>?) {
+        _balance.postValue(balance)
+        if (records != null) _records.postValue(records)
+        persist()
+    }
+
     fun feeRateText(): String = "0.6%"
 
     /** 手续费（0.6%） */

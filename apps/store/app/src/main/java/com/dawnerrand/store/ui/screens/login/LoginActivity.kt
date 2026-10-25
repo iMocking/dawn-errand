@@ -18,7 +18,7 @@ import com.dawnerrand.store.ui.util.setLightStatusBars
 import com.dawnerrand.store.ui.util.toast
 
 /**
- * 商家登录：手机验证码（演示）/ 邮箱密码（真实后端）+ 协议勾选（login 稿）。
+ * 商家登录：默认邮箱密码（真实后端），手机号验证码作为备用方式；协议勾选（login 稿）。
  * 已登录直接进入主页面。
  */
 class LoginActivity : AppCompatActivity() {
@@ -79,7 +79,7 @@ class LoginActivity : AppCompatActivity() {
             b.submitBtn.text = if (loading) "登录中…" else "登录 / 入驻"
         }
 
-        applyMode(LoginMode.PHONE)
+        applyMode(LoginMode.EMAIL)
     }
 
     private fun bindTabs() {
@@ -119,6 +119,7 @@ class LoginActivity : AppCompatActivity() {
         b.codeInput.addTextChangedListener(TextWatcher { vm.onCodeChange(it) })
         b.emailInput.setText(vm.email.value)
         b.emailInput.addTextChangedListener(TextWatcher { vm.onEmailChange(it) })
+        b.passwordInput.setText(vm.password.value)
         b.passwordInput.addTextChangedListener(TextWatcher { vm.onPasswordChange(it) })
 
         b.passwordToggle.setOnClickListener {

@@ -11,12 +11,17 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.dawnerrand.driver.R
+import com.dawnerrand.driver.BuildConfig
 import com.dawnerrand.driver.data.api.ApiClient
 import com.dawnerrand.driver.databinding.ActivityLoginBinding
 import com.dawnerrand.driver.ui.screens.main.MainActivity
 import com.dawnerrand.driver.ui.theme.Design
 import com.dawnerrand.driver.ui.util.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 骑手登录：还原 design/driver/login.html（渐变头部 + 白卡片）。
@@ -43,6 +48,10 @@ class LoginActivity : AppCompatActivity() {
         buildAgreementText()
         bindEvents()
         observe()
+        if (BuildConfig.DEBUG) {
+            binding.etEmail.setText("rider.owner@dawnerrand.local")
+            binding.etPassword.setText("Rider123456")
+        }
         switchMode(true)
     }
 
@@ -131,8 +140,13 @@ class LoginActivity : AppCompatActivity() {
                         getSharedPreferences("driver_session", MODE_PRIVATE)
                             .edit().putString("access_token", token).apply()
                     }
-                    MainActivity.start(this, state.demoMode)
-                    finish()
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            com.dawnerrand.driver.data.repository.DriverRemoteRepository.refresh()
+                        }
+                        MainActivity.start(this@LoginActivity, state.demoMode)
+                        finish()
+                    }
                 }
             }
         }

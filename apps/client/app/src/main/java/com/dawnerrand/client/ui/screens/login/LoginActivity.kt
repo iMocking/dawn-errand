@@ -30,12 +30,19 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var etPhone: EditText
     private lateinit var etCode: EditText
+    private lateinit var etEmail: EditText
+    private lateinit var etPassword: EditText
+    private lateinit var emailGroup: View
+    private lateinit var phoneGroup: View
+    private lateinit var tabEmail: TextView
+    private lateinit var tabPhone: TextView
     private lateinit var btnCode: TextView
     private lateinit var btnLogin: TextView
     private lateinit var chkAgree: TextView
+    private var emailMode = true
+    private var passwordVisible = false
     private var agreed = true
     private var countDown: CountDownTimer? = null
-    private var demoMode = false
     private var sending = false
     private var loggingIn = false
 
@@ -45,22 +52,43 @@ class LoginActivity : AppCompatActivity() {
 
         etPhone = findViewById(R.id.etPhone)
         etCode = findViewById(R.id.etCode)
+        etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        emailGroup = findViewById(R.id.emailGroup)
+        phoneGroup = findViewById(R.id.phoneGroup)
+        tabEmail = findViewById(R.id.tabEmail)
+        tabPhone = findViewById(R.id.tabPhone)
         btnCode = findViewById(R.id.btnCode)
         btnLogin = findViewById(R.id.btnLogin)
         chkAgree = findViewById(R.id.chkAgree)
 
-        if (BuildConfig.DEBUG && etPhone.text.isBlank()) {
+        if (BuildConfig.DEBUG) {
+            etEmail.setText("client.test@dawnerrand.local")
+            etPassword.setText("Client123456")
             etPhone.setText("13888888888")
         }
 
+        tabEmail.setOnClickListener { switchMode(true) }
+        tabPhone.setOnClickListener { switchMode(false) }
+        findViewById<View>(R.id.btnTogglePassword).setOnClickListener {
+            passwordVisible = !passwordVisible
+            etPassword.inputType = if (passwordVisible) {
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            } else {
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }
+            val end = etPassword.text.length
+            etPassword.setSelection(end)
+            findViewById<TextView>(R.id.btnTogglePassword).text = if (passwordVisible) "隐藏" else "显示"
+        }
         btnCode.setOnClickListener { sendCode() }
         chkAgree.setOnClickListener { agreed = !agreed; renderAgree() }
         btnLogin.setOnClickListener { login() }
         findViewById<View>(R.id.btnWechat).setOnClickListener {
-            ctx.toast("微信登录建设中，请使用手机号验证码登录")
+            ctx.toast("微信登录建设中，请使用邮箱登录")
         }
         findViewById<View>(R.id.btnAlipay).setOnClickListener {
-            ctx.toast("支付宝登录建设中，请使用手机号验证码登录")
+            ctx.toast("支付宝登录建设中，请使用邮箱登录")
         }
         findViewById<View>(R.id.tvUserAgreement).setOnClickListener {
             startActivity(Intent(this, LegalActivity::class.java)
@@ -70,6 +98,19 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, LegalActivity::class.java)
                 .putExtra(LegalActivity.EXTRA_TYPE, LegalActivity.TYPE_PRIVACY))
         }
+        switchMode(true)
+    }
+
+    /** 邮箱登录优先；手机号验证码作为备用方式。 */
+    private fun switchMode(email: Boolean) {
+        emailMode = email
+        emailGroup.visibility = if (email) View.VISIBLE else View.GONE
+        phoneGroup.visibility = if (email) View.GONE else View.VISIBLE
+        tabEmail.setTextColor(if (email) getColor(R.color.primary) else getColor(R.color.text_secondary))
+        tabPhone.setTextColor(if (email) getColor(R.color.text_secondary) else getColor(R.color.primary))
+        tabEmail.setTypeface(null, if (email) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+        tabPhone.setTypeface(null, if (!email) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+        btnLogin.text = "登录 / 注册"
     }
 
     private fun renderAgree() {
@@ -90,7 +131,6 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val devCode = ApiClient.sendSmsCode(phone)
-                demoMode = false
                 if (!devCode.isNullOrBlank()) {
                     etCode.setText(devCode)
                     ctx.toast("验证码已发送（开发环境已自动填充）")
@@ -99,25 +139,17 @@ class LoginActivity : AppCompatActivity() {
                 }
                 startCountdown()
             } catch (e: ApiException) {
-                if (e.code == 1401 || e.code == -1) {
-                    enterDemo("短信服务尚未部署，已切换演示模式：任意6位验证码可登录")
-                } else {
-                    btnCode.isEnabled = true
-                    btnCode.text = "重新获取"
-                    ctx.toast(e.message)
-                }
+                btnCode.isEnabled = true
+                btnCode.text = "重新获取"
+                ctx.toast(e.message)
             } catch (e: IOException) {
-                enterDemo("网络不可用，已切换演示模式：任意6位验证码可登录")
+                btnCode.isEnabled = true
+                btnCode.text = "重新获取"
+                ctx.toast("网络不可用，请检查后端服务后重试")
             } finally {
                 sending = false
             }
         }
-    }
-
-    private fun enterDemo(message: String) {
-        demoMode = true
-        ctx.toast(message)
-        startCountdown()
     }
 
     private fun startCountdown() {
@@ -138,6 +170,58 @@ class LoginActivity : AppCompatActivity() {
 
     private fun login() {
         if (loggingIn) return
+        if (!emailMode) {
+            loginByPhone()
+            return
+        }
+        val account = etEmail.text.toString().trim()
+        val password = etPassword.text.toString()
+        if (!account.contains("@")) {
+            ctx.toast("请输入正确的邮箱地址")
+            return
+        }
+        if (password.length < 6) {
+            ctx.toast("请输入至少 6 位密码")
+            return
+        }
+        if (!agreed) {
+            ctx.toast("请先阅读并同意《用户协议》和《隐私政策》")
+            return
+        }
+        loggingIn = true
+        btnLogin.isEnabled = false
+        btnLogin.text = "登录中…"
+        lifecycleScope.launch {
+            var entered = false
+            try {
+                val result = ApiClient.loginByPassword(account, password)
+                DemoRepository.login(
+                    token = result.token,
+                    refreshToken = result.refreshToken,
+                    phone = account,
+                    name = result.name,
+                    userId = result.userId,
+                    demo = false,
+                )
+                com.dawnerrand.client.data.ClientRemoteRepository.refresh()
+                ctx.toast("登录成功，欢迎 ${DemoRepository.currentUser.name}")
+                enterMain()
+                entered = true
+            } catch (e: ApiException) {
+                ctx.toast(e.message)
+            } catch (e: IOException) {
+                ctx.toast("网络不可用，请检查后端服务后重试")
+            } finally {
+                loggingIn = false
+                if (!entered) {
+                    btnLogin.isEnabled = true
+                    btnLogin.text = "登录 / 注册"
+                }
+            }
+        }
+    }
+
+    private fun loginByPhone() {
         val phone = etPhone.text.toString().trim()
         val code = etCode.text.toString().trim()
         if (phone.length != 11 || !phone.startsWith("1")) {
@@ -158,11 +242,6 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             var entered = false
             try {
-                if (demoMode) {
-                    demoLogin(phone)
-                    entered = true
-                    return@launch
-                }
                 val result = ApiClient.loginBySms(phone, code)
                 DemoRepository.login(
                     token = result.token,
@@ -172,19 +251,14 @@ class LoginActivity : AppCompatActivity() {
                     userId = result.userId,
                     demo = false,
                 )
+                com.dawnerrand.client.data.ClientRemoteRepository.refresh()
                 ctx.toast("登录成功，欢迎 ${DemoRepository.currentUser.name}")
                 enterMain()
                 entered = true
             } catch (e: ApiException) {
-                if (e.code == 1401 || e.code == -1) {
-                    demoLogin(phone)
-                    entered = true
-                } else {
-                    ctx.toast(e.message)
-                }
+                ctx.toast(e.message)
             } catch (e: IOException) {
-                demoLogin(phone)
-                entered = true
+                ctx.toast("网络不可用，请检查后端服务后重试")
             } finally {
                 loggingIn = false
                 if (!entered) {
@@ -193,19 +267,6 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun demoLogin(phone: String) {
-        DemoRepository.login(
-            token = "demo-token-" + System.currentTimeMillis(),
-            refreshToken = null,
-            phone = phone,
-            name = DemoRepository.defaultNameFor(phone),
-            userId = "",
-            demo = true,
-        )
-        ctx.toast("演示模式登录成功，欢迎 ${DemoRepository.currentUser.name}")
-        enterMain()
     }
 
     private fun enterMain() {
