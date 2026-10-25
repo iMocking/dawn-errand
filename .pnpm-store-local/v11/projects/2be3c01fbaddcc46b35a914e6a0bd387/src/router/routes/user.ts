@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/users/RealName.vue'),
     meta: {
       title: '实名认证',
-      icon: 'check-circle',
+      icon: 'id-card',
       group: '主体管理',
       permission: 'user:audit',
     },

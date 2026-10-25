@@ -13,10 +13,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/finance/Index.vue'),
     meta: {
       title: '财务结算',
-      icon: 'money',
+      icon: 'wallet',
       group: '资金管理',
-      badge: 8,
-      badgeColor: 'yellow',
       permission: 'finance:list',
     },
   },
@@ -26,7 +24,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/finance/Settlement.vue'),
     meta: {
       title: '结算流水',
-      icon: 'list',
+      icon: 'receipt',
       group: '资金管理',
       permission: 'finance:settlement',
     },

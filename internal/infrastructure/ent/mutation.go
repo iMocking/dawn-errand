@@ -9170,6 +9170,12 @@ type MerchantMutation struct {
 	cert_labels         *[]string
 	appendcert_labels   []string
 	reject_reason       *string
+	application_json    *[]byte
+	submitted_at        *int64
+	addsubmitted_at     *int64
+	verified_at         *int64
+	addverified_at      *int64
+	verified_by         *string
 	rating              *float64
 	addrating           *float64
 	monthly_orders      *int64
@@ -10486,6 +10492,203 @@ func (m *MerchantMutation) ResetRejectReason() {
 	m.reject_reason = nil
 }
 
+// SetApplicationJSON sets the "application_json" field.
+func (m *MerchantMutation) SetApplicationJSON(b []byte) {
+	m.application_json = &b
+}
+
+// ApplicationJSON returns the value of the "application_json" field in the mutation.
+func (m *MerchantMutation) ApplicationJSON() (r []byte, exists bool) {
+	v := m.application_json
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApplicationJSON returns the old "application_json" field's value of the Merchant entity.
+// If the Merchant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MerchantMutation) OldApplicationJSON(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApplicationJSON is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApplicationJSON requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApplicationJSON: %w", err)
+	}
+	return oldValue.ApplicationJSON, nil
+}
+
+// ClearApplicationJSON clears the value of the "application_json" field.
+func (m *MerchantMutation) ClearApplicationJSON() {
+	m.application_json = nil
+	m.clearedFields[merchant.FieldApplicationJSON] = struct{}{}
+}
+
+// ApplicationJSONCleared returns if the "application_json" field was cleared in this mutation.
+func (m *MerchantMutation) ApplicationJSONCleared() bool {
+	_, ok := m.clearedFields[merchant.FieldApplicationJSON]
+	return ok
+}
+
+// ResetApplicationJSON resets all changes to the "application_json" field.
+func (m *MerchantMutation) ResetApplicationJSON() {
+	m.application_json = nil
+	delete(m.clearedFields, merchant.FieldApplicationJSON)
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (m *MerchantMutation) SetSubmittedAt(i int64) {
+	m.submitted_at = &i
+	m.addsubmitted_at = nil
+}
+
+// SubmittedAt returns the value of the "submitted_at" field in the mutation.
+func (m *MerchantMutation) SubmittedAt() (r int64, exists bool) {
+	v := m.submitted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubmittedAt returns the old "submitted_at" field's value of the Merchant entity.
+// If the Merchant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MerchantMutation) OldSubmittedAt(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubmittedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubmittedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubmittedAt: %w", err)
+	}
+	return oldValue.SubmittedAt, nil
+}
+
+// AddSubmittedAt adds i to the "submitted_at" field.
+func (m *MerchantMutation) AddSubmittedAt(i int64) {
+	if m.addsubmitted_at != nil {
+		*m.addsubmitted_at += i
+	} else {
+		m.addsubmitted_at = &i
+	}
+}
+
+// AddedSubmittedAt returns the value that was added to the "submitted_at" field in this mutation.
+func (m *MerchantMutation) AddedSubmittedAt() (r int64, exists bool) {
+	v := m.addsubmitted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSubmittedAt resets all changes to the "submitted_at" field.
+func (m *MerchantMutation) ResetSubmittedAt() {
+	m.submitted_at = nil
+	m.addsubmitted_at = nil
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (m *MerchantMutation) SetVerifiedAt(i int64) {
+	m.verified_at = &i
+	m.addverified_at = nil
+}
+
+// VerifiedAt returns the value of the "verified_at" field in the mutation.
+func (m *MerchantMutation) VerifiedAt() (r int64, exists bool) {
+	v := m.verified_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVerifiedAt returns the old "verified_at" field's value of the Merchant entity.
+// If the Merchant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MerchantMutation) OldVerifiedAt(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVerifiedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVerifiedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVerifiedAt: %w", err)
+	}
+	return oldValue.VerifiedAt, nil
+}
+
+// AddVerifiedAt adds i to the "verified_at" field.
+func (m *MerchantMutation) AddVerifiedAt(i int64) {
+	if m.addverified_at != nil {
+		*m.addverified_at += i
+	} else {
+		m.addverified_at = &i
+	}
+}
+
+// AddedVerifiedAt returns the value that was added to the "verified_at" field in this mutation.
+func (m *MerchantMutation) AddedVerifiedAt() (r int64, exists bool) {
+	v := m.addverified_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVerifiedAt resets all changes to the "verified_at" field.
+func (m *MerchantMutation) ResetVerifiedAt() {
+	m.verified_at = nil
+	m.addverified_at = nil
+}
+
+// SetVerifiedBy sets the "verified_by" field.
+func (m *MerchantMutation) SetVerifiedBy(s string) {
+	m.verified_by = &s
+}
+
+// VerifiedBy returns the value of the "verified_by" field in the mutation.
+func (m *MerchantMutation) VerifiedBy() (r string, exists bool) {
+	v := m.verified_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVerifiedBy returns the old "verified_by" field's value of the Merchant entity.
+// If the Merchant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MerchantMutation) OldVerifiedBy(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVerifiedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVerifiedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVerifiedBy: %w", err)
+	}
+	return oldValue.VerifiedBy, nil
+}
+
+// ResetVerifiedBy resets all changes to the "verified_by" field.
+func (m *MerchantMutation) ResetVerifiedBy() {
+	m.verified_by = nil
+}
+
 // SetRating sets the "rating" field.
 func (m *MerchantMutation) SetRating(f float64) {
 	m.rating = &f
@@ -11340,7 +11543,7 @@ func (m *MerchantMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MerchantMutation) Fields() []string {
-	fields := make([]string, 0, 43)
+	fields := make([]string, 0, 47)
 	if m.region_id != nil {
 		fields = append(fields, merchant.FieldRegionID)
 	}
@@ -11424,6 +11627,18 @@ func (m *MerchantMutation) Fields() []string {
 	}
 	if m.reject_reason != nil {
 		fields = append(fields, merchant.FieldRejectReason)
+	}
+	if m.application_json != nil {
+		fields = append(fields, merchant.FieldApplicationJSON)
+	}
+	if m.submitted_at != nil {
+		fields = append(fields, merchant.FieldSubmittedAt)
+	}
+	if m.verified_at != nil {
+		fields = append(fields, merchant.FieldVerifiedAt)
+	}
+	if m.verified_by != nil {
+		fields = append(fields, merchant.FieldVerifiedBy)
 	}
 	if m.rating != nil {
 		fields = append(fields, merchant.FieldRating)
@@ -11534,6 +11749,14 @@ func (m *MerchantMutation) Field(name string) (ent.Value, bool) {
 		return m.CertLabels()
 	case merchant.FieldRejectReason:
 		return m.RejectReason()
+	case merchant.FieldApplicationJSON:
+		return m.ApplicationJSON()
+	case merchant.FieldSubmittedAt:
+		return m.SubmittedAt()
+	case merchant.FieldVerifiedAt:
+		return m.VerifiedAt()
+	case merchant.FieldVerifiedBy:
+		return m.VerifiedBy()
 	case merchant.FieldRating:
 		return m.Rating()
 	case merchant.FieldMonthlyOrders:
@@ -11629,6 +11852,14 @@ func (m *MerchantMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCertLabels(ctx)
 	case merchant.FieldRejectReason:
 		return m.OldRejectReason(ctx)
+	case merchant.FieldApplicationJSON:
+		return m.OldApplicationJSON(ctx)
+	case merchant.FieldSubmittedAt:
+		return m.OldSubmittedAt(ctx)
+	case merchant.FieldVerifiedAt:
+		return m.OldVerifiedAt(ctx)
+	case merchant.FieldVerifiedBy:
+		return m.OldVerifiedBy(ctx)
 	case merchant.FieldRating:
 		return m.OldRating(ctx)
 	case merchant.FieldMonthlyOrders:
@@ -11864,6 +12095,34 @@ func (m *MerchantMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRejectReason(v)
 		return nil
+	case merchant.FieldApplicationJSON:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApplicationJSON(v)
+		return nil
+	case merchant.FieldSubmittedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubmittedAt(v)
+		return nil
+	case merchant.FieldVerifiedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVerifiedAt(v)
+		return nil
+	case merchant.FieldVerifiedBy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVerifiedBy(v)
+		return nil
 	case merchant.FieldRating:
 		v, ok := value.(float64)
 		if !ok {
@@ -11998,6 +12257,12 @@ func (m *MerchantMutation) AddedFields() []string {
 	if m.addapplied_at != nil {
 		fields = append(fields, merchant.FieldAppliedAt)
 	}
+	if m.addsubmitted_at != nil {
+		fields = append(fields, merchant.FieldSubmittedAt)
+	}
+	if m.addverified_at != nil {
+		fields = append(fields, merchant.FieldVerifiedAt)
+	}
 	if m.addrating != nil {
 		fields = append(fields, merchant.FieldRating)
 	}
@@ -12062,6 +12327,10 @@ func (m *MerchantMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedPackingFee()
 	case merchant.FieldAppliedAt:
 		return m.AddedAppliedAt()
+	case merchant.FieldSubmittedAt:
+		return m.AddedSubmittedAt()
+	case merchant.FieldVerifiedAt:
+		return m.AddedVerifiedAt()
 	case merchant.FieldRating:
 		return m.AddedRating()
 	case merchant.FieldMonthlyOrders:
@@ -12147,6 +12416,20 @@ func (m *MerchantMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAppliedAt(v)
+		return nil
+	case merchant.FieldSubmittedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSubmittedAt(v)
+		return nil
+	case merchant.FieldVerifiedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVerifiedAt(v)
 		return nil
 	case merchant.FieldRating:
 		v, ok := value.(float64)
@@ -12257,6 +12540,9 @@ func (m *MerchantMutation) ClearedFields() []string {
 	if m.FieldCleared(merchant.FieldCertLabels) {
 		fields = append(fields, merchant.FieldCertLabels)
 	}
+	if m.FieldCleared(merchant.FieldApplicationJSON) {
+		fields = append(fields, merchant.FieldApplicationJSON)
+	}
 	return fields
 }
 
@@ -12273,6 +12559,9 @@ func (m *MerchantMutation) ClearField(name string) error {
 	switch name {
 	case merchant.FieldCertLabels:
 		m.ClearCertLabels()
+		return nil
+	case merchant.FieldApplicationJSON:
+		m.ClearApplicationJSON()
 		return nil
 	}
 	return fmt.Errorf("unknown Merchant nullable field %s", name)
@@ -12365,6 +12654,18 @@ func (m *MerchantMutation) ResetField(name string) error {
 		return nil
 	case merchant.FieldRejectReason:
 		m.ResetRejectReason()
+		return nil
+	case merchant.FieldApplicationJSON:
+		m.ResetApplicationJSON()
+		return nil
+	case merchant.FieldSubmittedAt:
+		m.ResetSubmittedAt()
+		return nil
+	case merchant.FieldVerifiedAt:
+		m.ResetVerifiedAt()
+		return nil
+	case merchant.FieldVerifiedBy:
+		m.ResetVerifiedBy()
 		return nil
 	case merchant.FieldRating:
 		m.ResetRating()

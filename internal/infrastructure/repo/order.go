@@ -149,6 +149,44 @@ func (r OrderRepo) List(q order.Query, sc tenant.Scope) ([]*order.Order, int64, 
 	return out, int64(total), nil
 }
 
+func (r OrderRepo) ListByMerchant(merchantID string, limit int) ([]*order.Order, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	rows, err := r.client.Order.Query().
+		Where(entorder.MerchantID(merchantID)).
+		Order(ent.Desc(entorder.FieldCreatedAt)).
+		Limit(limit).
+		All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*order.Order, 0, len(rows))
+	for _, e := range rows {
+		out = append(out, toOrder(e))
+	}
+	return out, nil
+}
+
+func (r OrderRepo) ListByRider(riderID string, limit int) ([]*order.Order, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	rows, err := r.client.Order.Query().
+		Where(entorder.RiderID(riderID)).
+		Order(ent.Desc(entorder.FieldCreatedAt)).
+		Limit(limit).
+		All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*order.Order, 0, len(rows))
+	for _, e := range rows {
+		out = append(out, toOrder(e))
+	}
+	return out, nil
+}
+
 func (r OrderRepo) ListByUser(userID string, limit int) ([]*order.Order, error) {
 	if limit <= 0 {
 		limit = 10

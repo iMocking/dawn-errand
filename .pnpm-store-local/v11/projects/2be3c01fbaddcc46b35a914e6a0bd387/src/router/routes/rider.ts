@@ -13,7 +13,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/riders/Index.vue'),
     meta: {
       title: '骑手管理',
-      icon: 'grid',
+      icon: 'rider-scooter',
       group: '主体管理',
       permission: 'rider:list',
     },
@@ -24,10 +24,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/riders/Audit.vue'),
     meta: {
       title: '骑手入驻审核',
-      icon: 'rider-audit',
+      icon: 'scooter',
       group: '主体管理',
-      badge: 5,
-      badgeColor: 'orange',
       permission: 'rider:audit',
     },
   },

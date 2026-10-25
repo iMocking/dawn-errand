@@ -3,14 +3,18 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
 import StatusTag from '@/components/StatusTag.vue'
+import MessageCenter from '@/components/MessageCenter.vue'
 import { formatToday } from '@/utils/format'
 import { useAuthStore } from '@/stores/auth'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { resetRouter } from '@/router'
 import { BACKEND_ROLES } from '@/api/users'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const workspace = useWorkspaceStore()
+const messageOpen = ref(false)
 const crumb = computed(() => (route.meta?.title as string) ?? '')
 
 /* 头像面板（交互对齐哔哩哔哩顶栏：hover 展开 / 移出关闭 / 点击切换） */
@@ -67,15 +71,21 @@ async function onLogout() {
         <span class="text-[13px] text-ink-4">搜索订单 / 商家 / 骑手</span>
       </div>
 
-      <div class="relative cursor-pointer">
-        <SvgIcon name="bell" :size="20" class="text-ink-2" />
+      <button
+        type="button"
+        class="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-head hover:text-ink-1"
+        title="消息中心"
+        @click="messageOpen = true"
+      >
+        <SvgIcon name="bell" :size="20" />
         <span
-          class="absolute -right-1.5 -top-1 flex h-[15px] min-w-[15px] items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white"
+          v-if="workspace.unread > 0"
+          class="absolute -right-1 -top-1 flex h-[15px] min-w-[15px] items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white"
           style="background:#FF4D4F;"
         >
-          3
+          {{ workspace.unread > 99 ? '99+' : workspace.unread }}
         </span>
-      </div>
+      </button>
 
       <!-- 头像：B 站式交互（hover 展开面板，移出关闭，点击切换） -->
       <div
@@ -160,4 +170,6 @@ async function onLogout() {
       </div>
     </div>
   </header>
+
+  <MessageCenter :open="messageOpen" @close="messageOpen = false" />
 </template>

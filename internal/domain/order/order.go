@@ -184,6 +184,10 @@ type OrderRepository interface {
 	List(q Query, scope tenant.Scope) ([]*Order, int64, error)
 	// ListByUser 用户近期订单。
 	ListByUser(userID string, limit int) ([]*Order, error)
+	// ListByMerchant 商家近期订单（管理端商家详情）。
+	ListByMerchant(merchantID string, limit int) ([]*Order, error)
+	// ListByRider 骑手近期订单（管理端骑手详情）。
+	ListByRider(riderID string, limit int) ([]*Order, error)
 	// Stats 当日/昨日统计（scope 隔离）。
 	Stats(scope tenant.Scope, now int64) (*Stats, error)
 	// Trend7d 近 7 日订单/交易额趋势（scope 隔离）。

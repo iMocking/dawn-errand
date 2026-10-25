@@ -198,6 +198,26 @@ func RejectReason(v string) predicate.Merchant {
 	return predicate.Merchant(sql.FieldEQ(FieldRejectReason, v))
 }
 
+// ApplicationJSON applies equality check predicate on the "application_json" field. It's identical to ApplicationJSONEQ.
+func ApplicationJSON(v []byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldApplicationJSON, v))
+}
+
+// SubmittedAt applies equality check predicate on the "submitted_at" field. It's identical to SubmittedAtEQ.
+func SubmittedAt(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldSubmittedAt, v))
+}
+
+// VerifiedAt applies equality check predicate on the "verified_at" field. It's identical to VerifiedAtEQ.
+func VerifiedAt(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldVerifiedAt, v))
+}
+
+// VerifiedBy applies equality check predicate on the "verified_by" field. It's identical to VerifiedByEQ.
+func VerifiedBy(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldVerifiedBy, v))
+}
+
 // Rating applies equality check predicate on the "rating" field. It's identical to RatingEQ.
 func Rating(v float64) predicate.Merchant {
 	return predicate.Merchant(sql.FieldEQ(FieldRating, v))
@@ -1806,6 +1826,201 @@ func RejectReasonEqualFold(v string) predicate.Merchant {
 // RejectReasonContainsFold applies the ContainsFold predicate on the "reject_reason" field.
 func RejectReasonContainsFold(v string) predicate.Merchant {
 	return predicate.Merchant(sql.FieldContainsFold(FieldRejectReason, v))
+}
+
+// ApplicationJSONEQ applies the EQ predicate on the "application_json" field.
+func ApplicationJSONEQ(v []byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldApplicationJSON, v))
+}
+
+// ApplicationJSONNEQ applies the NEQ predicate on the "application_json" field.
+func ApplicationJSONNEQ(v []byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldApplicationJSON, v))
+}
+
+// ApplicationJSONIn applies the In predicate on the "application_json" field.
+func ApplicationJSONIn(vs ...[]byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldApplicationJSON, vs...))
+}
+
+// ApplicationJSONNotIn applies the NotIn predicate on the "application_json" field.
+func ApplicationJSONNotIn(vs ...[]byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldApplicationJSON, vs...))
+}
+
+// ApplicationJSONGT applies the GT predicate on the "application_json" field.
+func ApplicationJSONGT(v []byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldApplicationJSON, v))
+}
+
+// ApplicationJSONGTE applies the GTE predicate on the "application_json" field.
+func ApplicationJSONGTE(v []byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldApplicationJSON, v))
+}
+
+// ApplicationJSONLT applies the LT predicate on the "application_json" field.
+func ApplicationJSONLT(v []byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldApplicationJSON, v))
+}
+
+// ApplicationJSONLTE applies the LTE predicate on the "application_json" field.
+func ApplicationJSONLTE(v []byte) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldApplicationJSON, v))
+}
+
+// ApplicationJSONIsNil applies the IsNil predicate on the "application_json" field.
+func ApplicationJSONIsNil() predicate.Merchant {
+	return predicate.Merchant(sql.FieldIsNull(FieldApplicationJSON))
+}
+
+// ApplicationJSONNotNil applies the NotNil predicate on the "application_json" field.
+func ApplicationJSONNotNil() predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotNull(FieldApplicationJSON))
+}
+
+// SubmittedAtEQ applies the EQ predicate on the "submitted_at" field.
+func SubmittedAtEQ(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldSubmittedAt, v))
+}
+
+// SubmittedAtNEQ applies the NEQ predicate on the "submitted_at" field.
+func SubmittedAtNEQ(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldSubmittedAt, v))
+}
+
+// SubmittedAtIn applies the In predicate on the "submitted_at" field.
+func SubmittedAtIn(vs ...int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldSubmittedAt, vs...))
+}
+
+// SubmittedAtNotIn applies the NotIn predicate on the "submitted_at" field.
+func SubmittedAtNotIn(vs ...int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldSubmittedAt, vs...))
+}
+
+// SubmittedAtGT applies the GT predicate on the "submitted_at" field.
+func SubmittedAtGT(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldSubmittedAt, v))
+}
+
+// SubmittedAtGTE applies the GTE predicate on the "submitted_at" field.
+func SubmittedAtGTE(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldSubmittedAt, v))
+}
+
+// SubmittedAtLT applies the LT predicate on the "submitted_at" field.
+func SubmittedAtLT(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldSubmittedAt, v))
+}
+
+// SubmittedAtLTE applies the LTE predicate on the "submitted_at" field.
+func SubmittedAtLTE(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldSubmittedAt, v))
+}
+
+// VerifiedAtEQ applies the EQ predicate on the "verified_at" field.
+func VerifiedAtEQ(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldVerifiedAt, v))
+}
+
+// VerifiedAtNEQ applies the NEQ predicate on the "verified_at" field.
+func VerifiedAtNEQ(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldVerifiedAt, v))
+}
+
+// VerifiedAtIn applies the In predicate on the "verified_at" field.
+func VerifiedAtIn(vs ...int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldVerifiedAt, vs...))
+}
+
+// VerifiedAtNotIn applies the NotIn predicate on the "verified_at" field.
+func VerifiedAtNotIn(vs ...int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldVerifiedAt, vs...))
+}
+
+// VerifiedAtGT applies the GT predicate on the "verified_at" field.
+func VerifiedAtGT(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldVerifiedAt, v))
+}
+
+// VerifiedAtGTE applies the GTE predicate on the "verified_at" field.
+func VerifiedAtGTE(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldVerifiedAt, v))
+}
+
+// VerifiedAtLT applies the LT predicate on the "verified_at" field.
+func VerifiedAtLT(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldVerifiedAt, v))
+}
+
+// VerifiedAtLTE applies the LTE predicate on the "verified_at" field.
+func VerifiedAtLTE(v int64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldVerifiedAt, v))
+}
+
+// VerifiedByEQ applies the EQ predicate on the "verified_by" field.
+func VerifiedByEQ(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldVerifiedBy, v))
+}
+
+// VerifiedByNEQ applies the NEQ predicate on the "verified_by" field.
+func VerifiedByNEQ(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldVerifiedBy, v))
+}
+
+// VerifiedByIn applies the In predicate on the "verified_by" field.
+func VerifiedByIn(vs ...string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldVerifiedBy, vs...))
+}
+
+// VerifiedByNotIn applies the NotIn predicate on the "verified_by" field.
+func VerifiedByNotIn(vs ...string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldVerifiedBy, vs...))
+}
+
+// VerifiedByGT applies the GT predicate on the "verified_by" field.
+func VerifiedByGT(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldVerifiedBy, v))
+}
+
+// VerifiedByGTE applies the GTE predicate on the "verified_by" field.
+func VerifiedByGTE(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldVerifiedBy, v))
+}
+
+// VerifiedByLT applies the LT predicate on the "verified_by" field.
+func VerifiedByLT(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldVerifiedBy, v))
+}
+
+// VerifiedByLTE applies the LTE predicate on the "verified_by" field.
+func VerifiedByLTE(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldVerifiedBy, v))
+}
+
+// VerifiedByContains applies the Contains predicate on the "verified_by" field.
+func VerifiedByContains(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldContains(FieldVerifiedBy, v))
+}
+
+// VerifiedByHasPrefix applies the HasPrefix predicate on the "verified_by" field.
+func VerifiedByHasPrefix(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldHasPrefix(FieldVerifiedBy, v))
+}
+
+// VerifiedByHasSuffix applies the HasSuffix predicate on the "verified_by" field.
+func VerifiedByHasSuffix(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldHasSuffix(FieldVerifiedBy, v))
+}
+
+// VerifiedByEqualFold applies the EqualFold predicate on the "verified_by" field.
+func VerifiedByEqualFold(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEqualFold(FieldVerifiedBy, v))
+}
+
+// VerifiedByContainsFold applies the ContainsFold predicate on the "verified_by" field.
+func VerifiedByContainsFold(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldContainsFold(FieldVerifiedBy, v))
 }
 
 // RatingEQ applies the EQ predicate on the "rating" field.

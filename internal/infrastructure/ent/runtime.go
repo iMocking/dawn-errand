@@ -997,66 +997,80 @@ func init() {
 	merchant.DefaultRejectReason = merchantDescRejectReason.Default.(string)
 	// merchant.RejectReasonValidator is a validator for the "reject_reason" field. It is called by the builders before save.
 	merchant.RejectReasonValidator = merchantDescRejectReason.Validators[0].(func(string) error)
+	// merchantDescSubmittedAt is the schema descriptor for submitted_at field.
+	merchantDescSubmittedAt := merchantFields[30].Descriptor()
+	// merchant.DefaultSubmittedAt holds the default value on creation for the submitted_at field.
+	merchant.DefaultSubmittedAt = merchantDescSubmittedAt.Default.(int64)
+	// merchantDescVerifiedAt is the schema descriptor for verified_at field.
+	merchantDescVerifiedAt := merchantFields[31].Descriptor()
+	// merchant.DefaultVerifiedAt holds the default value on creation for the verified_at field.
+	merchant.DefaultVerifiedAt = merchantDescVerifiedAt.Default.(int64)
+	// merchantDescVerifiedBy is the schema descriptor for verified_by field.
+	merchantDescVerifiedBy := merchantFields[32].Descriptor()
+	// merchant.DefaultVerifiedBy holds the default value on creation for the verified_by field.
+	merchant.DefaultVerifiedBy = merchantDescVerifiedBy.Default.(string)
+	// merchant.VerifiedByValidator is a validator for the "verified_by" field. It is called by the builders before save.
+	merchant.VerifiedByValidator = merchantDescVerifiedBy.Validators[0].(func(string) error)
 	// merchantDescRating is the schema descriptor for rating field.
-	merchantDescRating := merchantFields[29].Descriptor()
+	merchantDescRating := merchantFields[33].Descriptor()
 	// merchant.DefaultRating holds the default value on creation for the rating field.
 	merchant.DefaultRating = merchantDescRating.Default.(float64)
 	// merchantDescMonthlyOrders is the schema descriptor for monthly_orders field.
-	merchantDescMonthlyOrders := merchantFields[30].Descriptor()
+	merchantDescMonthlyOrders := merchantFields[34].Descriptor()
 	// merchant.DefaultMonthlyOrders holds the default value on creation for the monthly_orders field.
 	merchant.DefaultMonthlyOrders = merchantDescMonthlyOrders.Default.(int64)
 	// merchantDescMonthlyRevenue is the schema descriptor for monthly_revenue field.
-	merchantDescMonthlyRevenue := merchantFields[31].Descriptor()
+	merchantDescMonthlyRevenue := merchantFields[35].Descriptor()
 	// merchant.DefaultMonthlyRevenue holds the default value on creation for the monthly_revenue field.
 	merchant.DefaultMonthlyRevenue = merchantDescMonthlyRevenue.Default.(float64)
 	// merchantDescAvgOrder is the schema descriptor for avg_order field.
-	merchantDescAvgOrder := merchantFields[32].Descriptor()
+	merchantDescAvgOrder := merchantFields[36].Descriptor()
 	// merchant.DefaultAvgOrder holds the default value on creation for the avg_order field.
 	merchant.DefaultAvgOrder = merchantDescAvgOrder.Default.(float64)
 	// merchantDescGoodRate is the schema descriptor for good_rate field.
-	merchantDescGoodRate := merchantFields[33].Descriptor()
+	merchantDescGoodRate := merchantFields[37].Descriptor()
 	// merchant.DefaultGoodRate holds the default value on creation for the good_rate field.
 	merchant.DefaultGoodRate = merchantDescGoodRate.Default.(float64)
 	// merchantDescJoinedAt is the schema descriptor for joined_at field.
-	merchantDescJoinedAt := merchantFields[34].Descriptor()
+	merchantDescJoinedAt := merchantFields[38].Descriptor()
 	// merchant.DefaultJoinedAt holds the default value on creation for the joined_at field.
 	merchant.DefaultJoinedAt = merchantDescJoinedAt.Default.(int64)
 	// merchantDescLastUpdatedAt is the schema descriptor for last_updated_at field.
-	merchantDescLastUpdatedAt := merchantFields[35].Descriptor()
+	merchantDescLastUpdatedAt := merchantFields[39].Descriptor()
 	// merchant.DefaultLastUpdatedAt holds the default value on creation for the last_updated_at field.
 	merchant.DefaultLastUpdatedAt = merchantDescLastUpdatedAt.Default.(func() int64)
 	// merchantDescCompleteness is the schema descriptor for completeness field.
-	merchantDescCompleteness := merchantFields[36].Descriptor()
+	merchantDescCompleteness := merchantFields[40].Descriptor()
 	// merchant.DefaultCompleteness holds the default value on creation for the completeness field.
 	merchant.DefaultCompleteness = merchantDescCompleteness.Default.(int)
 	// merchantDescReviewCount is the schema descriptor for review_count field.
-	merchantDescReviewCount := merchantFields[37].Descriptor()
+	merchantDescReviewCount := merchantFields[41].Descriptor()
 	// merchant.DefaultReviewCount holds the default value on creation for the review_count field.
 	merchant.DefaultReviewCount = merchantDescReviewCount.Default.(int)
 	// merchantDescLastOperation is the schema descriptor for last_operation field.
-	merchantDescLastOperation := merchantFields[38].Descriptor()
+	merchantDescLastOperation := merchantFields[42].Descriptor()
 	// merchant.DefaultLastOperation holds the default value on creation for the last_operation field.
 	merchant.DefaultLastOperation = merchantDescLastOperation.Default.(string)
 	// merchant.LastOperationValidator is a validator for the "last_operation" field. It is called by the builders before save.
 	merchant.LastOperationValidator = merchantDescLastOperation.Validators[0].(func(string) error)
 	// merchantDescTodayOrders is the schema descriptor for today_orders field.
-	merchantDescTodayOrders := merchantFields[39].Descriptor()
+	merchantDescTodayOrders := merchantFields[43].Descriptor()
 	// merchant.DefaultTodayOrders holds the default value on creation for the today_orders field.
 	merchant.DefaultTodayOrders = merchantDescTodayOrders.Default.(int64)
 	// merchantDescTodayRevenue is the schema descriptor for today_revenue field.
-	merchantDescTodayRevenue := merchantFields[40].Descriptor()
+	merchantDescTodayRevenue := merchantFields[44].Descriptor()
 	// merchant.DefaultTodayRevenue holds the default value on creation for the today_revenue field.
 	merchant.DefaultTodayRevenue = merchantDescTodayRevenue.Default.(float64)
 	// merchantDescOnTimeRate is the schema descriptor for on_time_rate field.
-	merchantDescOnTimeRate := merchantFields[41].Descriptor()
+	merchantDescOnTimeRate := merchantFields[45].Descriptor()
 	// merchant.DefaultOnTimeRate holds the default value on creation for the on_time_rate field.
 	merchant.DefaultOnTimeRate = merchantDescOnTimeRate.Default.(float64)
 	// merchantDescPendingAbnormal is the schema descriptor for pending_abnormal field.
-	merchantDescPendingAbnormal := merchantFields[42].Descriptor()
+	merchantDescPendingAbnormal := merchantFields[46].Descriptor()
 	// merchant.DefaultPendingAbnormal holds the default value on creation for the pending_abnormal field.
 	merchant.DefaultPendingAbnormal = merchantDescPendingAbnormal.Default.(int)
 	// merchantDescUpdatedAt is the schema descriptor for updated_at field.
-	merchantDescUpdatedAt := merchantFields[43].Descriptor()
+	merchantDescUpdatedAt := merchantFields[47].Descriptor()
 	// merchant.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	merchant.DefaultUpdatedAt = merchantDescUpdatedAt.Default.(func() int64)
 	// merchantDescID is the schema descriptor for id field.

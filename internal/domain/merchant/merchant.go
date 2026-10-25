@@ -21,6 +21,25 @@ const (
 	AuditRejected AuditStatus = "rejected" // 已驳回
 )
 
+// Application 商家入驻完整资料（资质/结算/账号）。
+type Application struct {
+	LicenseNo        string   `json:"licenseNo"`
+	LicenseImage     string   `json:"licenseImage"`
+	LegalName        string   `json:"legalName"`
+	LegalIDCard      string   `json:"legalIdCard"`
+	IDCardFront      string   `json:"idCardFront"`
+	IDCardBack       string   `json:"idCardBack"`
+	FoodLicenseNo    string   `json:"foodLicenseNo"`
+	FoodLicenseImage string   `json:"foodLicenseImage"`
+	StorefrontImages []string `json:"storefrontImages"`
+	BankName         string   `json:"bankName"`
+	BankAccountName  string   `json:"bankAccountName"`
+	BankAccountNo    string   `json:"bankAccountNo"`
+	AccountEmail     string   `json:"accountEmail"`
+	AccountPhone     string   `json:"accountPhone"`
+	Notes            string   `json:"notes"`
+}
+
 // Merchant 商家聚合根。
 type Merchant struct {
 	ID          string
@@ -56,6 +75,12 @@ type Merchant struct {
 	AppliedAt    int64
 	CertLabels   []string // 证照类型标签 license/idcard/storefront/foodlicense/pharmacylicense
 	RejectReason string
+
+	// 入驻资料与认证。
+	Application Application
+	SubmittedAt int64
+	VerifiedAt  int64
+	VerifiedBy  string
 
 	Rating         float64
 	MonthlyOrders  int64

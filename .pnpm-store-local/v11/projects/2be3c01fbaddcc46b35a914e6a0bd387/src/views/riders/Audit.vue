@@ -4,6 +4,7 @@ import Modal from '@/components/Modal.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { formatTime } from '@/utils/format'
 import {
   getRiderAudit,
@@ -15,6 +16,7 @@ import {
 } from '@/api/riders'
 
 const toast = useToast()
+const workspace = useWorkspaceStore()
 
 const list = ref<RiderAuditRow[]>([])
 const loading = ref(false)
@@ -53,6 +55,8 @@ function askInfo(row: RiderAuditRow) {
 const approveTarget = ref<RiderAuditRow | null>(null)
 const approveOpen = ref(false)
 const submitting = ref(false)
+const accountOpen = ref(false)
+const accountResult = ref<{ email: string; phone: string; initialPassword: string } | null>(null)
 
 function askApprove(row: RiderAuditRow) {
   approveTarget.value = row
@@ -63,10 +67,16 @@ async function onApprove() {
   if (!row || submitting.value) return
   submitting.value = true
   try {
-    await approveRider(row.id)
-    toast.success(`已通过 ${row.name} 的入驻申请`)
+    const res = await approveRider(row.id)
+    toast.success(`已通过 ${row.name} 的入驻申请，账号已开通`)
+    if (res.account?.initialPassword) {
+      accountResult.value = res.account
+      accountOpen.value = true
+    }
     list.value = list.value.filter((r) => r.id !== row.id)
     approveOpen.value = false
+    workspace.refresh()
+    loadStats()
   } finally {
     submitting.value = false
   }
@@ -84,12 +94,17 @@ function askReject(row: RiderAuditRow) {
 async function onReject() {
   const row = rejectTarget.value
   if (!row || submitting.value) return
+  if (!reason.value.trim()) {
+    toast.warning('请填写驳回原因，便于骑手补件')
+    return
+  }
   submitting.value = true
   try {
-    await rejectRider(row.id, reason.value)
+    await rejectRider(row.id, reason.value.trim())
     toast.success(`已驳回 ${row.name} 的入驻申请`)
     list.value = list.value.filter((r) => r.id !== row.id)
     rejectOpen.value = false
+    workspace.refresh()
   } finally {
     submitting.value = false
   }
@@ -237,7 +252,7 @@ onMounted(() => {
       :loading="submitting"
       @confirm="onApprove"
     >
-      <p class="text-sm text-ink-2">确认通过骑手 {{ approveTarget?.name }}（{{ approveTarget?.applyNo }}）的入驻申请？通过后该骑手将自动上线接单。</p>
+      <p class="text-sm text-ink-2">确认通过骑手 {{ approveTarget?.name }}（{{ approveTarget?.applyNo }}）的入驻申请？通过后将自动开通骑手端账号。</p>
       <div
         v-if="approveTarget?.idCheck !== '已通过'"
         class="mt-3 rounded-lg border px-3 py-2.5 text-[12px] leading-[1.8]"
@@ -259,9 +274,30 @@ onMounted(() => {
       <textarea
         v-model="reason"
         rows="3"
-        placeholder="请填写驳回原因（选填）"
+        placeholder="请填写驳回原因（必填，骑手据此补件）"
         class="mt-3 w-full rounded-lg border border-line bg-head px-3 py-2 text-[13px] outline-none placeholder:text-ink-4"
       ></textarea>
+    </Modal>
+
+    <Modal v-model:open="accountOpen" title="骑手账号已开通" :width="500" confirm-text="我已记录" @confirm="accountOpen = false">
+      <div class="rounded-lg bg-[#E8F7F0] px-3 py-2.5 text-[12px]" style="color:#00B578;">
+        审核已通过，骑手端账号已创建并绑定；初始密码仅展示一次，请线下交付骑手。
+      </div>
+      <div class="mt-4 space-y-3">
+        <div class="flex items-center justify-between rounded-lg border border-line px-3 py-2.5">
+          <div>
+            <div class="text-[11px] text-ink-4">登录手机号</div>
+            <div class="mt-0.5 font-mono text-[13px] font-semibold text-ink-1">{{ accountResult?.phone || '—' }}</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between rounded-lg border border-line px-3 py-2.5">
+          <div>
+            <div class="text-[11px] text-ink-4">初始密码</div>
+            <div class="mt-0.5 font-mono text-[13px] font-semibold text-ink-1">{{ accountResult?.initialPassword || '—' }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 text-[11px] text-ink-4">骑手登录后请在骑手端修改密码；密码遗失可在骑手详情重置。</div>
     </Modal>
   </div>
 </template>

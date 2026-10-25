@@ -473,6 +473,74 @@ func (mu *MerchantUpdate) SetNillableRejectReason(s *string) *MerchantUpdate {
 	return mu
 }
 
+// SetApplicationJSON sets the "application_json" field.
+func (mu *MerchantUpdate) SetApplicationJSON(b []byte) *MerchantUpdate {
+	mu.mutation.SetApplicationJSON(b)
+	return mu
+}
+
+// ClearApplicationJSON clears the value of the "application_json" field.
+func (mu *MerchantUpdate) ClearApplicationJSON() *MerchantUpdate {
+	mu.mutation.ClearApplicationJSON()
+	return mu
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (mu *MerchantUpdate) SetSubmittedAt(i int64) *MerchantUpdate {
+	mu.mutation.ResetSubmittedAt()
+	mu.mutation.SetSubmittedAt(i)
+	return mu
+}
+
+// SetNillableSubmittedAt sets the "submitted_at" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableSubmittedAt(i *int64) *MerchantUpdate {
+	if i != nil {
+		mu.SetSubmittedAt(*i)
+	}
+	return mu
+}
+
+// AddSubmittedAt adds i to the "submitted_at" field.
+func (mu *MerchantUpdate) AddSubmittedAt(i int64) *MerchantUpdate {
+	mu.mutation.AddSubmittedAt(i)
+	return mu
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (mu *MerchantUpdate) SetVerifiedAt(i int64) *MerchantUpdate {
+	mu.mutation.ResetVerifiedAt()
+	mu.mutation.SetVerifiedAt(i)
+	return mu
+}
+
+// SetNillableVerifiedAt sets the "verified_at" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableVerifiedAt(i *int64) *MerchantUpdate {
+	if i != nil {
+		mu.SetVerifiedAt(*i)
+	}
+	return mu
+}
+
+// AddVerifiedAt adds i to the "verified_at" field.
+func (mu *MerchantUpdate) AddVerifiedAt(i int64) *MerchantUpdate {
+	mu.mutation.AddVerifiedAt(i)
+	return mu
+}
+
+// SetVerifiedBy sets the "verified_by" field.
+func (mu *MerchantUpdate) SetVerifiedBy(s string) *MerchantUpdate {
+	mu.mutation.SetVerifiedBy(s)
+	return mu
+}
+
+// SetNillableVerifiedBy sets the "verified_by" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableVerifiedBy(s *string) *MerchantUpdate {
+	if s != nil {
+		mu.SetVerifiedBy(*s)
+	}
+	return mu
+}
+
 // SetRating sets the "rating" field.
 func (mu *MerchantUpdate) SetRating(f float64) *MerchantUpdate {
 	mu.mutation.ResetRating()
@@ -910,6 +978,11 @@ func (mu *MerchantUpdate) check() error {
 			return &ValidationError{Name: "reject_reason", err: fmt.Errorf(`ent: validator failed for field "Merchant.reject_reason": %w`, err)}
 		}
 	}
+	if v, ok := mu.mutation.VerifiedBy(); ok {
+		if err := merchant.VerifiedByValidator(v); err != nil {
+			return &ValidationError{Name: "verified_by", err: fmt.Errorf(`ent: validator failed for field "Merchant.verified_by": %w`, err)}
+		}
+	}
 	if v, ok := mu.mutation.LastOperation(); ok {
 		if err := merchant.LastOperationValidator(v); err != nil {
 			return &ValidationError{Name: "last_operation", err: fmt.Errorf(`ent: validator failed for field "Merchant.last_operation": %w`, err)}
@@ -1042,6 +1115,27 @@ func (mu *MerchantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := mu.mutation.RejectReason(); ok {
 		_spec.SetField(merchant.FieldRejectReason, field.TypeString, value)
+	}
+	if value, ok := mu.mutation.ApplicationJSON(); ok {
+		_spec.SetField(merchant.FieldApplicationJSON, field.TypeBytes, value)
+	}
+	if mu.mutation.ApplicationJSONCleared() {
+		_spec.ClearField(merchant.FieldApplicationJSON, field.TypeBytes)
+	}
+	if value, ok := mu.mutation.SubmittedAt(); ok {
+		_spec.SetField(merchant.FieldSubmittedAt, field.TypeInt64, value)
+	}
+	if value, ok := mu.mutation.AddedSubmittedAt(); ok {
+		_spec.AddField(merchant.FieldSubmittedAt, field.TypeInt64, value)
+	}
+	if value, ok := mu.mutation.VerifiedAt(); ok {
+		_spec.SetField(merchant.FieldVerifiedAt, field.TypeInt64, value)
+	}
+	if value, ok := mu.mutation.AddedVerifiedAt(); ok {
+		_spec.AddField(merchant.FieldVerifiedAt, field.TypeInt64, value)
+	}
+	if value, ok := mu.mutation.VerifiedBy(); ok {
+		_spec.SetField(merchant.FieldVerifiedBy, field.TypeString, value)
 	}
 	if value, ok := mu.mutation.Rating(); ok {
 		_spec.SetField(merchant.FieldRating, field.TypeFloat64, value)
@@ -1595,6 +1689,74 @@ func (muo *MerchantUpdateOne) SetNillableRejectReason(s *string) *MerchantUpdate
 	return muo
 }
 
+// SetApplicationJSON sets the "application_json" field.
+func (muo *MerchantUpdateOne) SetApplicationJSON(b []byte) *MerchantUpdateOne {
+	muo.mutation.SetApplicationJSON(b)
+	return muo
+}
+
+// ClearApplicationJSON clears the value of the "application_json" field.
+func (muo *MerchantUpdateOne) ClearApplicationJSON() *MerchantUpdateOne {
+	muo.mutation.ClearApplicationJSON()
+	return muo
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (muo *MerchantUpdateOne) SetSubmittedAt(i int64) *MerchantUpdateOne {
+	muo.mutation.ResetSubmittedAt()
+	muo.mutation.SetSubmittedAt(i)
+	return muo
+}
+
+// SetNillableSubmittedAt sets the "submitted_at" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableSubmittedAt(i *int64) *MerchantUpdateOne {
+	if i != nil {
+		muo.SetSubmittedAt(*i)
+	}
+	return muo
+}
+
+// AddSubmittedAt adds i to the "submitted_at" field.
+func (muo *MerchantUpdateOne) AddSubmittedAt(i int64) *MerchantUpdateOne {
+	muo.mutation.AddSubmittedAt(i)
+	return muo
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (muo *MerchantUpdateOne) SetVerifiedAt(i int64) *MerchantUpdateOne {
+	muo.mutation.ResetVerifiedAt()
+	muo.mutation.SetVerifiedAt(i)
+	return muo
+}
+
+// SetNillableVerifiedAt sets the "verified_at" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableVerifiedAt(i *int64) *MerchantUpdateOne {
+	if i != nil {
+		muo.SetVerifiedAt(*i)
+	}
+	return muo
+}
+
+// AddVerifiedAt adds i to the "verified_at" field.
+func (muo *MerchantUpdateOne) AddVerifiedAt(i int64) *MerchantUpdateOne {
+	muo.mutation.AddVerifiedAt(i)
+	return muo
+}
+
+// SetVerifiedBy sets the "verified_by" field.
+func (muo *MerchantUpdateOne) SetVerifiedBy(s string) *MerchantUpdateOne {
+	muo.mutation.SetVerifiedBy(s)
+	return muo
+}
+
+// SetNillableVerifiedBy sets the "verified_by" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableVerifiedBy(s *string) *MerchantUpdateOne {
+	if s != nil {
+		muo.SetVerifiedBy(*s)
+	}
+	return muo
+}
+
 // SetRating sets the "rating" field.
 func (muo *MerchantUpdateOne) SetRating(f float64) *MerchantUpdateOne {
 	muo.mutation.ResetRating()
@@ -2045,6 +2207,11 @@ func (muo *MerchantUpdateOne) check() error {
 			return &ValidationError{Name: "reject_reason", err: fmt.Errorf(`ent: validator failed for field "Merchant.reject_reason": %w`, err)}
 		}
 	}
+	if v, ok := muo.mutation.VerifiedBy(); ok {
+		if err := merchant.VerifiedByValidator(v); err != nil {
+			return &ValidationError{Name: "verified_by", err: fmt.Errorf(`ent: validator failed for field "Merchant.verified_by": %w`, err)}
+		}
+	}
 	if v, ok := muo.mutation.LastOperation(); ok {
 		if err := merchant.LastOperationValidator(v); err != nil {
 			return &ValidationError{Name: "last_operation", err: fmt.Errorf(`ent: validator failed for field "Merchant.last_operation": %w`, err)}
@@ -2194,6 +2361,27 @@ func (muo *MerchantUpdateOne) sqlSave(ctx context.Context) (_node *Merchant, err
 	}
 	if value, ok := muo.mutation.RejectReason(); ok {
 		_spec.SetField(merchant.FieldRejectReason, field.TypeString, value)
+	}
+	if value, ok := muo.mutation.ApplicationJSON(); ok {
+		_spec.SetField(merchant.FieldApplicationJSON, field.TypeBytes, value)
+	}
+	if muo.mutation.ApplicationJSONCleared() {
+		_spec.ClearField(merchant.FieldApplicationJSON, field.TypeBytes)
+	}
+	if value, ok := muo.mutation.SubmittedAt(); ok {
+		_spec.SetField(merchant.FieldSubmittedAt, field.TypeInt64, value)
+	}
+	if value, ok := muo.mutation.AddedSubmittedAt(); ok {
+		_spec.AddField(merchant.FieldSubmittedAt, field.TypeInt64, value)
+	}
+	if value, ok := muo.mutation.VerifiedAt(); ok {
+		_spec.SetField(merchant.FieldVerifiedAt, field.TypeInt64, value)
+	}
+	if value, ok := muo.mutation.AddedVerifiedAt(); ok {
+		_spec.AddField(merchant.FieldVerifiedAt, field.TypeInt64, value)
+	}
+	if value, ok := muo.mutation.VerifiedBy(); ok {
+		_spec.SetField(merchant.FieldVerifiedBy, field.TypeString, value)
 	}
 	if value, ok := muo.mutation.Rating(); ok {
 		_spec.SetField(merchant.FieldRating, field.TypeFloat64, value)

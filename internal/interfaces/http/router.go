@@ -106,6 +106,8 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 
 			// 数据总览
 			authd.GET("/dashboard", mw.RequirePerm("dashboard", "view"), h.GetDashboard)
+			authd.GET("/messages", mw.RequirePerm("dashboard", "view"), h.GetMessages)
+			authd.POST("/uploads", h.AppUpload)
 
 			// 订单
 			orders := authd.Group("/orders")
@@ -120,6 +122,9 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			merchants.GET("/audit", mw.RequirePerm("merchant", "audit"), h.ListMerchantAudit)
 			merchants.POST("/audit/:id", mw.RequirePerm("merchant", "audit"), h.AuditMerchant)
 			merchants.POST("/:id/account", mw.RequirePerm("merchant", "create"), h.ProvisionMerchantAccount)
+			merchants.POST("/:id/account/reset", mw.RequirePerm("merchant", "create"), h.ResetMerchantAccount)
+			merchants.GET("/:id/workspace", mw.RequirePerm("merchant", "detail"), h.GetMerchantWorkspace)
+			merchants.PUT("/:id/application", mw.RequirePerm("merchant", "create"), h.UpdateMerchantApplication)
 			merchants.GET("/:id", mw.RequirePerm("merchant", "detail"), h.GetMerchant)
 
 			// 骑手
@@ -131,6 +136,8 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			riders.POST("/audit", mw.RequirePerm("rider", "audit"), h.AuditRider)
 			riders.POST("/freeze", mw.RequirePerm("rider", "freeze"), h.FreezeRider)
 			riders.POST("/:id/account", mw.RequirePerm("rider", "create"), h.ProvisionRiderAccount)
+			riders.POST("/:id/account/reset", mw.RequirePerm("rider", "create"), h.ResetRiderAccount)
+			riders.GET("/:id/workspace", mw.RequirePerm("rider", "detail"), h.GetRiderWorkspace)
 			riders.GET("/:id", mw.RequirePerm("rider", "detail"), h.GetRider)
 
 			// 用户

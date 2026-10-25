@@ -290,34 +290,48 @@ type MerchantStatsDto struct {
 
 // MerchantAuditRowDto 入驻申请行（对齐前端 MerchantAuditRow）。
 type MerchantAuditRowDto struct {
-	ID        string     `json:"id"`
-	ApplyNo   string     `json:"applyNo"`
-	Name      string     `json:"name"`
-	Operator  string     `json:"operator"`
-	Type      string     `json:"type"`
-	Address   string     `json:"address"`
-	AppliedAt int64      `json:"appliedAt"`
-	LogoBg    string     `json:"logoBg"`
-	LogoColor string     `json:"logoColor"`
-	LogoIcon  string     `json:"logoIcon"`
-	Certs     []CertItem `json:"certs"`
-	Status    string     `json:"status"`
+	ID           string               `json:"id"`
+	ApplyNo      string               `json:"applyNo"`
+	Name         string               `json:"name"`
+	Operator     string               `json:"operator"`
+	Type         string               `json:"type"`
+	Address      string               `json:"address"`
+	Contact      string               `json:"contact"`
+	Phone        string               `json:"phone"`
+	AppliedAt    int64                `json:"appliedAt"`
+	SubmittedAt  int64                `json:"submittedAt"`
+	LogoBg       string               `json:"logoBg"`
+	LogoColor    string               `json:"logoColor"`
+	LogoIcon     string               `json:"logoIcon"`
+	Certs        []CertItem           `json:"certs"`
+	Application  merchant.Application `json:"application"`
+	Status       string               `json:"status"`
+	RejectReason string               `json:"rejectReason"`
+	VerifiedAt   int64                `json:"verifiedAt"`
 }
 
 type CertItem struct {
 	Label string `json:"label"`
 	Icon  string `json:"icon"`
+	URL   string `json:"url,omitempty"`
 }
 
 func merchantCerts(m *merchant.Merchant) []CertItem {
-	out := []CertItem{{Label: "营业执照", Icon: "license"}}
+	out := []CertItem{{Label: "营业执照", Icon: "license", URL: m.Application.LicenseImage}}
 	switch merchantLogoIcon(m.Category) {
 	case "pharmacy":
 		out = append(out, CertItem{Label: "药品经营许可证", Icon: "pharmacylicense"})
 	case "food":
-		out = append(out, CertItem{Label: "食品经营许可证", Icon: "foodlicense"})
+		out = append(out, CertItem{Label: "食品经营许可证", Icon: "foodlicense", URL: m.Application.FoodLicenseImage})
 	}
-	out = append(out, CertItem{Label: "门店照片", Icon: "storefront"})
+	if m.Application.IDCardFront != "" || m.Application.IDCardBack != "" {
+		out = append(out, CertItem{Label: "法人身份证", Icon: "idcard", URL: m.Application.IDCardFront})
+	}
+	if len(m.Application.StorefrontImages) > 0 {
+		out = append(out, CertItem{Label: "门店照片", Icon: "storefront", URL: m.Application.StorefrontImages[0]})
+	} else {
+		out = append(out, CertItem{Label: "门店照片", Icon: "storefront"})
+	}
 	return out
 }
 
@@ -325,34 +339,43 @@ func toMerchantAuditRow(m *merchant.Merchant) MerchantAuditRowDto {
 	bg, color, icon := merchantLogoColors(m)
 	return MerchantAuditRowDto{
 		ID: m.ID, ApplyNo: m.ApplyNo, Name: m.Name, Operator: m.Operator,
-		Type: m.Category, Address: m.Address, AppliedAt: m.AppliedAt,
+		Type: m.Category, Address: m.Address, Contact: m.Contact, Phone: m.Phone,
+		AppliedAt: m.AppliedAt, SubmittedAt: m.SubmittedAt,
 		LogoBg: bg, LogoColor: color, LogoIcon: icon,
-		Certs: merchantCerts(m), Status: merchantAuditText(m.AuditStatus),
+		Certs: merchantCerts(m), Application: m.Application,
+		Status: merchantAuditText(m.AuditStatus), RejectReason: m.RejectReason,
+		VerifiedAt: m.VerifiedAt,
 	}
 }
 
 // MerchantDetailDto 商家详情（对齐前端 MerchantDetail）。
 type MerchantDetailDto struct {
-	ID             string           `json:"id"`
-	Name           string           `json:"name"`
-	Status         string           `json:"status"`
-	Category       string           `json:"category"`
-	CategoryBg     string           `json:"categoryBg"`
-	CategoryColor  string           `json:"categoryColor"`
-	JoinedAt       int64            `json:"joinedAt"`
-	Rating         float64          `json:"rating"`
-	MonthlyOrders  int64            `json:"monthlyOrders"`
-	MonthlyRevenue float64          `json:"monthlyRevenue"`
-	AvgOrder       float64          `json:"avgOrder"`
-	GoodRate       string           `json:"goodRate"`
-	LogoBg         string           `json:"logoBg"`
-	LogoColor      string           `json:"logoColor"`
-	Basic          MerchantBasicDto `json:"basic"`
-	LastUpdatedAt  int64            `json:"lastUpdatedAt"`
-	Completeness   int              `json:"completeness"`
-	Today          MerchantTodayDto `json:"today"`
-	ReviewCount    int              `json:"reviewCount"`
-	LastOperation  string           `json:"lastOperation"`
+	ID             string               `json:"id"`
+	Name           string               `json:"name"`
+	Status         string               `json:"status"`
+	Category       string               `json:"category"`
+	CategoryBg     string               `json:"categoryBg"`
+	CategoryColor  string               `json:"categoryColor"`
+	JoinedAt       int64                `json:"joinedAt"`
+	Rating         float64              `json:"rating"`
+	MonthlyOrders  int64                `json:"monthlyOrders"`
+	MonthlyRevenue float64              `json:"monthlyRevenue"`
+	AvgOrder       float64              `json:"avgOrder"`
+	GoodRate       string               `json:"goodRate"`
+	LogoBg         string               `json:"logoBg"`
+	LogoColor      string               `json:"logoColor"`
+	Basic          MerchantBasicDto     `json:"basic"`
+	LastUpdatedAt  int64                `json:"lastUpdatedAt"`
+	Completeness   int                  `json:"completeness"`
+	Today          MerchantTodayDto     `json:"today"`
+	ReviewCount    int                  `json:"reviewCount"`
+	LastOperation  string               `json:"lastOperation"`
+	AuditStatus    string               `json:"auditStatus"`
+	RejectReason   string               `json:"rejectReason"`
+	SubmittedAt    int64                `json:"submittedAt"`
+	VerifiedAt     int64                `json:"verifiedAt"`
+	OwnerUserID    string               `json:"ownerUserId"`
+	Application    merchant.Application `json:"application"`
 }
 
 type MerchantBasicDto struct {
@@ -401,6 +424,9 @@ func toMerchantDetail(m *merchant.Merchant) MerchantDetailDto {
 			PendingAbnormal: int64(m.PendingAbnormal),
 		},
 		ReviewCount: m.ReviewCount, LastOperation: m.LastOperation,
+		AuditStatus: merchantAuditText(m.AuditStatus), RejectReason: m.RejectReason,
+		SubmittedAt: m.SubmittedAt, VerifiedAt: m.VerifiedAt, OwnerUserID: m.OwnerUserID,
+		Application: m.Application,
 	}
 }
 

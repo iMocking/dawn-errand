@@ -45,6 +45,88 @@ type ProvisionResult struct {
 	InitialPassword string
 }
 
+// ResetMerchantPassword 为已开通商家重置登录密码（旧会话立即失效）。
+func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID, operator string) (*ProvisionResult, error) {
+	m, err := s.Repos.Merchants.FindByID(merchantID)
+	if err != nil {
+		return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
+	}
+	if m.OwnerUserID == "" {
+		return nil, errcode.New(errcode.CodeMerchantStatus, "该商家尚未开通账号")
+	}
+	u, err := s.Repos.Users.FindByID(m.OwnerUserID)
+	if err != nil {
+		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "商家账号不存在")
+	}
+	password, err := randomPassword(10)
+	if err != nil {
+		return nil, err
+	}
+	hash, err := s.Hasher.Hash(password)
+	if err != nil {
+		return nil, errcode.New(errcode.CodePasswordPolicy, "密码生成失败")
+	}
+	cred, err := s.Repos.Credentials.FindByUserID(u.ID)
+	if err != nil {
+		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "账号凭证不存在")
+	}
+	if err := s.Repos.Credentials.Save(&identity.Credential{
+		UserID: u.ID, PasswordHash: hash,
+		SessionVersion: cred.SessionVersion + 1, UpdatedAt: time.Now().Unix(),
+	}); err != nil {
+		return nil, err
+	}
+	s.Repos.Audit.Record(ctx, application.AuditEntry{
+		UserID: operator, Action: "merchant.account.reset", Object: merchantID, Result: "success",
+		RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx), Operator: operator,
+	})
+	return &ProvisionResult{
+		UserID: u.ID, Email: u.Email, Phone: u.Phone, Name: u.Name,
+		Role: identity.RoleMerchant, MerchantID: merchantID, InitialPassword: password,
+	}, nil
+}
+
+// ResetRiderPassword 为已开通骑手重置登录密码（旧会话立即失效）。
+func (s *AccountsService) ResetRiderPassword(ctx context.Context, riderID, operator string) (*ProvisionResult, error) {
+	r, err := s.Repos.Riders.FindByID(riderID)
+	if err != nil {
+		return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
+	}
+	if r.UserID == "" {
+		return nil, errcode.New(errcode.CodeRiderStatus, "该骑手尚未开通账号")
+	}
+	u, err := s.Repos.Users.FindByID(r.UserID)
+	if err != nil {
+		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "骑手账号不存在")
+	}
+	password, err := randomPassword(10)
+	if err != nil {
+		return nil, err
+	}
+	hash, err := s.Hasher.Hash(password)
+	if err != nil {
+		return nil, errcode.New(errcode.CodePasswordPolicy, "密码生成失败")
+	}
+	cred, err := s.Repos.Credentials.FindByUserID(u.ID)
+	if err != nil {
+		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "账号凭证不存在")
+	}
+	if err := s.Repos.Credentials.Save(&identity.Credential{
+		UserID: u.ID, PasswordHash: hash,
+		SessionVersion: cred.SessionVersion + 1, UpdatedAt: time.Now().Unix(),
+	}); err != nil {
+		return nil, err
+	}
+	s.Repos.Audit.Record(ctx, application.AuditEntry{
+		UserID: operator, Action: "rider.account.reset", Object: riderID, Result: "success",
+		RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx), Operator: operator,
+	})
+	return &ProvisionResult{
+		UserID: u.ID, Email: u.Email, Phone: u.Phone, Name: u.Name,
+		Role: identity.RoleDriver, RiderID: riderID, InitialPassword: password,
+	}, nil
+}
+
 // ProvisionMerchant 为商家开通账号。
 func (s *AccountsService) ProvisionMerchant(ctx context.Context, merchantID string, in ProvisionInput, operator string) (*ProvisionResult, error) {
 	return s.provision(ctx, identity.RoleMerchant, merchantID, in, operator)

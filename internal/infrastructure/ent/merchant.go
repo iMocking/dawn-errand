@@ -73,6 +73,14 @@ type Merchant struct {
 	CertLabels []string `json:"cert_labels,omitempty"`
 	// RejectReason holds the value of the "reject_reason" field.
 	RejectReason string `json:"reject_reason,omitempty"`
+	// ApplicationJSON holds the value of the "application_json" field.
+	ApplicationJSON []byte `json:"application_json,omitempty"`
+	// SubmittedAt holds the value of the "submitted_at" field.
+	SubmittedAt int64 `json:"submitted_at,omitempty"`
+	// VerifiedAt holds the value of the "verified_at" field.
+	VerifiedAt int64 `json:"verified_at,omitempty"`
+	// VerifiedBy holds the value of the "verified_by" field.
+	VerifiedBy string `json:"verified_by,omitempty"`
 	// Rating holds the value of the "rating" field.
 	Rating float64 `json:"rating,omitempty"`
 	// MonthlyOrders holds the value of the "monthly_orders" field.
@@ -111,15 +119,15 @@ func (*Merchant) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case merchant.FieldCertLabels:
+		case merchant.FieldCertLabels, merchant.FieldApplicationJSON:
 			values[i] = new([]byte)
 		case merchant.FieldAutoAccept:
 			values[i] = new(sql.NullBool)
 		case merchant.FieldCommission, merchant.FieldLat, merchant.FieldLng, merchant.FieldMinPrice, merchant.FieldDeliveryFee, merchant.FieldPackingFee, merchant.FieldRating, merchant.FieldMonthlyRevenue, merchant.FieldAvgOrder, merchant.FieldGoodRate, merchant.FieldTodayRevenue, merchant.FieldOnTimeRate:
 			values[i] = new(sql.NullFloat64)
-		case merchant.FieldAppliedAt, merchant.FieldMonthlyOrders, merchant.FieldJoinedAt, merchant.FieldLastUpdatedAt, merchant.FieldCompleteness, merchant.FieldReviewCount, merchant.FieldTodayOrders, merchant.FieldPendingAbnormal, merchant.FieldUpdatedAt:
+		case merchant.FieldAppliedAt, merchant.FieldSubmittedAt, merchant.FieldVerifiedAt, merchant.FieldMonthlyOrders, merchant.FieldJoinedAt, merchant.FieldLastUpdatedAt, merchant.FieldCompleteness, merchant.FieldReviewCount, merchant.FieldTodayOrders, merchant.FieldPendingAbnormal, merchant.FieldUpdatedAt:
 			values[i] = new(sql.NullInt64)
-		case merchant.FieldID, merchant.FieldRegionID, merchant.FieldOwnerUserID, merchant.FieldName, merchant.FieldCategory, merchant.FieldAddress, merchant.FieldAddressSub, merchant.FieldContact, merchant.FieldPhone, merchant.FieldOpenHours, merchant.FieldDeliveryRange, merchant.FieldBankAccount, merchant.FieldDeliveryMethod, merchant.FieldAnnouncement, merchant.FieldServicePhone, merchant.FieldStatus, merchant.FieldAuditStatus, merchant.FieldApplyNo, merchant.FieldOperator, merchant.FieldRejectReason, merchant.FieldLastOperation:
+		case merchant.FieldID, merchant.FieldRegionID, merchant.FieldOwnerUserID, merchant.FieldName, merchant.FieldCategory, merchant.FieldAddress, merchant.FieldAddressSub, merchant.FieldContact, merchant.FieldPhone, merchant.FieldOpenHours, merchant.FieldDeliveryRange, merchant.FieldBankAccount, merchant.FieldDeliveryMethod, merchant.FieldAnnouncement, merchant.FieldServicePhone, merchant.FieldStatus, merchant.FieldAuditStatus, merchant.FieldApplyNo, merchant.FieldOperator, merchant.FieldRejectReason, merchant.FieldVerifiedBy, merchant.FieldLastOperation:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -311,6 +319,30 @@ func (m *Merchant) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field reject_reason", values[i])
 			} else if value.Valid {
 				m.RejectReason = value.String
+			}
+		case merchant.FieldApplicationJSON:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field application_json", values[i])
+			} else if value != nil {
+				m.ApplicationJSON = *value
+			}
+		case merchant.FieldSubmittedAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field submitted_at", values[i])
+			} else if value.Valid {
+				m.SubmittedAt = value.Int64
+			}
+		case merchant.FieldVerifiedAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field verified_at", values[i])
+			} else if value.Valid {
+				m.VerifiedAt = value.Int64
+			}
+		case merchant.FieldVerifiedBy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field verified_by", values[i])
+			} else if value.Valid {
+				m.VerifiedBy = value.String
 			}
 		case merchant.FieldRating:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -521,6 +553,18 @@ func (m *Merchant) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("reject_reason=")
 	builder.WriteString(m.RejectReason)
+	builder.WriteString(", ")
+	builder.WriteString("application_json=")
+	builder.WriteString(fmt.Sprintf("%v", m.ApplicationJSON))
+	builder.WriteString(", ")
+	builder.WriteString("submitted_at=")
+	builder.WriteString(fmt.Sprintf("%v", m.SubmittedAt))
+	builder.WriteString(", ")
+	builder.WriteString("verified_at=")
+	builder.WriteString(fmt.Sprintf("%v", m.VerifiedAt))
+	builder.WriteString(", ")
+	builder.WriteString("verified_by=")
+	builder.WriteString(m.VerifiedBy)
 	builder.WriteString(", ")
 	builder.WriteString("rating=")
 	builder.WriteString(fmt.Sprintf("%v", m.Rating))

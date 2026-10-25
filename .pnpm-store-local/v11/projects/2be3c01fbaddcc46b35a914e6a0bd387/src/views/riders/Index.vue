@@ -135,6 +135,9 @@ const createForm = reactive({
   tool: '' as string,
   orderTypes: '',
   idCard: '',
+  serviceType: '',
+  vehicle: '',
+  account: '',
 })
 
 function openCreate() {
@@ -144,6 +147,9 @@ function openCreate() {
   createForm.tool = ''
   createForm.orderTypes = ''
   createForm.idCard = ''
+  createForm.serviceType = ''
+  createForm.vehicle = ''
+  createForm.account = ''
   createOpen.value = true
 }
 
@@ -166,6 +172,9 @@ async function onCreate() {
       tool: createForm.tool || undefined,
       orderTypes: createForm.orderTypes.trim() || undefined,
       idCard: createForm.idCard.trim() || undefined,
+      serviceType: createForm.serviceType.trim() || undefined,
+      vehicle: createForm.vehicle.trim() || undefined,
+      account: createForm.account.trim() || undefined,
     })
     toast.success('已提交入驻申请，待审核')
     createOpen.value = false
@@ -381,6 +390,18 @@ onMounted(() => {
         <div>
           <div class="mb-1.5 text-[13px] text-ink-2">身份证号</div>
           <AppInput v-model="createForm.idCard" placeholder="用于实名核验" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">服务类型</div>
+          <AppInput v-model="createForm.serviceType" placeholder="如 外卖/帮送" clearable />
+        </div>
+        <div>
+          <div class="mb-1.5 text-[13px] text-ink-2">车辆信息</div>
+          <AppInput v-model="createForm.vehicle" placeholder="如 台铃小绿" clearable />
+        </div>
+        <div class="col-span-2">
+          <div class="mb-1.5 text-[13px] text-ink-2">收款账户</div>
+          <AppInput v-model="createForm.account" placeholder="银行卡号 / 支付账户" clearable />
         </div>
       </div>
       <div class="mt-3 rounded-lg bg-head px-3 py-2.5 text-[12px] text-ink-3">

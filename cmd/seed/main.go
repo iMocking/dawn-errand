@@ -22,6 +22,7 @@ import (
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/merchant"
 	"dawn-errand/internal/domain/order"
+	"dawn-errand/internal/domain/review"
 	"dawn-errand/internal/domain/rider"
 	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/domain/userprofile"
@@ -86,6 +87,8 @@ func main() {
 	seedAddresses(ctx, repos, now)
 	seedCoupons(ctx, repos, now)
 	seedOrder(ctx, repos, now)
+	seedMerchantApplication(ctx, repos)
+	seedReview(ctx, repos, now)
 	seedWithdraw(ctx, repos, now)
 	seedComplaint(ctx, repos, now)
 	seedFeeRules(ctx, repos, now)
@@ -381,6 +384,47 @@ func seedCoupons(ctx context.Context, repos *application.RepoUnit, now int64) {
 	if count > 0 {
 		fmt.Println("  + 优惠券", count, "张")
 	}
+}
+
+// seedMerchantApplication 为联调商家补齐入驻资料（仅当历史数据为空）。
+func seedMerchantApplication(ctx context.Context, repos *application.RepoUnit) {
+	m, err := repos.Merchants.FindByID("M00268")
+	if err != nil || m.Application.LicenseNo != "" {
+		return
+	}
+	m.Application = merchant.Application{
+		LicenseNo: "91330000DEMO002680", LicenseImage: "",
+		LegalName: "陈建国", LegalIDCard: "330100197801010018",
+		FoodLicenseNo: "JY330100DEMO00268",
+		BankName:      "工商银行", BankAccountName: "陈建国", BankAccountNo: "62220210000000268",
+		AccountPhone: m.Phone,
+	}
+	m.Completeness = 100
+	m.SubmittedAt = m.AppliedAt
+	m.VerifiedAt = m.JoinedAt
+	if err := repos.Merchants.Save(m); err != nil {
+		fmt.Println("  ! 商家入驻资料写入失败:", err)
+		return
+	}
+	fmt.Println("  + 商家入驻资料 M00268")
+}
+
+// seedReview 联调商家评价（幂等，按订单去重）。
+func seedReview(ctx context.Context, repos *application.RepoUnit, now int64) {
+	if _, err := repos.Reviews.FindByOrder("SG202610220086"); err == nil {
+		return
+	}
+	if err := repos.Reviews.Save(&review.Review{
+		ID: "RV20261022001", OrderID: "SG202610220086", UserID: "U86540",
+		MerchantID: "M00268", RiderID: "R00086", Rating: 5,
+		Tags:    []string{"味道好", "分量足", "送得快"},
+		Content: "菜量很足，汤还是热的，骑手也很快。", CreatedAt: now - 1200,
+		Reply: "感谢支持，欢迎常来！", RepliedAt: now - 600,
+	}); err != nil {
+		fmt.Println("  ! 评价写入失败:", err)
+		return
+	}
+	fmt.Println("  + 商家评价 RV20261022001")
 }
 
 func seedOrder(ctx context.Context, repos *application.RepoUnit, now int64) {

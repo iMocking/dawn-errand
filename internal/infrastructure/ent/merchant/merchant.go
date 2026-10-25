@@ -67,6 +67,14 @@ const (
 	FieldCertLabels = "cert_labels"
 	// FieldRejectReason holds the string denoting the reject_reason field in the database.
 	FieldRejectReason = "reject_reason"
+	// FieldApplicationJSON holds the string denoting the application_json field in the database.
+	FieldApplicationJSON = "application_json"
+	// FieldSubmittedAt holds the string denoting the submitted_at field in the database.
+	FieldSubmittedAt = "submitted_at"
+	// FieldVerifiedAt holds the string denoting the verified_at field in the database.
+	FieldVerifiedAt = "verified_at"
+	// FieldVerifiedBy holds the string denoting the verified_by field in the database.
+	FieldVerifiedBy = "verified_by"
 	// FieldRating holds the string denoting the rating field in the database.
 	FieldRating = "rating"
 	// FieldMonthlyOrders holds the string denoting the monthly_orders field in the database.
@@ -132,6 +140,10 @@ var Columns = []string{
 	FieldAppliedAt,
 	FieldCertLabels,
 	FieldRejectReason,
+	FieldApplicationJSON,
+	FieldSubmittedAt,
+	FieldVerifiedAt,
+	FieldVerifiedBy,
 	FieldRating,
 	FieldMonthlyOrders,
 	FieldMonthlyRevenue,
@@ -248,6 +260,14 @@ var (
 	DefaultRejectReason string
 	// RejectReasonValidator is a validator for the "reject_reason" field. It is called by the builders before save.
 	RejectReasonValidator func(string) error
+	// DefaultSubmittedAt holds the default value on creation for the "submitted_at" field.
+	DefaultSubmittedAt int64
+	// DefaultVerifiedAt holds the default value on creation for the "verified_at" field.
+	DefaultVerifiedAt int64
+	// DefaultVerifiedBy holds the default value on creation for the "verified_by" field.
+	DefaultVerifiedBy string
+	// VerifiedByValidator is a validator for the "verified_by" field. It is called by the builders before save.
+	VerifiedByValidator func(string) error
 	// DefaultRating holds the default value on creation for the "rating" field.
 	DefaultRating float64
 	// DefaultMonthlyOrders holds the default value on creation for the "monthly_orders" field.
@@ -427,6 +447,21 @@ func ByAppliedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByRejectReason orders the results by the reject_reason field.
 func ByRejectReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRejectReason, opts...).ToFunc()
+}
+
+// BySubmittedAt orders the results by the submitted_at field.
+func BySubmittedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSubmittedAt, opts...).ToFunc()
+}
+
+// ByVerifiedAt orders the results by the verified_at field.
+func ByVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerifiedAt, opts...).ToFunc()
+}
+
+// ByVerifiedBy orders the results by the verified_by field.
+func ByVerifiedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerifiedBy, opts...).ToFunc()
 }
 
 // ByRating orders the results by the rating field.

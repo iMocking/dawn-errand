@@ -36,6 +36,8 @@ type createRiderBody struct {
 	OrderTypes  string `json:"orderTypes"`
 	IDCard      string `json:"idCard"`
 	ServiceType string `json:"serviceType"`
+	Vehicle     string `json:"vehicle"`
+	Account     string `json:"account"`
 	RegionID    string `json:"regionId"`
 }
 
@@ -53,8 +55,8 @@ func (h *Handler) CreateRider(c *gin.Context) {
 	r := &rider.Rider{
 		RegionID: in.RegionID, Name: strings.TrimSpace(in.Name), Phone: in.Phone,
 		Area: in.Area, Tool: in.Tool, OrderTypes: in.OrderTypes, IDCard: in.IDCard,
-		ServiceType: in.ServiceType,
-		Status:      rider.RiderOffline, IDCheck: "待补充", NoticeType: "none",
+		ServiceType: in.ServiceType, Vehicle: in.Vehicle, Account: in.Account,
+		Status: rider.RiderOffline, IDCheck: "待补充", NoticeType: "none",
 	}
 	if err := h.Riders.Create(c.Request.Context(), r, scope(c)); err != nil {
 		response.Err(c, err)
@@ -119,6 +121,58 @@ func (h *Handler) GetRider(c *gin.Context) {
 	response.OK(c, toRiderDetail(r))
 }
 
+// GetRiderWorkspace GET /riders/:id/workspace：详情页各 Tab 数据。
+func (h *Handler) GetRiderWorkspace(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	ws, err := h.Riders.Workspace(c.Request.Context(), id, scope(c))
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	orders := make([]gin.H, 0, len(ws.Orders))
+	for _, o := range ws.Orders {
+		orders = append(orders, orderBrief(o))
+	}
+	abnormal := make([]gin.H, 0, len(ws.Abnormal))
+	for _, o := range ws.Abnormal {
+		abnormal = append(abnormal, orderBrief(o))
+	}
+	reviews := make([]gin.H, 0, len(ws.Reviews))
+	for _, rv := range ws.Reviews {
+		reviews = append(reviews, gin.H{
+			"id": rv.ID, "orderId": rv.OrderID, "userId": rv.UserID,
+			"userName": ws.UserNames[rv.UserID], "rating": rv.Rating,
+			"tags": rv.Tags, "content": rv.Content, "reply": rv.Reply,
+			"createdAt": rv.CreatedAt,
+		})
+	}
+	r := ws.Rider
+	response.OK(c, gin.H{
+		"records":  ws.Records,
+		"orders":   orders,
+		"abnormal": abnormal,
+		"trend":    ws.Trend,
+		"reviews":  gin.H{"list": reviews, "total": len(reviews), "rating": r.Rating},
+		"profile": gin.H{
+			"idCard": r.IDCard, "idCheck": r.IDCheck, "tool": r.Tool,
+			"vehicle": r.Vehicle, "account": r.Account, "docs": r.Docs,
+			"docCount": r.DocCount, "auditStatus": riderAuditText(r.AuditStatus),
+			"submittedAt": r.SubmittedAt, "joinedAt": r.JoinedAt,
+			"serviceType": r.ServiceType, "orderTypes": r.OrderTypes,
+		},
+		"performance": gin.H{
+			"rating": r.Rating, "onTimeRate": pctStr(r.OnTimeRate),
+			"avgMinutes": r.AvgMinutes, "complaintsToday": r.ComplaintsToday,
+			"todayOrders": r.TodayOrders, "monthIncome": r.MonthIncome,
+			"onlineHours": r.OnlineHours,
+		},
+	})
+}
+
 type riderAuditBody struct {
 	ID     string `json:"id"`
 	Action string `json:"action"`
@@ -137,11 +191,40 @@ func (h *Handler) AuditRider(c *gin.Context) {
 		return
 	}
 	u := middleware.User(c)
-	if err := h.Riders.AuditAction(c.Request.Context(), in.ID, in.Action, in.Reason, u.ID, scope(c)); err != nil {
+	account, err := h.Riders.AuditAction(c.Request.Context(), in.ID, in.Action, in.Reason, u.ID, scope(c))
+	if err != nil {
 		response.Err(c, err)
 		return
 	}
-	response.OKMsg(c, "操作成功", gin.H{"id": in.ID, "action": in.Action})
+	body := gin.H{"id": in.ID, "action": in.Action}
+	if account != nil {
+		body["account"] = gin.H{
+			"userId": account.UserID, "email": account.Email, "phone": account.Phone,
+			"initialPassword": account.InitialPassword,
+		}
+	}
+	response.OKMsg(c, "操作成功", body)
+}
+
+// ResetRiderAccount POST /riders/:id/account/reset。
+func (h *Handler) ResetRiderAccount(c *gin.Context) {
+	id, err := pathID(c)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	u := middleware.User(c)
+	res, err := h.Accounts.ResetRiderPassword(c.Request.Context(), id, u.ID)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OKMsg(c, "密码已重置", gin.H{
+		"account": gin.H{
+			"userId": res.UserID, "email": res.Email, "phone": res.Phone,
+			"initialPassword": res.InitialPassword,
+		},
+	})
 }
 
 // FreezeRider POST /riders/freeze。

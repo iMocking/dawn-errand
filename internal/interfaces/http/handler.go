@@ -52,6 +52,8 @@ type Handler struct {
 	Coupons *app.CouponService
 	// CouponsAdmin 管理端券发放。
 	CouponsAdmin *admin.CouponService
+	// Workspace 管理端消息中心与待办角标。
+	Workspace *admin.WorkspaceService
 	// Ready 就绪探针（DB/Redis）。
 	Ready func(ctx context.Context) error
 	// Storage 文件存储端口（头像/菜品图/证件/送达凭证）。

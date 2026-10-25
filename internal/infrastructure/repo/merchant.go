@@ -35,6 +35,8 @@ func (r MerchantRepo) Save(m *merchant.Merchant) error {
 			SetStatus(string(m.Status)).SetAuditStatus(string(m.AuditStatus)).
 			SetApplyNo(m.ApplyNo).SetOperator(m.Operator).SetAppliedAt(m.AppliedAt).
 			SetCertLabels(m.CertLabels).SetRejectReason(m.RejectReason).
+			SetApplicationJSON(mustJSON(m.Application)).
+			SetSubmittedAt(m.SubmittedAt).SetVerifiedAt(m.VerifiedAt).SetVerifiedBy(m.VerifiedBy).
 			SetRating(m.Rating).SetMonthlyOrders(m.MonthlyOrders).SetMonthlyRevenue(m.MonthlyRevenue).
 			SetAvgOrder(m.AvgOrder).SetGoodRate(m.GoodRate).SetJoinedAt(m.JoinedAt).
 			SetLastUpdatedAt(m.LastUpdatedAt).SetCompleteness(m.Completeness).SetReviewCount(m.ReviewCount).
@@ -55,6 +57,8 @@ func (r MerchantRepo) Save(m *merchant.Merchant) error {
 		SetStatus(string(m.Status)).SetAuditStatus(string(m.AuditStatus)).
 		SetApplyNo(m.ApplyNo).SetOperator(m.Operator).SetAppliedAt(m.AppliedAt).
 		SetCertLabels(m.CertLabels).SetRejectReason(m.RejectReason).
+		SetApplicationJSON(mustJSON(m.Application)).
+		SetSubmittedAt(m.SubmittedAt).SetVerifiedAt(m.VerifiedAt).SetVerifiedBy(m.VerifiedBy).
 		SetRating(m.Rating).SetMonthlyOrders(m.MonthlyOrders).SetMonthlyRevenue(m.MonthlyRevenue).
 		SetAvgOrder(m.AvgOrder).SetGoodRate(m.GoodRate).SetJoinedAt(m.JoinedAt).
 		SetLastUpdatedAt(m.LastUpdatedAt).SetCompleteness(m.Completeness).SetReviewCount(m.ReviewCount).
@@ -68,7 +72,7 @@ func toMerchant(e *ent.Merchant) *merchant.Merchant {
 	if e == nil {
 		return nil
 	}
-	return &merchant.Merchant{
+	m := &merchant.Merchant{
 		ID: e.ID, RegionID: e.RegionID, OwnerUserID: e.OwnerUserID,
 		Name: e.Name, Category: e.Category, Address: e.Address, AddressSub: e.AddressSub,
 		Contact: e.Contact, Phone: e.Phone, OpenHours: e.OpenHours, DeliveryRange: e.DeliveryRange,
@@ -79,6 +83,7 @@ func toMerchant(e *ent.Merchant) *merchant.Merchant {
 		Status: merchant.MerchantStatus(e.Status), AuditStatus: merchant.AuditStatus(e.AuditStatus),
 		ApplyNo: e.ApplyNo, Operator: e.Operator, AppliedAt: e.AppliedAt,
 		CertLabels: e.CertLabels, RejectReason: e.RejectReason,
+		SubmittedAt: e.SubmittedAt, VerifiedAt: e.VerifiedAt, VerifiedBy: e.VerifiedBy,
 		Rating: e.Rating, MonthlyOrders: e.MonthlyOrders, MonthlyRevenue: e.MonthlyRevenue,
 		AvgOrder: e.AvgOrder, GoodRate: e.GoodRate, JoinedAt: e.JoinedAt,
 		LastUpdatedAt: e.LastUpdatedAt, Completeness: e.Completeness, ReviewCount: e.ReviewCount,
@@ -86,6 +91,8 @@ func toMerchant(e *ent.Merchant) *merchant.Merchant {
 		TodayOrders:   e.TodayOrders, TodayRevenue: e.TodayRevenue,
 		OnTimeRate: e.OnTimeRate, PendingAbnormal: e.PendingAbnormal,
 	}
+	_ = jsonUnmarshal(e.ApplicationJSON, &m.Application)
+	return m
 }
 
 func (r MerchantRepo) FindByID(id string) (*merchant.Merchant, error) {
@@ -205,7 +212,9 @@ func (r MerchantRepo) UpdateAudit(id string, approved bool, reason, operator str
 	upd := r.client.Merchant.UpdateOneID(id).
 		SetAuditStatus(status).SetRejectReason(reason).SetUpdatedAt(now)
 	if approved {
-		upd.SetStatus(string(merchant.MerchantStatusOpen)).SetJoinedAt(now)
+		// 审核通过后进入「休息中」，由商家登录后自行开店；认证信息留痕。
+		upd.SetStatus(string(merchant.MerchantStatusRest)).
+			SetJoinedAt(now).SetVerifiedAt(now).SetVerifiedBy(operator)
 	}
 	err := upd.SetLastOperation(operator + " 审核" + status).Exec(ctx)
 	return err

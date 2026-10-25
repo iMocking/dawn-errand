@@ -11,6 +11,8 @@ import (
 
 	"dawn-errand/internal/application"
 	"dawn-errand/internal/domain/identity"
+	"dawn-errand/internal/domain/merchant"
+	"dawn-errand/internal/domain/rider"
 	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/pkg/errcode"
 	"dawn-errand/internal/pkg/metrics"
@@ -20,12 +22,14 @@ import (
 
 // Middleware 中间件依赖集合。
 type Middleware struct {
-	Logger   *zap.Logger
-	Tokens   application.TokenManager
-	Users    identity.UserRepository
-	Creds    identity.CredentialRepository
-	Limiter  application.RateLimiter
-	Enforcer application.PolicyManager
+	Logger    *zap.Logger
+	Tokens    application.TokenManager
+	Users     identity.UserRepository
+	Creds     identity.CredentialRepository
+	Merchants merchant.MerchantRepository
+	Riders    rider.RiderRepository
+	Limiter   application.RateLimiter
+	Enforcer  application.PolicyManager
 }
 
 // gin.Context 键（Get/Set 需要 string 键）。
@@ -218,9 +222,31 @@ func (m *Middleware) RequireAppRole(roles ...string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
+			m, err := m.Merchants.FindByID(p.MerchantID)
+			if err != nil || (m.AuditStatus != merchant.AuditApproved && m.OwnerUserID == "") {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeMerchantStatus, "商家入驻审核未通过，暂不可经营")
+				c.Abort()
+				return
+			}
+			if m.Status == merchant.MerchantStatusBanned {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeMerchantStatus, "商家已被封禁")
+				c.Abort()
+				return
+			}
 		case identity.RoleDriver:
 			if p.RiderID == "" {
 				response.ErrStatus(c, http.StatusForbidden, errcode.CodeAccountUnbound, "账号未绑定骑手，请联系平台开通")
+				c.Abort()
+				return
+			}
+			r, err := m.Riders.FindByID(p.RiderID)
+			if err != nil || (r.AuditStatus != rider.AuditApproved && r.UserID == "") {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeRiderStatus, "骑手入驻审核未通过，暂不可接单")
+				c.Abort()
+				return
+			}
+			if r.Status == rider.RiderFrozen {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeRiderStatus, "骑手账号已冻结")
 				c.Abort()
 				return
 			}

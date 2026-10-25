@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
 import Modal from '@/components/Modal.vue'
 import AppButton from '@/components/AppButton.vue'
 import { useToast } from '@/composables/useToast'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { formatTime } from '@/utils/format'
 import {
   getMerchantAuditList,
@@ -12,6 +14,8 @@ import {
 } from '@/api/merchants'
 
 const toast = useToast()
+const router = useRouter()
+const workspace = useWorkspaceStore()
 
 const rows = ref<MerchantAuditRow[]>([])
 const loading = ref(false)
@@ -25,6 +29,8 @@ const confirmState = ref<{ open: boolean; type: 'approve' | 'reject'; row: Merch
   row: null,
 })
 const rejectReason = ref('')
+const accountOpen = ref(false)
+const accountResult = ref<{ userId: string; email: string; phone: string; initialPassword: string } | null>(null)
 
 const logoPaths: Record<MerchantAuditRow['logoIcon'], string> = {
   food: '<path d="M3 11h18c0 5-4 8-9 8s-9-3-9-8z"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
@@ -67,14 +73,33 @@ function openConfirm(row: MerchantAuditRow, type: 'approve' | 'reject') {
 async function onConfirm() {
   const { row, type } = confirmState.value
   if (!row) return
+  if (type === 'reject' && !rejectReason.value.trim()) {
+    toast.warning('请填写驳回原因，便于业务员补件')
+    return
+  }
   submittingId.value = row.id
   try {
-    await auditMerchant(row.id, type, rejectReason.value || undefined)
-    toast.success(type === 'approve' ? `已通过 ${row.name} 的入驻申请` : `已驳回 ${row.name} 的入驻申请`)
+    const res = await auditMerchant(row.id, type, rejectReason.value.trim() || undefined)
+    if (type === 'approve' && res.account?.initialPassword) {
+      accountResult.value = res.account
+      accountOpen.value = true
+    }
+    toast.success(type === 'approve' ? `已通过 ${row.name} 的入驻申请，账号已开通` : `已驳回 ${row.name} 的入驻申请`)
     confirmState.value.open = false
+    activeTab.value = type === 'approve' ? '已通过' : '已驳回'
     await load()
+    workspace.refresh()
   } finally {
     submittingId.value = ''
+  }
+}
+
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    toast.success('已复制')
+  } catch {
+    toast.warning('复制失败，请手动选择')
   }
 }
 
@@ -137,15 +162,29 @@ onMounted(load)
           </div>
           <!-- 证照 -->
           <div class="mt-3 flex flex-wrap gap-2">
-            <div
+            <component
+              :is="cert.url ? 'a' : 'div'"
               v-for="cert in row.certs"
               :key="cert.label"
-              class="flex h-16 w-16 flex-col items-center justify-center gap-0.5 rounded-lg bg-head"
+              :href="cert.url || undefined"
+              :target="cert.url ? '_blank' : undefined"
+              class="flex h-16 w-16 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-lg bg-head"
               style="border:1px dashed #D0D3D9;"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" v-html="certIconPaths[cert.icon]" />
-              <span class="text-[10px] text-ink-3">{{ cert.label }}</span>
-            </div>
+              <img v-if="cert.url" :src="cert.url" alt="" class="h-full w-full object-cover" />
+              <template v-else>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" v-html="certIconPaths[cert.icon]" />
+                <span class="text-[10px] text-ink-3">{{ cert.label }}</span>
+              </template>
+            </component>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 rounded-lg bg-head px-3 py-2 text-[12px] text-ink-3">
+            <span>执照号：{{ row.application?.licenseNo || '—' }}</span>
+            <span>法人：{{ row.application?.legalName || '—' }} {{ row.application?.legalIdCard || '' }}</span>
+            <span>结算：{{ row.application?.bankName || '—' }} · {{ row.application?.bankAccountName || '—' }}</span>
+            <span>登录账号：{{ row.application?.accountPhone || row.phone }}</span>
+            <span v-if="row.application?.foodLicenseNo">食品许可证：{{ row.application.foodLicenseNo }}</span>
+            <span v-if="row.rejectReason" class="col-span-2 text-[#FF4D4F]">驳回原因：{{ row.rejectReason }}</span>
           </div>
         </div>
 
@@ -169,6 +208,11 @@ onMounted(load)
 {{ submittingId === row.id ? '提交中…' : '驳回申请' }}
 </AppButton>
         </div>
+        <div v-else-if="row.status === '已驳回'" class="flex shrink-0 flex-col justify-center gap-2.5">
+          <AppButton variant="secondary" class="!px-5" @click="router.push(`/merchants/${row.id}/edit`)">
+            修改资料
+          </AppButton>
+        </div>
       </div>
     </div>
 
@@ -185,13 +229,50 @@ onMounted(load)
         <span class="font-semibold text-ink-1">{{ confirmState.row?.name }}</span>
         的入驻申请？
       </p>
+      <div v-if="confirmState.type === 'approve'" class="mt-3 rounded-lg bg-head px-3 py-2 text-[12px] text-ink-3">
+        通过后将自动开通商家端账号，并生成一次性初始密码；商家可立即登录，但需自行开店后才会接单。
+      </div>
       <div v-if="confirmState.type === 'reject'" class="mt-3">
         <textarea
           v-model="rejectReason"
           rows="3"
-          placeholder="请输入驳回原因（选填）"
+          placeholder="请填写驳回原因（必填，业务员据此补件）"
           class="w-full resize-none rounded-lg border border-line bg-head px-3 py-2 text-[13px] outline-none focus:border-primary"
         ></textarea>
+      </div>
+    </Modal>
+
+    <!-- 账号开通结果：初始密码仅展示一次 -->
+    <Modal
+      v-model:open="accountOpen"
+      title="商家账号已开通"
+      :width="520"
+      confirm-text="我已记录"
+      @confirm="accountOpen = false"
+    >
+      <div class="rounded-lg bg-[#E8F7F0] px-3 py-2.5 text-[12px]" style="color:#00B578;">
+        审核已通过，商家端账号已创建并绑定。请将以下信息线下交付给商家；初始密码仅本次展示。
+      </div>
+      <div class="mt-4 space-y-3">
+        <div v-for="item in [
+          { label: '登录手机号', value: accountResult?.phone || '—' },
+          { label: '登录邮箱', value: accountResult?.email || '—' },
+          { label: '初始密码', value: accountResult?.initialPassword || '—' },
+        ]" :key="item.label" class="flex items-center justify-between rounded-lg border border-line px-3 py-2.5">
+          <div>
+            <div class="text-[11px] text-ink-4">{{ item.label }}</div>
+            <div class="mt-0.5 font-mono text-[13px] font-semibold text-ink-1">{{ item.value }}</div>
+          </div>
+          <button
+            v-if="item.value !== '—'"
+            type="button"
+            class="text-[12px] text-primary"
+            @click="copyText(item.value)"
+          >复制</button>
+        </div>
+      </div>
+      <div class="mt-3 text-[11px] text-ink-4">
+        商家登录后请尽快修改密码；如密码遗失，可由平台在商家详情重新开通/重置。
       </div>
     </Modal>
   </div>

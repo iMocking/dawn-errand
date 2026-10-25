@@ -1,6 +1,19 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from 'vue'
 import Sidebar from './Sidebar.vue'
 import Topbar from './Topbar.vue'
+import { useWorkspaceStore } from '@/stores/workspace'
+
+const workspace = useWorkspaceStore()
+let timer: ReturnType<typeof setInterval> | undefined
+
+onMounted(() => {
+  workspace.refresh()
+  timer = setInterval(() => workspace.refresh(), 60_000)
+})
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer)
+})
 </script>
 
 <template>

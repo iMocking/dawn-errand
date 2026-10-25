@@ -9,6 +9,76 @@ import (
 	"time"
 )
 
+// TestMerchantWorkspace 商家详情子页数据（证照/经营/菜单/评价/异常）。
+func TestMerchantWorkspace(t *testing.T) {
+	admin := loginAdmin(t)
+	r, _ := do(t, http.MethodGet, "/api/merchants/M00268/workspace", admin, nil)
+	if r.Code != 0 {
+		t.Fatalf("workspace code=%d msg=%s", r.Code, r.Message)
+	}
+	var body struct {
+		Certs []struct {
+			Label string `json:"label"`
+		} `json:"certs"`
+		Trend []struct {
+			Date string `json:"date"`
+		} `json:"trend"`
+		Menu struct {
+			Categories []any `json:"categories"`
+			Dishes     []any `json:"dishes"`
+		} `json:"menu"`
+		Reviews struct {
+			Total int `json:"total"`
+		} `json:"reviews"`
+	}
+	if err := json.Unmarshal(r.Body, &body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body.Certs) < 1 || len(body.Trend) != 7 || len(body.Menu.Categories) < 1 || len(body.Menu.Dishes) < 1 {
+		t.Fatalf("workspace 聚合数据不完整: certs=%d trend=%d cats=%d dishes=%d",
+			len(body.Certs), len(body.Trend), len(body.Menu.Categories), len(body.Menu.Dishes))
+	}
+	if body.Reviews.Total < 1 {
+		t.Fatalf("评价数据为空: %s", r.Body)
+	}
+}
+
+// TestWorkspaceMessages 管理端消息中心与左侧待办角标使用真实数据。
+func TestWorkspaceMessages(t *testing.T) {
+	admin := loginAdmin(t)
+	r, _ := do(t, http.MethodGet, "/api/messages", admin, nil)
+	if r.Code != 0 {
+		t.Fatalf("messages code=%d msg=%s", r.Code, r.Message)
+	}
+	var body struct {
+		Badges struct {
+			Complaints     int64 `json:"complaints"`
+			MerchantAudits int64 `json:"merchantAudits"`
+			RiderAudits    int64 `json:"riderAudits"`
+			Withdrawals    int64 `json:"withdrawals"`
+		} `json:"badges"`
+		List []struct {
+			Type string `json:"type"`
+			Link string `json:"link"`
+		} `json:"list"`
+	}
+	if err := json.Unmarshal(r.Body, &body); err != nil {
+		t.Fatal(err)
+	}
+	if body.Badges.Complaints < 1 {
+		t.Fatalf("待处理客诉角标应 >=1: %+v", body.Badges)
+	}
+	found := false
+	for _, m := range body.List {
+		if m.Type == "complaint" && m.Link != "" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("消息中心缺少客诉待办: %s", r.Body)
+	}
+}
+
 // TestAdminContract 管理端关键 DTO/写接口契约：详情字段小写、提现时间线、公告 ID/发布、费率开关。
 func TestAdminContract(t *testing.T) {
 	admin := loginAdmin(t)

@@ -387,6 +387,54 @@ func (mc *MerchantCreate) SetNillableRejectReason(s *string) *MerchantCreate {
 	return mc
 }
 
+// SetApplicationJSON sets the "application_json" field.
+func (mc *MerchantCreate) SetApplicationJSON(b []byte) *MerchantCreate {
+	mc.mutation.SetApplicationJSON(b)
+	return mc
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (mc *MerchantCreate) SetSubmittedAt(i int64) *MerchantCreate {
+	mc.mutation.SetSubmittedAt(i)
+	return mc
+}
+
+// SetNillableSubmittedAt sets the "submitted_at" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableSubmittedAt(i *int64) *MerchantCreate {
+	if i != nil {
+		mc.SetSubmittedAt(*i)
+	}
+	return mc
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (mc *MerchantCreate) SetVerifiedAt(i int64) *MerchantCreate {
+	mc.mutation.SetVerifiedAt(i)
+	return mc
+}
+
+// SetNillableVerifiedAt sets the "verified_at" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableVerifiedAt(i *int64) *MerchantCreate {
+	if i != nil {
+		mc.SetVerifiedAt(*i)
+	}
+	return mc
+}
+
+// SetVerifiedBy sets the "verified_by" field.
+func (mc *MerchantCreate) SetVerifiedBy(s string) *MerchantCreate {
+	mc.mutation.SetVerifiedBy(s)
+	return mc
+}
+
+// SetNillableVerifiedBy sets the "verified_by" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableVerifiedBy(s *string) *MerchantCreate {
+	if s != nil {
+		mc.SetVerifiedBy(*s)
+	}
+	return mc
+}
+
 // SetRating sets the "rating" field.
 func (mc *MerchantCreate) SetRating(f float64) *MerchantCreate {
 	mc.mutation.SetRating(f)
@@ -746,6 +794,18 @@ func (mc *MerchantCreate) defaults() {
 		v := merchant.DefaultRejectReason
 		mc.mutation.SetRejectReason(v)
 	}
+	if _, ok := mc.mutation.SubmittedAt(); !ok {
+		v := merchant.DefaultSubmittedAt
+		mc.mutation.SetSubmittedAt(v)
+	}
+	if _, ok := mc.mutation.VerifiedAt(); !ok {
+		v := merchant.DefaultVerifiedAt
+		mc.mutation.SetVerifiedAt(v)
+	}
+	if _, ok := mc.mutation.VerifiedBy(); !ok {
+		v := merchant.DefaultVerifiedBy
+		mc.mutation.SetVerifiedBy(v)
+	}
 	if _, ok := mc.mutation.Rating(); !ok {
 		v := merchant.DefaultRating
 		mc.mutation.SetRating(v)
@@ -990,6 +1050,20 @@ func (mc *MerchantCreate) check() error {
 			return &ValidationError{Name: "reject_reason", err: fmt.Errorf(`ent: validator failed for field "Merchant.reject_reason": %w`, err)}
 		}
 	}
+	if _, ok := mc.mutation.SubmittedAt(); !ok {
+		return &ValidationError{Name: "submitted_at", err: errors.New(`ent: missing required field "Merchant.submitted_at"`)}
+	}
+	if _, ok := mc.mutation.VerifiedAt(); !ok {
+		return &ValidationError{Name: "verified_at", err: errors.New(`ent: missing required field "Merchant.verified_at"`)}
+	}
+	if _, ok := mc.mutation.VerifiedBy(); !ok {
+		return &ValidationError{Name: "verified_by", err: errors.New(`ent: missing required field "Merchant.verified_by"`)}
+	}
+	if v, ok := mc.mutation.VerifiedBy(); ok {
+		if err := merchant.VerifiedByValidator(v); err != nil {
+			return &ValidationError{Name: "verified_by", err: fmt.Errorf(`ent: validator failed for field "Merchant.verified_by": %w`, err)}
+		}
+	}
 	if _, ok := mc.mutation.Rating(); !ok {
 		return &ValidationError{Name: "rating", err: errors.New(`ent: missing required field "Merchant.rating"`)}
 	}
@@ -1191,6 +1265,22 @@ func (mc *MerchantCreate) createSpec() (*Merchant, *sqlgraph.CreateSpec) {
 	if value, ok := mc.mutation.RejectReason(); ok {
 		_spec.SetField(merchant.FieldRejectReason, field.TypeString, value)
 		_node.RejectReason = value
+	}
+	if value, ok := mc.mutation.ApplicationJSON(); ok {
+		_spec.SetField(merchant.FieldApplicationJSON, field.TypeBytes, value)
+		_node.ApplicationJSON = value
+	}
+	if value, ok := mc.mutation.SubmittedAt(); ok {
+		_spec.SetField(merchant.FieldSubmittedAt, field.TypeInt64, value)
+		_node.SubmittedAt = value
+	}
+	if value, ok := mc.mutation.VerifiedAt(); ok {
+		_spec.SetField(merchant.FieldVerifiedAt, field.TypeInt64, value)
+		_node.VerifiedAt = value
+	}
+	if value, ok := mc.mutation.VerifiedBy(); ok {
+		_spec.SetField(merchant.FieldVerifiedBy, field.TypeString, value)
+		_node.VerifiedBy = value
 	}
 	if value, ok := mc.mutation.Rating(); ok {
 		_spec.SetField(merchant.FieldRating, field.TypeFloat64, value)

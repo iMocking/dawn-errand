@@ -24,7 +24,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/settings/FeeRules.vue'),
     meta: {
       title: '配送费率',
-      icon: 'tag',
+      icon: 'scooter-coin',
       group: '系统管理',
       permission: 'settings:fee',
     },
@@ -35,7 +35,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/settings/Announcements.vue'),
     meta: {
       title: '公告管理',
-      icon: 'bell',
+      icon: 'megaphone',
       group: '系统管理',
       permission: 'settings:announcement',
     },

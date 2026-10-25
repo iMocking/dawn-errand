@@ -184,6 +184,7 @@ func Build(cfg *config.Config) (*App, error) {
 	mw := &middleware.Middleware{
 		Logger: logger, Tokens: tokens, Users: repos.Users,
 		Creds: repos.Credentials, Limiter: limiter, Enforcer: enforcer,
+		Merchants: repos.Merchants, Riders: repos.Riders,
 	}
 
 	orderSvc := &appsvc.OrderService{Repos: repos, Tx: store, MockPayment: cfg.IsDev()}
@@ -198,6 +199,7 @@ func Build(cfg *config.Config) (*App, error) {
 	reviewSvc := &appsvc.ReviewService{Repos: repos, Tx: store}
 	refundSvc := &appsvc.RefundService{Repos: repos, Tx: store}
 	couponSvc := &appsvc.CouponService{Repos: repos}
+	accountsSvc := &admin.AccountsService{Repos: repos, Tx: store, Hasher: hasher}
 	jobsRunner := &jobs.Runner{
 		Repos: repos, Orders: orderSvc, Locker: redisc.NewLocker(rdb),
 		PayTimeout:  time.Duration(cfg.OrderPayTimeoutSec) * time.Second,
@@ -220,16 +222,17 @@ func Build(cfg *config.Config) (*App, error) {
 		Coupons:       couponSvc,
 		Storage:       fileStore,
 		StorageMount:  storageMount,
-		Accounts:      &admin.AccountsService{Repos: repos, Tx: store, Hasher: hasher},
+		Accounts:      accountsSvc,
 		Dashboard:     &admin.DashboardService{Repos: repos},
 		Orders:        &admin.OrdersService{Repos: repos},
-		Merchants:     &admin.MerchantsService{Repos: repos},
-		Riders:        &admin.RidersService{Repos: repos},
+		Merchants:     &admin.MerchantsService{Repos: repos, Accounts: accountsSvc},
+		Riders:        &admin.RidersService{Repos: repos, Accounts: accountsSvc},
 		Users:         &admin.UsersService{Repos: repos, Tx: store, Cipher: cipher},
 		Finance:       &admin.FinanceService{Repos: repos, Tx: store, Payout: payoutGw},
 		Complaints:    &admin.ComplaintsService{Repos: repos},
 		Settings:      &admin.SettingsService{Repos: repos},
 		CouponsAdmin:  &admin.CouponService{Repos: repos},
+		Workspace:     &admin.WorkspaceService{Repos: repos},
 	}
 	h.Ready = func(ctx context.Context) error {
 		if _, err := client.User.Query().Limit(1).Exist(ctx); err != nil {

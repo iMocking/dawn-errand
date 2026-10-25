@@ -136,9 +136,80 @@ export function getRiderDetail(id: string) {
   return http.get<RiderDetailDto>(`/riders/${id}`)
 }
 
-/** 审核通过（mock 中间件回显请求体） */
+export interface RiderOrderBrief {
+  id: string
+  orderNo: string
+  status: string
+  type: string
+  payAmount: number
+  createdAt: number
+  userName: string
+  route: string
+}
+
+export interface RiderWorkspace {
+  records: { title: string; detail: string; tone: string; time: number }[]
+  orders: RiderOrderBrief[]
+  abnormal: RiderOrderBrief[]
+  trend: { date: string; orders: number; amount: number }[]
+  reviews: {
+    list: {
+      id: string
+      orderId: string
+      userName: string
+      rating: number
+      tags: string[]
+      content: string
+      reply: string
+      createdAt: number
+    }[]
+    total: number
+    rating: number
+  }
+  profile: {
+    idCard: string
+    idCheck: string
+    tool: string
+    vehicle: string
+    account: string
+    docs: string
+    docCount: number
+    auditStatus: string
+    submittedAt: number
+    joinedAt: number
+    serviceType: string
+    orderTypes: string
+  }
+  performance: {
+    rating: number
+    onTimeRate: string
+    avgMinutes: number
+    complaintsToday: number
+    todayOrders: number
+    monthIncome: number
+    onlineHours: number
+  }
+}
+
+/** 骑手详情页各 Tab 数据（配送/绩效/证件/奖惩） */
+export function getRiderWorkspace(id: string) {
+  return http.get<RiderWorkspace>(`/riders/${id}/workspace`)
+}
+
+/** 重置骑手登录密码（旧会话失效，返回一次性新密码） */
+export function resetRiderAccount(id: string) {
+  return http.post<{ account: { userId: string; email: string; phone: string; initialPassword: string } }>(
+    `/riders/${id}/account/reset`,
+  )
+}
+
+/** 审核通过：自动开通骑手端账号，返回一次性初始密码 */
 export function approveRider(id: string) {
-  return http.post<{ id: string; action: string }>('/riders/audit', { id, action: 'approve' })
+  return http.post<{
+    id: string
+    action: string
+    account?: { userId: string; email: string; phone: string; initialPassword: string }
+  }>('/riders/audit', { id, action: 'approve' })
 }
 
 /** 审核驳回 */
@@ -164,6 +235,8 @@ export interface CreateRiderPayload {
   orderTypes?: string
   idCard?: string
   serviceType?: string
+  vehicle?: string
+  account?: string
   regionId?: string
 }
 

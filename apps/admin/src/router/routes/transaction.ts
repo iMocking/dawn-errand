@@ -11,7 +11,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/orders/Index.vue'),
     meta: {
       title: '订单管理',
-      icon: 'order',
+      icon: 'clipboard',
       group: '交易管理',
       permission: 'order:list',
     },
@@ -28,10 +28,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/complaints/Index.vue'),
     meta: {
       title: '投诉售后',
-      icon: 'complaint',
+      icon: 'headset',
       group: '交易管理',
-      badge: 2,
-      badgeColor: 'red',
       permission: 'complaint:list',
     },
   },

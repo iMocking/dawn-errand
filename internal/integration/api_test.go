@@ -527,9 +527,18 @@ func TestAdminCreateMerchantRiderAndUserQueries(t *testing.T) {
 		t.Fatalf("merchant 缺 name 应 1301, got %d", bad.Code)
 	}
 
-	// 创建商家
-	mr, _ := do(t, http.MethodPost, "/api/merchants", token, map[string]string{
-		"name": "测试接入商家", "phone": "13800000001", "contact": "测试员", "category": "其他",
+	// 创建商家（完整入驻资料）
+	mr, _ := do(t, http.MethodPost, "/api/merchants", token, map[string]any{
+		"name": "测试接入商家", "phone": "13800000001", "contact": "测试员",
+		"category": "其他", "address": "测试镇测试路 1 号", "openHours": "09:00-21:00",
+		"regionId": "area-001",
+		"application": map[string]any{
+			"licenseNo": "91330000TEST000001", "licenseImage": "http://example.com/license.jpg",
+			"legalName": "测试法人", "legalIdCard": "330100199001010011",
+			"idCardFront": "http://example.com/id-front.jpg", "idCardBack": "http://example.com/id-back.jpg",
+			"storefrontImages": []string{"http://example.com/store.jpg"},
+			"bankName":         "工商银行", "bankAccountName": "测试接入商家", "bankAccountNo": "6222000000000000001",
+		},
 	})
 	if mr.Code != 0 {
 		t.Fatalf("create merchant code=%d msg=%s", mr.Code, mr.Message)

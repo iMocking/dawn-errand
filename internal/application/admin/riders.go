@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"dawn-errand/internal/application"
@@ -13,7 +14,8 @@ import (
 
 // RidersService 骑手管理。
 type RidersService struct {
-	Repos *application.RepoUnit
+	Repos    *application.RepoUnit
+	Accounts *AccountsService
 }
 
 // List 骑手列表。
@@ -48,29 +50,59 @@ func (s *RidersService) Detail(ctx context.Context, id string, sc tenant.Scope) 
 	return r, nil
 }
 
-// AuditAction 审核入驻。
-func (s *RidersService) AuditAction(ctx context.Context, id, action, reason, operator string, sc tenant.Scope) error {
+// AuditAction 审核入驻：通过时自动开通骑手端账号并返回一次性初始密码。
+func (s *RidersService) AuditAction(ctx context.Context, id, action, reason, operator string, sc tenant.Scope) (*ProvisionResult, error) {
 	r, err := s.Repos.Riders.FindByID(id)
 	if err != nil {
 		if err == application.ErrNotFound {
-			return errcode.NewStatus(404, errcode.CodeRiderNotFound, "申请不存在")
+			return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "申请不存在")
 		}
-		return err
+		return nil, err
 	}
 	if !riderAccessOK(sc, r) {
-		return tenantDenied()
+		return nil, tenantDenied()
 	}
 	if r.AuditStatus != rider.AuditPending {
-		return errcode.New(errcode.CodeRiderStatus, "该申请已处理")
+		return nil, errcode.New(errcode.CodeRiderStatus, "该申请已处理")
 	}
-	if err := s.Repos.Riders.UpdateAudit(id, action == "approve", reason, operator, time.Now().Unix()); err != nil {
-		return err
+	approved := action == "approve"
+	if !approved {
+		if strings.TrimSpace(reason) == "" {
+			return nil, errcode.New(errcode.CodeBadRequest, "驳回必须填写原因，便于补件")
+		}
+		if err := s.Repos.Riders.UpdateAudit(id, false, strings.TrimSpace(reason), operator, time.Now().Unix()); err != nil {
+			return nil, err
+		}
+		s.audit(ctx, id, operator)
+		return nil, nil
 	}
+	if strings.TrimSpace(r.Phone) == "" {
+		return nil, errcode.New(errcode.CodeBadRequest, "骑手手机号必填，用于登录骑手端")
+	}
+	if err := s.Repos.Riders.UpdateAudit(id, true, "", operator, time.Now().Unix()); err != nil {
+		return nil, err
+	}
+	var account *ProvisionResult
+	if r.UserID == "" {
+		if s.Accounts == nil {
+			return nil, errcode.New(errcode.CodeInternal, "账号开通服务未配置")
+		}
+		account, err = s.Accounts.ProvisionRider(ctx, id, ProvisionInput{
+			Phone: strings.TrimSpace(r.Phone), Name: r.Name,
+		}, operator)
+		if err != nil {
+			return nil, err
+		}
+	}
+	s.audit(ctx, id, operator)
+	return account, nil
+}
+
+func (s *RidersService) audit(ctx context.Context, id, operator string) {
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
 		UserID: operator, Action: "rider.audit", Object: id, Result: "success",
 		RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx),
 	})
-	return nil
 }
 
 // Freeze 冻结/解冻骑手。

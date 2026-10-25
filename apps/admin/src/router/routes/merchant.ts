@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/merchants/Index.vue'),
     meta: {
       title: '商家管理',
-      icon: 'merchant',
+      icon: 'storefront',
       group: '主体管理',
       permission: 'merchant:list',
     },
@@ -18,12 +18,22 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/merchants/Audit.vue'),
     meta: {
       title: '商家入驻审核',
-      icon: 'shield',
+      icon: 'storefront-check',
       group: '主体管理',
-      badge: 3,
-      badgeColor: 'orange',
       permission: 'merchant:audit',
     },
+  },
+  {
+    path: '/merchants/new',
+    name: 'merchant-create',
+    component: () => import('@/views/merchants/Create.vue'),
+    meta: { title: '新增商家', hidden: true, parent: '/merchants', permission: 'merchant:create' },
+  },
+  {
+    path: '/merchants/:id/edit',
+    name: 'merchant-edit',
+    component: () => import('@/views/merchants/Create.vue'),
+    meta: { title: '编辑入驻资料', hidden: true, parent: '/merchants', permission: 'merchant:create' },
   },
   {
     path: '/merchants/:id',

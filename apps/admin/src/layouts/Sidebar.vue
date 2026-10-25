@@ -2,9 +2,11 @@
 import { onMounted, ref } from 'vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
 import { useMenus, useActiveMenu } from '@/permission/menus'
+import { useWorkspaceStore } from '@/stores/workspace'
 
 const groups = useMenus()
 const active = useActiveMenu()
+const workspace = useWorkspaceStore()
 
 /* 面板收起 / 展开（默认展开，状态持久化到 localStorage） */
 const SIDEBAR_KEY = 'admin_sidebar_collapsed'
@@ -12,6 +14,7 @@ const collapsed = ref(false)
 
 onMounted(() => {
   collapsed.value = localStorage.getItem(SIDEBAR_KEY) === '1'
+  workspace.refresh()
 })
 
 function toggleCollapse() {
@@ -23,6 +26,13 @@ const badgeColor: Record<string, string> = {
   red: 'background:#FF4D4F;',
   orange: 'background:#FF6B2C;',
   yellow: 'background:#D48806;',
+}
+
+/** 角标颜色按业务类型区分（投诉红 / 入驻橙 / 提现黄）。 */
+function badgeTone(path: string): 'red' | 'orange' | 'yellow' {
+  if (path === '/complaints') return 'red'
+  if (path === '/finance') return 'yellow'
+  return 'orange'
 }
 </script>
 
@@ -72,17 +82,17 @@ const badgeColor: Record<string, string> = {
               : 'text-ink-2 hover:bg-page',
           ]"
         >
-          <SvgIcon :name="item.icon ?? 'list'" :size="16" :stroke-width="2" />
+          <SvgIcon :name="item.icon ?? 'list'" :size="18" :stroke-width="2" />
           <span v-if="!collapsed">{{ item.title }}</span>
           <span
-            v-if="item.badge"
+            v-if="workspace.badgeCount(item.path) > 0"
             class="flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[11px] font-semibold text-white"
             :class="collapsed
               ? 'absolute -right-1 -top-1 h-[15px] min-w-[15px] px-0.5'
               : 'ml-auto'"
-            :style="badgeColor[item.badgeColor ?? 'orange']"
+            :style="badgeColor[badgeTone(item.path)]"
           >
-            {{ item.badge }}
+            {{ workspace.badgeCount(item.path) }}
           </span>
         </router-link>
       </template>
