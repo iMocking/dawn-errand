@@ -1,0 +1,34 @@
+name: backend
+
+on:
+  push:
+    paths:
+      - "cmd/**"
+      - "internal/**"
+      - "migrations/**"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "cmd/**"
+      - "internal/**"
+      - "migrations/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Format check
+        run: test -z "$(gofmt -l ./cmd ./internal)"
+      - name: Vet
+        run: go vet ./...
+      - name: Build
+        run: go build ./...
+      # 集成测试依赖 PostgreSQL/Redis + seed 超管凭据，放到部署流水线执行：
+      #   go test ./internal/integration -count=1

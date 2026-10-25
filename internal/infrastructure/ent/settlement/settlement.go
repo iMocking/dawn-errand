@@ -15,6 +15,10 @@ const (
 	FieldRegionID = "region_id"
 	// FieldParty holds the string denoting the party field in the database.
 	FieldParty = "party"
+	// FieldPartyType holds the string denoting the party_type field in the database.
+	FieldPartyType = "party_type"
+	// FieldPartyID holds the string denoting the party_id field in the database.
+	FieldPartyID = "party_id"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldAmount holds the string denoting the amount field in the database.
@@ -36,6 +40,8 @@ var Columns = []string{
 	FieldID,
 	FieldRegionID,
 	FieldParty,
+	FieldPartyType,
+	FieldPartyID,
 	FieldType,
 	FieldAmount,
 	FieldStatus,
@@ -63,6 +69,14 @@ var (
 	DefaultParty string
 	// PartyValidator is a validator for the "party" field. It is called by the builders before save.
 	PartyValidator func(string) error
+	// DefaultPartyType holds the default value on creation for the "party_type" field.
+	DefaultPartyType string
+	// PartyTypeValidator is a validator for the "party_type" field. It is called by the builders before save.
+	PartyTypeValidator func(string) error
+	// DefaultPartyID holds the default value on creation for the "party_id" field.
+	DefaultPartyID string
+	// PartyIDValidator is a validator for the "party_id" field. It is called by the builders before save.
+	PartyIDValidator func(string) error
 	// DefaultType holds the default value on creation for the "type" field.
 	DefaultType string
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
@@ -105,6 +119,16 @@ func ByRegionID(opts ...sql.OrderTermOption) OrderOption {
 // ByParty orders the results by the party field.
 func ByParty(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParty, opts...).ToFunc()
+}
+
+// ByPartyType orders the results by the party_type field.
+func ByPartyType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPartyType, opts...).ToFunc()
+}
+
+// ByPartyID orders the results by the party_id field.
+func ByPartyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPartyID, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.

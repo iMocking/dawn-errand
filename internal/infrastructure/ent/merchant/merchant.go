@@ -37,6 +37,22 @@ const (
 	FieldBankAccount = "bank_account"
 	// FieldDeliveryMethod holds the string denoting the delivery_method field in the database.
 	FieldDeliveryMethod = "delivery_method"
+	// FieldLat holds the string denoting the lat field in the database.
+	FieldLat = "lat"
+	// FieldLng holds the string denoting the lng field in the database.
+	FieldLng = "lng"
+	// FieldAutoAccept holds the string denoting the auto_accept field in the database.
+	FieldAutoAccept = "auto_accept"
+	// FieldMinPrice holds the string denoting the min_price field in the database.
+	FieldMinPrice = "min_price"
+	// FieldDeliveryFee holds the string denoting the delivery_fee field in the database.
+	FieldDeliveryFee = "delivery_fee"
+	// FieldPackingFee holds the string denoting the packing_fee field in the database.
+	FieldPackingFee = "packing_fee"
+	// FieldAnnouncement holds the string denoting the announcement field in the database.
+	FieldAnnouncement = "announcement"
+	// FieldServicePhone holds the string denoting the service_phone field in the database.
+	FieldServicePhone = "service_phone"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldAuditStatus holds the string denoting the audit_status field in the database.
@@ -101,6 +117,14 @@ var Columns = []string{
 	FieldCommission,
 	FieldBankAccount,
 	FieldDeliveryMethod,
+	FieldLat,
+	FieldLng,
+	FieldAutoAccept,
+	FieldMinPrice,
+	FieldDeliveryFee,
+	FieldPackingFee,
+	FieldAnnouncement,
+	FieldServicePhone,
 	FieldStatus,
 	FieldAuditStatus,
 	FieldApplyNo,
@@ -182,6 +206,26 @@ var (
 	DefaultDeliveryMethod string
 	// DeliveryMethodValidator is a validator for the "delivery_method" field. It is called by the builders before save.
 	DeliveryMethodValidator func(string) error
+	// DefaultLat holds the default value on creation for the "lat" field.
+	DefaultLat float64
+	// DefaultLng holds the default value on creation for the "lng" field.
+	DefaultLng float64
+	// DefaultAutoAccept holds the default value on creation for the "auto_accept" field.
+	DefaultAutoAccept bool
+	// DefaultMinPrice holds the default value on creation for the "min_price" field.
+	DefaultMinPrice float64
+	// DefaultDeliveryFee holds the default value on creation for the "delivery_fee" field.
+	DefaultDeliveryFee float64
+	// DefaultPackingFee holds the default value on creation for the "packing_fee" field.
+	DefaultPackingFee float64
+	// DefaultAnnouncement holds the default value on creation for the "announcement" field.
+	DefaultAnnouncement string
+	// AnnouncementValidator is a validator for the "announcement" field. It is called by the builders before save.
+	AnnouncementValidator func(string) error
+	// DefaultServicePhone holds the default value on creation for the "service_phone" field.
+	DefaultServicePhone string
+	// ServicePhoneValidator is a validator for the "service_phone" field. It is called by the builders before save.
+	ServicePhoneValidator func(string) error
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus string
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -313,6 +357,46 @@ func ByBankAccount(opts ...sql.OrderTermOption) OrderOption {
 // ByDeliveryMethod orders the results by the delivery_method field.
 func ByDeliveryMethod(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeliveryMethod, opts...).ToFunc()
+}
+
+// ByLat orders the results by the lat field.
+func ByLat(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLat, opts...).ToFunc()
+}
+
+// ByLng orders the results by the lng field.
+func ByLng(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLng, opts...).ToFunc()
+}
+
+// ByAutoAccept orders the results by the auto_accept field.
+func ByAutoAccept(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAutoAccept, opts...).ToFunc()
+}
+
+// ByMinPrice orders the results by the min_price field.
+func ByMinPrice(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMinPrice, opts...).ToFunc()
+}
+
+// ByDeliveryFee orders the results by the delivery_fee field.
+func ByDeliveryFee(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryFee, opts...).ToFunc()
+}
+
+// ByPackingFee orders the results by the packing_fee field.
+func ByPackingFee(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPackingFee, opts...).ToFunc()
+}
+
+// ByAnnouncement orders the results by the announcement field.
+func ByAnnouncement(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAnnouncement, opts...).ToFunc()
+}
+
+// ByServicePhone orders the results by the service_phone field.
+func ByServicePhone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldServicePhone, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

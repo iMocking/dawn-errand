@@ -29,6 +29,9 @@ func (r MerchantRepo) Save(m *merchant.Merchant) error {
 			SetName(m.Name).SetCategory(m.Category).SetAddress(m.Address).SetAddressSub(m.AddressSub).
 			SetContact(m.Contact).SetPhone(m.Phone).SetOpenHours(m.OpenHours).SetDeliveryRange(m.DeliveryRange).
 			SetCommission(m.Commission).SetBankAccount(m.BankAccount).SetDeliveryMethod(m.DeliveryMethod).
+			SetLat(m.Lat).SetLng(m.Lng).SetAutoAccept(m.AutoAccept).
+			SetMinPrice(m.MinPrice).SetDeliveryFee(m.DeliveryFee).SetPackingFee(m.PackingFee).
+			SetAnnouncement(m.Announcement).SetServicePhone(m.ServicePhone).
 			SetStatus(string(m.Status)).SetAuditStatus(string(m.AuditStatus)).
 			SetApplyNo(m.ApplyNo).SetOperator(m.Operator).SetAppliedAt(m.AppliedAt).
 			SetCertLabels(m.CertLabels).SetRejectReason(m.RejectReason).
@@ -46,6 +49,9 @@ func (r MerchantRepo) Save(m *merchant.Merchant) error {
 		SetName(m.Name).SetCategory(m.Category).SetAddress(m.Address).SetAddressSub(m.AddressSub).
 		SetContact(m.Contact).SetPhone(m.Phone).SetOpenHours(m.OpenHours).SetDeliveryRange(m.DeliveryRange).
 		SetCommission(m.Commission).SetBankAccount(m.BankAccount).SetDeliveryMethod(m.DeliveryMethod).
+		SetLat(m.Lat).SetLng(m.Lng).SetAutoAccept(m.AutoAccept).
+		SetMinPrice(m.MinPrice).SetDeliveryFee(m.DeliveryFee).SetPackingFee(m.PackingFee).
+		SetAnnouncement(m.Announcement).SetServicePhone(m.ServicePhone).
 		SetStatus(string(m.Status)).SetAuditStatus(string(m.AuditStatus)).
 		SetApplyNo(m.ApplyNo).SetOperator(m.Operator).SetAppliedAt(m.AppliedAt).
 		SetCertLabels(m.CertLabels).SetRejectReason(m.RejectReason).
@@ -67,6 +73,9 @@ func toMerchant(e *ent.Merchant) *merchant.Merchant {
 		Name: e.Name, Category: e.Category, Address: e.Address, AddressSub: e.AddressSub,
 		Contact: e.Contact, Phone: e.Phone, OpenHours: e.OpenHours, DeliveryRange: e.DeliveryRange,
 		Commission: e.Commission, BankAccount: e.BankAccount, DeliveryMethod: e.DeliveryMethod,
+		Lat: e.Lat, Lng: e.Lng, AutoAccept: e.AutoAccept,
+		MinPrice: e.MinPrice, DeliveryFee: e.DeliveryFee, PackingFee: e.PackingFee,
+		Announcement: e.Announcement, ServicePhone: e.ServicePhone,
 		Status: merchant.MerchantStatus(e.Status), AuditStatus: merchant.AuditStatus(e.AuditStatus),
 		ApplyNo: e.ApplyNo, Operator: e.Operator, AppliedAt: e.AppliedAt,
 		CertLabels: e.CertLabels, RejectReason: e.RejectReason,
@@ -110,6 +119,39 @@ func (r MerchantRepo) List(q merchant.MerchantQuery, sc tenant.Scope) ([]*mercha
 	}
 	page, size := normalizePage(q.Page, q.PageSize)
 	rows, err := bq.Order(ent.Desc(entmerchant.FieldUpdatedAt)).Offset((page - 1) * size).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]*merchant.Merchant, 0, len(rows))
+	for _, e := range rows {
+		out = append(out, toMerchant(e))
+	}
+	return out, int64(total), nil
+}
+
+// ListForClient C 端商家列表：区域内、审核通过、未封禁；营业中优先。
+func (r MerchantRepo) ListForClient(regionID, keyword, category string, page, pageSize int) ([]*merchant.Merchant, int64, error) {
+	ctx := context.Background()
+	bq := r.client.Merchant.Query().
+		Where(entmerchant.RegionID(regionID),
+			entmerchant.AuditStatus(string(merchant.AuditApproved)),
+			entmerchant.StatusNEQ(string(merchant.MerchantStatusBanned)))
+	if c := strings.TrimSpace(category); c != "" {
+		bq.Where(entmerchant.Category(c))
+	}
+	if k := strings.TrimSpace(keyword); k != "" {
+		bq.Where(entmerchant.Or(
+			entmerchant.NameContainsFold(k),
+			entmerchant.CategoryContainsFold(k),
+		))
+	}
+	total, err := bq.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	page, size := normalizePage(page, pageSize)
+	rows, err := bq.Order(ent.Asc(entmerchant.FieldStatus), ent.Desc(entmerchant.FieldRating)).
+		Offset((page - 1) * size).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}

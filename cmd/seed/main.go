@@ -13,8 +13,11 @@ import (
 	"dawn-errand/internal/application"
 	"dawn-errand/internal/assembly"
 	"dawn-errand/internal/config"
+	"dawn-errand/internal/domain/address"
+	"dawn-errand/internal/domain/catalog"
 	"dawn-errand/internal/domain/cms"
 	"dawn-errand/internal/domain/complaint"
+	"dawn-errand/internal/domain/coupon"
 	"dawn-errand/internal/domain/finance"
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/merchant"
@@ -22,6 +25,7 @@ import (
 	"dawn-errand/internal/domain/rider"
 	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/domain/userprofile"
+	"dawn-errand/internal/pkg/ulidgen"
 )
 
 func main() {
@@ -77,6 +81,10 @@ func main() {
 	seedUser(ctx, repos, now)
 	seedMerchant(ctx, repos, now)
 	seedRider(ctx, repos, now)
+	seedAccounts(ctx, repos, app.Auth.Hasher, now)
+	seedCatalog(ctx, repos, now)
+	seedAddresses(ctx, repos, now)
+	seedCoupons(ctx, repos, now)
 	seedOrder(ctx, repos, now)
 	seedWithdraw(ctx, repos, now)
 	seedComplaint(ctx, repos, now)
@@ -178,6 +186,201 @@ func seedRider(ctx context.Context, repos *application.RepoUnit, now int64) {
 		return
 	}
 	fmt.Println("  + 骑手 R00086 赵铁柱")
+}
+
+// seedAccounts 三端联调账号（幂等）：客户端 / 商家端 / 骑手端。
+// 商家与骑手账号同时写入 users.merchant_id / users.rider_id 与主体表反向绑定。
+func seedAccounts(ctx context.Context, repos *application.RepoUnit, hasher application.PasswordHasher, now int64) {
+	type seedAccount struct {
+		Email      string
+		Password   string
+		Name       string
+		Role       string
+		RegionID   string
+		MerchantID string
+		RiderID    string
+	}
+	accounts := []seedAccount{
+		{Email: "client.test@dawnerrand.local", Password: "Client123456", Name: "联调用户", Role: identity.RoleUser, RegionID: "area-001"},
+		{Email: "store.owner@dawnerrand.local", Password: "Store123456", Name: "老陈", Role: identity.RoleMerchant, RegionID: "area-001", MerchantID: "M00268"},
+		{Email: "rider.owner@dawnerrand.local", Password: "Rider123456", Name: "赵铁柱", Role: identity.RoleDriver, RegionID: "area-001", RiderID: "R00086"},
+	}
+	for _, a := range accounts {
+		u, err := repos.Users.FindByEmail(a.Email)
+		if err != nil {
+			hash, herr := hasher.Hash(a.Password)
+			if herr != nil {
+				fmt.Println("  ! 账号密码哈希失败:", a.Email, herr)
+				continue
+			}
+			u = &identity.User{
+				ID: ulidgen.New(), Email: a.Email, Name: a.Name,
+				Status: identity.UserStatusActive, EmailVerified: true,
+				Role: a.Role, RegionID: a.RegionID,
+				MerchantID: a.MerchantID, RiderID: a.RiderID,
+				RegisteredAt: now, UpdatedAt: now,
+			}
+			if err := repos.Users.Save(u); err != nil {
+				fmt.Println("  ! 联调账号写入失败:", a.Email, err)
+				continue
+			}
+			if err := repos.Credentials.Save(&identity.Credential{
+				UserID: u.ID, PasswordHash: hash, SessionVersion: 0, UpdatedAt: now,
+			}); err != nil {
+				fmt.Println("  ! 联调账号凭证写入失败:", a.Email, err)
+				continue
+			}
+			_ = repos.Profiles.Save(&userprofile.Profile{
+				UserID: u.ID, Level: "Lv.3 联调账号", Nickname: a.Name,
+				Verified: "未实名", Region: "王家湾镇", RegisterChannel: "seed",
+				RecentActiveAt: now, UpdatedAt: now,
+			})
+			fmt.Println("  + 联调账号", a.Email, "("+identity.RoleDisplayName[a.Role]+")")
+		} else {
+			// 已存在：只补齐角色与绑定，不重置密码，避免覆盖联调中修改的凭据。
+			u.Role = a.Role
+			u.RegionID = a.RegionID
+			if a.MerchantID != "" {
+				u.MerchantID = a.MerchantID
+			}
+			if a.RiderID != "" {
+				u.RiderID = a.RiderID
+			}
+			u.EmailVerified = true
+			u.UpdatedAt = now
+			if err := repos.Users.Save(u); err != nil {
+				fmt.Println("  ! 联调账号绑定更新失败:", a.Email, err)
+			}
+			if _, err := repos.Credentials.FindByUserID(u.ID); err != nil {
+				hash, herr := hasher.Hash(a.Password)
+				if herr == nil {
+					_ = repos.Credentials.Save(&identity.Credential{
+						UserID: u.ID, PasswordHash: hash, UpdatedAt: now,
+					})
+				}
+			}
+			fmt.Println("  = 联调账号已存在", a.Email)
+		}
+	}
+
+	// 主体表反向绑定（幂等）。
+	if m, err := repos.Merchants.FindByID("M00268"); err == nil {
+		storeUser, uerr := repos.Users.FindByEmail("store.owner@dawnerrand.local")
+		if uerr == nil && m.OwnerUserID != storeUser.ID {
+			m.OwnerUserID = storeUser.ID
+			m.LastUpdatedAt = now
+			if err := repos.Merchants.Save(m); err != nil {
+				fmt.Println("  ! 商家反向绑定失败:", err)
+			}
+		}
+	}
+	if r, err := repos.Riders.FindByID("R00086"); err == nil {
+		riderUser, uerr := repos.Users.FindByEmail("rider.owner@dawnerrand.local")
+		if uerr == nil && r.UserID != riderUser.ID {
+			r.UserID = riderUser.ID
+			if err := repos.Riders.Save(r); err != nil {
+				fmt.Println("  ! 骑手反向绑定失败:", err)
+			}
+		}
+	}
+}
+
+// seedCatalog 商家经营设置 + 菜品分类/菜品（幂等）。
+func seedCatalog(ctx context.Context, repos *application.RepoUnit, now int64) {
+	if m, err := repos.Merchants.FindByID("M00268"); err == nil {
+		// 仅首次初始化经营设置，避免覆盖联调/运营修改。
+		if m.Lat == 0 && m.Lng == 0 && m.MinPrice == 0 && m.DeliveryFee == 0 && m.PackingFee == 0 && m.Announcement == "" {
+			m.Lat, m.Lng = 30.4201, 115.3290
+			m.MinPrice = 15
+			m.DeliveryFee = 5
+			m.PackingFee = 2
+			m.Announcement = "今日有新鲜土鸡，欢迎下单"
+			m.ServicePhone = "13900002680"
+			m.LastUpdatedAt = now
+			if err := repos.Merchants.Save(m); err != nil {
+				fmt.Println("  ! 商家经营设置写入失败:", err)
+			}
+		}
+	}
+
+	categories := []catalog.Category{
+		{ID: "C001", MerchantID: "M00268", Name: "招牌热菜", Sort: 1},
+		{ID: "C002", MerchantID: "M00268", Name: "主食汤品", Sort: 2},
+	}
+	for i := range categories {
+		if _, err := repos.Catalog.FindCategory(categories[i].ID); err == nil {
+			continue
+		}
+		if err := repos.Catalog.SaveCategory(&categories[i]); err != nil {
+			fmt.Println("  ! 菜品分类写入失败:", categories[i].ID, err)
+		}
+	}
+
+	dishes := []catalog.Dish{
+		{ID: "D001", MerchantID: "M00268", CategoryID: "C001", Name: "尖椒炒肉盖饭", Description: "本地辣椒，现炒", Price: 22, Stock: 50, OnSale: true, MonthlySales: 320, Sort: 1},
+		{ID: "D002", MerchantID: "M00268", CategoryID: "C001", Name: "红烧土鸡块", Description: "土鸡现烧，微辣", Price: 58, Stock: 20, OnSale: true, MonthlySales: 128, Sort: 2},
+		{ID: "D003", MerchantID: "M00268", CategoryID: "C001", Name: "手撕包菜", Description: "大火快炒", Price: 12, Stock: 0, OnSale: true, MonthlySales: 52, Sort: 3},
+		{ID: "D004", MerchantID: "M00268", CategoryID: "C002", Name: "西红柿蛋汤", Description: "农家土鸡蛋", Price: 12, Stock: 30, OnSale: true, MonthlySales: 96, Sort: 1},
+		{ID: "D005", MerchantID: "M00268", CategoryID: "C002", Name: "米饭", Description: "东北大米", Price: 3, Stock: 100, OnSale: true, MonthlySales: 560, Sort: 2},
+		{ID: "D006", MerchantID: "M00268", CategoryID: "C001", Name: "农家小炒肉", Description: "季节限定，暂未上架", Price: 28, Stock: 0, OnSale: false, MonthlySales: 0, Sort: 4},
+	}
+	for i := range dishes {
+		if _, err := repos.Catalog.FindDish(dishes[i].ID); err == nil {
+			continue
+		}
+		if err := repos.Catalog.SaveDish(&dishes[i]); err != nil {
+			fmt.Println("  ! 菜品写入失败:", dishes[i].ID, err)
+		}
+	}
+	fmt.Println("  + 菜品分类 2 个、菜品 6 个")
+}
+
+// seedAddresses 联调用户地址（幂等，仅首次写入）。
+func seedAddresses(ctx context.Context, repos *application.RepoUnit, now int64) {
+	u, err := repos.Users.FindByEmail("client.test@dawnerrand.local")
+	if err != nil {
+		fmt.Println("  ! 联调用户不存在，跳过地址种子")
+		return
+	}
+	if n, _ := repos.Addresses.CountByUser(u.ID); n > 0 {
+		return
+	}
+	rows := []address.Address{
+		{ID: "ADDR001", UserID: u.ID, ContactName: "联调用户", Phone: "13800008640", RegionID: "area-001", Detail: "王家湾镇中心村 12 号", Tag: "家", Lat: 30.4310, Lng: 115.3350, IsDefault: true},
+		{ID: "ADDR002", UserID: u.ID, ContactName: "联调用户", Phone: "13800008640", RegionID: "area-001", Detail: "王家湾镇正街 6 号供销社", Tag: "公司", Lat: 30.4205, Lng: 115.3295},
+	}
+	for i := range rows {
+		if err := repos.Addresses.Save(&rows[i]); err != nil {
+			fmt.Println("  ! 地址写入失败:", rows[i].ID, err)
+		}
+	}
+	fmt.Println("  + 用户地址 2 条")
+}
+
+// seedCoupons 联调用户优惠券（幂等）。
+func seedCoupons(ctx context.Context, repos *application.RepoUnit, now int64) {
+	u, err := repos.Users.FindByEmail("client.test@dawnerrand.local")
+	if err != nil {
+		return
+	}
+	rows := []coupon.Coupon{
+		{ID: "CPN001", UserID: u.ID, MerchantID: "M00268", Title: "老陈家常菜满减券", Amount: 3, MinSpend: 15, Status: coupon.StatusUnused, ExpiresAt: now + 30*86400},
+		{ID: "CPN002", UserID: u.ID, Title: "平台通用立减券", Amount: 5, MinSpend: 30, Status: coupon.StatusUnused, ExpiresAt: now + 30*86400},
+	}
+	count := 0
+	for i := range rows {
+		if _, err := repos.Coupons.FindByID(rows[i].ID); err == nil {
+			continue
+		}
+		if err := repos.Coupons.Save(&rows[i]); err != nil {
+			fmt.Println("  ! 优惠券写入失败:", rows[i].ID, err)
+			continue
+		}
+		count++
+	}
+	if count > 0 {
+		fmt.Println("  + 优惠券", count, "张")
+	}
 }
 
 func seedOrder(ctx context.Context, repos *application.RepoUnit, now int64) {

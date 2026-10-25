@@ -217,6 +217,153 @@ func (mu *MerchantUpdate) SetNillableDeliveryMethod(s *string) *MerchantUpdate {
 	return mu
 }
 
+// SetLat sets the "lat" field.
+func (mu *MerchantUpdate) SetLat(f float64) *MerchantUpdate {
+	mu.mutation.ResetLat()
+	mu.mutation.SetLat(f)
+	return mu
+}
+
+// SetNillableLat sets the "lat" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableLat(f *float64) *MerchantUpdate {
+	if f != nil {
+		mu.SetLat(*f)
+	}
+	return mu
+}
+
+// AddLat adds f to the "lat" field.
+func (mu *MerchantUpdate) AddLat(f float64) *MerchantUpdate {
+	mu.mutation.AddLat(f)
+	return mu
+}
+
+// SetLng sets the "lng" field.
+func (mu *MerchantUpdate) SetLng(f float64) *MerchantUpdate {
+	mu.mutation.ResetLng()
+	mu.mutation.SetLng(f)
+	return mu
+}
+
+// SetNillableLng sets the "lng" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableLng(f *float64) *MerchantUpdate {
+	if f != nil {
+		mu.SetLng(*f)
+	}
+	return mu
+}
+
+// AddLng adds f to the "lng" field.
+func (mu *MerchantUpdate) AddLng(f float64) *MerchantUpdate {
+	mu.mutation.AddLng(f)
+	return mu
+}
+
+// SetAutoAccept sets the "auto_accept" field.
+func (mu *MerchantUpdate) SetAutoAccept(b bool) *MerchantUpdate {
+	mu.mutation.SetAutoAccept(b)
+	return mu
+}
+
+// SetNillableAutoAccept sets the "auto_accept" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableAutoAccept(b *bool) *MerchantUpdate {
+	if b != nil {
+		mu.SetAutoAccept(*b)
+	}
+	return mu
+}
+
+// SetMinPrice sets the "min_price" field.
+func (mu *MerchantUpdate) SetMinPrice(f float64) *MerchantUpdate {
+	mu.mutation.ResetMinPrice()
+	mu.mutation.SetMinPrice(f)
+	return mu
+}
+
+// SetNillableMinPrice sets the "min_price" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableMinPrice(f *float64) *MerchantUpdate {
+	if f != nil {
+		mu.SetMinPrice(*f)
+	}
+	return mu
+}
+
+// AddMinPrice adds f to the "min_price" field.
+func (mu *MerchantUpdate) AddMinPrice(f float64) *MerchantUpdate {
+	mu.mutation.AddMinPrice(f)
+	return mu
+}
+
+// SetDeliveryFee sets the "delivery_fee" field.
+func (mu *MerchantUpdate) SetDeliveryFee(f float64) *MerchantUpdate {
+	mu.mutation.ResetDeliveryFee()
+	mu.mutation.SetDeliveryFee(f)
+	return mu
+}
+
+// SetNillableDeliveryFee sets the "delivery_fee" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableDeliveryFee(f *float64) *MerchantUpdate {
+	if f != nil {
+		mu.SetDeliveryFee(*f)
+	}
+	return mu
+}
+
+// AddDeliveryFee adds f to the "delivery_fee" field.
+func (mu *MerchantUpdate) AddDeliveryFee(f float64) *MerchantUpdate {
+	mu.mutation.AddDeliveryFee(f)
+	return mu
+}
+
+// SetPackingFee sets the "packing_fee" field.
+func (mu *MerchantUpdate) SetPackingFee(f float64) *MerchantUpdate {
+	mu.mutation.ResetPackingFee()
+	mu.mutation.SetPackingFee(f)
+	return mu
+}
+
+// SetNillablePackingFee sets the "packing_fee" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillablePackingFee(f *float64) *MerchantUpdate {
+	if f != nil {
+		mu.SetPackingFee(*f)
+	}
+	return mu
+}
+
+// AddPackingFee adds f to the "packing_fee" field.
+func (mu *MerchantUpdate) AddPackingFee(f float64) *MerchantUpdate {
+	mu.mutation.AddPackingFee(f)
+	return mu
+}
+
+// SetAnnouncement sets the "announcement" field.
+func (mu *MerchantUpdate) SetAnnouncement(s string) *MerchantUpdate {
+	mu.mutation.SetAnnouncement(s)
+	return mu
+}
+
+// SetNillableAnnouncement sets the "announcement" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableAnnouncement(s *string) *MerchantUpdate {
+	if s != nil {
+		mu.SetAnnouncement(*s)
+	}
+	return mu
+}
+
+// SetServicePhone sets the "service_phone" field.
+func (mu *MerchantUpdate) SetServicePhone(s string) *MerchantUpdate {
+	mu.mutation.SetServicePhone(s)
+	return mu
+}
+
+// SetNillableServicePhone sets the "service_phone" field if the given value is not nil.
+func (mu *MerchantUpdate) SetNillableServicePhone(s *string) *MerchantUpdate {
+	if s != nil {
+		mu.SetServicePhone(*s)
+	}
+	return mu
+}
+
 // SetStatus sets the "status" field.
 func (mu *MerchantUpdate) SetStatus(s string) *MerchantUpdate {
 	mu.mutation.SetStatus(s)
@@ -728,6 +875,16 @@ func (mu *MerchantUpdate) check() error {
 			return &ValidationError{Name: "delivery_method", err: fmt.Errorf(`ent: validator failed for field "Merchant.delivery_method": %w`, err)}
 		}
 	}
+	if v, ok := mu.mutation.Announcement(); ok {
+		if err := merchant.AnnouncementValidator(v); err != nil {
+			return &ValidationError{Name: "announcement", err: fmt.Errorf(`ent: validator failed for field "Merchant.announcement": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.ServicePhone(); ok {
+		if err := merchant.ServicePhoneValidator(v); err != nil {
+			return &ValidationError{Name: "service_phone", err: fmt.Errorf(`ent: validator failed for field "Merchant.service_phone": %w`, err)}
+		}
+	}
 	if v, ok := mu.mutation.Status(); ok {
 		if err := merchant.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Merchant.status": %w`, err)}
@@ -814,6 +971,45 @@ func (mu *MerchantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := mu.mutation.DeliveryMethod(); ok {
 		_spec.SetField(merchant.FieldDeliveryMethod, field.TypeString, value)
+	}
+	if value, ok := mu.mutation.Lat(); ok {
+		_spec.SetField(merchant.FieldLat, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.AddedLat(); ok {
+		_spec.AddField(merchant.FieldLat, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.Lng(); ok {
+		_spec.SetField(merchant.FieldLng, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.AddedLng(); ok {
+		_spec.AddField(merchant.FieldLng, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.AutoAccept(); ok {
+		_spec.SetField(merchant.FieldAutoAccept, field.TypeBool, value)
+	}
+	if value, ok := mu.mutation.MinPrice(); ok {
+		_spec.SetField(merchant.FieldMinPrice, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.AddedMinPrice(); ok {
+		_spec.AddField(merchant.FieldMinPrice, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.DeliveryFee(); ok {
+		_spec.SetField(merchant.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.AddedDeliveryFee(); ok {
+		_spec.AddField(merchant.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.PackingFee(); ok {
+		_spec.SetField(merchant.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.AddedPackingFee(); ok {
+		_spec.AddField(merchant.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := mu.mutation.Announcement(); ok {
+		_spec.SetField(merchant.FieldAnnouncement, field.TypeString, value)
+	}
+	if value, ok := mu.mutation.ServicePhone(); ok {
+		_spec.SetField(merchant.FieldServicePhone, field.TypeString, value)
 	}
 	if value, ok := mu.mutation.Status(); ok {
 		_spec.SetField(merchant.FieldStatus, field.TypeString, value)
@@ -1139,6 +1335,153 @@ func (muo *MerchantUpdateOne) SetDeliveryMethod(s string) *MerchantUpdateOne {
 func (muo *MerchantUpdateOne) SetNillableDeliveryMethod(s *string) *MerchantUpdateOne {
 	if s != nil {
 		muo.SetDeliveryMethod(*s)
+	}
+	return muo
+}
+
+// SetLat sets the "lat" field.
+func (muo *MerchantUpdateOne) SetLat(f float64) *MerchantUpdateOne {
+	muo.mutation.ResetLat()
+	muo.mutation.SetLat(f)
+	return muo
+}
+
+// SetNillableLat sets the "lat" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableLat(f *float64) *MerchantUpdateOne {
+	if f != nil {
+		muo.SetLat(*f)
+	}
+	return muo
+}
+
+// AddLat adds f to the "lat" field.
+func (muo *MerchantUpdateOne) AddLat(f float64) *MerchantUpdateOne {
+	muo.mutation.AddLat(f)
+	return muo
+}
+
+// SetLng sets the "lng" field.
+func (muo *MerchantUpdateOne) SetLng(f float64) *MerchantUpdateOne {
+	muo.mutation.ResetLng()
+	muo.mutation.SetLng(f)
+	return muo
+}
+
+// SetNillableLng sets the "lng" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableLng(f *float64) *MerchantUpdateOne {
+	if f != nil {
+		muo.SetLng(*f)
+	}
+	return muo
+}
+
+// AddLng adds f to the "lng" field.
+func (muo *MerchantUpdateOne) AddLng(f float64) *MerchantUpdateOne {
+	muo.mutation.AddLng(f)
+	return muo
+}
+
+// SetAutoAccept sets the "auto_accept" field.
+func (muo *MerchantUpdateOne) SetAutoAccept(b bool) *MerchantUpdateOne {
+	muo.mutation.SetAutoAccept(b)
+	return muo
+}
+
+// SetNillableAutoAccept sets the "auto_accept" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableAutoAccept(b *bool) *MerchantUpdateOne {
+	if b != nil {
+		muo.SetAutoAccept(*b)
+	}
+	return muo
+}
+
+// SetMinPrice sets the "min_price" field.
+func (muo *MerchantUpdateOne) SetMinPrice(f float64) *MerchantUpdateOne {
+	muo.mutation.ResetMinPrice()
+	muo.mutation.SetMinPrice(f)
+	return muo
+}
+
+// SetNillableMinPrice sets the "min_price" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableMinPrice(f *float64) *MerchantUpdateOne {
+	if f != nil {
+		muo.SetMinPrice(*f)
+	}
+	return muo
+}
+
+// AddMinPrice adds f to the "min_price" field.
+func (muo *MerchantUpdateOne) AddMinPrice(f float64) *MerchantUpdateOne {
+	muo.mutation.AddMinPrice(f)
+	return muo
+}
+
+// SetDeliveryFee sets the "delivery_fee" field.
+func (muo *MerchantUpdateOne) SetDeliveryFee(f float64) *MerchantUpdateOne {
+	muo.mutation.ResetDeliveryFee()
+	muo.mutation.SetDeliveryFee(f)
+	return muo
+}
+
+// SetNillableDeliveryFee sets the "delivery_fee" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableDeliveryFee(f *float64) *MerchantUpdateOne {
+	if f != nil {
+		muo.SetDeliveryFee(*f)
+	}
+	return muo
+}
+
+// AddDeliveryFee adds f to the "delivery_fee" field.
+func (muo *MerchantUpdateOne) AddDeliveryFee(f float64) *MerchantUpdateOne {
+	muo.mutation.AddDeliveryFee(f)
+	return muo
+}
+
+// SetPackingFee sets the "packing_fee" field.
+func (muo *MerchantUpdateOne) SetPackingFee(f float64) *MerchantUpdateOne {
+	muo.mutation.ResetPackingFee()
+	muo.mutation.SetPackingFee(f)
+	return muo
+}
+
+// SetNillablePackingFee sets the "packing_fee" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillablePackingFee(f *float64) *MerchantUpdateOne {
+	if f != nil {
+		muo.SetPackingFee(*f)
+	}
+	return muo
+}
+
+// AddPackingFee adds f to the "packing_fee" field.
+func (muo *MerchantUpdateOne) AddPackingFee(f float64) *MerchantUpdateOne {
+	muo.mutation.AddPackingFee(f)
+	return muo
+}
+
+// SetAnnouncement sets the "announcement" field.
+func (muo *MerchantUpdateOne) SetAnnouncement(s string) *MerchantUpdateOne {
+	muo.mutation.SetAnnouncement(s)
+	return muo
+}
+
+// SetNillableAnnouncement sets the "announcement" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableAnnouncement(s *string) *MerchantUpdateOne {
+	if s != nil {
+		muo.SetAnnouncement(*s)
+	}
+	return muo
+}
+
+// SetServicePhone sets the "service_phone" field.
+func (muo *MerchantUpdateOne) SetServicePhone(s string) *MerchantUpdateOne {
+	muo.mutation.SetServicePhone(s)
+	return muo
+}
+
+// SetNillableServicePhone sets the "service_phone" field if the given value is not nil.
+func (muo *MerchantUpdateOne) SetNillableServicePhone(s *string) *MerchantUpdateOne {
+	if s != nil {
+		muo.SetServicePhone(*s)
 	}
 	return muo
 }
@@ -1667,6 +2010,16 @@ func (muo *MerchantUpdateOne) check() error {
 			return &ValidationError{Name: "delivery_method", err: fmt.Errorf(`ent: validator failed for field "Merchant.delivery_method": %w`, err)}
 		}
 	}
+	if v, ok := muo.mutation.Announcement(); ok {
+		if err := merchant.AnnouncementValidator(v); err != nil {
+			return &ValidationError{Name: "announcement", err: fmt.Errorf(`ent: validator failed for field "Merchant.announcement": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.ServicePhone(); ok {
+		if err := merchant.ServicePhoneValidator(v); err != nil {
+			return &ValidationError{Name: "service_phone", err: fmt.Errorf(`ent: validator failed for field "Merchant.service_phone": %w`, err)}
+		}
+	}
 	if v, ok := muo.mutation.Status(); ok {
 		if err := merchant.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Merchant.status": %w`, err)}
@@ -1770,6 +2123,45 @@ func (muo *MerchantUpdateOne) sqlSave(ctx context.Context) (_node *Merchant, err
 	}
 	if value, ok := muo.mutation.DeliveryMethod(); ok {
 		_spec.SetField(merchant.FieldDeliveryMethod, field.TypeString, value)
+	}
+	if value, ok := muo.mutation.Lat(); ok {
+		_spec.SetField(merchant.FieldLat, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.AddedLat(); ok {
+		_spec.AddField(merchant.FieldLat, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.Lng(); ok {
+		_spec.SetField(merchant.FieldLng, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.AddedLng(); ok {
+		_spec.AddField(merchant.FieldLng, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.AutoAccept(); ok {
+		_spec.SetField(merchant.FieldAutoAccept, field.TypeBool, value)
+	}
+	if value, ok := muo.mutation.MinPrice(); ok {
+		_spec.SetField(merchant.FieldMinPrice, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.AddedMinPrice(); ok {
+		_spec.AddField(merchant.FieldMinPrice, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.DeliveryFee(); ok {
+		_spec.SetField(merchant.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.AddedDeliveryFee(); ok {
+		_spec.AddField(merchant.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.PackingFee(); ok {
+		_spec.SetField(merchant.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.AddedPackingFee(); ok {
+		_spec.AddField(merchant.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := muo.mutation.Announcement(); ok {
+		_spec.SetField(merchant.FieldAnnouncement, field.TypeString, value)
+	}
+	if value, ok := muo.mutation.ServicePhone(); ok {
+		_spec.SetField(merchant.FieldServicePhone, field.TypeString, value)
 	}
 	if value, ok := muo.mutation.Status(); ok {
 		_spec.SetField(merchant.FieldStatus, field.TypeString, value)

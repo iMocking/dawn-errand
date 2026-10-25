@@ -39,6 +39,16 @@ type Merchant struct {
 	BankAccount    string
 	DeliveryMethod string
 
+	// 门店位置与经营设置（App 商家端）。
+	Lat          float64
+	Lng          float64
+	AutoAccept   bool
+	MinPrice     float64
+	DeliveryFee  float64
+	PackingFee   float64
+	Announcement string
+	ServicePhone string
+
 	Status       MerchantStatus
 	AuditStatus  AuditStatus
 	ApplyNo      string
@@ -97,6 +107,8 @@ type MerchantRepository interface {
 	FindByID(id string) (*Merchant, error)
 	// List 商家列表（scope 强制数据隔离）。
 	List(q MerchantQuery, scope tenant.Scope) ([]*Merchant, int64, error)
+	// ListForClient C 端商家列表（区域内、审核通过、未封禁；营业中优先）。
+	ListForClient(regionID, keyword, category string, page, pageSize int) ([]*Merchant, int64, error)
 	// AuditList 入驻审核列表（scope 隔离）。
 	AuditList(q AuditQuery, scope tenant.Scope) ([]*Merchant, int64, error)
 	// UpdateAudit 审核处理。

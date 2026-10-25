@@ -128,6 +128,46 @@ func DeliveryMethod(v string) predicate.Merchant {
 	return predicate.Merchant(sql.FieldEQ(FieldDeliveryMethod, v))
 }
 
+// Lat applies equality check predicate on the "lat" field. It's identical to LatEQ.
+func Lat(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldLat, v))
+}
+
+// Lng applies equality check predicate on the "lng" field. It's identical to LngEQ.
+func Lng(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldLng, v))
+}
+
+// AutoAccept applies equality check predicate on the "auto_accept" field. It's identical to AutoAcceptEQ.
+func AutoAccept(v bool) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldAutoAccept, v))
+}
+
+// MinPrice applies equality check predicate on the "min_price" field. It's identical to MinPriceEQ.
+func MinPrice(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldMinPrice, v))
+}
+
+// DeliveryFee applies equality check predicate on the "delivery_fee" field. It's identical to DeliveryFeeEQ.
+func DeliveryFee(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldDeliveryFee, v))
+}
+
+// PackingFee applies equality check predicate on the "packing_fee" field. It's identical to PackingFeeEQ.
+func PackingFee(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldPackingFee, v))
+}
+
+// Announcement applies equality check predicate on the "announcement" field. It's identical to AnnouncementEQ.
+func Announcement(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldAnnouncement, v))
+}
+
+// ServicePhone applies equality check predicate on the "service_phone" field. It's identical to ServicePhoneEQ.
+func ServicePhone(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldServicePhone, v))
+}
+
 // Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
 func Status(v string) predicate.Merchant {
 	return predicate.Merchant(sql.FieldEQ(FieldStatus, v))
@@ -1051,6 +1091,346 @@ func DeliveryMethodEqualFold(v string) predicate.Merchant {
 // DeliveryMethodContainsFold applies the ContainsFold predicate on the "delivery_method" field.
 func DeliveryMethodContainsFold(v string) predicate.Merchant {
 	return predicate.Merchant(sql.FieldContainsFold(FieldDeliveryMethod, v))
+}
+
+// LatEQ applies the EQ predicate on the "lat" field.
+func LatEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldLat, v))
+}
+
+// LatNEQ applies the NEQ predicate on the "lat" field.
+func LatNEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldLat, v))
+}
+
+// LatIn applies the In predicate on the "lat" field.
+func LatIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldLat, vs...))
+}
+
+// LatNotIn applies the NotIn predicate on the "lat" field.
+func LatNotIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldLat, vs...))
+}
+
+// LatGT applies the GT predicate on the "lat" field.
+func LatGT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldLat, v))
+}
+
+// LatGTE applies the GTE predicate on the "lat" field.
+func LatGTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldLat, v))
+}
+
+// LatLT applies the LT predicate on the "lat" field.
+func LatLT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldLat, v))
+}
+
+// LatLTE applies the LTE predicate on the "lat" field.
+func LatLTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldLat, v))
+}
+
+// LngEQ applies the EQ predicate on the "lng" field.
+func LngEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldLng, v))
+}
+
+// LngNEQ applies the NEQ predicate on the "lng" field.
+func LngNEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldLng, v))
+}
+
+// LngIn applies the In predicate on the "lng" field.
+func LngIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldLng, vs...))
+}
+
+// LngNotIn applies the NotIn predicate on the "lng" field.
+func LngNotIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldLng, vs...))
+}
+
+// LngGT applies the GT predicate on the "lng" field.
+func LngGT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldLng, v))
+}
+
+// LngGTE applies the GTE predicate on the "lng" field.
+func LngGTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldLng, v))
+}
+
+// LngLT applies the LT predicate on the "lng" field.
+func LngLT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldLng, v))
+}
+
+// LngLTE applies the LTE predicate on the "lng" field.
+func LngLTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldLng, v))
+}
+
+// AutoAcceptEQ applies the EQ predicate on the "auto_accept" field.
+func AutoAcceptEQ(v bool) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldAutoAccept, v))
+}
+
+// AutoAcceptNEQ applies the NEQ predicate on the "auto_accept" field.
+func AutoAcceptNEQ(v bool) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldAutoAccept, v))
+}
+
+// MinPriceEQ applies the EQ predicate on the "min_price" field.
+func MinPriceEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldMinPrice, v))
+}
+
+// MinPriceNEQ applies the NEQ predicate on the "min_price" field.
+func MinPriceNEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldMinPrice, v))
+}
+
+// MinPriceIn applies the In predicate on the "min_price" field.
+func MinPriceIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldMinPrice, vs...))
+}
+
+// MinPriceNotIn applies the NotIn predicate on the "min_price" field.
+func MinPriceNotIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldMinPrice, vs...))
+}
+
+// MinPriceGT applies the GT predicate on the "min_price" field.
+func MinPriceGT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldMinPrice, v))
+}
+
+// MinPriceGTE applies the GTE predicate on the "min_price" field.
+func MinPriceGTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldMinPrice, v))
+}
+
+// MinPriceLT applies the LT predicate on the "min_price" field.
+func MinPriceLT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldMinPrice, v))
+}
+
+// MinPriceLTE applies the LTE predicate on the "min_price" field.
+func MinPriceLTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldMinPrice, v))
+}
+
+// DeliveryFeeEQ applies the EQ predicate on the "delivery_fee" field.
+func DeliveryFeeEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldDeliveryFee, v))
+}
+
+// DeliveryFeeNEQ applies the NEQ predicate on the "delivery_fee" field.
+func DeliveryFeeNEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldDeliveryFee, v))
+}
+
+// DeliveryFeeIn applies the In predicate on the "delivery_fee" field.
+func DeliveryFeeIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldDeliveryFee, vs...))
+}
+
+// DeliveryFeeNotIn applies the NotIn predicate on the "delivery_fee" field.
+func DeliveryFeeNotIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldDeliveryFee, vs...))
+}
+
+// DeliveryFeeGT applies the GT predicate on the "delivery_fee" field.
+func DeliveryFeeGT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldDeliveryFee, v))
+}
+
+// DeliveryFeeGTE applies the GTE predicate on the "delivery_fee" field.
+func DeliveryFeeGTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldDeliveryFee, v))
+}
+
+// DeliveryFeeLT applies the LT predicate on the "delivery_fee" field.
+func DeliveryFeeLT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldDeliveryFee, v))
+}
+
+// DeliveryFeeLTE applies the LTE predicate on the "delivery_fee" field.
+func DeliveryFeeLTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldDeliveryFee, v))
+}
+
+// PackingFeeEQ applies the EQ predicate on the "packing_fee" field.
+func PackingFeeEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldPackingFee, v))
+}
+
+// PackingFeeNEQ applies the NEQ predicate on the "packing_fee" field.
+func PackingFeeNEQ(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldPackingFee, v))
+}
+
+// PackingFeeIn applies the In predicate on the "packing_fee" field.
+func PackingFeeIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldPackingFee, vs...))
+}
+
+// PackingFeeNotIn applies the NotIn predicate on the "packing_fee" field.
+func PackingFeeNotIn(vs ...float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldPackingFee, vs...))
+}
+
+// PackingFeeGT applies the GT predicate on the "packing_fee" field.
+func PackingFeeGT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldPackingFee, v))
+}
+
+// PackingFeeGTE applies the GTE predicate on the "packing_fee" field.
+func PackingFeeGTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldPackingFee, v))
+}
+
+// PackingFeeLT applies the LT predicate on the "packing_fee" field.
+func PackingFeeLT(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldPackingFee, v))
+}
+
+// PackingFeeLTE applies the LTE predicate on the "packing_fee" field.
+func PackingFeeLTE(v float64) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldPackingFee, v))
+}
+
+// AnnouncementEQ applies the EQ predicate on the "announcement" field.
+func AnnouncementEQ(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldAnnouncement, v))
+}
+
+// AnnouncementNEQ applies the NEQ predicate on the "announcement" field.
+func AnnouncementNEQ(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldAnnouncement, v))
+}
+
+// AnnouncementIn applies the In predicate on the "announcement" field.
+func AnnouncementIn(vs ...string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldAnnouncement, vs...))
+}
+
+// AnnouncementNotIn applies the NotIn predicate on the "announcement" field.
+func AnnouncementNotIn(vs ...string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldAnnouncement, vs...))
+}
+
+// AnnouncementGT applies the GT predicate on the "announcement" field.
+func AnnouncementGT(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldAnnouncement, v))
+}
+
+// AnnouncementGTE applies the GTE predicate on the "announcement" field.
+func AnnouncementGTE(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldAnnouncement, v))
+}
+
+// AnnouncementLT applies the LT predicate on the "announcement" field.
+func AnnouncementLT(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldAnnouncement, v))
+}
+
+// AnnouncementLTE applies the LTE predicate on the "announcement" field.
+func AnnouncementLTE(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldAnnouncement, v))
+}
+
+// AnnouncementContains applies the Contains predicate on the "announcement" field.
+func AnnouncementContains(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldContains(FieldAnnouncement, v))
+}
+
+// AnnouncementHasPrefix applies the HasPrefix predicate on the "announcement" field.
+func AnnouncementHasPrefix(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldHasPrefix(FieldAnnouncement, v))
+}
+
+// AnnouncementHasSuffix applies the HasSuffix predicate on the "announcement" field.
+func AnnouncementHasSuffix(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldHasSuffix(FieldAnnouncement, v))
+}
+
+// AnnouncementEqualFold applies the EqualFold predicate on the "announcement" field.
+func AnnouncementEqualFold(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEqualFold(FieldAnnouncement, v))
+}
+
+// AnnouncementContainsFold applies the ContainsFold predicate on the "announcement" field.
+func AnnouncementContainsFold(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldContainsFold(FieldAnnouncement, v))
+}
+
+// ServicePhoneEQ applies the EQ predicate on the "service_phone" field.
+func ServicePhoneEQ(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEQ(FieldServicePhone, v))
+}
+
+// ServicePhoneNEQ applies the NEQ predicate on the "service_phone" field.
+func ServicePhoneNEQ(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNEQ(FieldServicePhone, v))
+}
+
+// ServicePhoneIn applies the In predicate on the "service_phone" field.
+func ServicePhoneIn(vs ...string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldIn(FieldServicePhone, vs...))
+}
+
+// ServicePhoneNotIn applies the NotIn predicate on the "service_phone" field.
+func ServicePhoneNotIn(vs ...string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldNotIn(FieldServicePhone, vs...))
+}
+
+// ServicePhoneGT applies the GT predicate on the "service_phone" field.
+func ServicePhoneGT(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGT(FieldServicePhone, v))
+}
+
+// ServicePhoneGTE applies the GTE predicate on the "service_phone" field.
+func ServicePhoneGTE(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldGTE(FieldServicePhone, v))
+}
+
+// ServicePhoneLT applies the LT predicate on the "service_phone" field.
+func ServicePhoneLT(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLT(FieldServicePhone, v))
+}
+
+// ServicePhoneLTE applies the LTE predicate on the "service_phone" field.
+func ServicePhoneLTE(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldLTE(FieldServicePhone, v))
+}
+
+// ServicePhoneContains applies the Contains predicate on the "service_phone" field.
+func ServicePhoneContains(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldContains(FieldServicePhone, v))
+}
+
+// ServicePhoneHasPrefix applies the HasPrefix predicate on the "service_phone" field.
+func ServicePhoneHasPrefix(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldHasPrefix(FieldServicePhone, v))
+}
+
+// ServicePhoneHasSuffix applies the HasSuffix predicate on the "service_phone" field.
+func ServicePhoneHasSuffix(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldHasSuffix(FieldServicePhone, v))
+}
+
+// ServicePhoneEqualFold applies the EqualFold predicate on the "service_phone" field.
+func ServicePhoneEqualFold(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldEqualFold(FieldServicePhone, v))
+}
+
+// ServicePhoneContainsFold applies the ContainsFold predicate on the "service_phone" field.
+func ServicePhoneContainsFold(v string) predicate.Merchant {
+	return predicate.Merchant(sql.FieldContainsFold(FieldServicePhone, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

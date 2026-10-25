@@ -15,6 +15,8 @@ const (
 	FieldRegionID = "region_id"
 	// FieldPartyType holds the string denoting the party_type field in the database.
 	FieldPartyType = "party_type"
+	// FieldPartyID holds the string denoting the party_id field in the database.
+	FieldPartyID = "party_id"
 	// FieldPartyName holds the string denoting the party_name field in the database.
 	FieldPartyName = "party_name"
 	// FieldPartyNo holds the string denoting the party_no field in the database.
@@ -68,6 +70,7 @@ var Columns = []string{
 	FieldID,
 	FieldRegionID,
 	FieldPartyType,
+	FieldPartyID,
 	FieldPartyName,
 	FieldPartyNo,
 	FieldBankInfo,
@@ -111,6 +114,10 @@ var (
 	DefaultPartyType string
 	// PartyTypeValidator is a validator for the "party_type" field. It is called by the builders before save.
 	PartyTypeValidator func(string) error
+	// DefaultPartyID holds the default value on creation for the "party_id" field.
+	DefaultPartyID string
+	// PartyIDValidator is a validator for the "party_id" field. It is called by the builders before save.
+	PartyIDValidator func(string) error
 	// DefaultPartyName holds the default value on creation for the "party_name" field.
 	DefaultPartyName string
 	// PartyNameValidator is a validator for the "party_name" field. It is called by the builders before save.
@@ -199,6 +206,11 @@ func ByRegionID(opts ...sql.OrderTermOption) OrderOption {
 // ByPartyType orders the results by the party_type field.
 func ByPartyType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPartyType, opts...).ToFunc()
+}
+
+// ByPartyID orders the results by the party_id field.
+func ByPartyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPartyID, opts...).ToFunc()
 }
 
 // ByPartyName orders the results by the party_name field.

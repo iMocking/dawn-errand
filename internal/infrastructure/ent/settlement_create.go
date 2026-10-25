@@ -47,6 +47,34 @@ func (sc *SettlementCreate) SetNillableParty(s *string) *SettlementCreate {
 	return sc
 }
 
+// SetPartyType sets the "party_type" field.
+func (sc *SettlementCreate) SetPartyType(s string) *SettlementCreate {
+	sc.mutation.SetPartyType(s)
+	return sc
+}
+
+// SetNillablePartyType sets the "party_type" field if the given value is not nil.
+func (sc *SettlementCreate) SetNillablePartyType(s *string) *SettlementCreate {
+	if s != nil {
+		sc.SetPartyType(*s)
+	}
+	return sc
+}
+
+// SetPartyID sets the "party_id" field.
+func (sc *SettlementCreate) SetPartyID(s string) *SettlementCreate {
+	sc.mutation.SetPartyID(s)
+	return sc
+}
+
+// SetNillablePartyID sets the "party_id" field if the given value is not nil.
+func (sc *SettlementCreate) SetNillablePartyID(s *string) *SettlementCreate {
+	if s != nil {
+		sc.SetPartyID(*s)
+	}
+	return sc
+}
+
 // SetType sets the "type" field.
 func (sc *SettlementCreate) SetType(s string) *SettlementCreate {
 	sc.mutation.SetType(s)
@@ -188,6 +216,14 @@ func (sc *SettlementCreate) defaults() {
 		v := settlement.DefaultParty
 		sc.mutation.SetParty(v)
 	}
+	if _, ok := sc.mutation.PartyType(); !ok {
+		v := settlement.DefaultPartyType
+		sc.mutation.SetPartyType(v)
+	}
+	if _, ok := sc.mutation.PartyID(); !ok {
+		v := settlement.DefaultPartyID
+		sc.mutation.SetPartyID(v)
+	}
 	if _, ok := sc.mutation.GetType(); !ok {
 		v := settlement.DefaultType
 		sc.mutation.SetType(v)
@@ -234,6 +270,22 @@ func (sc *SettlementCreate) check() error {
 	if v, ok := sc.mutation.Party(); ok {
 		if err := settlement.PartyValidator(v); err != nil {
 			return &ValidationError{Name: "party", err: fmt.Errorf(`ent: validator failed for field "Settlement.party": %w`, err)}
+		}
+	}
+	if _, ok := sc.mutation.PartyType(); !ok {
+		return &ValidationError{Name: "party_type", err: errors.New(`ent: missing required field "Settlement.party_type"`)}
+	}
+	if v, ok := sc.mutation.PartyType(); ok {
+		if err := settlement.PartyTypeValidator(v); err != nil {
+			return &ValidationError{Name: "party_type", err: fmt.Errorf(`ent: validator failed for field "Settlement.party_type": %w`, err)}
+		}
+	}
+	if _, ok := sc.mutation.PartyID(); !ok {
+		return &ValidationError{Name: "party_id", err: errors.New(`ent: missing required field "Settlement.party_id"`)}
+	}
+	if v, ok := sc.mutation.PartyID(); ok {
+		if err := settlement.PartyIDValidator(v); err != nil {
+			return &ValidationError{Name: "party_id", err: fmt.Errorf(`ent: validator failed for field "Settlement.party_id": %w`, err)}
 		}
 	}
 	if _, ok := sc.mutation.GetType(); !ok {
@@ -321,6 +373,14 @@ func (sc *SettlementCreate) createSpec() (*Settlement, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Party(); ok {
 		_spec.SetField(settlement.FieldParty, field.TypeString, value)
 		_node.Party = value
+	}
+	if value, ok := sc.mutation.PartyType(); ok {
+		_spec.SetField(settlement.FieldPartyType, field.TypeString, value)
+		_node.PartyType = value
+	}
+	if value, ok := sc.mutation.PartyID(); ok {
+		_spec.SetField(settlement.FieldPartyID, field.TypeString, value)
+		_node.PartyID = value
 	}
 	if value, ok := sc.mutation.GetType(); ok {
 		_spec.SetField(settlement.FieldType, field.TypeString, value)

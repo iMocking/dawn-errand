@@ -2,11 +2,13 @@ package http
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/interfaces/middleware"
 	"dawn-errand/internal/pkg/response"
 )
@@ -17,13 +19,31 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
-	r.Use(mw.RequestID(), mw.Metrics(), mw.AccessLog(), mw.Recovery())
+	r.Use(mw.RequestID(), mw.Metrics(), mw.AccessLog(), mw.Recovery(), middleware.SecurityHeaders())
 
 	// 健康检查与指标
 	r.GET("/healthz", func(c *gin.Context) {
 		response.OK(c, gin.H{"status": "ok"})
 	})
+	r.GET("/readyz", func(c *gin.Context) {
+		if h.Ready == nil {
+			response.OK(c, gin.H{"status": "ready"})
+			return
+		}
+		if err := h.Ready(c.Request.Context()); err != nil {
+			response.ErrStatus(c, http.StatusServiceUnavailable, 1500, "依赖未就绪")
+			return
+		}
+		response.OK(c, gin.H{"status": "ready"})
+	})
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	// 本地上传文件静态访问（存储根目录，文件由 /api/app/common/uploads 写入）。
+	mount := h.StorageMount
+	if mount == "" {
+		mount = "uploads"
+	}
+	r.Static("/"+strings.Trim(mount, "/"), h.Cfg.StorageRootDir)
 
 	// 404/405 统一返回
 	r.NoRoute(func(c *gin.Context) {
@@ -43,6 +63,9 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 		authPub.POST("/password/reset", mw.RateLimit("auth:reset", 10, time.Minute), h.ResetPassword)
 		authPub.POST("/sms/send", mw.RateLimit("auth:sms:send", 30, time.Minute), h.SendSMSCode)
 		authPub.POST("/sms/login", mw.RateLimit("auth:sms:login", 30, time.Minute), h.LoginBySMS)
+
+		// ---- 公开：支付回调（HMAC 验签）----
+		api.POST("/payments/callback/:channel", mw.RateLimit("payment:callback", 60, time.Minute), h.PaymentCallback)
 
 		// ---- 公开：初始化 ----
 		sysPub := api.Group("/system")
@@ -96,6 +119,7 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			merchants.GET("/stats", mw.RequirePerm("merchant", "list"), h.GetMerchantStats)
 			merchants.GET("/audit", mw.RequirePerm("merchant", "audit"), h.ListMerchantAudit)
 			merchants.POST("/audit/:id", mw.RequirePerm("merchant", "audit"), h.AuditMerchant)
+			merchants.POST("/:id/account", mw.RequirePerm("merchant", "create"), h.ProvisionMerchantAccount)
 			merchants.GET("/:id", mw.RequirePerm("merchant", "detail"), h.GetMerchant)
 
 			// 骑手
@@ -106,6 +130,7 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			riders.GET("/audit", mw.RequirePerm("rider", "audit"), h.ListRiderAudit)
 			riders.POST("/audit", mw.RequirePerm("rider", "audit"), h.AuditRider)
 			riders.POST("/freeze", mw.RequirePerm("rider", "freeze"), h.FreezeRider)
+			riders.POST("/:id/account", mw.RequirePerm("rider", "create"), h.ProvisionRiderAccount)
 			riders.GET("/:id", mw.RequirePerm("rider", "detail"), h.GetRider)
 
 			// 用户
@@ -128,11 +153,19 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			finance.GET("/withdraws", mw.RequirePerm("finance", "view"), h.ListWithdraws)
 			finance.GET("/withdraw/:id", mw.RequirePerm("finance", "view"), h.GetWithdraw)
 			finance.POST("/withdraw/:id/audit", mw.RequirePerm("finance", "audit"), h.AuditWithdraw)
+			finance.GET("/reconciliation", mw.RequirePerm("finance", "view"), h.GetReconciliation)
 
 			// 投诉
 			complaints := authd.Group("/complaints")
 			complaints.GET("", mw.RequirePerm("complaint", "list"), h.ListComplaints)
 			complaints.GET("/:id", mw.RequirePerm("complaint", "detail"), h.GetComplaint)
+
+			// 优惠券运营
+			coupons := authd.Group("/coupons")
+			{
+				coupons.GET("", mw.RequirePerm("coupon", "view"), h.ListCoupons)
+				coupons.POST("", mw.RequirePerm("coupon", "manage"), h.IssueCoupon)
+			}
 
 			// 系统设置（服务区域/费率/公告）
 			settings := authd.Group("/settings")
@@ -142,6 +175,83 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			settings.POST("/fee-rules", mw.RequirePerm("settings", "save"), h.SaveFeeRule)
 			settings.GET("/announcements", mw.RequirePerm("settings", "list"), h.ListAnnouncements)
 			settings.POST("/announcements", mw.RequirePerm("settings", "save"), h.SaveAnnouncement)
+		}
+
+		// ---- App 面（三端专用，独立命名空间，snake_case 契约）----
+		appAPI := api.Group("/app")
+		{
+			client := appAPI.Group("/client", mw.Auth(), mw.RequireAppRole(identity.RoleUser))
+			client.GET("/me", h.AppClientMe)
+			client.PUT("/me", h.AppUpdateClientProfile)
+			client.GET("/regions", h.AppListRegions)
+			client.PUT("/region", h.AppSetRegion)
+			client.GET("/merchants", h.AppListMerchants)
+			client.GET("/merchants/:id", h.AppGetMerchant)
+			client.GET("/addresses", h.AppListAddresses)
+			client.POST("/addresses", h.AppCreateAddress)
+			client.PUT("/addresses/:id", h.AppUpdateAddress)
+			client.DELETE("/addresses/:id", h.AppDeleteAddress)
+			client.POST("/addresses/:id/default", h.AppSetDefaultAddress)
+			client.POST("/orders", mw.RateLimit("app:order:create", 30, time.Minute), h.AppCreateOrder)
+			client.GET("/orders", h.AppListClientOrders)
+			client.GET("/orders/:id", h.AppGetClientOrder)
+			client.POST("/orders/:id/cancel", h.AppCancelClientOrder)
+			client.POST("/orders/:id/pay", h.AppPayOrder)
+			client.POST("/orders/:id/confirm", h.AppConfirmOrder)
+			client.GET("/orders/:id/track", h.AppTrackOrder)
+			client.POST("/orders/:id/review", h.AppSubmitReview)
+			client.POST("/orders/:id/after-sale", h.AppApplyAfterSale)
+			client.GET("/coupons", h.AppListCoupons)
+
+			store := appAPI.Group("/store", mw.Auth(), mw.RequireAppRole(identity.RoleMerchant))
+			store.GET("/me", h.AppStoreMe)
+			store.PUT("/status", h.AppUpdateStoreStatus)
+			store.GET("/business", h.AppGetStoreBusiness)
+			store.PUT("/business", h.AppUpdateStoreBusiness)
+			store.GET("/menu", h.AppStoreMenu)
+			store.POST("/categories", h.AppCreateCategory)
+			store.PUT("/categories/:id", h.AppUpdateCategory)
+			store.DELETE("/categories/:id", h.AppDeleteCategory)
+			store.POST("/dishes", h.AppCreateDish)
+			store.PUT("/dishes/:id", h.AppUpdateDish)
+			store.DELETE("/dishes/:id", h.AppDeleteDish)
+			store.POST("/dishes/:id/on-sale", h.AppSetDishSale)
+			store.GET("/orders", h.AppListStoreOrders)
+			store.GET("/orders/:id", h.AppGetStoreOrder)
+			store.POST("/orders/:id/accept", h.AppAcceptOrder)
+			store.POST("/orders/:id/reject", h.AppRejectOrder)
+			store.POST("/orders/:id/ready", h.AppReadyOrder)
+			store.POST("/orders/:id/refund/decision", h.AppDecideRefund)
+			store.GET("/reviews", h.AppStoreReviews)
+			store.POST("/reviews/:id/reply", h.AppReplyReview)
+			store.GET("/finance/summary", h.AppStoreFinanceSummary)
+			store.GET("/finance/records", h.AppStoreFinanceRecords)
+			store.GET("/settlements", h.AppStoreSettlements)
+			store.GET("/withdrawals", h.AppStoreWithdrawals)
+			store.POST("/withdrawals", mw.RateLimit("app:withdraw", 10, time.Hour), h.AppStoreCreateWithdrawal)
+
+			driver := appAPI.Group("/driver", mw.Auth(), mw.RequireAppRole(identity.RoleDriver))
+			driver.GET("/me", h.AppDriverMe)
+			driver.PUT("/status", h.AppSetDriverStatus)
+			driver.GET("/order-pool", h.AppDriverPool)
+			driver.GET("/orders", h.AppListDriverOrders)
+			driver.GET("/orders/:id", h.AppGetDriverOrder)
+			driver.POST("/orders/:id/grab", h.AppGrabOrder)
+			driver.POST("/orders/:id/pickup", h.AppPickupOrder)
+			driver.POST("/orders/:id/deliver", h.AppDeliverOrder)
+			driver.POST("/location", mw.RateLimit("driver:loc", 120, time.Minute), h.AppReportLocation)
+			driver.GET("/finance/summary", h.AppDriverFinanceSummary)
+			driver.GET("/finance/records", h.AppDriverFinanceRecords)
+			driver.GET("/settlements", h.AppDriverSettlements)
+			driver.GET("/withdrawals", h.AppDriverWithdrawals)
+			driver.POST("/withdrawals", mw.RateLimit("app:withdraw", 10, time.Hour), h.AppDriverCreateWithdrawal)
+
+			common := appAPI.Group("/common", mw.Auth(),
+				mw.RequireAppRole(identity.RoleUser, identity.RoleMerchant, identity.RoleDriver))
+			common.POST("/uploads", h.AppUpload)
+			common.GET("/notifications", h.AppListNotifications)
+			common.POST("/notifications/read-all", h.AppReadAllNotifications)
+			common.POST("/notifications/:id/read", h.AppReadNotification)
 		}
 	}
 	return r

@@ -19,7 +19,7 @@ enum class TrackPhase {
 /** 进度步骤状态。 */
 enum class StepState { DONE, ACTIVE, TODO }
 
-/** 进度步骤（数据驱动渲染设计稿 4 步节点）。 */
+/** 进度步骤（横向 4 节点，短文案避免底栏过高）。 */
 data class TrackStep(
     val text: String,
     val state: StepState,
@@ -35,11 +35,13 @@ data class OrderTrack(
     val statusDesc: String,
     val etaMinutes: String,   // 预计送达（分钟），非配送阶段为 "—"
     val remainingKm: String,  // 剩余距离（公里），非配送阶段为 "—"
+    val arrivalClock: String, // 预计送达时刻，如 "12:45"
     val pickup: TrackPoint,   // 取货点（商家）
     val delivery: TrackPoint, // 送达点（客户地址）
     val rider: TrackPoint?,   // 骑手当前位置；无骑手时为 null
     val heading: Float,       // 骑手行进方向（旋转骑手标记）
     val progress: Float,      // 骑手沿路线的进度 0..1（配送中递增）
+    val stepProgress: Float,  // 底部横向进度条高亮比例 0..1
     val traveledKm: Double,   // 已行驶公里
     val steps: List<TrackStep>,
     val riderName: String,

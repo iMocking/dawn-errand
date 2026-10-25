@@ -14,6 +14,10 @@ const (
 	CodeInvalidID      = 1302 // 非法 ID
 	CodeUnauthorized   = 1001 // 未认证 / 凭证无效
 	CodeForbidden      = 1201 // 无权限
+	CodeAccountUnbound = 1202 // 账号未绑定商家/骑手主体
+	CodeRoleDenied     = 1203 // 角色不允许访问该端
+	CodeFileTooLarge   = 1303 // 文件超过大小限制
+	CodeFileTypeDenied = 1304 // 文件类型不支持
 	CodeNotFound       = 1401 // 资源不存在
 	CodeConflict       = 1402 // 状态冲突
 	CodeTooManyRequest = 1007 // 触发限流
@@ -58,6 +62,34 @@ const (
 	CodeFeeRuleError      = 1514
 	CodeRegionNotFound    = 1515
 	CodeTenantScopeDenied = 1516 // 租户数据越权（不应出现的兜底）
+
+	// 用户端交易 16xx
+	CodeDishUnavailable  = 1601 // 菜品不存在/下架/库存不足
+	CodeMerchantClosed   = 1602 // 商家休息中
+	CodeAmountMismatch   = 1603 // 金额校验失败
+	CodeAddressNotFound  = 1604 // 地址不存在/不属于本人
+	CodeCouponInvalid    = 1605 // 优惠券不可用
+	CodeDeliveryOutRange = 1606 // 超出配送范围
+	CodeOrderState       = 1607 // 订单状态不允许该操作
+	CodeOrderDuplicate   = 1608 // 重复提交
+	CodeRegionRequired   = 1609 // 未选择服务区域
+
+	// 商家端 17xx
+	CodeDishNotFound     = 1701 // 菜品不存在
+	CodeCategoryNotFound = 1702 // 分类不存在
+	CodeNotOwned         = 1703 // 资源不属于当前商家
+	CodeCategoryInUse    = 1704 // 分类下仍有菜品，不可删除
+	CodeOrderNotOwned    = 1705 // 订单不属于本店
+
+	// 骑手端 18xx
+	CodeOrderGrabbed     = 1801 // 订单已被抢
+	CodeRiderOffline     = 1802 // 骑手未上线
+	CodeRiderOutOfRange  = 1803 // 超出接单范围
+	CodeDeliveryCodeFail = 1804 // 取送校验码错误
+
+	// 资金 19xx
+	CodePaymentFailed    = 1901 // 支付失败
+	CodeInsufficientFund = 1902 // 余额不足
 )
 
 // Error 业务错误。Code 与 HTTP 状态分离，HTTP 状态 MUST 正确。

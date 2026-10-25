@@ -55,6 +55,34 @@ func (su *SettlementUpdate) SetNillableParty(s *string) *SettlementUpdate {
 	return su
 }
 
+// SetPartyType sets the "party_type" field.
+func (su *SettlementUpdate) SetPartyType(s string) *SettlementUpdate {
+	su.mutation.SetPartyType(s)
+	return su
+}
+
+// SetNillablePartyType sets the "party_type" field if the given value is not nil.
+func (su *SettlementUpdate) SetNillablePartyType(s *string) *SettlementUpdate {
+	if s != nil {
+		su.SetPartyType(*s)
+	}
+	return su
+}
+
+// SetPartyID sets the "party_id" field.
+func (su *SettlementUpdate) SetPartyID(s string) *SettlementUpdate {
+	su.mutation.SetPartyID(s)
+	return su
+}
+
+// SetNillablePartyID sets the "party_id" field if the given value is not nil.
+func (su *SettlementUpdate) SetNillablePartyID(s *string) *SettlementUpdate {
+	if s != nil {
+		su.SetPartyID(*s)
+	}
+	return su
+}
+
 // SetType sets the "type" field.
 func (su *SettlementUpdate) SetType(s string) *SettlementUpdate {
 	su.mutation.SetType(s)
@@ -197,6 +225,16 @@ func (su *SettlementUpdate) check() error {
 			return &ValidationError{Name: "party", err: fmt.Errorf(`ent: validator failed for field "Settlement.party": %w`, err)}
 		}
 	}
+	if v, ok := su.mutation.PartyType(); ok {
+		if err := settlement.PartyTypeValidator(v); err != nil {
+			return &ValidationError{Name: "party_type", err: fmt.Errorf(`ent: validator failed for field "Settlement.party_type": %w`, err)}
+		}
+	}
+	if v, ok := su.mutation.PartyID(); ok {
+		if err := settlement.PartyIDValidator(v); err != nil {
+			return &ValidationError{Name: "party_id", err: fmt.Errorf(`ent: validator failed for field "Settlement.party_id": %w`, err)}
+		}
+	}
 	if v, ok := su.mutation.GetType(); ok {
 		if err := settlement.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Settlement.type": %w`, err)}
@@ -237,6 +275,12 @@ func (su *SettlementUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.Party(); ok {
 		_spec.SetField(settlement.FieldParty, field.TypeString, value)
+	}
+	if value, ok := su.mutation.PartyType(); ok {
+		_spec.SetField(settlement.FieldPartyType, field.TypeString, value)
+	}
+	if value, ok := su.mutation.PartyID(); ok {
+		_spec.SetField(settlement.FieldPartyID, field.TypeString, value)
 	}
 	if value, ok := su.mutation.GetType(); ok {
 		_spec.SetField(settlement.FieldType, field.TypeString, value)
@@ -306,6 +350,34 @@ func (suo *SettlementUpdateOne) SetParty(s string) *SettlementUpdateOne {
 func (suo *SettlementUpdateOne) SetNillableParty(s *string) *SettlementUpdateOne {
 	if s != nil {
 		suo.SetParty(*s)
+	}
+	return suo
+}
+
+// SetPartyType sets the "party_type" field.
+func (suo *SettlementUpdateOne) SetPartyType(s string) *SettlementUpdateOne {
+	suo.mutation.SetPartyType(s)
+	return suo
+}
+
+// SetNillablePartyType sets the "party_type" field if the given value is not nil.
+func (suo *SettlementUpdateOne) SetNillablePartyType(s *string) *SettlementUpdateOne {
+	if s != nil {
+		suo.SetPartyType(*s)
+	}
+	return suo
+}
+
+// SetPartyID sets the "party_id" field.
+func (suo *SettlementUpdateOne) SetPartyID(s string) *SettlementUpdateOne {
+	suo.mutation.SetPartyID(s)
+	return suo
+}
+
+// SetNillablePartyID sets the "party_id" field if the given value is not nil.
+func (suo *SettlementUpdateOne) SetNillablePartyID(s *string) *SettlementUpdateOne {
+	if s != nil {
+		suo.SetPartyID(*s)
 	}
 	return suo
 }
@@ -465,6 +537,16 @@ func (suo *SettlementUpdateOne) check() error {
 			return &ValidationError{Name: "party", err: fmt.Errorf(`ent: validator failed for field "Settlement.party": %w`, err)}
 		}
 	}
+	if v, ok := suo.mutation.PartyType(); ok {
+		if err := settlement.PartyTypeValidator(v); err != nil {
+			return &ValidationError{Name: "party_type", err: fmt.Errorf(`ent: validator failed for field "Settlement.party_type": %w`, err)}
+		}
+	}
+	if v, ok := suo.mutation.PartyID(); ok {
+		if err := settlement.PartyIDValidator(v); err != nil {
+			return &ValidationError{Name: "party_id", err: fmt.Errorf(`ent: validator failed for field "Settlement.party_id": %w`, err)}
+		}
+	}
 	if v, ok := suo.mutation.GetType(); ok {
 		if err := settlement.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Settlement.type": %w`, err)}
@@ -522,6 +604,12 @@ func (suo *SettlementUpdateOne) sqlSave(ctx context.Context) (_node *Settlement,
 	}
 	if value, ok := suo.mutation.Party(); ok {
 		_spec.SetField(settlement.FieldParty, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.PartyType(); ok {
+		_spec.SetField(settlement.FieldPartyType, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.PartyID(); ok {
+		_spec.SetField(settlement.FieldPartyID, field.TypeString, value)
 	}
 	if value, ok := suo.mutation.GetType(); ok {
 		_spec.SetField(settlement.FieldType, field.TypeString, value)

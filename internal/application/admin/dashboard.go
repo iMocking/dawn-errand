@@ -110,6 +110,11 @@ func (s *OrdersService) CountByRegion(ctx context.Context, regionID string, now 
 	return s.Repos.Orders.CountByRegion(regionID, now)
 }
 
+// Events 订单事件时间线（后台详情用）。
+func (s *OrdersService) Events(ctx context.Context, id string) ([]*order.Event, error) {
+	return s.Repos.OrderEvents.ListByOrder(id)
+}
+
 // Detail 订单详情（对象级数据隔离）。
 func (s *OrdersService) Detail(ctx context.Context, id string, sc tenant.Scope) (*order.Order, error) {
 	o, err := s.Repos.Orders.FindByID(id)

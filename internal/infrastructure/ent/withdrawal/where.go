@@ -73,6 +73,11 @@ func PartyType(v string) predicate.Withdrawal {
 	return predicate.Withdrawal(sql.FieldEQ(FieldPartyType, v))
 }
 
+// PartyID applies equality check predicate on the "party_id" field. It's identical to PartyIDEQ.
+func PartyID(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldEQ(FieldPartyID, v))
+}
+
 // PartyName applies equality check predicate on the "party_name" field. It's identical to PartyNameEQ.
 func PartyName(v string) predicate.Withdrawal {
 	return predicate.Withdrawal(sql.FieldEQ(FieldPartyName, v))
@@ -306,6 +311,71 @@ func PartyTypeEqualFold(v string) predicate.Withdrawal {
 // PartyTypeContainsFold applies the ContainsFold predicate on the "party_type" field.
 func PartyTypeContainsFold(v string) predicate.Withdrawal {
 	return predicate.Withdrawal(sql.FieldContainsFold(FieldPartyType, v))
+}
+
+// PartyIDEQ applies the EQ predicate on the "party_id" field.
+func PartyIDEQ(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldEQ(FieldPartyID, v))
+}
+
+// PartyIDNEQ applies the NEQ predicate on the "party_id" field.
+func PartyIDNEQ(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldNEQ(FieldPartyID, v))
+}
+
+// PartyIDIn applies the In predicate on the "party_id" field.
+func PartyIDIn(vs ...string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldIn(FieldPartyID, vs...))
+}
+
+// PartyIDNotIn applies the NotIn predicate on the "party_id" field.
+func PartyIDNotIn(vs ...string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldNotIn(FieldPartyID, vs...))
+}
+
+// PartyIDGT applies the GT predicate on the "party_id" field.
+func PartyIDGT(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldGT(FieldPartyID, v))
+}
+
+// PartyIDGTE applies the GTE predicate on the "party_id" field.
+func PartyIDGTE(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldGTE(FieldPartyID, v))
+}
+
+// PartyIDLT applies the LT predicate on the "party_id" field.
+func PartyIDLT(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldLT(FieldPartyID, v))
+}
+
+// PartyIDLTE applies the LTE predicate on the "party_id" field.
+func PartyIDLTE(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldLTE(FieldPartyID, v))
+}
+
+// PartyIDContains applies the Contains predicate on the "party_id" field.
+func PartyIDContains(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldContains(FieldPartyID, v))
+}
+
+// PartyIDHasPrefix applies the HasPrefix predicate on the "party_id" field.
+func PartyIDHasPrefix(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldHasPrefix(FieldPartyID, v))
+}
+
+// PartyIDHasSuffix applies the HasSuffix predicate on the "party_id" field.
+func PartyIDHasSuffix(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldHasSuffix(FieldPartyID, v))
+}
+
+// PartyIDEqualFold applies the EqualFold predicate on the "party_id" field.
+func PartyIDEqualFold(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldEqualFold(FieldPartyID, v))
+}
+
+// PartyIDContainsFold applies the ContainsFold predicate on the "party_id" field.
+func PartyIDContainsFold(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldContainsFold(FieldPartyID, v))
 }
 
 // PartyNameEQ applies the EQ predicate on the "party_name" field.

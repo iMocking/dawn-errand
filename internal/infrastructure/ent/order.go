@@ -63,7 +63,57 @@ type Order struct {
 	// PayMethod holds the value of the "pay_method" field.
 	PayMethod string `json:"pay_method,omitempty"`
 	// FundFlow holds the value of the "fund_flow" field.
-	FundFlow     string `json:"fund_flow,omitempty"`
+	FundFlow string `json:"fund_flow,omitempty"`
+	// ClientOrderNo holds the value of the "client_order_no" field.
+	ClientOrderNo string `json:"client_order_no,omitempty"`
+	// AddressID holds the value of the "address_id" field.
+	AddressID string `json:"address_id,omitempty"`
+	// AddressSnapshot holds the value of the "address_snapshot" field.
+	AddressSnapshot []byte `json:"address_snapshot,omitempty"`
+	// PickupLat holds the value of the "pickup_lat" field.
+	PickupLat float64 `json:"pickup_lat,omitempty"`
+	// PickupLng holds the value of the "pickup_lng" field.
+	PickupLng float64 `json:"pickup_lng,omitempty"`
+	// DeliveryLat holds the value of the "delivery_lat" field.
+	DeliveryLat float64 `json:"delivery_lat,omitempty"`
+	// DeliveryLng holds the value of the "delivery_lng" field.
+	DeliveryLng float64 `json:"delivery_lng,omitempty"`
+	// DeliveryDistanceKm holds the value of the "delivery_distance_km" field.
+	DeliveryDistanceKm float64 `json:"delivery_distance_km,omitempty"`
+	// DeliveryFee holds the value of the "delivery_fee" field.
+	DeliveryFee float64 `json:"delivery_fee,omitempty"`
+	// PackingFee holds the value of the "packing_fee" field.
+	PackingFee float64 `json:"packing_fee,omitempty"`
+	// DiscountAmount holds the value of the "discount_amount" field.
+	DiscountAmount float64 `json:"discount_amount,omitempty"`
+	// CouponAmount holds the value of the "coupon_amount" field.
+	CouponAmount float64 `json:"coupon_amount,omitempty"`
+	// CouponID holds the value of the "coupon_id" field.
+	CouponID string `json:"coupon_id,omitempty"`
+	// PaymentStatus holds the value of the "payment_status" field.
+	PaymentStatus string `json:"payment_status,omitempty"`
+	// AcceptedAt holds the value of the "accepted_at" field.
+	AcceptedAt int64 `json:"accepted_at,omitempty"`
+	// ReadyAt holds the value of the "ready_at" field.
+	ReadyAt int64 `json:"ready_at,omitempty"`
+	// PickedAt holds the value of the "picked_at" field.
+	PickedAt int64 `json:"picked_at,omitempty"`
+	// DeliveredAt holds the value of the "delivered_at" field.
+	DeliveredAt int64 `json:"delivered_at,omitempty"`
+	// CanceledAt holds the value of the "canceled_at" field.
+	CanceledAt int64 `json:"canceled_at,omitempty"`
+	// ConfirmedAt holds the value of the "confirmed_at" field.
+	ConfirmedAt int64 `json:"confirmed_at,omitempty"`
+	// ReviewedAt holds the value of the "reviewed_at" field.
+	ReviewedAt int64 `json:"reviewed_at,omitempty"`
+	// CancelReason holds the value of the "cancel_reason" field.
+	CancelReason string `json:"cancel_reason,omitempty"`
+	// RiderEarning holds the value of the "rider_earning" field.
+	RiderEarning float64 `json:"rider_earning,omitempty"`
+	// PickupCode holds the value of the "pickup_code" field.
+	PickupCode string `json:"pickup_code,omitempty"`
+	// DeliveryCode holds the value of the "delivery_code" field.
+	DeliveryCode string `json:"delivery_code,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -72,13 +122,13 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case order.FieldGoods, order.FieldFees, order.FieldSteps, order.FieldMerchant, order.FieldUser, order.FieldRider:
+		case order.FieldGoods, order.FieldFees, order.FieldSteps, order.FieldMerchant, order.FieldUser, order.FieldRider, order.FieldAddressSnapshot:
 			values[i] = new([]byte)
-		case order.FieldAmount, order.FieldPayAmount:
+		case order.FieldAmount, order.FieldPayAmount, order.FieldPickupLat, order.FieldPickupLng, order.FieldDeliveryLat, order.FieldDeliveryLng, order.FieldDeliveryDistanceKm, order.FieldDeliveryFee, order.FieldPackingFee, order.FieldDiscountAmount, order.FieldCouponAmount, order.FieldRiderEarning:
 			values[i] = new(sql.NullFloat64)
-		case order.FieldCreatedAt, order.FieldEstimatedArrival:
+		case order.FieldCreatedAt, order.FieldEstimatedArrival, order.FieldAcceptedAt, order.FieldReadyAt, order.FieldPickedAt, order.FieldDeliveredAt, order.FieldCanceledAt, order.FieldConfirmedAt, order.FieldReviewedAt:
 			values[i] = new(sql.NullInt64)
-		case order.FieldID, order.FieldOrderNo, order.FieldRegionID, order.FieldMerchantID, order.FieldUserID, order.FieldRiderID, order.FieldType, order.FieldStatus, order.FieldRoute, order.FieldUserName, order.FieldRiderName, order.FieldChannel, order.FieldRemark, order.FieldPayMethod, order.FieldFundFlow:
+		case order.FieldID, order.FieldOrderNo, order.FieldRegionID, order.FieldMerchantID, order.FieldUserID, order.FieldRiderID, order.FieldType, order.FieldStatus, order.FieldRoute, order.FieldUserName, order.FieldRiderName, order.FieldChannel, order.FieldRemark, order.FieldPayMethod, order.FieldFundFlow, order.FieldClientOrderNo, order.FieldAddressID, order.FieldCouponID, order.FieldPaymentStatus, order.FieldCancelReason, order.FieldPickupCode, order.FieldDeliveryCode:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -245,6 +295,156 @@ func (o *Order) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				o.FundFlow = value.String
 			}
+		case order.FieldClientOrderNo:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field client_order_no", values[i])
+			} else if value.Valid {
+				o.ClientOrderNo = value.String
+			}
+		case order.FieldAddressID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field address_id", values[i])
+			} else if value.Valid {
+				o.AddressID = value.String
+			}
+		case order.FieldAddressSnapshot:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field address_snapshot", values[i])
+			} else if value != nil {
+				o.AddressSnapshot = *value
+			}
+		case order.FieldPickupLat:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field pickup_lat", values[i])
+			} else if value.Valid {
+				o.PickupLat = value.Float64
+			}
+		case order.FieldPickupLng:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field pickup_lng", values[i])
+			} else if value.Valid {
+				o.PickupLng = value.Float64
+			}
+		case order.FieldDeliveryLat:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_lat", values[i])
+			} else if value.Valid {
+				o.DeliveryLat = value.Float64
+			}
+		case order.FieldDeliveryLng:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_lng", values[i])
+			} else if value.Valid {
+				o.DeliveryLng = value.Float64
+			}
+		case order.FieldDeliveryDistanceKm:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_distance_km", values[i])
+			} else if value.Valid {
+				o.DeliveryDistanceKm = value.Float64
+			}
+		case order.FieldDeliveryFee:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_fee", values[i])
+			} else if value.Valid {
+				o.DeliveryFee = value.Float64
+			}
+		case order.FieldPackingFee:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field packing_fee", values[i])
+			} else if value.Valid {
+				o.PackingFee = value.Float64
+			}
+		case order.FieldDiscountAmount:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field discount_amount", values[i])
+			} else if value.Valid {
+				o.DiscountAmount = value.Float64
+			}
+		case order.FieldCouponAmount:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field coupon_amount", values[i])
+			} else if value.Valid {
+				o.CouponAmount = value.Float64
+			}
+		case order.FieldCouponID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field coupon_id", values[i])
+			} else if value.Valid {
+				o.CouponID = value.String
+			}
+		case order.FieldPaymentStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field payment_status", values[i])
+			} else if value.Valid {
+				o.PaymentStatus = value.String
+			}
+		case order.FieldAcceptedAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field accepted_at", values[i])
+			} else if value.Valid {
+				o.AcceptedAt = value.Int64
+			}
+		case order.FieldReadyAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field ready_at", values[i])
+			} else if value.Valid {
+				o.ReadyAt = value.Int64
+			}
+		case order.FieldPickedAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field picked_at", values[i])
+			} else if value.Valid {
+				o.PickedAt = value.Int64
+			}
+		case order.FieldDeliveredAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivered_at", values[i])
+			} else if value.Valid {
+				o.DeliveredAt = value.Int64
+			}
+		case order.FieldCanceledAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field canceled_at", values[i])
+			} else if value.Valid {
+				o.CanceledAt = value.Int64
+			}
+		case order.FieldConfirmedAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field confirmed_at", values[i])
+			} else if value.Valid {
+				o.ConfirmedAt = value.Int64
+			}
+		case order.FieldReviewedAt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field reviewed_at", values[i])
+			} else if value.Valid {
+				o.ReviewedAt = value.Int64
+			}
+		case order.FieldCancelReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cancel_reason", values[i])
+			} else if value.Valid {
+				o.CancelReason = value.String
+			}
+		case order.FieldRiderEarning:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field rider_earning", values[i])
+			} else if value.Valid {
+				o.RiderEarning = value.Float64
+			}
+		case order.FieldPickupCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field pickup_code", values[i])
+			} else if value.Valid {
+				o.PickupCode = value.String
+			}
+		case order.FieldDeliveryCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_code", values[i])
+			} else if value.Valid {
+				o.DeliveryCode = value.String
+			}
 		default:
 			o.selectValues.Set(columns[i], values[i])
 		}
@@ -352,6 +552,81 @@ func (o *Order) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("fund_flow=")
 	builder.WriteString(o.FundFlow)
+	builder.WriteString(", ")
+	builder.WriteString("client_order_no=")
+	builder.WriteString(o.ClientOrderNo)
+	builder.WriteString(", ")
+	builder.WriteString("address_id=")
+	builder.WriteString(o.AddressID)
+	builder.WriteString(", ")
+	builder.WriteString("address_snapshot=")
+	builder.WriteString(fmt.Sprintf("%v", o.AddressSnapshot))
+	builder.WriteString(", ")
+	builder.WriteString("pickup_lat=")
+	builder.WriteString(fmt.Sprintf("%v", o.PickupLat))
+	builder.WriteString(", ")
+	builder.WriteString("pickup_lng=")
+	builder.WriteString(fmt.Sprintf("%v", o.PickupLng))
+	builder.WriteString(", ")
+	builder.WriteString("delivery_lat=")
+	builder.WriteString(fmt.Sprintf("%v", o.DeliveryLat))
+	builder.WriteString(", ")
+	builder.WriteString("delivery_lng=")
+	builder.WriteString(fmt.Sprintf("%v", o.DeliveryLng))
+	builder.WriteString(", ")
+	builder.WriteString("delivery_distance_km=")
+	builder.WriteString(fmt.Sprintf("%v", o.DeliveryDistanceKm))
+	builder.WriteString(", ")
+	builder.WriteString("delivery_fee=")
+	builder.WriteString(fmt.Sprintf("%v", o.DeliveryFee))
+	builder.WriteString(", ")
+	builder.WriteString("packing_fee=")
+	builder.WriteString(fmt.Sprintf("%v", o.PackingFee))
+	builder.WriteString(", ")
+	builder.WriteString("discount_amount=")
+	builder.WriteString(fmt.Sprintf("%v", o.DiscountAmount))
+	builder.WriteString(", ")
+	builder.WriteString("coupon_amount=")
+	builder.WriteString(fmt.Sprintf("%v", o.CouponAmount))
+	builder.WriteString(", ")
+	builder.WriteString("coupon_id=")
+	builder.WriteString(o.CouponID)
+	builder.WriteString(", ")
+	builder.WriteString("payment_status=")
+	builder.WriteString(o.PaymentStatus)
+	builder.WriteString(", ")
+	builder.WriteString("accepted_at=")
+	builder.WriteString(fmt.Sprintf("%v", o.AcceptedAt))
+	builder.WriteString(", ")
+	builder.WriteString("ready_at=")
+	builder.WriteString(fmt.Sprintf("%v", o.ReadyAt))
+	builder.WriteString(", ")
+	builder.WriteString("picked_at=")
+	builder.WriteString(fmt.Sprintf("%v", o.PickedAt))
+	builder.WriteString(", ")
+	builder.WriteString("delivered_at=")
+	builder.WriteString(fmt.Sprintf("%v", o.DeliveredAt))
+	builder.WriteString(", ")
+	builder.WriteString("canceled_at=")
+	builder.WriteString(fmt.Sprintf("%v", o.CanceledAt))
+	builder.WriteString(", ")
+	builder.WriteString("confirmed_at=")
+	builder.WriteString(fmt.Sprintf("%v", o.ConfirmedAt))
+	builder.WriteString(", ")
+	builder.WriteString("reviewed_at=")
+	builder.WriteString(fmt.Sprintf("%v", o.ReviewedAt))
+	builder.WriteString(", ")
+	builder.WriteString("cancel_reason=")
+	builder.WriteString(o.CancelReason)
+	builder.WriteString(", ")
+	builder.WriteString("rider_earning=")
+	builder.WriteString(fmt.Sprintf("%v", o.RiderEarning))
+	builder.WriteString(", ")
+	builder.WriteString("pickup_code=")
+	builder.WriteString(o.PickupCode)
+	builder.WriteString(", ")
+	builder.WriteString("delivery_code=")
+	builder.WriteString(o.DeliveryCode)
 	builder.WriteByte(')')
 	return builder.String()
 }

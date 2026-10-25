@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 取货点：橙色气泡图钉 + 白色餐盒（竞品风，尖角指向坐标） -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#FF6B2C"
+        android:pathData="M9,19a15,15 0 1,0 30,0a15,15 0 1,0 -30,0Z M17,32L24,46L31,32Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,13C14,9 18,6 24,6C30,6 34,9 34,13Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,13H34V24C34,27 32,29 29,29H19C16,29 14,27 14,24Z" />
+    <path
+        android:fillColor="#FF6B2C"
+        android:pathData="M18,19H30V22H18Z" />
+</vector>

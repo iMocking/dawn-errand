@@ -185,6 +185,118 @@ func (mc *MerchantCreate) SetNillableDeliveryMethod(s *string) *MerchantCreate {
 	return mc
 }
 
+// SetLat sets the "lat" field.
+func (mc *MerchantCreate) SetLat(f float64) *MerchantCreate {
+	mc.mutation.SetLat(f)
+	return mc
+}
+
+// SetNillableLat sets the "lat" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableLat(f *float64) *MerchantCreate {
+	if f != nil {
+		mc.SetLat(*f)
+	}
+	return mc
+}
+
+// SetLng sets the "lng" field.
+func (mc *MerchantCreate) SetLng(f float64) *MerchantCreate {
+	mc.mutation.SetLng(f)
+	return mc
+}
+
+// SetNillableLng sets the "lng" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableLng(f *float64) *MerchantCreate {
+	if f != nil {
+		mc.SetLng(*f)
+	}
+	return mc
+}
+
+// SetAutoAccept sets the "auto_accept" field.
+func (mc *MerchantCreate) SetAutoAccept(b bool) *MerchantCreate {
+	mc.mutation.SetAutoAccept(b)
+	return mc
+}
+
+// SetNillableAutoAccept sets the "auto_accept" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableAutoAccept(b *bool) *MerchantCreate {
+	if b != nil {
+		mc.SetAutoAccept(*b)
+	}
+	return mc
+}
+
+// SetMinPrice sets the "min_price" field.
+func (mc *MerchantCreate) SetMinPrice(f float64) *MerchantCreate {
+	mc.mutation.SetMinPrice(f)
+	return mc
+}
+
+// SetNillableMinPrice sets the "min_price" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableMinPrice(f *float64) *MerchantCreate {
+	if f != nil {
+		mc.SetMinPrice(*f)
+	}
+	return mc
+}
+
+// SetDeliveryFee sets the "delivery_fee" field.
+func (mc *MerchantCreate) SetDeliveryFee(f float64) *MerchantCreate {
+	mc.mutation.SetDeliveryFee(f)
+	return mc
+}
+
+// SetNillableDeliveryFee sets the "delivery_fee" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableDeliveryFee(f *float64) *MerchantCreate {
+	if f != nil {
+		mc.SetDeliveryFee(*f)
+	}
+	return mc
+}
+
+// SetPackingFee sets the "packing_fee" field.
+func (mc *MerchantCreate) SetPackingFee(f float64) *MerchantCreate {
+	mc.mutation.SetPackingFee(f)
+	return mc
+}
+
+// SetNillablePackingFee sets the "packing_fee" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillablePackingFee(f *float64) *MerchantCreate {
+	if f != nil {
+		mc.SetPackingFee(*f)
+	}
+	return mc
+}
+
+// SetAnnouncement sets the "announcement" field.
+func (mc *MerchantCreate) SetAnnouncement(s string) *MerchantCreate {
+	mc.mutation.SetAnnouncement(s)
+	return mc
+}
+
+// SetNillableAnnouncement sets the "announcement" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableAnnouncement(s *string) *MerchantCreate {
+	if s != nil {
+		mc.SetAnnouncement(*s)
+	}
+	return mc
+}
+
+// SetServicePhone sets the "service_phone" field.
+func (mc *MerchantCreate) SetServicePhone(s string) *MerchantCreate {
+	mc.mutation.SetServicePhone(s)
+	return mc
+}
+
+// SetNillableServicePhone sets the "service_phone" field if the given value is not nil.
+func (mc *MerchantCreate) SetNillableServicePhone(s *string) *MerchantCreate {
+	if s != nil {
+		mc.SetServicePhone(*s)
+	}
+	return mc
+}
+
 // SetStatus sets the "status" field.
 func (mc *MerchantCreate) SetStatus(s string) *MerchantCreate {
 	mc.mutation.SetStatus(s)
@@ -578,6 +690,38 @@ func (mc *MerchantCreate) defaults() {
 		v := merchant.DefaultDeliveryMethod
 		mc.mutation.SetDeliveryMethod(v)
 	}
+	if _, ok := mc.mutation.Lat(); !ok {
+		v := merchant.DefaultLat
+		mc.mutation.SetLat(v)
+	}
+	if _, ok := mc.mutation.Lng(); !ok {
+		v := merchant.DefaultLng
+		mc.mutation.SetLng(v)
+	}
+	if _, ok := mc.mutation.AutoAccept(); !ok {
+		v := merchant.DefaultAutoAccept
+		mc.mutation.SetAutoAccept(v)
+	}
+	if _, ok := mc.mutation.MinPrice(); !ok {
+		v := merchant.DefaultMinPrice
+		mc.mutation.SetMinPrice(v)
+	}
+	if _, ok := mc.mutation.DeliveryFee(); !ok {
+		v := merchant.DefaultDeliveryFee
+		mc.mutation.SetDeliveryFee(v)
+	}
+	if _, ok := mc.mutation.PackingFee(); !ok {
+		v := merchant.DefaultPackingFee
+		mc.mutation.SetPackingFee(v)
+	}
+	if _, ok := mc.mutation.Announcement(); !ok {
+		v := merchant.DefaultAnnouncement
+		mc.mutation.SetAnnouncement(v)
+	}
+	if _, ok := mc.mutation.ServicePhone(); !ok {
+		v := merchant.DefaultServicePhone
+		mc.mutation.SetServicePhone(v)
+	}
 	if _, ok := mc.mutation.Status(); !ok {
 		v := merchant.DefaultStatus
 		mc.mutation.SetStatus(v)
@@ -769,6 +913,40 @@ func (mc *MerchantCreate) check() error {
 			return &ValidationError{Name: "delivery_method", err: fmt.Errorf(`ent: validator failed for field "Merchant.delivery_method": %w`, err)}
 		}
 	}
+	if _, ok := mc.mutation.Lat(); !ok {
+		return &ValidationError{Name: "lat", err: errors.New(`ent: missing required field "Merchant.lat"`)}
+	}
+	if _, ok := mc.mutation.Lng(); !ok {
+		return &ValidationError{Name: "lng", err: errors.New(`ent: missing required field "Merchant.lng"`)}
+	}
+	if _, ok := mc.mutation.AutoAccept(); !ok {
+		return &ValidationError{Name: "auto_accept", err: errors.New(`ent: missing required field "Merchant.auto_accept"`)}
+	}
+	if _, ok := mc.mutation.MinPrice(); !ok {
+		return &ValidationError{Name: "min_price", err: errors.New(`ent: missing required field "Merchant.min_price"`)}
+	}
+	if _, ok := mc.mutation.DeliveryFee(); !ok {
+		return &ValidationError{Name: "delivery_fee", err: errors.New(`ent: missing required field "Merchant.delivery_fee"`)}
+	}
+	if _, ok := mc.mutation.PackingFee(); !ok {
+		return &ValidationError{Name: "packing_fee", err: errors.New(`ent: missing required field "Merchant.packing_fee"`)}
+	}
+	if _, ok := mc.mutation.Announcement(); !ok {
+		return &ValidationError{Name: "announcement", err: errors.New(`ent: missing required field "Merchant.announcement"`)}
+	}
+	if v, ok := mc.mutation.Announcement(); ok {
+		if err := merchant.AnnouncementValidator(v); err != nil {
+			return &ValidationError{Name: "announcement", err: fmt.Errorf(`ent: validator failed for field "Merchant.announcement": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.ServicePhone(); !ok {
+		return &ValidationError{Name: "service_phone", err: errors.New(`ent: missing required field "Merchant.service_phone"`)}
+	}
+	if v, ok := mc.mutation.ServicePhone(); ok {
+		if err := merchant.ServicePhoneValidator(v); err != nil {
+			return &ValidationError{Name: "service_phone", err: fmt.Errorf(`ent: validator failed for field "Merchant.service_phone": %w`, err)}
+		}
+	}
 	if _, ok := mc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Merchant.status"`)}
 	}
@@ -953,6 +1131,38 @@ func (mc *MerchantCreate) createSpec() (*Merchant, *sqlgraph.CreateSpec) {
 	if value, ok := mc.mutation.DeliveryMethod(); ok {
 		_spec.SetField(merchant.FieldDeliveryMethod, field.TypeString, value)
 		_node.DeliveryMethod = value
+	}
+	if value, ok := mc.mutation.Lat(); ok {
+		_spec.SetField(merchant.FieldLat, field.TypeFloat64, value)
+		_node.Lat = value
+	}
+	if value, ok := mc.mutation.Lng(); ok {
+		_spec.SetField(merchant.FieldLng, field.TypeFloat64, value)
+		_node.Lng = value
+	}
+	if value, ok := mc.mutation.AutoAccept(); ok {
+		_spec.SetField(merchant.FieldAutoAccept, field.TypeBool, value)
+		_node.AutoAccept = value
+	}
+	if value, ok := mc.mutation.MinPrice(); ok {
+		_spec.SetField(merchant.FieldMinPrice, field.TypeFloat64, value)
+		_node.MinPrice = value
+	}
+	if value, ok := mc.mutation.DeliveryFee(); ok {
+		_spec.SetField(merchant.FieldDeliveryFee, field.TypeFloat64, value)
+		_node.DeliveryFee = value
+	}
+	if value, ok := mc.mutation.PackingFee(); ok {
+		_spec.SetField(merchant.FieldPackingFee, field.TypeFloat64, value)
+		_node.PackingFee = value
+	}
+	if value, ok := mc.mutation.Announcement(); ok {
+		_spec.SetField(merchant.FieldAnnouncement, field.TypeString, value)
+		_node.Announcement = value
+	}
+	if value, ok := mc.mutation.ServicePhone(); ok {
+		_spec.SetField(merchant.FieldServicePhone, field.TypeString, value)
+		_node.ServicePhone = value
 	}
 	if value, ok := mc.mutation.Status(); ok {
 		_spec.SetField(merchant.FieldStatus, field.TypeString, value)

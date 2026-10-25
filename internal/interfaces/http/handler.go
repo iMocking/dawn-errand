@@ -2,6 +2,7 @@
 package http
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 	"dawn-errand/internal/application"
 	"dawn-errand/internal/application/admin"
+	"dawn-errand/internal/application/app"
 	"dawn-errand/internal/application/auth"
 	"dawn-errand/internal/application/system"
 	"dawn-errand/internal/config"
@@ -25,6 +27,39 @@ type Handler struct {
 	MW     *middleware.Middleware
 	Auth   *auth.Service
 	System *system.Service
+
+	// Portal App 面用例（用户端/商家端/骑手端共享）。
+	Portal *app.Service
+	// ClientApp 用户端目录/地址用例。
+	ClientApp *app.ClientService
+	// StoreApp 商家端经营设置/菜单用例。
+	StoreApp *app.StoreService
+	// OrderApp 三端订单交易用例。
+	OrderApp *app.OrderService
+	// Tracking 骑手位置与配送追踪。
+	Tracking *app.TrackingService
+	// Notifications 站内通知。
+	Notifications *app.NotificationService
+	// Wallet 钱包查询。
+	Wallet *app.WalletService
+	// FinanceApp 商家/骑手资金。
+	FinanceApp *app.FinanceAppService
+	// Reviews 订单评价。
+	Reviews *app.ReviewService
+	// Refunds 退款售后。
+	Refunds *app.RefundService
+	// Coupons 用户优惠券。
+	Coupons *app.CouponService
+	// CouponsAdmin 管理端券发放。
+	CouponsAdmin *admin.CouponService
+	// Ready 就绪探针（DB/Redis）。
+	Ready func(ctx context.Context) error
+	// Storage 文件存储端口（头像/菜品图/证件/送达凭证）。
+	Storage application.StoragePort
+	// StorageMount 上传文件静态访问前缀（默认 uploads，对应 /uploads/<file>）。
+	StorageMount string
+	// Accounts 商家/骑手账号开通。
+	Accounts *admin.AccountsService
 
 	Dashboard  *admin.DashboardService
 	Orders     *admin.OrdersService

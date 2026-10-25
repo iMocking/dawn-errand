@@ -9,19 +9,31 @@ import (
 	"dawn-errand/internal/infrastructure/ent/casbinrule"
 	"dawn-errand/internal/infrastructure/ent/complaint"
 	"dawn-errand/internal/infrastructure/ent/credential"
+	"dawn-errand/internal/infrastructure/ent/dish"
+	"dawn-errand/internal/infrastructure/ent/dishcategory"
 	"dawn-errand/internal/infrastructure/ent/emailverificationtoken"
 	"dawn-errand/internal/infrastructure/ent/feerule"
 	"dawn-errand/internal/infrastructure/ent/mailoutbox"
 	"dawn-errand/internal/infrastructure/ent/merchant"
+	"dawn-errand/internal/infrastructure/ent/notification"
 	"dawn-errand/internal/infrastructure/ent/order"
+	"dawn-errand/internal/infrastructure/ent/orderevent"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
+	"dawn-errand/internal/infrastructure/ent/payment"
 	"dawn-errand/internal/infrastructure/ent/realnameverification"
+	"dawn-errand/internal/infrastructure/ent/refund"
 	"dawn-errand/internal/infrastructure/ent/region"
+	"dawn-errand/internal/infrastructure/ent/review"
 	"dawn-errand/internal/infrastructure/ent/rider"
+	"dawn-errand/internal/infrastructure/ent/riderlocation"
 	"dawn-errand/internal/infrastructure/ent/settlement"
 	"dawn-errand/internal/infrastructure/ent/systemsetting"
 	"dawn-errand/internal/infrastructure/ent/user"
+	"dawn-errand/internal/infrastructure/ent/useraddress"
+	"dawn-errand/internal/infrastructure/ent/usercoupon"
 	"dawn-errand/internal/infrastructure/ent/userprofile"
+	"dawn-errand/internal/infrastructure/ent/walletaccount"
+	"dawn-errand/internal/infrastructure/ent/wallettransaction"
 	"dawn-errand/internal/infrastructure/ent/withdrawal"
 	"errors"
 	"fmt"
@@ -96,19 +108,31 @@ func checkColumn(table, column string) error {
 			casbinrule.Table:             casbinrule.ValidColumn,
 			complaint.Table:              complaint.ValidColumn,
 			credential.Table:             credential.ValidColumn,
+			dish.Table:                   dish.ValidColumn,
+			dishcategory.Table:           dishcategory.ValidColumn,
 			emailverificationtoken.Table: emailverificationtoken.ValidColumn,
 			feerule.Table:                feerule.ValidColumn,
 			mailoutbox.Table:             mailoutbox.ValidColumn,
 			merchant.Table:               merchant.ValidColumn,
+			notification.Table:           notification.ValidColumn,
 			order.Table:                  order.ValidColumn,
+			orderevent.Table:             orderevent.ValidColumn,
 			passwordresettoken.Table:     passwordresettoken.ValidColumn,
+			payment.Table:                payment.ValidColumn,
 			realnameverification.Table:   realnameverification.ValidColumn,
+			refund.Table:                 refund.ValidColumn,
 			region.Table:                 region.ValidColumn,
+			review.Table:                 review.ValidColumn,
 			rider.Table:                  rider.ValidColumn,
+			riderlocation.Table:          riderlocation.ValidColumn,
 			settlement.Table:             settlement.ValidColumn,
 			systemsetting.Table:          systemsetting.ValidColumn,
 			user.Table:                   user.ValidColumn,
+			useraddress.Table:            useraddress.ValidColumn,
+			usercoupon.Table:             usercoupon.ValidColumn,
 			userprofile.Table:            userprofile.ValidColumn,
+			walletaccount.Table:          walletaccount.ValidColumn,
+			wallettransaction.Table:      wallettransaction.ValidColumn,
 			withdrawal.Table:             withdrawal.ValidColumn,
 		})
 	})

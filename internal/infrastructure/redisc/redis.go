@@ -68,3 +68,40 @@ func (s *CodeStore) Get(ctx context.Context, key string) (string, error) {
 func (s *CodeStore) Delete(ctx context.Context, key string) error {
 	return s.rdb.Del(ctx, key).Err()
 }
+
+// Locker 基于 Redis SETNX 的分布式锁，实现 application.Locker。
+type Locker struct {
+	rdb *redis.Client
+}
+
+// NewLocker 构建分布式锁。
+func NewLocker(rdb *redis.Client) *Locker { return &Locker{rdb: rdb} }
+
+// TryLock 尝试加锁（SET NX + TTL）。
+func (l *Locker) TryLock(ctx context.Context, key string, ttl time.Duration) (bool, error) {
+	return l.rdb.SetNX(ctx, key, "1", ttl).Result()
+}
+
+// Unlock 释放锁。
+func (l *Locker) Unlock(ctx context.Context, key string) error {
+	return l.rdb.Del(ctx, key).Err()
+}
+
+// GeoStore 基于 Redis GEO 的骑手位置索引。
+type GeoStore struct {
+	rdb *redis.Client
+}
+
+// NewGeoStore 构建位置索引。
+func NewGeoStore(rdb *redis.Client) *GeoStore { return &GeoStore{rdb: rdb} }
+
+// SetRiderLocation 写入骑手位置（同区域 GEO 集合，24h 过期）。
+func (g *GeoStore) SetRiderLocation(ctx context.Context, regionID, riderID string, lat, lng float64) error {
+	key := "geo:riders:" + regionID
+	if err := g.rdb.GeoAdd(ctx, key, &redis.GeoLocation{
+		Name: riderID, Longitude: lng, Latitude: lat,
+	}).Err(); err != nil {
+		return err
+	}
+	return g.rdb.Expire(ctx, key, 24*time.Hour).Err()
+}

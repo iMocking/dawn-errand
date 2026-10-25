@@ -51,6 +51,26 @@ func (h *Handler) GetFinance(c *gin.Context) {
 	})
 }
 
+// GetReconciliation GET /finance/reconciliation?date=YYYY-MM-DD。
+func (h *Handler) GetReconciliation(c *gin.Context) {
+	date := c.Query("date")
+	if date == "" {
+		date = time.Now().UTC().Format("2006-01-02")
+	}
+	res, err := h.Finance.Reconciliation(c.Request.Context(), date)
+	if err != nil {
+		response.Err(c, err)
+		return
+	}
+	response.OK(c, gin.H{
+		"date":    res.Date,
+		"paid":    gin.H{"orders": res.PaidOrders, "amount": res.OrderAmount},
+		"payment": gin.H{"count": res.PaymentCount, "amount": res.PaymentAmount},
+		"refund":  gin.H{"count": res.RefundCount, "amount": res.RefundAmount},
+		"diff":    res.Diff, "missing_orders": res.MissingOrders,
+	})
+}
+
 // ListSettlements GET /finance/settlement。
 func (h *Handler) ListSettlements(c *gin.Context) {
 	page, size := parsePage(c)

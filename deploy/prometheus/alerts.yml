@@ -1,0 +1,46 @@
+groups:
+  - name: dawn-errand-api
+    rules:
+      - alert: DawnHigh5xxRate
+        expr: |
+          sum(rate(dawn_http_requests_total{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(dawn_http_requests_total[5m])), 0.001) > 0.01
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "后端 5xx 比例超过 1%"
+          description: "最近 5 分钟 5xx 比例 {{ $value | humanizePercentage }}"
+
+      - alert: DawnHighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(dawn_http_request_duration_seconds_bucket[5m]))
+          ) > 1
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "P95 延迟超过 1s"
+
+      - alert: DawnOrderTimeoutSpike
+        expr: increase(dawn_orders_timed_out_total[10m]) > 20
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "超时取消订单突增"
+          description: "10 分钟内超时取消 {{ $value }} 单，请检查支付/商家接单"
+
+      - alert: DawnLocationReportStop
+        expr: increase(dawn_location_reports_total[10m]) == 0
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "骑手位置上报中断"
+          description: "10 分钟无位置上报，检查骑手端/接口"
+
+      - alert: DawnJobNotRunning
+        expr: absent(dawn_job_runs_total) or increase(dawn_job_runs_total[15m]) == 0
+        for: 15m
+        labels: { severity: critical }
+        annotations:
+          summary: "定时任务可能未执行"

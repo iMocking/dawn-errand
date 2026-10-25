@@ -29,7 +29,7 @@ func (r WithdrawalRepo) Save(w *finance.Withdrawal) error {
 	}
 	err := r.client.Withdrawal.Create().
 		SetID(w.ID).SetRegionID(w.RegionID).
-		SetPartyType(w.PartyType).SetPartyName(w.PartyName).SetPartyNo(w.PartyNo).
+		SetPartyType(w.PartyType).SetPartyID(w.PartyID).SetPartyName(w.PartyName).SetPartyNo(w.PartyNo).
 		SetBankInfo(w.BankInfo).SetAmount(w.Amount).SetFee(w.Fee).SetFeeNote(w.FeeNote).
 		SetStatus(string(w.Status)).SetKind(w.Kind).SetApplicant(w.Applicant).
 		SetAccountHolder(w.AccountHolder).SetWithdrawType(w.WithdrawType).SetArriveExpect(w.ArriveExpect).
@@ -47,7 +47,7 @@ func toWithdrawal(e *ent.Withdrawal) *finance.Withdrawal {
 	}
 	w := &finance.Withdrawal{
 		ID: e.ID, RegionID: e.RegionID,
-		PartyType: e.PartyType, PartyName: e.PartyName, PartyNo: e.PartyNo,
+		PartyType: e.PartyType, PartyID: e.PartyID, PartyName: e.PartyName, PartyNo: e.PartyNo,
 		BankInfo: e.BankInfo, Amount: e.Amount, Fee: e.Fee, FeeNote: e.FeeNote,
 		Status: finance.WithdrawStatus(e.Status), Kind: e.Kind, Applicant: e.Applicant,
 		AccountHolder: e.AccountHolder, WithdrawType: e.WithdrawType, ArriveExpect: e.ArriveExpect,
@@ -57,6 +57,12 @@ func toWithdrawal(e *ent.Withdrawal) *finance.Withdrawal {
 		CreatedAt: e.CreatedAt,
 	}
 	_ = jsonUnmarshal(e.Timeline, &w.Timeline)
+	for _, ev := range w.Timeline {
+		if strings.HasPrefix(ev.Text, "打款成功") {
+			w.PayoutRef = ev.Operator
+			w.PayoutAt = ev.Time
+		}
+	}
 	return w
 }
 
@@ -79,6 +85,12 @@ func (r WithdrawalRepo) List(q finance.WithdrawQuery, sc tenant.Scope) ([]*finan
 	}
 	if s := strings.TrimSpace(q.Status); s != "" {
 		bq.Where(entwithdrawal.Status(s))
+	}
+	if q.PartyType != "" {
+		bq.Where(entwithdrawal.PartyType(q.PartyType))
+	}
+	if q.PartyID != "" {
+		bq.Where(entwithdrawal.PartyID(q.PartyID))
 	}
 	if k := strings.TrimSpace(q.Keyword); k != "" {
 		bq.Where(entwithdrawal.Or(
@@ -122,6 +134,16 @@ func (r WithdrawalRepo) Audit(id string, approved bool, remark, operator string,
 		SetStatus(status).SetRejectReason(remark).SetTimeline(mustJSON(cur.Timeline)).
 		Exec(ctx)
 	return err
+}
+
+func (r WithdrawalRepo) MarkPayout(id, ref string, now int64) error {
+	cur, err := r.FindByID(id)
+	if err != nil {
+		return err
+	}
+	cur.Timeline = append(cur.Timeline, finance.Event{Time: now, Text: "打款成功", Operator: ref})
+	return r.client.Withdrawal.UpdateOneID(id).
+		SetTimeline(mustJSON(cur.Timeline)).Exec(context.Background())
 }
 
 func (r WithdrawalRepo) Stats(sc tenant.Scope, now int64) (*finance.Stats, error) {
@@ -174,6 +196,21 @@ func (r WithdrawalRepo) CountPending() (int64, error) {
 	return int64(n), err
 }
 
+func (r WithdrawalRepo) CountByPartySince(partyType, partyID string, since int64) (int64, error) {
+	n, err := r.client.Withdrawal.Query().
+		Where(entwithdrawal.PartyType(partyType), entwithdrawal.PartyID(partyID),
+			entwithdrawal.CreatedAtGTE(since)).
+		Count(context.Background())
+	return int64(n), err
+}
+
+func (r WithdrawalRepo) SumPendingByParty(partyType, partyID string) (float64, error) {
+	return sumFloat64(context.Background(), r.client.Withdrawal.Query().
+		Where(entwithdrawal.PartyType(partyType), entwithdrawal.PartyID(partyID),
+			entwithdrawal.Status(string(finance.WithdrawPending))),
+		entwithdrawal.FieldAmount)
+}
+
 // SettlementRepo 实现 finance.SettlementRepository。
 type SettlementRepo struct{ client *ent.Client }
 
@@ -184,6 +221,7 @@ func (r SettlementRepo) Save(s *finance.Settlement) error {
 	}
 	err := r.client.Settlement.Create().
 		SetID(s.ID).SetRegionID(s.RegionID).SetParty(s.Party).
+		SetPartyType(s.PartyType).SetPartyID(s.PartyID).
 		SetType(string(s.Type)).SetAmount(s.Amount).SetStatus(string(s.Status)).
 		SetPeriod(s.Period).SetSettledAt(s.SettledAt).SetAction(s.Action).
 		Exec(ctx)
@@ -196,6 +234,7 @@ func toSettlement(e *ent.Settlement) *finance.Settlement {
 	}
 	return &finance.Settlement{
 		ID: e.ID, RegionID: e.RegionID, Party: e.Party,
+		PartyType: e.PartyType, PartyID: e.PartyID,
 		Type: finance.SettlementType(e.Type), Amount: e.Amount,
 		Status: finance.SettlementStatus(e.Status), Period: e.Period,
 		SettledAt: e.SettledAt, Action: e.Action,
@@ -213,6 +252,12 @@ func (r SettlementRepo) List(q finance.SettlementQuery, sc tenant.Scope) ([]*fin
 	}
 	if t := strings.TrimSpace(q.Type); t != "" {
 		bq.Where(entsettlement.Type(t))
+	}
+	if q.PartyType != "" {
+		bq.Where(entsettlement.PartyType(q.PartyType))
+	}
+	if q.PartyID != "" {
+		bq.Where(entsettlement.PartyID(q.PartyID))
 	}
 	if k := strings.TrimSpace(q.Keyword); k != "" {
 		bq.Where(entsettlement.Or(
@@ -234,6 +279,13 @@ func (r SettlementRepo) List(q finance.SettlementQuery, sc tenant.Scope) ([]*fin
 		out = append(out, toSettlement(e))
 	}
 	return out, int64(total), nil
+}
+
+func (r SettlementRepo) SumPendingByParty(partyType, partyID string) (float64, error) {
+	return sumFloat64(context.Background(), r.client.Settlement.Query().
+		Where(entsettlement.PartyType(partyType), entsettlement.PartyID(partyID),
+			entsettlement.Status(string(finance.SettlementProcessing))),
+		entsettlement.FieldAmount)
 }
 
 func (r SettlementRepo) Stats(sc tenant.Scope, now int64) (*finance.SettlementStats, error) {

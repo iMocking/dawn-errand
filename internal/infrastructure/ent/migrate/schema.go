@@ -157,6 +157,68 @@ var (
 		Columns:    CredentialsColumns,
 		PrimaryKey: []*schema.Column{CredentialsColumns[0]},
 	}
+	// DishesColumns holds the columns for the "dishes" table.
+	DishesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "merchant_id", Type: field.TypeString, Size: 26},
+		{Name: "category_id", Type: field.TypeString, Size: 26},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "description", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "image_url", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "price", Type: field.TypeFloat64, Default: 0},
+		{Name: "stock", Type: field.TypeInt, Default: 0},
+		{Name: "on_sale", Type: field.TypeBool, Default: true},
+		{Name: "monthly_sales", Type: field.TypeInt64, Default: 0},
+		{Name: "sort", Type: field.TypeInt, Default: 0},
+		{Name: "deleted_at", Type: field.TypeInt64, Default: 0},
+		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// DishesTable holds the schema information for the "dishes" table.
+	DishesTable = &schema.Table{
+		Name:       "dishes",
+		Columns:    DishesColumns,
+		PrimaryKey: []*schema.Column{DishesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "dish_merchant_id_on_sale",
+				Unique:  false,
+				Columns: []*schema.Column{DishesColumns[1], DishesColumns[8]},
+			},
+			{
+				Name:    "dish_category_id",
+				Unique:  false,
+				Columns: []*schema.Column{DishesColumns[2]},
+			},
+			{
+				Name:    "dish_name",
+				Unique:  false,
+				Columns: []*schema.Column{DishesColumns[3]},
+			},
+		},
+	}
+	// DishCategoriesColumns holds the columns for the "dish_categories" table.
+	DishCategoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "merchant_id", Type: field.TypeString, Size: 26},
+		{Name: "name", Type: field.TypeString, Size: 64},
+		{Name: "sort", Type: field.TypeInt, Default: 0},
+		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// DishCategoriesTable holds the schema information for the "dish_categories" table.
+	DishCategoriesTable = &schema.Table{
+		Name:       "dish_categories",
+		Columns:    DishCategoriesColumns,
+		PrimaryKey: []*schema.Column{DishCategoriesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "dishcategory_merchant_id_sort",
+				Unique:  false,
+				Columns: []*schema.Column{DishCategoriesColumns[1], DishCategoriesColumns[3]},
+			},
+		},
+	}
 	// EmailVerificationTokensColumns holds the columns for the "email_verification_tokens" table.
 	EmailVerificationTokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 26},
@@ -248,6 +310,14 @@ var (
 		{Name: "commission", Type: field.TypeFloat64, Default: 0},
 		{Name: "bank_account", Type: field.TypeString, Size: 128, Default: ""},
 		{Name: "delivery_method", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "lat", Type: field.TypeFloat64, Default: 0},
+		{Name: "lng", Type: field.TypeFloat64, Default: 0},
+		{Name: "auto_accept", Type: field.TypeBool, Default: false},
+		{Name: "min_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "delivery_fee", Type: field.TypeFloat64, Default: 0},
+		{Name: "packing_fee", Type: field.TypeFloat64, Default: 0},
+		{Name: "announcement", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "service_phone", Type: field.TypeString, Size: 32, Default: ""},
 		{Name: "status", Type: field.TypeString, Size: 16, Default: "open"},
 		{Name: "audit_status", Type: field.TypeString, Size: 16, Default: "approved"},
 		{Name: "apply_no", Type: field.TypeString, Size: 32, Default: ""},
@@ -280,17 +350,46 @@ var (
 			{
 				Name:    "merchant_region_id_status",
 				Unique:  false,
-				Columns: []*schema.Column{MerchantsColumns[1], MerchantsColumns[14]},
+				Columns: []*schema.Column{MerchantsColumns[1], MerchantsColumns[22]},
 			},
 			{
 				Name:    "merchant_audit_status",
 				Unique:  false,
-				Columns: []*schema.Column{MerchantsColumns[15]},
+				Columns: []*schema.Column{MerchantsColumns[23]},
 			},
 			{
 				Name:    "merchant_name",
 				Unique:  false,
 				Columns: []*schema.Column{MerchantsColumns[3]},
+			},
+		},
+	}
+	// NotificationsColumns holds the columns for the "notifications" table.
+	NotificationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "user_id", Type: field.TypeString, Size: 26},
+		{Name: "title", Type: field.TypeString, Size: 128},
+		{Name: "content", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "type", Type: field.TypeString, Size: 16, Default: "order"},
+		{Name: "ref_id", Type: field.TypeString, Size: 32, Default: ""},
+		{Name: "read_at", Type: field.TypeInt64, Default: 0},
+		{Name: "created_at", Type: field.TypeInt64},
+	}
+	// NotificationsTable holds the schema information for the "notifications" table.
+	NotificationsTable = &schema.Table{
+		Name:       "notifications",
+		Columns:    NotificationsColumns,
+		PrimaryKey: []*schema.Column{NotificationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "notification_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationsColumns[1], NotificationsColumns[7]},
+			},
+			{
+				Name:    "notification_user_id_read_at",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationsColumns[1], NotificationsColumns[6]},
 			},
 		},
 	}
@@ -321,6 +420,31 @@ var (
 		{Name: "pay_amount", Type: field.TypeFloat64, Default: 0},
 		{Name: "pay_method", Type: field.TypeString, Size: 64, Default: ""},
 		{Name: "fund_flow", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "client_order_no", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "address_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "address_snapshot", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "pickup_lat", Type: field.TypeFloat64, Default: 0},
+		{Name: "pickup_lng", Type: field.TypeFloat64, Default: 0},
+		{Name: "delivery_lat", Type: field.TypeFloat64, Default: 0},
+		{Name: "delivery_lng", Type: field.TypeFloat64, Default: 0},
+		{Name: "delivery_distance_km", Type: field.TypeFloat64, Default: 0},
+		{Name: "delivery_fee", Type: field.TypeFloat64, Default: 0},
+		{Name: "packing_fee", Type: field.TypeFloat64, Default: 0},
+		{Name: "discount_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "coupon_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "coupon_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "payment_status", Type: field.TypeString, Size: 16, Default: "unpaid"},
+		{Name: "accepted_at", Type: field.TypeInt64, Default: 0},
+		{Name: "ready_at", Type: field.TypeInt64, Default: 0},
+		{Name: "picked_at", Type: field.TypeInt64, Default: 0},
+		{Name: "delivered_at", Type: field.TypeInt64, Default: 0},
+		{Name: "canceled_at", Type: field.TypeInt64, Default: 0},
+		{Name: "confirmed_at", Type: field.TypeInt64, Default: 0},
+		{Name: "reviewed_at", Type: field.TypeInt64, Default: 0},
+		{Name: "cancel_reason", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "rider_earning", Type: field.TypeFloat64, Default: 0},
+		{Name: "pickup_code", Type: field.TypeString, Size: 8, Default: ""},
+		{Name: "delivery_code", Type: field.TypeString, Size: 8, Default: ""},
 	}
 	// OrdersTable holds the schema information for the "orders" table.
 	OrdersTable = &schema.Table{
@@ -348,6 +472,40 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{OrdersColumns[5]},
 			},
+			{
+				Name:    "order_user_id_client_order_no",
+				Unique:  false,
+				Columns: []*schema.Column{OrdersColumns[4], OrdersColumns[25]},
+			},
+			{
+				Name:    "order_region_id_status_rider_id",
+				Unique:  false,
+				Columns: []*schema.Column{OrdersColumns[2], OrdersColumns[7], OrdersColumns[5]},
+			},
+		},
+	}
+	// OrderEventsColumns holds the columns for the "order_events" table.
+	OrderEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "order_id", Type: field.TypeString, Size: 32},
+		{Name: "from_status", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "to_status", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "actor_type", Type: field.TypeString, Size: 16, Default: "system"},
+		{Name: "actor_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "note", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "created_at", Type: field.TypeInt64},
+	}
+	// OrderEventsTable holds the schema information for the "order_events" table.
+	OrderEventsTable = &schema.Table{
+		Name:       "order_events",
+		Columns:    OrderEventsColumns,
+		PrimaryKey: []*schema.Column{OrderEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "orderevent_order_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{OrderEventsColumns[1], OrderEventsColumns[7]},
+			},
 		},
 	}
 	// PasswordResetTokensColumns holds the columns for the "password_reset_tokens" table.
@@ -368,6 +526,37 @@ var (
 				Name:    "passwordresettoken_user_id",
 				Unique:  false,
 				Columns: []*schema.Column{PasswordResetTokensColumns[1]},
+			},
+		},
+	}
+	// PaymentsColumns holds the columns for the "payments" table.
+	PaymentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "order_id", Type: field.TypeString, Size: 32},
+		{Name: "user_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "channel", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "status", Type: field.TypeString, Size: 16, Default: "created"},
+		{Name: "trade_no", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "paid_at", Type: field.TypeInt64, Default: 0},
+		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// PaymentsTable holds the schema information for the "payments" table.
+	PaymentsTable = &schema.Table{
+		Name:       "payments",
+		Columns:    PaymentsColumns,
+		PrimaryKey: []*schema.Column{PaymentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "payment_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentsColumns[1]},
+			},
+			{
+				Name:    "payment_trade_no",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentsColumns[6]},
 			},
 		},
 	}
@@ -402,6 +591,39 @@ var (
 			},
 		},
 	}
+	// RefundsColumns holds the columns for the "refunds" table.
+	RefundsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "order_id", Type: field.TypeString, Size: 32},
+		{Name: "user_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "merchant_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "reason", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "status", Type: field.TypeString, Size: 16, Default: "requested"},
+		{Name: "prev_status", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "operator", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "reject_reason", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "handled_at", Type: field.TypeInt64, Default: 0},
+	}
+	// RefundsTable holds the schema information for the "refunds" table.
+	RefundsTable = &schema.Table{
+		Name:       "refunds",
+		Columns:    RefundsColumns,
+		PrimaryKey: []*schema.Column{RefundsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "refund_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{RefundsColumns[1]},
+			},
+			{
+				Name:    "refund_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{RefundsColumns[6], RefundsColumns[10]},
+			},
+		},
+	}
 	// RegionsColumns holds the columns for the "regions" table.
 	RegionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 26},
@@ -420,6 +642,39 @@ var (
 		Name:       "regions",
 		Columns:    RegionsColumns,
 		PrimaryKey: []*schema.Column{RegionsColumns[0]},
+	}
+	// ReviewsColumns holds the columns for the "reviews" table.
+	ReviewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "order_id", Type: field.TypeString, Unique: true, Size: 32},
+		{Name: "user_id", Type: field.TypeString, Size: 26},
+		{Name: "merchant_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "rider_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "rating", Type: field.TypeInt, Default: 5},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "content", Type: field.TypeString, Size: 1024, Default: ""},
+		{Name: "images", Type: field.TypeJSON, Nullable: true},
+		{Name: "reply", Type: field.TypeString, Size: 1024, Default: ""},
+		{Name: "replied_at", Type: field.TypeInt64, Default: 0},
+		{Name: "created_at", Type: field.TypeInt64},
+	}
+	// ReviewsTable holds the schema information for the "reviews" table.
+	ReviewsTable = &schema.Table{
+		Name:       "reviews",
+		Columns:    ReviewsColumns,
+		PrimaryKey: []*schema.Column{ReviewsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "review_merchant_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ReviewsColumns[3], ReviewsColumns[11]},
+			},
+			{
+				Name:    "review_rider_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ReviewsColumns[4], ReviewsColumns[11]},
+			},
+		},
 	}
 	// RidersColumns holds the columns for the "riders" table.
 	RidersColumns = []*schema.Column{
@@ -482,11 +737,43 @@ var (
 			},
 		},
 	}
+	// RiderLocationsColumns holds the columns for the "rider_locations" table.
+	RiderLocationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "rider_id", Type: field.TypeString, Unique: true, Size: 26},
+		{Name: "region_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "lat", Type: field.TypeFloat64, Default: 0},
+		{Name: "lng", Type: field.TypeFloat64, Default: 0},
+		{Name: "heading", Type: field.TypeFloat64, Default: 0},
+		{Name: "speed", Type: field.TypeFloat64, Default: 0},
+		{Name: "accuracy", Type: field.TypeFloat64, Default: 0},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// RiderLocationsTable holds the schema information for the "rider_locations" table.
+	RiderLocationsTable = &schema.Table{
+		Name:       "rider_locations",
+		Columns:    RiderLocationsColumns,
+		PrimaryKey: []*schema.Column{RiderLocationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "riderlocation_region_id",
+				Unique:  false,
+				Columns: []*schema.Column{RiderLocationsColumns[2]},
+			},
+			{
+				Name:    "riderlocation_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{RiderLocationsColumns[8]},
+			},
+		},
+	}
 	// SettlementsColumns holds the columns for the "settlements" table.
 	SettlementsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 26},
 		{Name: "region_id", Type: field.TypeString, Size: 26, Default: ""},
 		{Name: "party", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "party_type", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "party_id", Type: field.TypeString, Size: 26, Default: ""},
 		{Name: "type", Type: field.TypeString, Size: 32, Default: ""},
 		{Name: "amount", Type: field.TypeFloat64, Default: 0},
 		{Name: "status", Type: field.TypeString, Size: 16, Default: "已到账"},
@@ -503,12 +790,12 @@ var (
 			{
 				Name:    "settlement_settled_at",
 				Unique:  false,
-				Columns: []*schema.Column{SettlementsColumns[7]},
+				Columns: []*schema.Column{SettlementsColumns[9]},
 			},
 			{
 				Name:    "settlement_type",
 				Unique:  false,
-				Columns: []*schema.Column{SettlementsColumns[3]},
+				Columns: []*schema.Column{SettlementsColumns[5]},
 			},
 		},
 	}
@@ -576,6 +863,66 @@ var (
 			},
 		},
 	}
+	// UserAddressesColumns holds the columns for the "user_addresses" table.
+	UserAddressesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "user_id", Type: field.TypeString, Size: 26},
+		{Name: "contact_name", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "phone", Type: field.TypeString, Size: 32, Default: ""},
+		{Name: "region_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "detail", Type: field.TypeString, Size: 255},
+		{Name: "tag", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "lat", Type: field.TypeFloat64, Default: 0},
+		{Name: "lng", Type: field.TypeFloat64, Default: 0},
+		{Name: "is_default", Type: field.TypeBool, Default: false},
+		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// UserAddressesTable holds the schema information for the "user_addresses" table.
+	UserAddressesTable = &schema.Table{
+		Name:       "user_addresses",
+		Columns:    UserAddressesColumns,
+		PrimaryKey: []*schema.Column{UserAddressesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "useraddress_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{UserAddressesColumns[1], UserAddressesColumns[10]},
+			},
+		},
+	}
+	// UserCouponsColumns holds the columns for the "user_coupons" table.
+	UserCouponsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "user_id", Type: field.TypeString, Size: 26},
+		{Name: "merchant_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "title", Type: field.TypeString, Size: 64},
+		{Name: "amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "min_spend", Type: field.TypeFloat64, Default: 0},
+		{Name: "status", Type: field.TypeString, Size: 16, Default: "unused"},
+		{Name: "expires_at", Type: field.TypeInt64, Default: 0},
+		{Name: "used_order_id", Type: field.TypeString, Size: 32, Default: ""},
+		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// UserCouponsTable holds the schema information for the "user_coupons" table.
+	UserCouponsTable = &schema.Table{
+		Name:       "user_coupons",
+		Columns:    UserCouponsColumns,
+		PrimaryKey: []*schema.Column{UserCouponsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "usercoupon_user_id_status_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{UserCouponsColumns[1], UserCouponsColumns[6], UserCouponsColumns[7]},
+			},
+			{
+				Name:    "usercoupon_used_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserCouponsColumns[8]},
+			},
+		},
+	}
 	// UserProfilesColumns holds the columns for the "user_profiles" table.
 	UserProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 26},
@@ -599,11 +946,70 @@ var (
 		Columns:    UserProfilesColumns,
 		PrimaryKey: []*schema.Column{UserProfilesColumns[0]},
 	}
+	// WalletAccountsColumns holds the columns for the "wallet_accounts" table.
+	WalletAccountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "party_type", Type: field.TypeString, Size: 16},
+		{Name: "party_id", Type: field.TypeString, Size: 26},
+		{Name: "balance", Type: field.TypeFloat64, Default: 0},
+		{Name: "frozen", Type: field.TypeFloat64, Default: 0},
+		{Name: "updated_at", Type: field.TypeInt64},
+	}
+	// WalletAccountsTable holds the schema information for the "wallet_accounts" table.
+	WalletAccountsTable = &schema.Table{
+		Name:       "wallet_accounts",
+		Columns:    WalletAccountsColumns,
+		PrimaryKey: []*schema.Column{WalletAccountsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "walletaccount_party_type_party_id",
+				Unique:  true,
+				Columns: []*schema.Column{WalletAccountsColumns[1], WalletAccountsColumns[2]},
+			},
+		},
+	}
+	// WalletTransactionsColumns holds the columns for the "wallet_transactions" table.
+	WalletTransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 26},
+		{Name: "account_id", Type: field.TypeString, Size: 26},
+		{Name: "party_type", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "party_id", Type: field.TypeString, Size: 26, Default: ""},
+		{Name: "order_id", Type: field.TypeString, Size: 32, Default: ""},
+		{Name: "type", Type: field.TypeString, Size: 32},
+		{Name: "amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "balance_after", Type: field.TypeFloat64, Default: 0},
+		{Name: "note", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "created_at", Type: field.TypeInt64},
+	}
+	// WalletTransactionsTable holds the schema information for the "wallet_transactions" table.
+	WalletTransactionsTable = &schema.Table{
+		Name:       "wallet_transactions",
+		Columns:    WalletTransactionsColumns,
+		PrimaryKey: []*schema.Column{WalletTransactionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "wallettransaction_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{WalletTransactionsColumns[1], WalletTransactionsColumns[9]},
+			},
+			{
+				Name:    "wallettransaction_party_type_party_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{WalletTransactionsColumns[2], WalletTransactionsColumns[3], WalletTransactionsColumns[9]},
+			},
+			{
+				Name:    "wallettransaction_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{WalletTransactionsColumns[4]},
+			},
+		},
+	}
 	// WithdrawalsColumns holds the columns for the "withdrawals" table.
 	WithdrawalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 26},
 		{Name: "region_id", Type: field.TypeString, Size: 26, Default: ""},
 		{Name: "party_type", Type: field.TypeString, Size: 16, Default: "rider"},
+		{Name: "party_id", Type: field.TypeString, Size: 26, Default: ""},
 		{Name: "party_name", Type: field.TypeString, Size: 64, Default: ""},
 		{Name: "party_no", Type: field.TypeString, Size: 32, Default: ""},
 		{Name: "bank_info", Type: field.TypeString, Size: 128, Default: ""},
@@ -636,7 +1042,7 @@ var (
 			{
 				Name:    "withdrawal_status_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{WithdrawalsColumns[9], WithdrawalsColumns[23]},
+				Columns: []*schema.Column{WithdrawalsColumns[10], WithdrawalsColumns[24]},
 			},
 			{
 				Name:    "withdrawal_region_id",
@@ -652,19 +1058,31 @@ var (
 		CasbinRulesTable,
 		ComplaintsTable,
 		CredentialsTable,
+		DishesTable,
+		DishCategoriesTable,
 		EmailVerificationTokensTable,
 		FeeRulesTable,
 		MailOutboxesTable,
 		MerchantsTable,
+		NotificationsTable,
 		OrdersTable,
+		OrderEventsTable,
 		PasswordResetTokensTable,
+		PaymentsTable,
 		RealNameVerificationsTable,
+		RefundsTable,
 		RegionsTable,
+		ReviewsTable,
 		RidersTable,
+		RiderLocationsTable,
 		SettlementsTable,
 		SystemSettingsTable,
 		UsersTable,
+		UserAddressesTable,
+		UserCouponsTable,
 		UserProfilesTable,
+		WalletAccountsTable,
+		WalletTransactionsTable,
 		WithdrawalsTable,
 	}
 )

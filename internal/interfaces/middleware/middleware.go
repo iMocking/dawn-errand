@@ -106,6 +106,17 @@ func (m *Middleware) Metrics() gin.HandlerFunc {
 	}
 }
 
+// SecurityHeaders 基础安全响应头。
+func SecurityHeaders() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("X-Content-Type-Options", "nosniff")
+		c.Header("X-Frame-Options", "DENY")
+		c.Header("Referrer-Policy", "no-referrer")
+		c.Header("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+		c.Next()
+	}
+}
+
 // RateLimit 按 IP+前缀限流。
 func (m *Middleware) RateLimit(prefix string, limit int, window time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -180,6 +191,39 @@ func (m *Middleware) RequirePerm(obj, act string) gin.HandlerFunc {
 			response.ErrStatus(c, http.StatusForbidden, errcode.CodeForbidden, "无权限执行该操作")
 			c.Abort()
 			return
+		}
+		c.Next()
+	}
+}
+
+// RequireAppRole App 面角色守卫：校验角色并强制主体绑定。
+// merchant 必须绑定 MerchantID、driver 必须绑定 RiderID，否则返回 1202；
+// user 允许尚未选择区域（区域接口自身放行，业务接口由用例校验）。
+func (m *Middleware) RequireAppRole(roles ...string) gin.HandlerFunc {
+	allowed := make(map[string]bool, len(roles))
+	for _, r := range roles {
+		allowed[r] = true
+	}
+	return func(c *gin.Context) {
+		p := Principal(c)
+		if !allowed[p.Role] {
+			response.ErrStatus(c, http.StatusForbidden, errcode.CodeRoleDenied, "当前账号无权访问该端")
+			c.Abort()
+			return
+		}
+		switch p.Role {
+		case identity.RoleMerchant:
+			if p.MerchantID == "" {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeAccountUnbound, "账号未绑定商家，请联系平台开通")
+				c.Abort()
+				return
+			}
+		case identity.RoleDriver:
+			if p.RiderID == "" {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeAccountUnbound, "账号未绑定骑手，请联系平台开通")
+				c.Abort()
+				return
+			}
 		}
 		c.Next()
 	}

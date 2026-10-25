@@ -21,6 +21,8 @@ type Withdrawal struct {
 	RegionID string `json:"region_id,omitempty"`
 	// PartyType holds the value of the "party_type" field.
 	PartyType string `json:"party_type,omitempty"`
+	// PartyID holds the value of the "party_id" field.
+	PartyID string `json:"party_id,omitempty"`
 	// PartyName holds the value of the "party_name" field.
 	PartyName string `json:"party_name,omitempty"`
 	// PartyNo holds the value of the "party_no" field.
@@ -79,7 +81,7 @@ func (*Withdrawal) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case withdrawal.FieldMonthOrders, withdrawal.FieldCreatedAt:
 			values[i] = new(sql.NullInt64)
-		case withdrawal.FieldID, withdrawal.FieldRegionID, withdrawal.FieldPartyType, withdrawal.FieldPartyName, withdrawal.FieldPartyNo, withdrawal.FieldBankInfo, withdrawal.FieldFeeNote, withdrawal.FieldStatus, withdrawal.FieldKind, withdrawal.FieldApplicant, withdrawal.FieldAccountHolder, withdrawal.FieldWithdrawType, withdrawal.FieldArriveExpect, withdrawal.FieldPurpose, withdrawal.FieldRiskWarning, withdrawal.FieldRejectReason:
+		case withdrawal.FieldID, withdrawal.FieldRegionID, withdrawal.FieldPartyType, withdrawal.FieldPartyID, withdrawal.FieldPartyName, withdrawal.FieldPartyNo, withdrawal.FieldBankInfo, withdrawal.FieldFeeNote, withdrawal.FieldStatus, withdrawal.FieldKind, withdrawal.FieldApplicant, withdrawal.FieldAccountHolder, withdrawal.FieldWithdrawType, withdrawal.FieldArriveExpect, withdrawal.FieldPurpose, withdrawal.FieldRiskWarning, withdrawal.FieldRejectReason:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -113,6 +115,12 @@ func (w *Withdrawal) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field party_type", values[i])
 			} else if value.Valid {
 				w.PartyType = value.String
+			}
+		case withdrawal.FieldPartyID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field party_id", values[i])
+			} else if value.Valid {
+				w.PartyID = value.String
 			}
 		case withdrawal.FieldPartyName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -289,6 +297,9 @@ func (w *Withdrawal) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("party_type=")
 	builder.WriteString(w.PartyType)
+	builder.WriteString(", ")
+	builder.WriteString("party_id=")
+	builder.WriteString(w.PartyID)
 	builder.WriteString(", ")
 	builder.WriteString("party_name=")
 	builder.WriteString(w.PartyName)

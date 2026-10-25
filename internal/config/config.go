@@ -3,8 +3,10 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -26,6 +28,13 @@ type Config struct {
 	StorageRootDir   string
 	StoragePublicURL string
 	StorageMaxSizeMB int64
+
+	// 订单超时任务
+	OrderPayTimeoutSec  int64 // 待支付超时（秒）
+	OrderAutoConfirmSec int64 // 送达后自动确认（秒）
+
+	// 支付回调签名密钥（真实渠道适配层验签）。
+	PaymentCallbackSecret string
 }
 
 // Load 从环境变量加载配置；缺省值对应 .env.example。
@@ -48,11 +57,47 @@ func Load() *Config {
 		StorageRootDir:   getStr("STORAGE_ROOT_DIR", ".data/uploads"),
 		StoragePublicURL: getStr("STORAGE_PUBLIC_BASE_URL", "http://localhost:8080"),
 		StorageMaxSizeMB: int64(getInt("STORAGE_MAX_SIZE_MB", 10)),
+
+		OrderPayTimeoutSec:  int64(getInt("ORDER_PAY_TIMEOUT_SEC", 900)),
+		OrderAutoConfirmSec: int64(getInt("ORDER_AUTO_CONFIRM_SEC", 86400)),
+
+		PaymentCallbackSecret: getStr("PAYMENT_CALLBACK_SECRET", "dev_payment_callback_secret"),
 	}
 }
 
 // IsDev 是否开发环境（启用 dev 专用能力，如邮件 outbox 查询）。
 func (c *Config) IsDev() bool { return c.AppEnv == "dev" }
+
+// Validate 生产环境启动校验：禁止默认/弱密钥与开发口令。
+func (c *Config) Validate() error {
+	if c.AppEnv != "prod" {
+		return nil
+	}
+	switch {
+	case len(c.JWTSecret) < 32 || containsDev(c.JWTSecret):
+		return errors.New("生产环境 JWT_SECRET 必须为 ≥32 字节随机值，且不得使用 dev 默认值")
+	case containsDev(c.ConfigCipherKey):
+		return errors.New("生产环境 CONFIG_ENCRYPTION_KEY 必须更换")
+	case c.BootstrapToken == "" || containsDev(c.BootstrapToken):
+		return errors.New("生产环境 BOOTSTRAP_TOKEN 必须更换")
+	case c.PaymentCallbackSecret == "" || containsDev(c.PaymentCallbackSecret):
+		return errors.New("生产环境 PAYMENT_CALLBACK_SECRET 必须更换")
+	case containsDev(c.RedisPassword):
+		return errors.New("生产环境 Redis 密码不得使用 dev 默认值")
+	case containsDev(c.PostgresDSN):
+		return errors.New("生产环境数据库连接不得使用 dev 默认密码")
+	}
+	return nil
+}
+
+func containsDev(v string) bool {
+	for _, marker := range []string{"dev_only", "dev_bootstrap", "dev_payment", "change_me"} {
+		if strings.Contains(v, marker) {
+			return true
+		}
+	}
+	return false
+}
 
 func getStr(key, def string) string {
 	if v := os.Getenv(key); v != "" {

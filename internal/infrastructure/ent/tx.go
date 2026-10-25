@@ -22,6 +22,10 @@ type Tx struct {
 	Complaint *ComplaintClient
 	// Credential is the client for interacting with the Credential builders.
 	Credential *CredentialClient
+	// Dish is the client for interacting with the Dish builders.
+	Dish *DishClient
+	// DishCategory is the client for interacting with the DishCategory builders.
+	DishCategory *DishCategoryClient
 	// EmailVerificationToken is the client for interacting with the EmailVerificationToken builders.
 	EmailVerificationToken *EmailVerificationTokenClient
 	// FeeRule is the client for interacting with the FeeRule builders.
@@ -30,24 +34,44 @@ type Tx struct {
 	MailOutbox *MailOutboxClient
 	// Merchant is the client for interacting with the Merchant builders.
 	Merchant *MerchantClient
+	// Notification is the client for interacting with the Notification builders.
+	Notification *NotificationClient
 	// Order is the client for interacting with the Order builders.
 	Order *OrderClient
+	// OrderEvent is the client for interacting with the OrderEvent builders.
+	OrderEvent *OrderEventClient
 	// PasswordResetToken is the client for interacting with the PasswordResetToken builders.
 	PasswordResetToken *PasswordResetTokenClient
+	// Payment is the client for interacting with the Payment builders.
+	Payment *PaymentClient
 	// RealNameVerification is the client for interacting with the RealNameVerification builders.
 	RealNameVerification *RealNameVerificationClient
+	// Refund is the client for interacting with the Refund builders.
+	Refund *RefundClient
 	// Region is the client for interacting with the Region builders.
 	Region *RegionClient
+	// Review is the client for interacting with the Review builders.
+	Review *ReviewClient
 	// Rider is the client for interacting with the Rider builders.
 	Rider *RiderClient
+	// RiderLocation is the client for interacting with the RiderLocation builders.
+	RiderLocation *RiderLocationClient
 	// Settlement is the client for interacting with the Settlement builders.
 	Settlement *SettlementClient
 	// SystemSetting is the client for interacting with the SystemSetting builders.
 	SystemSetting *SystemSettingClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserAddress is the client for interacting with the UserAddress builders.
+	UserAddress *UserAddressClient
+	// UserCoupon is the client for interacting with the UserCoupon builders.
+	UserCoupon *UserCouponClient
 	// UserProfile is the client for interacting with the UserProfile builders.
 	UserProfile *UserProfileClient
+	// WalletAccount is the client for interacting with the WalletAccount builders.
+	WalletAccount *WalletAccountClient
+	// WalletTransaction is the client for interacting with the WalletTransaction builders.
+	WalletTransaction *WalletTransactionClient
 	// Withdrawal is the client for interacting with the Withdrawal builders.
 	Withdrawal *WithdrawalClient
 
@@ -186,19 +210,31 @@ func (tx *Tx) init() {
 	tx.CasbinRule = NewCasbinRuleClient(tx.config)
 	tx.Complaint = NewComplaintClient(tx.config)
 	tx.Credential = NewCredentialClient(tx.config)
+	tx.Dish = NewDishClient(tx.config)
+	tx.DishCategory = NewDishCategoryClient(tx.config)
 	tx.EmailVerificationToken = NewEmailVerificationTokenClient(tx.config)
 	tx.FeeRule = NewFeeRuleClient(tx.config)
 	tx.MailOutbox = NewMailOutboxClient(tx.config)
 	tx.Merchant = NewMerchantClient(tx.config)
+	tx.Notification = NewNotificationClient(tx.config)
 	tx.Order = NewOrderClient(tx.config)
+	tx.OrderEvent = NewOrderEventClient(tx.config)
 	tx.PasswordResetToken = NewPasswordResetTokenClient(tx.config)
+	tx.Payment = NewPaymentClient(tx.config)
 	tx.RealNameVerification = NewRealNameVerificationClient(tx.config)
+	tx.Refund = NewRefundClient(tx.config)
 	tx.Region = NewRegionClient(tx.config)
+	tx.Review = NewReviewClient(tx.config)
 	tx.Rider = NewRiderClient(tx.config)
+	tx.RiderLocation = NewRiderLocationClient(tx.config)
 	tx.Settlement = NewSettlementClient(tx.config)
 	tx.SystemSetting = NewSystemSettingClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserAddress = NewUserAddressClient(tx.config)
+	tx.UserCoupon = NewUserCouponClient(tx.config)
 	tx.UserProfile = NewUserProfileClient(tx.config)
+	tx.WalletAccount = NewWalletAccountClient(tx.config)
+	tx.WalletTransaction = NewWalletTransactionClient(tx.config)
 	tx.Withdrawal = NewWithdrawalClient(tx.config)
 }
 

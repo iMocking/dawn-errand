@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 送达点：绿色气泡图钉 + 白色房子（竞品风，尖角指向坐标） -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#00B578"
+        android:pathData="M9,19a15,15 0 1,0 30,0a15,15 0 1,0 -30,0Z M17,32L24,46L31,32Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,13L24,5L34,13Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,13H32V27H16Z" />
+    <path
+        android:fillColor="#00B578"
+        android:pathData="M22,27V21H26V27Z" />
+</vector>

@@ -47,6 +47,20 @@ func (wc *WithdrawalCreate) SetNillablePartyType(s *string) *WithdrawalCreate {
 	return wc
 }
 
+// SetPartyID sets the "party_id" field.
+func (wc *WithdrawalCreate) SetPartyID(s string) *WithdrawalCreate {
+	wc.mutation.SetPartyID(s)
+	return wc
+}
+
+// SetNillablePartyID sets the "party_id" field if the given value is not nil.
+func (wc *WithdrawalCreate) SetNillablePartyID(s *string) *WithdrawalCreate {
+	if s != nil {
+		wc.SetPartyID(*s)
+	}
+	return wc
+}
+
 // SetPartyName sets the "party_name" field.
 func (wc *WithdrawalCreate) SetPartyName(s string) *WithdrawalCreate {
 	wc.mutation.SetPartyName(s)
@@ -396,6 +410,10 @@ func (wc *WithdrawalCreate) defaults() {
 		v := withdrawal.DefaultPartyType
 		wc.mutation.SetPartyType(v)
 	}
+	if _, ok := wc.mutation.PartyID(); !ok {
+		v := withdrawal.DefaultPartyID
+		wc.mutation.SetPartyID(v)
+	}
 	if _, ok := wc.mutation.PartyName(); !ok {
 		v := withdrawal.DefaultPartyName
 		wc.mutation.SetPartyName(v)
@@ -498,6 +516,14 @@ func (wc *WithdrawalCreate) check() error {
 	if v, ok := wc.mutation.PartyType(); ok {
 		if err := withdrawal.PartyTypeValidator(v); err != nil {
 			return &ValidationError{Name: "party_type", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_type": %w`, err)}
+		}
+	}
+	if _, ok := wc.mutation.PartyID(); !ok {
+		return &ValidationError{Name: "party_id", err: errors.New(`ent: missing required field "Withdrawal.party_id"`)}
+	}
+	if v, ok := wc.mutation.PartyID(); ok {
+		if err := withdrawal.PartyIDValidator(v); err != nil {
+			return &ValidationError{Name: "party_id", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_id": %w`, err)}
 		}
 	}
 	if _, ok := wc.mutation.PartyName(); !ok {
@@ -672,6 +698,10 @@ func (wc *WithdrawalCreate) createSpec() (*Withdrawal, *sqlgraph.CreateSpec) {
 	if value, ok := wc.mutation.PartyType(); ok {
 		_spec.SetField(withdrawal.FieldPartyType, field.TypeString, value)
 		_node.PartyType = value
+	}
+	if value, ok := wc.mutation.PartyID(); ok {
+		_spec.SetField(withdrawal.FieldPartyID, field.TypeString, value)
+		_node.PartyID = value
 	}
 	if value, ok := wc.mutation.PartyName(); ok {
 		_spec.SetField(withdrawal.FieldPartyName, field.TypeString, value)

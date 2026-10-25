@@ -25,10 +25,10 @@ import (
 	"dawn-errand/internal/infrastructure/ent/credential"
 	"dawn-errand/internal/infrastructure/ent/emailverificationtoken"
 	"dawn-errand/internal/infrastructure/ent/passwordresettoken"
-	entuserprofile "dawn-errand/internal/infrastructure/ent/userprofile"
 	"dawn-errand/internal/infrastructure/ent/realnameverification"
 	"dawn-errand/internal/infrastructure/ent/systemsetting"
 	"dawn-errand/internal/infrastructure/ent/user"
+	entuserprofile "dawn-errand/internal/infrastructure/ent/userprofile"
 	"dawn-errand/internal/infrastructure/passwd"
 	apihandlers "dawn-errand/internal/interfaces/http"
 )
@@ -42,6 +42,7 @@ var (
 	router  *gin.Engine
 	handler *apihandlers.Handler
 	client  *ent.Client
+	appInst *assembly.App
 )
 
 type resp struct {
@@ -63,6 +64,7 @@ func setup() {
 	}
 	client = app.Client
 	handler = app.Handler
+	appInst = app
 	router = apihandlers.NewRouter(app.Handler, app.MW)
 }
 
@@ -653,9 +655,9 @@ func TestAdminSmsWithdrawRuleAndUserRole(t *testing.T) {
 		t.Fatalf("get withdraw-rule code=%d", wg.Code)
 	}
 	var wdef struct {
-		Enabled  bool    `json:"enabled"`
-		FeeRate  float64 `json:"fee_rate"`
-		Mode     string  `json:"mode"`
+		Enabled bool    `json:"enabled"`
+		FeeRate float64 `json:"fee_rate"`
+		Mode    string  `json:"mode"`
 	}
 	if err := json.Unmarshal(wg.Body, &wdef); err != nil {
 		t.Fatal(err)
@@ -818,8 +820,8 @@ func TestRealNameVerificationFlow(t *testing.T) {
 		t.Fatalf("detail code=%d", du.Code)
 	}
 	var dv struct {
-		Verified string `json:"verified"`
-		RealName string `json:"realName"`
+		Verified       string `json:"verified"`
+		RealName       string `json:"realName"`
 		RealNameVerify *struct {
 			Status string `json:"status"`
 		} `json:"realNameVerify"`

@@ -267,6 +267,348 @@ func (oc *OrderCreate) SetNillableFundFlow(s *string) *OrderCreate {
 	return oc
 }
 
+// SetClientOrderNo sets the "client_order_no" field.
+func (oc *OrderCreate) SetClientOrderNo(s string) *OrderCreate {
+	oc.mutation.SetClientOrderNo(s)
+	return oc
+}
+
+// SetNillableClientOrderNo sets the "client_order_no" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableClientOrderNo(s *string) *OrderCreate {
+	if s != nil {
+		oc.SetClientOrderNo(*s)
+	}
+	return oc
+}
+
+// SetAddressID sets the "address_id" field.
+func (oc *OrderCreate) SetAddressID(s string) *OrderCreate {
+	oc.mutation.SetAddressID(s)
+	return oc
+}
+
+// SetNillableAddressID sets the "address_id" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableAddressID(s *string) *OrderCreate {
+	if s != nil {
+		oc.SetAddressID(*s)
+	}
+	return oc
+}
+
+// SetAddressSnapshot sets the "address_snapshot" field.
+func (oc *OrderCreate) SetAddressSnapshot(b []byte) *OrderCreate {
+	oc.mutation.SetAddressSnapshot(b)
+	return oc
+}
+
+// SetPickupLat sets the "pickup_lat" field.
+func (oc *OrderCreate) SetPickupLat(f float64) *OrderCreate {
+	oc.mutation.SetPickupLat(f)
+	return oc
+}
+
+// SetNillablePickupLat sets the "pickup_lat" field if the given value is not nil.
+func (oc *OrderCreate) SetNillablePickupLat(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetPickupLat(*f)
+	}
+	return oc
+}
+
+// SetPickupLng sets the "pickup_lng" field.
+func (oc *OrderCreate) SetPickupLng(f float64) *OrderCreate {
+	oc.mutation.SetPickupLng(f)
+	return oc
+}
+
+// SetNillablePickupLng sets the "pickup_lng" field if the given value is not nil.
+func (oc *OrderCreate) SetNillablePickupLng(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetPickupLng(*f)
+	}
+	return oc
+}
+
+// SetDeliveryLat sets the "delivery_lat" field.
+func (oc *OrderCreate) SetDeliveryLat(f float64) *OrderCreate {
+	oc.mutation.SetDeliveryLat(f)
+	return oc
+}
+
+// SetNillableDeliveryLat sets the "delivery_lat" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDeliveryLat(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetDeliveryLat(*f)
+	}
+	return oc
+}
+
+// SetDeliveryLng sets the "delivery_lng" field.
+func (oc *OrderCreate) SetDeliveryLng(f float64) *OrderCreate {
+	oc.mutation.SetDeliveryLng(f)
+	return oc
+}
+
+// SetNillableDeliveryLng sets the "delivery_lng" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDeliveryLng(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetDeliveryLng(*f)
+	}
+	return oc
+}
+
+// SetDeliveryDistanceKm sets the "delivery_distance_km" field.
+func (oc *OrderCreate) SetDeliveryDistanceKm(f float64) *OrderCreate {
+	oc.mutation.SetDeliveryDistanceKm(f)
+	return oc
+}
+
+// SetNillableDeliveryDistanceKm sets the "delivery_distance_km" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDeliveryDistanceKm(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetDeliveryDistanceKm(*f)
+	}
+	return oc
+}
+
+// SetDeliveryFee sets the "delivery_fee" field.
+func (oc *OrderCreate) SetDeliveryFee(f float64) *OrderCreate {
+	oc.mutation.SetDeliveryFee(f)
+	return oc
+}
+
+// SetNillableDeliveryFee sets the "delivery_fee" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDeliveryFee(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetDeliveryFee(*f)
+	}
+	return oc
+}
+
+// SetPackingFee sets the "packing_fee" field.
+func (oc *OrderCreate) SetPackingFee(f float64) *OrderCreate {
+	oc.mutation.SetPackingFee(f)
+	return oc
+}
+
+// SetNillablePackingFee sets the "packing_fee" field if the given value is not nil.
+func (oc *OrderCreate) SetNillablePackingFee(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetPackingFee(*f)
+	}
+	return oc
+}
+
+// SetDiscountAmount sets the "discount_amount" field.
+func (oc *OrderCreate) SetDiscountAmount(f float64) *OrderCreate {
+	oc.mutation.SetDiscountAmount(f)
+	return oc
+}
+
+// SetNillableDiscountAmount sets the "discount_amount" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDiscountAmount(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetDiscountAmount(*f)
+	}
+	return oc
+}
+
+// SetCouponAmount sets the "coupon_amount" field.
+func (oc *OrderCreate) SetCouponAmount(f float64) *OrderCreate {
+	oc.mutation.SetCouponAmount(f)
+	return oc
+}
+
+// SetNillableCouponAmount sets the "coupon_amount" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableCouponAmount(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetCouponAmount(*f)
+	}
+	return oc
+}
+
+// SetCouponID sets the "coupon_id" field.
+func (oc *OrderCreate) SetCouponID(s string) *OrderCreate {
+	oc.mutation.SetCouponID(s)
+	return oc
+}
+
+// SetNillableCouponID sets the "coupon_id" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableCouponID(s *string) *OrderCreate {
+	if s != nil {
+		oc.SetCouponID(*s)
+	}
+	return oc
+}
+
+// SetPaymentStatus sets the "payment_status" field.
+func (oc *OrderCreate) SetPaymentStatus(s string) *OrderCreate {
+	oc.mutation.SetPaymentStatus(s)
+	return oc
+}
+
+// SetNillablePaymentStatus sets the "payment_status" field if the given value is not nil.
+func (oc *OrderCreate) SetNillablePaymentStatus(s *string) *OrderCreate {
+	if s != nil {
+		oc.SetPaymentStatus(*s)
+	}
+	return oc
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (oc *OrderCreate) SetAcceptedAt(i int64) *OrderCreate {
+	oc.mutation.SetAcceptedAt(i)
+	return oc
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableAcceptedAt(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetAcceptedAt(*i)
+	}
+	return oc
+}
+
+// SetReadyAt sets the "ready_at" field.
+func (oc *OrderCreate) SetReadyAt(i int64) *OrderCreate {
+	oc.mutation.SetReadyAt(i)
+	return oc
+}
+
+// SetNillableReadyAt sets the "ready_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableReadyAt(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetReadyAt(*i)
+	}
+	return oc
+}
+
+// SetPickedAt sets the "picked_at" field.
+func (oc *OrderCreate) SetPickedAt(i int64) *OrderCreate {
+	oc.mutation.SetPickedAt(i)
+	return oc
+}
+
+// SetNillablePickedAt sets the "picked_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillablePickedAt(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetPickedAt(*i)
+	}
+	return oc
+}
+
+// SetDeliveredAt sets the "delivered_at" field.
+func (oc *OrderCreate) SetDeliveredAt(i int64) *OrderCreate {
+	oc.mutation.SetDeliveredAt(i)
+	return oc
+}
+
+// SetNillableDeliveredAt sets the "delivered_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDeliveredAt(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetDeliveredAt(*i)
+	}
+	return oc
+}
+
+// SetCanceledAt sets the "canceled_at" field.
+func (oc *OrderCreate) SetCanceledAt(i int64) *OrderCreate {
+	oc.mutation.SetCanceledAt(i)
+	return oc
+}
+
+// SetNillableCanceledAt sets the "canceled_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableCanceledAt(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetCanceledAt(*i)
+	}
+	return oc
+}
+
+// SetConfirmedAt sets the "confirmed_at" field.
+func (oc *OrderCreate) SetConfirmedAt(i int64) *OrderCreate {
+	oc.mutation.SetConfirmedAt(i)
+	return oc
+}
+
+// SetNillableConfirmedAt sets the "confirmed_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableConfirmedAt(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetConfirmedAt(*i)
+	}
+	return oc
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (oc *OrderCreate) SetReviewedAt(i int64) *OrderCreate {
+	oc.mutation.SetReviewedAt(i)
+	return oc
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableReviewedAt(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetReviewedAt(*i)
+	}
+	return oc
+}
+
+// SetCancelReason sets the "cancel_reason" field.
+func (oc *OrderCreate) SetCancelReason(s string) *OrderCreate {
+	oc.mutation.SetCancelReason(s)
+	return oc
+}
+
+// SetNillableCancelReason sets the "cancel_reason" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableCancelReason(s *string) *OrderCreate {
+	if s != nil {
+		oc.SetCancelReason(*s)
+	}
+	return oc
+}
+
+// SetRiderEarning sets the "rider_earning" field.
+func (oc *OrderCreate) SetRiderEarning(f float64) *OrderCreate {
+	oc.mutation.SetRiderEarning(f)
+	return oc
+}
+
+// SetNillableRiderEarning sets the "rider_earning" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableRiderEarning(f *float64) *OrderCreate {
+	if f != nil {
+		oc.SetRiderEarning(*f)
+	}
+	return oc
+}
+
+// SetPickupCode sets the "pickup_code" field.
+func (oc *OrderCreate) SetPickupCode(s string) *OrderCreate {
+	oc.mutation.SetPickupCode(s)
+	return oc
+}
+
+// SetNillablePickupCode sets the "pickup_code" field if the given value is not nil.
+func (oc *OrderCreate) SetNillablePickupCode(s *string) *OrderCreate {
+	if s != nil {
+		oc.SetPickupCode(*s)
+	}
+	return oc
+}
+
+// SetDeliveryCode sets the "delivery_code" field.
+func (oc *OrderCreate) SetDeliveryCode(s string) *OrderCreate {
+	oc.mutation.SetDeliveryCode(s)
+	return oc
+}
+
+// SetNillableDeliveryCode sets the "delivery_code" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDeliveryCode(s *string) *OrderCreate {
+	if s != nil {
+		oc.SetDeliveryCode(*s)
+	}
+	return oc
+}
+
 // SetID sets the "id" field.
 func (oc *OrderCreate) SetID(s string) *OrderCreate {
 	oc.mutation.SetID(s)
@@ -367,6 +709,102 @@ func (oc *OrderCreate) defaults() {
 	if _, ok := oc.mutation.FundFlow(); !ok {
 		v := order.DefaultFundFlow
 		oc.mutation.SetFundFlow(v)
+	}
+	if _, ok := oc.mutation.ClientOrderNo(); !ok {
+		v := order.DefaultClientOrderNo
+		oc.mutation.SetClientOrderNo(v)
+	}
+	if _, ok := oc.mutation.AddressID(); !ok {
+		v := order.DefaultAddressID
+		oc.mutation.SetAddressID(v)
+	}
+	if _, ok := oc.mutation.PickupLat(); !ok {
+		v := order.DefaultPickupLat
+		oc.mutation.SetPickupLat(v)
+	}
+	if _, ok := oc.mutation.PickupLng(); !ok {
+		v := order.DefaultPickupLng
+		oc.mutation.SetPickupLng(v)
+	}
+	if _, ok := oc.mutation.DeliveryLat(); !ok {
+		v := order.DefaultDeliveryLat
+		oc.mutation.SetDeliveryLat(v)
+	}
+	if _, ok := oc.mutation.DeliveryLng(); !ok {
+		v := order.DefaultDeliveryLng
+		oc.mutation.SetDeliveryLng(v)
+	}
+	if _, ok := oc.mutation.DeliveryDistanceKm(); !ok {
+		v := order.DefaultDeliveryDistanceKm
+		oc.mutation.SetDeliveryDistanceKm(v)
+	}
+	if _, ok := oc.mutation.DeliveryFee(); !ok {
+		v := order.DefaultDeliveryFee
+		oc.mutation.SetDeliveryFee(v)
+	}
+	if _, ok := oc.mutation.PackingFee(); !ok {
+		v := order.DefaultPackingFee
+		oc.mutation.SetPackingFee(v)
+	}
+	if _, ok := oc.mutation.DiscountAmount(); !ok {
+		v := order.DefaultDiscountAmount
+		oc.mutation.SetDiscountAmount(v)
+	}
+	if _, ok := oc.mutation.CouponAmount(); !ok {
+		v := order.DefaultCouponAmount
+		oc.mutation.SetCouponAmount(v)
+	}
+	if _, ok := oc.mutation.CouponID(); !ok {
+		v := order.DefaultCouponID
+		oc.mutation.SetCouponID(v)
+	}
+	if _, ok := oc.mutation.PaymentStatus(); !ok {
+		v := order.DefaultPaymentStatus
+		oc.mutation.SetPaymentStatus(v)
+	}
+	if _, ok := oc.mutation.AcceptedAt(); !ok {
+		v := order.DefaultAcceptedAt
+		oc.mutation.SetAcceptedAt(v)
+	}
+	if _, ok := oc.mutation.ReadyAt(); !ok {
+		v := order.DefaultReadyAt
+		oc.mutation.SetReadyAt(v)
+	}
+	if _, ok := oc.mutation.PickedAt(); !ok {
+		v := order.DefaultPickedAt
+		oc.mutation.SetPickedAt(v)
+	}
+	if _, ok := oc.mutation.DeliveredAt(); !ok {
+		v := order.DefaultDeliveredAt
+		oc.mutation.SetDeliveredAt(v)
+	}
+	if _, ok := oc.mutation.CanceledAt(); !ok {
+		v := order.DefaultCanceledAt
+		oc.mutation.SetCanceledAt(v)
+	}
+	if _, ok := oc.mutation.ConfirmedAt(); !ok {
+		v := order.DefaultConfirmedAt
+		oc.mutation.SetConfirmedAt(v)
+	}
+	if _, ok := oc.mutation.ReviewedAt(); !ok {
+		v := order.DefaultReviewedAt
+		oc.mutation.SetReviewedAt(v)
+	}
+	if _, ok := oc.mutation.CancelReason(); !ok {
+		v := order.DefaultCancelReason
+		oc.mutation.SetCancelReason(v)
+	}
+	if _, ok := oc.mutation.RiderEarning(); !ok {
+		v := order.DefaultRiderEarning
+		oc.mutation.SetRiderEarning(v)
+	}
+	if _, ok := oc.mutation.PickupCode(); !ok {
+		v := order.DefaultPickupCode
+		oc.mutation.SetPickupCode(v)
+	}
+	if _, ok := oc.mutation.DeliveryCode(); !ok {
+		v := order.DefaultDeliveryCode
+		oc.mutation.SetDeliveryCode(v)
 	}
 	if _, ok := oc.mutation.ID(); !ok {
 		v := order.DefaultID()
@@ -498,6 +936,113 @@ func (oc *OrderCreate) check() error {
 	if v, ok := oc.mutation.FundFlow(); ok {
 		if err := order.FundFlowValidator(v); err != nil {
 			return &ValidationError{Name: "fund_flow", err: fmt.Errorf(`ent: validator failed for field "Order.fund_flow": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.ClientOrderNo(); !ok {
+		return &ValidationError{Name: "client_order_no", err: errors.New(`ent: missing required field "Order.client_order_no"`)}
+	}
+	if v, ok := oc.mutation.ClientOrderNo(); ok {
+		if err := order.ClientOrderNoValidator(v); err != nil {
+			return &ValidationError{Name: "client_order_no", err: fmt.Errorf(`ent: validator failed for field "Order.client_order_no": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.AddressID(); !ok {
+		return &ValidationError{Name: "address_id", err: errors.New(`ent: missing required field "Order.address_id"`)}
+	}
+	if v, ok := oc.mutation.AddressID(); ok {
+		if err := order.AddressIDValidator(v); err != nil {
+			return &ValidationError{Name: "address_id", err: fmt.Errorf(`ent: validator failed for field "Order.address_id": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.PickupLat(); !ok {
+		return &ValidationError{Name: "pickup_lat", err: errors.New(`ent: missing required field "Order.pickup_lat"`)}
+	}
+	if _, ok := oc.mutation.PickupLng(); !ok {
+		return &ValidationError{Name: "pickup_lng", err: errors.New(`ent: missing required field "Order.pickup_lng"`)}
+	}
+	if _, ok := oc.mutation.DeliveryLat(); !ok {
+		return &ValidationError{Name: "delivery_lat", err: errors.New(`ent: missing required field "Order.delivery_lat"`)}
+	}
+	if _, ok := oc.mutation.DeliveryLng(); !ok {
+		return &ValidationError{Name: "delivery_lng", err: errors.New(`ent: missing required field "Order.delivery_lng"`)}
+	}
+	if _, ok := oc.mutation.DeliveryDistanceKm(); !ok {
+		return &ValidationError{Name: "delivery_distance_km", err: errors.New(`ent: missing required field "Order.delivery_distance_km"`)}
+	}
+	if _, ok := oc.mutation.DeliveryFee(); !ok {
+		return &ValidationError{Name: "delivery_fee", err: errors.New(`ent: missing required field "Order.delivery_fee"`)}
+	}
+	if _, ok := oc.mutation.PackingFee(); !ok {
+		return &ValidationError{Name: "packing_fee", err: errors.New(`ent: missing required field "Order.packing_fee"`)}
+	}
+	if _, ok := oc.mutation.DiscountAmount(); !ok {
+		return &ValidationError{Name: "discount_amount", err: errors.New(`ent: missing required field "Order.discount_amount"`)}
+	}
+	if _, ok := oc.mutation.CouponAmount(); !ok {
+		return &ValidationError{Name: "coupon_amount", err: errors.New(`ent: missing required field "Order.coupon_amount"`)}
+	}
+	if _, ok := oc.mutation.CouponID(); !ok {
+		return &ValidationError{Name: "coupon_id", err: errors.New(`ent: missing required field "Order.coupon_id"`)}
+	}
+	if v, ok := oc.mutation.CouponID(); ok {
+		if err := order.CouponIDValidator(v); err != nil {
+			return &ValidationError{Name: "coupon_id", err: fmt.Errorf(`ent: validator failed for field "Order.coupon_id": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.PaymentStatus(); !ok {
+		return &ValidationError{Name: "payment_status", err: errors.New(`ent: missing required field "Order.payment_status"`)}
+	}
+	if v, ok := oc.mutation.PaymentStatus(); ok {
+		if err := order.PaymentStatusValidator(v); err != nil {
+			return &ValidationError{Name: "payment_status", err: fmt.Errorf(`ent: validator failed for field "Order.payment_status": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.AcceptedAt(); !ok {
+		return &ValidationError{Name: "accepted_at", err: errors.New(`ent: missing required field "Order.accepted_at"`)}
+	}
+	if _, ok := oc.mutation.ReadyAt(); !ok {
+		return &ValidationError{Name: "ready_at", err: errors.New(`ent: missing required field "Order.ready_at"`)}
+	}
+	if _, ok := oc.mutation.PickedAt(); !ok {
+		return &ValidationError{Name: "picked_at", err: errors.New(`ent: missing required field "Order.picked_at"`)}
+	}
+	if _, ok := oc.mutation.DeliveredAt(); !ok {
+		return &ValidationError{Name: "delivered_at", err: errors.New(`ent: missing required field "Order.delivered_at"`)}
+	}
+	if _, ok := oc.mutation.CanceledAt(); !ok {
+		return &ValidationError{Name: "canceled_at", err: errors.New(`ent: missing required field "Order.canceled_at"`)}
+	}
+	if _, ok := oc.mutation.ConfirmedAt(); !ok {
+		return &ValidationError{Name: "confirmed_at", err: errors.New(`ent: missing required field "Order.confirmed_at"`)}
+	}
+	if _, ok := oc.mutation.ReviewedAt(); !ok {
+		return &ValidationError{Name: "reviewed_at", err: errors.New(`ent: missing required field "Order.reviewed_at"`)}
+	}
+	if _, ok := oc.mutation.CancelReason(); !ok {
+		return &ValidationError{Name: "cancel_reason", err: errors.New(`ent: missing required field "Order.cancel_reason"`)}
+	}
+	if v, ok := oc.mutation.CancelReason(); ok {
+		if err := order.CancelReasonValidator(v); err != nil {
+			return &ValidationError{Name: "cancel_reason", err: fmt.Errorf(`ent: validator failed for field "Order.cancel_reason": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.RiderEarning(); !ok {
+		return &ValidationError{Name: "rider_earning", err: errors.New(`ent: missing required field "Order.rider_earning"`)}
+	}
+	if _, ok := oc.mutation.PickupCode(); !ok {
+		return &ValidationError{Name: "pickup_code", err: errors.New(`ent: missing required field "Order.pickup_code"`)}
+	}
+	if v, ok := oc.mutation.PickupCode(); ok {
+		if err := order.PickupCodeValidator(v); err != nil {
+			return &ValidationError{Name: "pickup_code", err: fmt.Errorf(`ent: validator failed for field "Order.pickup_code": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.DeliveryCode(); !ok {
+		return &ValidationError{Name: "delivery_code", err: errors.New(`ent: missing required field "Order.delivery_code"`)}
+	}
+	if v, ok := oc.mutation.DeliveryCode(); ok {
+		if err := order.DeliveryCodeValidator(v); err != nil {
+			return &ValidationError{Name: "delivery_code", err: fmt.Errorf(`ent: validator failed for field "Order.delivery_code": %w`, err)}
 		}
 	}
 	if v, ok := oc.mutation.ID(); ok {
@@ -635,6 +1180,106 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	if value, ok := oc.mutation.FundFlow(); ok {
 		_spec.SetField(order.FieldFundFlow, field.TypeString, value)
 		_node.FundFlow = value
+	}
+	if value, ok := oc.mutation.ClientOrderNo(); ok {
+		_spec.SetField(order.FieldClientOrderNo, field.TypeString, value)
+		_node.ClientOrderNo = value
+	}
+	if value, ok := oc.mutation.AddressID(); ok {
+		_spec.SetField(order.FieldAddressID, field.TypeString, value)
+		_node.AddressID = value
+	}
+	if value, ok := oc.mutation.AddressSnapshot(); ok {
+		_spec.SetField(order.FieldAddressSnapshot, field.TypeBytes, value)
+		_node.AddressSnapshot = value
+	}
+	if value, ok := oc.mutation.PickupLat(); ok {
+		_spec.SetField(order.FieldPickupLat, field.TypeFloat64, value)
+		_node.PickupLat = value
+	}
+	if value, ok := oc.mutation.PickupLng(); ok {
+		_spec.SetField(order.FieldPickupLng, field.TypeFloat64, value)
+		_node.PickupLng = value
+	}
+	if value, ok := oc.mutation.DeliveryLat(); ok {
+		_spec.SetField(order.FieldDeliveryLat, field.TypeFloat64, value)
+		_node.DeliveryLat = value
+	}
+	if value, ok := oc.mutation.DeliveryLng(); ok {
+		_spec.SetField(order.FieldDeliveryLng, field.TypeFloat64, value)
+		_node.DeliveryLng = value
+	}
+	if value, ok := oc.mutation.DeliveryDistanceKm(); ok {
+		_spec.SetField(order.FieldDeliveryDistanceKm, field.TypeFloat64, value)
+		_node.DeliveryDistanceKm = value
+	}
+	if value, ok := oc.mutation.DeliveryFee(); ok {
+		_spec.SetField(order.FieldDeliveryFee, field.TypeFloat64, value)
+		_node.DeliveryFee = value
+	}
+	if value, ok := oc.mutation.PackingFee(); ok {
+		_spec.SetField(order.FieldPackingFee, field.TypeFloat64, value)
+		_node.PackingFee = value
+	}
+	if value, ok := oc.mutation.DiscountAmount(); ok {
+		_spec.SetField(order.FieldDiscountAmount, field.TypeFloat64, value)
+		_node.DiscountAmount = value
+	}
+	if value, ok := oc.mutation.CouponAmount(); ok {
+		_spec.SetField(order.FieldCouponAmount, field.TypeFloat64, value)
+		_node.CouponAmount = value
+	}
+	if value, ok := oc.mutation.CouponID(); ok {
+		_spec.SetField(order.FieldCouponID, field.TypeString, value)
+		_node.CouponID = value
+	}
+	if value, ok := oc.mutation.PaymentStatus(); ok {
+		_spec.SetField(order.FieldPaymentStatus, field.TypeString, value)
+		_node.PaymentStatus = value
+	}
+	if value, ok := oc.mutation.AcceptedAt(); ok {
+		_spec.SetField(order.FieldAcceptedAt, field.TypeInt64, value)
+		_node.AcceptedAt = value
+	}
+	if value, ok := oc.mutation.ReadyAt(); ok {
+		_spec.SetField(order.FieldReadyAt, field.TypeInt64, value)
+		_node.ReadyAt = value
+	}
+	if value, ok := oc.mutation.PickedAt(); ok {
+		_spec.SetField(order.FieldPickedAt, field.TypeInt64, value)
+		_node.PickedAt = value
+	}
+	if value, ok := oc.mutation.DeliveredAt(); ok {
+		_spec.SetField(order.FieldDeliveredAt, field.TypeInt64, value)
+		_node.DeliveredAt = value
+	}
+	if value, ok := oc.mutation.CanceledAt(); ok {
+		_spec.SetField(order.FieldCanceledAt, field.TypeInt64, value)
+		_node.CanceledAt = value
+	}
+	if value, ok := oc.mutation.ConfirmedAt(); ok {
+		_spec.SetField(order.FieldConfirmedAt, field.TypeInt64, value)
+		_node.ConfirmedAt = value
+	}
+	if value, ok := oc.mutation.ReviewedAt(); ok {
+		_spec.SetField(order.FieldReviewedAt, field.TypeInt64, value)
+		_node.ReviewedAt = value
+	}
+	if value, ok := oc.mutation.CancelReason(); ok {
+		_spec.SetField(order.FieldCancelReason, field.TypeString, value)
+		_node.CancelReason = value
+	}
+	if value, ok := oc.mutation.RiderEarning(); ok {
+		_spec.SetField(order.FieldRiderEarning, field.TypeFloat64, value)
+		_node.RiderEarning = value
+	}
+	if value, ok := oc.mutation.PickupCode(); ok {
+		_spec.SetField(order.FieldPickupCode, field.TypeString, value)
+		_node.PickupCode = value
+	}
+	if value, ok := oc.mutation.DeliveryCode(); ok {
+		_spec.SetField(order.FieldDeliveryCode, field.TypeString, value)
+		_node.DeliveryCode = value
 	}
 	return _node, _spec
 }

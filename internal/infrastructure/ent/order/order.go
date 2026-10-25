@@ -59,6 +59,56 @@ const (
 	FieldPayMethod = "pay_method"
 	// FieldFundFlow holds the string denoting the fund_flow field in the database.
 	FieldFundFlow = "fund_flow"
+	// FieldClientOrderNo holds the string denoting the client_order_no field in the database.
+	FieldClientOrderNo = "client_order_no"
+	// FieldAddressID holds the string denoting the address_id field in the database.
+	FieldAddressID = "address_id"
+	// FieldAddressSnapshot holds the string denoting the address_snapshot field in the database.
+	FieldAddressSnapshot = "address_snapshot"
+	// FieldPickupLat holds the string denoting the pickup_lat field in the database.
+	FieldPickupLat = "pickup_lat"
+	// FieldPickupLng holds the string denoting the pickup_lng field in the database.
+	FieldPickupLng = "pickup_lng"
+	// FieldDeliveryLat holds the string denoting the delivery_lat field in the database.
+	FieldDeliveryLat = "delivery_lat"
+	// FieldDeliveryLng holds the string denoting the delivery_lng field in the database.
+	FieldDeliveryLng = "delivery_lng"
+	// FieldDeliveryDistanceKm holds the string denoting the delivery_distance_km field in the database.
+	FieldDeliveryDistanceKm = "delivery_distance_km"
+	// FieldDeliveryFee holds the string denoting the delivery_fee field in the database.
+	FieldDeliveryFee = "delivery_fee"
+	// FieldPackingFee holds the string denoting the packing_fee field in the database.
+	FieldPackingFee = "packing_fee"
+	// FieldDiscountAmount holds the string denoting the discount_amount field in the database.
+	FieldDiscountAmount = "discount_amount"
+	// FieldCouponAmount holds the string denoting the coupon_amount field in the database.
+	FieldCouponAmount = "coupon_amount"
+	// FieldCouponID holds the string denoting the coupon_id field in the database.
+	FieldCouponID = "coupon_id"
+	// FieldPaymentStatus holds the string denoting the payment_status field in the database.
+	FieldPaymentStatus = "payment_status"
+	// FieldAcceptedAt holds the string denoting the accepted_at field in the database.
+	FieldAcceptedAt = "accepted_at"
+	// FieldReadyAt holds the string denoting the ready_at field in the database.
+	FieldReadyAt = "ready_at"
+	// FieldPickedAt holds the string denoting the picked_at field in the database.
+	FieldPickedAt = "picked_at"
+	// FieldDeliveredAt holds the string denoting the delivered_at field in the database.
+	FieldDeliveredAt = "delivered_at"
+	// FieldCanceledAt holds the string denoting the canceled_at field in the database.
+	FieldCanceledAt = "canceled_at"
+	// FieldConfirmedAt holds the string denoting the confirmed_at field in the database.
+	FieldConfirmedAt = "confirmed_at"
+	// FieldReviewedAt holds the string denoting the reviewed_at field in the database.
+	FieldReviewedAt = "reviewed_at"
+	// FieldCancelReason holds the string denoting the cancel_reason field in the database.
+	FieldCancelReason = "cancel_reason"
+	// FieldRiderEarning holds the string denoting the rider_earning field in the database.
+	FieldRiderEarning = "rider_earning"
+	// FieldPickupCode holds the string denoting the pickup_code field in the database.
+	FieldPickupCode = "pickup_code"
+	// FieldDeliveryCode holds the string denoting the delivery_code field in the database.
+	FieldDeliveryCode = "delivery_code"
 	// Table holds the table name of the order in the database.
 	Table = "orders"
 )
@@ -90,6 +140,31 @@ var Columns = []string{
 	FieldPayAmount,
 	FieldPayMethod,
 	FieldFundFlow,
+	FieldClientOrderNo,
+	FieldAddressID,
+	FieldAddressSnapshot,
+	FieldPickupLat,
+	FieldPickupLng,
+	FieldDeliveryLat,
+	FieldDeliveryLng,
+	FieldDeliveryDistanceKm,
+	FieldDeliveryFee,
+	FieldPackingFee,
+	FieldDiscountAmount,
+	FieldCouponAmount,
+	FieldCouponID,
+	FieldPaymentStatus,
+	FieldAcceptedAt,
+	FieldReadyAt,
+	FieldPickedAt,
+	FieldDeliveredAt,
+	FieldCanceledAt,
+	FieldConfirmedAt,
+	FieldReviewedAt,
+	FieldCancelReason,
+	FieldRiderEarning,
+	FieldPickupCode,
+	FieldDeliveryCode,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -157,6 +232,68 @@ var (
 	DefaultFundFlow string
 	// FundFlowValidator is a validator for the "fund_flow" field. It is called by the builders before save.
 	FundFlowValidator func(string) error
+	// DefaultClientOrderNo holds the default value on creation for the "client_order_no" field.
+	DefaultClientOrderNo string
+	// ClientOrderNoValidator is a validator for the "client_order_no" field. It is called by the builders before save.
+	ClientOrderNoValidator func(string) error
+	// DefaultAddressID holds the default value on creation for the "address_id" field.
+	DefaultAddressID string
+	// AddressIDValidator is a validator for the "address_id" field. It is called by the builders before save.
+	AddressIDValidator func(string) error
+	// DefaultPickupLat holds the default value on creation for the "pickup_lat" field.
+	DefaultPickupLat float64
+	// DefaultPickupLng holds the default value on creation for the "pickup_lng" field.
+	DefaultPickupLng float64
+	// DefaultDeliveryLat holds the default value on creation for the "delivery_lat" field.
+	DefaultDeliveryLat float64
+	// DefaultDeliveryLng holds the default value on creation for the "delivery_lng" field.
+	DefaultDeliveryLng float64
+	// DefaultDeliveryDistanceKm holds the default value on creation for the "delivery_distance_km" field.
+	DefaultDeliveryDistanceKm float64
+	// DefaultDeliveryFee holds the default value on creation for the "delivery_fee" field.
+	DefaultDeliveryFee float64
+	// DefaultPackingFee holds the default value on creation for the "packing_fee" field.
+	DefaultPackingFee float64
+	// DefaultDiscountAmount holds the default value on creation for the "discount_amount" field.
+	DefaultDiscountAmount float64
+	// DefaultCouponAmount holds the default value on creation for the "coupon_amount" field.
+	DefaultCouponAmount float64
+	// DefaultCouponID holds the default value on creation for the "coupon_id" field.
+	DefaultCouponID string
+	// CouponIDValidator is a validator for the "coupon_id" field. It is called by the builders before save.
+	CouponIDValidator func(string) error
+	// DefaultPaymentStatus holds the default value on creation for the "payment_status" field.
+	DefaultPaymentStatus string
+	// PaymentStatusValidator is a validator for the "payment_status" field. It is called by the builders before save.
+	PaymentStatusValidator func(string) error
+	// DefaultAcceptedAt holds the default value on creation for the "accepted_at" field.
+	DefaultAcceptedAt int64
+	// DefaultReadyAt holds the default value on creation for the "ready_at" field.
+	DefaultReadyAt int64
+	// DefaultPickedAt holds the default value on creation for the "picked_at" field.
+	DefaultPickedAt int64
+	// DefaultDeliveredAt holds the default value on creation for the "delivered_at" field.
+	DefaultDeliveredAt int64
+	// DefaultCanceledAt holds the default value on creation for the "canceled_at" field.
+	DefaultCanceledAt int64
+	// DefaultConfirmedAt holds the default value on creation for the "confirmed_at" field.
+	DefaultConfirmedAt int64
+	// DefaultReviewedAt holds the default value on creation for the "reviewed_at" field.
+	DefaultReviewedAt int64
+	// DefaultCancelReason holds the default value on creation for the "cancel_reason" field.
+	DefaultCancelReason string
+	// CancelReasonValidator is a validator for the "cancel_reason" field. It is called by the builders before save.
+	CancelReasonValidator func(string) error
+	// DefaultRiderEarning holds the default value on creation for the "rider_earning" field.
+	DefaultRiderEarning float64
+	// DefaultPickupCode holds the default value on creation for the "pickup_code" field.
+	DefaultPickupCode string
+	// PickupCodeValidator is a validator for the "pickup_code" field. It is called by the builders before save.
+	PickupCodeValidator func(string) error
+	// DefaultDeliveryCode holds the default value on creation for the "delivery_code" field.
+	DefaultDeliveryCode string
+	// DeliveryCodeValidator is a validator for the "delivery_code" field. It is called by the builders before save.
+	DeliveryCodeValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -259,4 +396,124 @@ func ByPayMethod(opts ...sql.OrderTermOption) OrderOption {
 // ByFundFlow orders the results by the fund_flow field.
 func ByFundFlow(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFundFlow, opts...).ToFunc()
+}
+
+// ByClientOrderNo orders the results by the client_order_no field.
+func ByClientOrderNo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClientOrderNo, opts...).ToFunc()
+}
+
+// ByAddressID orders the results by the address_id field.
+func ByAddressID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAddressID, opts...).ToFunc()
+}
+
+// ByPickupLat orders the results by the pickup_lat field.
+func ByPickupLat(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPickupLat, opts...).ToFunc()
+}
+
+// ByPickupLng orders the results by the pickup_lng field.
+func ByPickupLng(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPickupLng, opts...).ToFunc()
+}
+
+// ByDeliveryLat orders the results by the delivery_lat field.
+func ByDeliveryLat(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryLat, opts...).ToFunc()
+}
+
+// ByDeliveryLng orders the results by the delivery_lng field.
+func ByDeliveryLng(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryLng, opts...).ToFunc()
+}
+
+// ByDeliveryDistanceKm orders the results by the delivery_distance_km field.
+func ByDeliveryDistanceKm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryDistanceKm, opts...).ToFunc()
+}
+
+// ByDeliveryFee orders the results by the delivery_fee field.
+func ByDeliveryFee(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryFee, opts...).ToFunc()
+}
+
+// ByPackingFee orders the results by the packing_fee field.
+func ByPackingFee(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPackingFee, opts...).ToFunc()
+}
+
+// ByDiscountAmount orders the results by the discount_amount field.
+func ByDiscountAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDiscountAmount, opts...).ToFunc()
+}
+
+// ByCouponAmount orders the results by the coupon_amount field.
+func ByCouponAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCouponAmount, opts...).ToFunc()
+}
+
+// ByCouponID orders the results by the coupon_id field.
+func ByCouponID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCouponID, opts...).ToFunc()
+}
+
+// ByPaymentStatus orders the results by the payment_status field.
+func ByPaymentStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPaymentStatus, opts...).ToFunc()
+}
+
+// ByAcceptedAt orders the results by the accepted_at field.
+func ByAcceptedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAcceptedAt, opts...).ToFunc()
+}
+
+// ByReadyAt orders the results by the ready_at field.
+func ByReadyAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReadyAt, opts...).ToFunc()
+}
+
+// ByPickedAt orders the results by the picked_at field.
+func ByPickedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPickedAt, opts...).ToFunc()
+}
+
+// ByDeliveredAt orders the results by the delivered_at field.
+func ByDeliveredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveredAt, opts...).ToFunc()
+}
+
+// ByCanceledAt orders the results by the canceled_at field.
+func ByCanceledAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCanceledAt, opts...).ToFunc()
+}
+
+// ByConfirmedAt orders the results by the confirmed_at field.
+func ByConfirmedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldConfirmedAt, opts...).ToFunc()
+}
+
+// ByReviewedAt orders the results by the reviewed_at field.
+func ByReviewedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewedAt, opts...).ToFunc()
+}
+
+// ByCancelReason orders the results by the cancel_reason field.
+func ByCancelReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCancelReason, opts...).ToFunc()
+}
+
+// ByRiderEarning orders the results by the rider_earning field.
+func ByRiderEarning(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRiderEarning, opts...).ToFunc()
+}
+
+// ByPickupCode orders the results by the pickup_code field.
+func ByPickupCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPickupCode, opts...).ToFunc()
+}
+
+// ByDeliveryCode orders the results by the delivery_code field.
+func ByDeliveryCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryCode, opts...).ToFunc()
 }

@@ -73,6 +73,16 @@ func Party(v string) predicate.Settlement {
 	return predicate.Settlement(sql.FieldEQ(FieldParty, v))
 }
 
+// PartyType applies equality check predicate on the "party_type" field. It's identical to PartyTypeEQ.
+func PartyType(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldEQ(FieldPartyType, v))
+}
+
+// PartyID applies equality check predicate on the "party_id" field. It's identical to PartyIDEQ.
+func PartyID(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldEQ(FieldPartyID, v))
+}
+
 // Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
 func Type(v string) predicate.Settlement {
 	return predicate.Settlement(sql.FieldEQ(FieldType, v))
@@ -231,6 +241,136 @@ func PartyEqualFold(v string) predicate.Settlement {
 // PartyContainsFold applies the ContainsFold predicate on the "party" field.
 func PartyContainsFold(v string) predicate.Settlement {
 	return predicate.Settlement(sql.FieldContainsFold(FieldParty, v))
+}
+
+// PartyTypeEQ applies the EQ predicate on the "party_type" field.
+func PartyTypeEQ(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldEQ(FieldPartyType, v))
+}
+
+// PartyTypeNEQ applies the NEQ predicate on the "party_type" field.
+func PartyTypeNEQ(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldNEQ(FieldPartyType, v))
+}
+
+// PartyTypeIn applies the In predicate on the "party_type" field.
+func PartyTypeIn(vs ...string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldIn(FieldPartyType, vs...))
+}
+
+// PartyTypeNotIn applies the NotIn predicate on the "party_type" field.
+func PartyTypeNotIn(vs ...string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldNotIn(FieldPartyType, vs...))
+}
+
+// PartyTypeGT applies the GT predicate on the "party_type" field.
+func PartyTypeGT(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldGT(FieldPartyType, v))
+}
+
+// PartyTypeGTE applies the GTE predicate on the "party_type" field.
+func PartyTypeGTE(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldGTE(FieldPartyType, v))
+}
+
+// PartyTypeLT applies the LT predicate on the "party_type" field.
+func PartyTypeLT(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldLT(FieldPartyType, v))
+}
+
+// PartyTypeLTE applies the LTE predicate on the "party_type" field.
+func PartyTypeLTE(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldLTE(FieldPartyType, v))
+}
+
+// PartyTypeContains applies the Contains predicate on the "party_type" field.
+func PartyTypeContains(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldContains(FieldPartyType, v))
+}
+
+// PartyTypeHasPrefix applies the HasPrefix predicate on the "party_type" field.
+func PartyTypeHasPrefix(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldHasPrefix(FieldPartyType, v))
+}
+
+// PartyTypeHasSuffix applies the HasSuffix predicate on the "party_type" field.
+func PartyTypeHasSuffix(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldHasSuffix(FieldPartyType, v))
+}
+
+// PartyTypeEqualFold applies the EqualFold predicate on the "party_type" field.
+func PartyTypeEqualFold(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldEqualFold(FieldPartyType, v))
+}
+
+// PartyTypeContainsFold applies the ContainsFold predicate on the "party_type" field.
+func PartyTypeContainsFold(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldContainsFold(FieldPartyType, v))
+}
+
+// PartyIDEQ applies the EQ predicate on the "party_id" field.
+func PartyIDEQ(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldEQ(FieldPartyID, v))
+}
+
+// PartyIDNEQ applies the NEQ predicate on the "party_id" field.
+func PartyIDNEQ(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldNEQ(FieldPartyID, v))
+}
+
+// PartyIDIn applies the In predicate on the "party_id" field.
+func PartyIDIn(vs ...string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldIn(FieldPartyID, vs...))
+}
+
+// PartyIDNotIn applies the NotIn predicate on the "party_id" field.
+func PartyIDNotIn(vs ...string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldNotIn(FieldPartyID, vs...))
+}
+
+// PartyIDGT applies the GT predicate on the "party_id" field.
+func PartyIDGT(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldGT(FieldPartyID, v))
+}
+
+// PartyIDGTE applies the GTE predicate on the "party_id" field.
+func PartyIDGTE(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldGTE(FieldPartyID, v))
+}
+
+// PartyIDLT applies the LT predicate on the "party_id" field.
+func PartyIDLT(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldLT(FieldPartyID, v))
+}
+
+// PartyIDLTE applies the LTE predicate on the "party_id" field.
+func PartyIDLTE(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldLTE(FieldPartyID, v))
+}
+
+// PartyIDContains applies the Contains predicate on the "party_id" field.
+func PartyIDContains(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldContains(FieldPartyID, v))
+}
+
+// PartyIDHasPrefix applies the HasPrefix predicate on the "party_id" field.
+func PartyIDHasPrefix(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldHasPrefix(FieldPartyID, v))
+}
+
+// PartyIDHasSuffix applies the HasSuffix predicate on the "party_id" field.
+func PartyIDHasSuffix(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldHasSuffix(FieldPartyID, v))
+}
+
+// PartyIDEqualFold applies the EqualFold predicate on the "party_id" field.
+func PartyIDEqualFold(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldEqualFold(FieldPartyID, v))
+}
+
+// PartyIDContainsFold applies the ContainsFold predicate on the "party_id" field.
+func PartyIDContainsFold(v string) predicate.Settlement {
+	return predicate.Settlement(sql.FieldContainsFold(FieldPartyID, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.

@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/redis/go-redis/v9"
@@ -15,7 +17,9 @@ import (
 
 	"dawn-errand/internal/application"
 	"dawn-errand/internal/application/admin"
+	appsvc "dawn-errand/internal/application/app"
 	"dawn-errand/internal/application/auth"
+	"dawn-errand/internal/application/jobs"
 	"dawn-errand/internal/application/system"
 	"dawn-errand/internal/config"
 	sysdomain "dawn-errand/internal/domain/system"
@@ -24,6 +28,7 @@ import (
 	"dawn-errand/internal/infrastructure/ent"
 	"dawn-errand/internal/infrastructure/mailer"
 	"dawn-errand/internal/infrastructure/passwd"
+	"dawn-errand/internal/infrastructure/payout"
 	"dawn-errand/internal/infrastructure/redisc"
 	"dawn-errand/internal/infrastructure/repo"
 	"dawn-errand/internal/infrastructure/storage"
@@ -49,6 +54,7 @@ type App struct {
 	Sender   *mailer.Sender
 	Auth     *auth.Service
 	System   *system.Service
+	Jobs     *jobs.Runner
 	Handler  *http.Handler
 	MW       *middleware.Middleware
 }
@@ -76,18 +82,32 @@ func smtpConfigProvider(cipher *crypto.Cipher, store *repo.Store) func() (*sysdo
 	}
 }
 
-// localStorageProvider 读取已保存的本地存储配置。
-func localStorageProvider(store *repo.Store) func() *sysdomain.LocalStorageConfig {
+// localStorageProvider 读取已保存的本地存储配置；未配置时回退到启动配置。
+func localStorageProvider(store *repo.Store, cfg *config.Config) func() *sysdomain.LocalStorageConfig {
 	return func() *sysdomain.LocalStorageConfig {
+		def := &sysdomain.LocalStorageConfig{
+			RootDir:       cfg.StorageRootDir,
+			PublicBaseURL: cfg.StoragePublicURL,
+			MaxSizeMB:     cfg.StorageMaxSizeMB,
+		}
 		rec, err := store.Repos().Settings.Get(sysdomain.KeyLocal)
 		if err != nil {
-			return &sysdomain.LocalStorageConfig{RootDir: ".data/uploads"}
+			return def
 		}
-		var cfg sysdomain.LocalStorageConfig
-		if err := json.Unmarshal([]byte(rec.ValueJSON), &cfg); err != nil {
-			return &sysdomain.LocalStorageConfig{RootDir: ".data/uploads"}
+		var c sysdomain.LocalStorageConfig
+		if err := json.Unmarshal([]byte(rec.ValueJSON), &c); err != nil {
+			return def
 		}
-		return &cfg
+		if c.RootDir == "" {
+			c.RootDir = def.RootDir
+		}
+		if c.PublicBaseURL == "" {
+			c.PublicBaseURL = def.PublicBaseURL
+		}
+		if c.MaxSizeMB <= 0 {
+			c.MaxSizeMB = def.MaxSizeMB
+		}
+		return &c
 	}
 }
 
@@ -113,6 +133,9 @@ func outboxProvider(client *ent.Client) func(ctx context.Context, limit int) ([]
 
 // Build 装配全部依赖。
 func Build(cfg *config.Config) (*App, error) {
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("配置校验失败: %w", err)
+	}
 	logger, err := log.New(cfg.AppEnv)
 	if err != nil {
 		return nil, fmt.Errorf("init logger: %w", err)
@@ -141,7 +164,12 @@ func Build(cfg *config.Config) (*App, error) {
 	tokens := token.NewManager(cfg.JWTSecret, rdb)
 	limiter := redisc.NewLimiter(rdb)
 	sender := mailer.NewSender(client, smtpConfigProvider(cipher, store))
-	_ = storage.NewLocal(localStorageProvider(store))
+	fileCfg := localStorageProvider(store, cfg)()
+	fileStore := storage.NewLocal(localStorageProvider(store, cfg))
+	storageMount := strings.Trim(fileCfg.PathPrefix, "/")
+	if storageMount == "" {
+		storageMount = "uploads"
+	}
 
 	authSvc := &auth.Service{
 		Repos: repos, Tx: store, Hasher: hasher, Tokens: tokens,
@@ -158,21 +186,61 @@ func Build(cfg *config.Config) (*App, error) {
 		Creds: repos.Credentials, Limiter: limiter, Enforcer: enforcer,
 	}
 
+	orderSvc := &appsvc.OrderService{Repos: repos, Tx: store, MockPayment: cfg.IsDev()}
+	trackingSvc := &appsvc.TrackingService{Repos: repos, Geo: redisc.NewGeoStore(rdb)}
+	notifySvc := &appsvc.NotificationService{Repos: repos}
+	walletSvc := &appsvc.WalletService{Repos: repos}
+	var payoutGw application.PayoutGateway
+	if cfg.IsDev() {
+		payoutGw = payout.NewMock()
+	}
+	financeAppSvc := &appsvc.FinanceAppService{Repos: repos, Tx: store, Wallet: walletSvc, Payout: payoutGw}
+	reviewSvc := &appsvc.ReviewService{Repos: repos, Tx: store}
+	refundSvc := &appsvc.RefundService{Repos: repos, Tx: store}
+	couponSvc := &appsvc.CouponService{Repos: repos}
+	jobsRunner := &jobs.Runner{
+		Repos: repos, Orders: orderSvc, Locker: redisc.NewLocker(rdb),
+		PayTimeout:  time.Duration(cfg.OrderPayTimeoutSec) * time.Second,
+		AutoConfirm: time.Duration(cfg.OrderAutoConfirmSec) * time.Second,
+		BatchLimit:  100,
+	}
+
 	h := &http.Handler{
 		Cfg: cfg, MW: mw, Auth: authSvc, System: systemSvc,
-		Dashboard:  &admin.DashboardService{Repos: repos},
-		Orders:     &admin.OrdersService{Repos: repos},
-		Merchants:  &admin.MerchantsService{Repos: repos},
-		Riders:     &admin.RidersService{Repos: repos},
-		Users:      &admin.UsersService{Repos: repos, Tx: store, Cipher: cipher},
-		Finance:    &admin.FinanceService{Repos: repos},
-		Complaints: &admin.ComplaintsService{Repos: repos},
-		Settings:   &admin.SettingsService{Repos: repos},
+		Portal:        &appsvc.Service{Repos: repos, Tx: store},
+		ClientApp:     &appsvc.ClientService{Repos: repos, Tx: store},
+		StoreApp:      &appsvc.StoreService{Repos: repos, Tx: store},
+		OrderApp:      orderSvc,
+		Tracking:      trackingSvc,
+		Notifications: notifySvc,
+		Wallet:        walletSvc,
+		FinanceApp:    financeAppSvc,
+		Reviews:       reviewSvc,
+		Refunds:       refundSvc,
+		Coupons:       couponSvc,
+		Storage:       fileStore,
+		StorageMount:  storageMount,
+		Accounts:      &admin.AccountsService{Repos: repos, Tx: store, Hasher: hasher},
+		Dashboard:     &admin.DashboardService{Repos: repos},
+		Orders:        &admin.OrdersService{Repos: repos},
+		Merchants:     &admin.MerchantsService{Repos: repos},
+		Riders:        &admin.RidersService{Repos: repos},
+		Users:         &admin.UsersService{Repos: repos, Tx: store, Cipher: cipher},
+		Finance:       &admin.FinanceService{Repos: repos, Tx: store, Payout: payoutGw},
+		Complaints:    &admin.ComplaintsService{Repos: repos},
+		Settings:      &admin.SettingsService{Repos: repos},
+		CouponsAdmin:  &admin.CouponService{Repos: repos},
+	}
+	h.Ready = func(ctx context.Context) error {
+		if _, err := client.User.Query().Limit(1).Exist(ctx); err != nil {
+			return err
+		}
+		return rdb.Ping(ctx).Err()
 	}
 
 	return &App{
 		Cfg: cfg, Logger: logger, Client: client, Rdb: rdb,
 		Store: store, Enforcer: enforcer, Sender: sender,
-		Auth: authSvc, System: systemSvc, Handler: h, MW: mw,
+		Auth: authSvc, System: systemSvc, Jobs: jobsRunner, Handler: h, MW: mw,
 	}, nil
 }

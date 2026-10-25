@@ -29,9 +29,12 @@ const (
 
 // OrderGoods 商品明细。
 type OrderGoods struct {
-	Name  string
-	Spec  string
-	Price float64
+	DishID string
+	Name   string
+	Spec   string
+	Price  float64
+	Count  int
+	Amount float64
 }
 
 // OrderFee 费用明细。
@@ -105,6 +108,43 @@ type Order struct {
 	PayAmount float64
 	PayMethod string
 	FundFlow  string
+
+	// 交易闭环字段（M2）。
+	ClientOrderNo      string
+	AddressID          string
+	Address            AddressSnapshot
+	PickupLat          float64
+	PickupLng          float64
+	DeliveryLat        float64
+	DeliveryLng        float64
+	DeliveryDistanceKM float64
+	DeliveryFee        float64
+	PackingFee         float64
+	DiscountAmount     float64
+	CouponAmount       float64
+	CouponID           string
+	PaymentStatus      string
+	AcceptedAt         int64
+	ReadyAt            int64
+	PickedAt           int64
+	DeliveredAt        int64
+	CanceledAt         int64
+	ConfirmedAt        int64
+	ReviewedAt         int64
+	CancelReason       string
+	RiderEarning       float64
+	PickupCode         string
+	DeliveryCode       string
+}
+
+// AddressSnapshot 下单时地址快照（避免地址后续修改影响历史订单）。
+type AddressSnapshot struct {
+	ContactName string
+	Phone       string
+	Detail      string
+	Tag         string
+	Lat         float64
+	Lng         float64
 }
 
 // Query 订单列表查询。
@@ -113,7 +153,8 @@ type Query struct {
 	PageSize int
 	Keyword  string
 	Status   string
-	UserID   string // 用户详情近期订单
+	Statuses []string // 多状态筛选（Tab），优先于 Status
+	UserID   string   // 用户详情近期订单
 	Limit    int
 }
 
@@ -137,6 +178,8 @@ type DayTrend struct {
 type OrderRepository interface {
 	Save(o *Order) error
 	FindByID(id string) (*Order, error)
+	// FindByClientOrderNo 幂等查询：同一用户同一客户端单号。
+	FindByClientOrderNo(userID, clientOrderNo string) (*Order, error)
 	// List 订单列表（scope 强制隔离）。
 	List(q Query, scope tenant.Scope) ([]*Order, int64, error)
 	// ListByUser 用户近期订单。
@@ -165,4 +208,14 @@ type OrderRepository interface {
 	CountByType(scope tenant.Scope) (map[OrderType]int64, error)
 	// CountAll 订单总数（scope 隔离）。
 	CountAll(scope tenant.Scope) (int64, error)
+	// UpdateStatus 条件流转（from→to）；返回是否更新成功（0 行表示状态已变化/并发冲突）。
+	UpdateStatus(id string, from, to OrderStatus, patch StatusPatch, now int64) (bool, error)
+	// AssignRider 抢单：仅当订单待取货且未分配骑手时成功（并发唯一）。
+	AssignRider(id, riderID, riderName string, now int64) (bool, error)
+	// ListPool 抢单池：本区域待取货且未分配骑手的订单。
+	ListPool(regionID string, page, pageSize int) ([]*Order, int64, error)
+	// ListPendingPayBefore 超时未支付订单。
+	ListPendingPayBefore(before int64, limit int) ([]*Order, error)
+	// ListDeliveredBefore 超时未确认收货订单。
+	ListDeliveredBefore(before int64, limit int) ([]*Order, error)
 }

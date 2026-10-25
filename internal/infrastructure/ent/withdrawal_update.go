@@ -56,6 +56,20 @@ func (wu *WithdrawalUpdate) SetNillablePartyType(s *string) *WithdrawalUpdate {
 	return wu
 }
 
+// SetPartyID sets the "party_id" field.
+func (wu *WithdrawalUpdate) SetPartyID(s string) *WithdrawalUpdate {
+	wu.mutation.SetPartyID(s)
+	return wu
+}
+
+// SetNillablePartyID sets the "party_id" field if the given value is not nil.
+func (wu *WithdrawalUpdate) SetNillablePartyID(s *string) *WithdrawalUpdate {
+	if s != nil {
+		wu.SetPartyID(*s)
+	}
+	return wu
+}
+
 // SetPartyName sets the "party_name" field.
 func (wu *WithdrawalUpdate) SetPartyName(s string) *WithdrawalUpdate {
 	wu.mutation.SetPartyName(s)
@@ -459,6 +473,11 @@ func (wu *WithdrawalUpdate) check() error {
 			return &ValidationError{Name: "party_type", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_type": %w`, err)}
 		}
 	}
+	if v, ok := wu.mutation.PartyID(); ok {
+		if err := withdrawal.PartyIDValidator(v); err != nil {
+			return &ValidationError{Name: "party_id", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_id": %w`, err)}
+		}
+	}
 	if v, ok := wu.mutation.PartyName(); ok {
 		if err := withdrawal.PartyNameValidator(v); err != nil {
 			return &ValidationError{Name: "party_name", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_name": %w`, err)}
@@ -544,6 +563,9 @@ func (wu *WithdrawalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := wu.mutation.PartyType(); ok {
 		_spec.SetField(withdrawal.FieldPartyType, field.TypeString, value)
+	}
+	if value, ok := wu.mutation.PartyID(); ok {
+		_spec.SetField(withdrawal.FieldPartyID, field.TypeString, value)
 	}
 	if value, ok := wu.mutation.PartyName(); ok {
 		_spec.SetField(withdrawal.FieldPartyName, field.TypeString, value)
@@ -687,6 +709,20 @@ func (wuo *WithdrawalUpdateOne) SetPartyType(s string) *WithdrawalUpdateOne {
 func (wuo *WithdrawalUpdateOne) SetNillablePartyType(s *string) *WithdrawalUpdateOne {
 	if s != nil {
 		wuo.SetPartyType(*s)
+	}
+	return wuo
+}
+
+// SetPartyID sets the "party_id" field.
+func (wuo *WithdrawalUpdateOne) SetPartyID(s string) *WithdrawalUpdateOne {
+	wuo.mutation.SetPartyID(s)
+	return wuo
+}
+
+// SetNillablePartyID sets the "party_id" field if the given value is not nil.
+func (wuo *WithdrawalUpdateOne) SetNillablePartyID(s *string) *WithdrawalUpdateOne {
+	if s != nil {
+		wuo.SetPartyID(*s)
 	}
 	return wuo
 }
@@ -1107,6 +1143,11 @@ func (wuo *WithdrawalUpdateOne) check() error {
 			return &ValidationError{Name: "party_type", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_type": %w`, err)}
 		}
 	}
+	if v, ok := wuo.mutation.PartyID(); ok {
+		if err := withdrawal.PartyIDValidator(v); err != nil {
+			return &ValidationError{Name: "party_id", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_id": %w`, err)}
+		}
+	}
 	if v, ok := wuo.mutation.PartyName(); ok {
 		if err := withdrawal.PartyNameValidator(v); err != nil {
 			return &ValidationError{Name: "party_name", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.party_name": %w`, err)}
@@ -1209,6 +1250,9 @@ func (wuo *WithdrawalUpdateOne) sqlSave(ctx context.Context) (_node *Withdrawal,
 	}
 	if value, ok := wuo.mutation.PartyType(); ok {
 		_spec.SetField(withdrawal.FieldPartyType, field.TypeString, value)
+	}
+	if value, ok := wuo.mutation.PartyID(); ok {
+		_spec.SetField(withdrawal.FieldPartyID, field.TypeString, value)
 	}
 	if value, ok := wuo.mutation.PartyName(); ok {
 		_spec.SetField(withdrawal.FieldPartyName, field.TypeString, value)

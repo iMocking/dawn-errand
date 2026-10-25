@@ -344,6 +344,12 @@ func (s *Service) autoRegisterByPhone(ctx context.Context, phone string) (*ident
 		if err := tx.Users.Save(u); err != nil {
 			return err
 		}
+		// 无密码账号同样需要凭证行：认证中间件以 session_version 校验会话有效性。
+		if err := tx.Credentials.Save(&identity.Credential{
+			UserID: u.ID, PasswordHash: passwordlessHash, UpdatedAt: now,
+		}); err != nil {
+			return err
+		}
 		// 初始化用户资料行（个人中心展示余额/积分等资产）。
 		return tx.Profiles.Save(&userprofile.Profile{
 			UserID: u.ID, Level: "Lv.1 新用户", Verified: "未实名",
@@ -356,12 +362,41 @@ func (s *Service) autoRegisterByPhone(ctx context.Context, phone string) (*ident
 	return u, nil
 }
 
+// passwordlessHash 无密码账号（手机验证码/后台开通未设密码）的占位哈希。
+// 该值不是合法 Argon2id 格式，Verify 必返回 false，因此不能用于密码登录。
+const passwordlessHash = "!"
+
+// ensureCredential 确保用户存在凭证行；无密码账号使用占位哈希。
+// 认证中间件要求 credential 存在以校验 session_version，缺失会导致登录后全部 401/1006。
+func (s *Service) ensureCredential(ctx context.Context, userID string, now int64) (*identity.Credential, error) {
+	cred, err := s.Repos.Credentials.FindByUserID(userID)
+	if err == nil {
+		return cred, nil
+	}
+	if !errors.Is(err, application.ErrNotFound) {
+		return nil, err
+	}
+	c := &identity.Credential{
+		UserID: userID, PasswordHash: passwordlessHash, SessionVersion: 0, UpdatedAt: now,
+	}
+	if err := s.Repos.Credentials.Save(c); err != nil {
+		// 并发下可能已被其他请求创建，回读一次。
+		if again, e := s.Repos.Credentials.FindByUserID(userID); e == nil {
+			return again, nil
+		}
+		return nil, err
+	}
+	return c, nil
+}
+
 // issueTokens 统一签发访问/刷新令牌并记录审计。
 func (s *Service) issueTokens(ctx context.Context, u *identity.User, action string) (*LoginResult, error) {
-	sv := int64(0)
-	if cred, err := s.Repos.Credentials.FindByUserID(u.ID); err == nil {
-		sv = cred.SessionVersion
+	now := time.Now().Unix()
+	cred, err := s.ensureCredential(ctx, u.ID, now)
+	if err != nil {
+		return nil, err
 	}
+	sv := cred.SessionVersion
 	access, err := s.Tokens.IssueAccessToken(application.TokenClaims{
 		UserID: u.ID, Role: u.Role, SessionVersion: sv,
 	}, s.Cfg.AccessTokenTTL)
@@ -399,7 +434,7 @@ func (s *Service) Refresh(ctx context.Context, userID, refreshToken string) (*Lo
 	if !u.IsActive() {
 		return nil, errcode.NewStatus(403, errcode.CodeUserBanned, "账号已被封禁")
 	}
-	cred, err := s.Repos.Credentials.FindByUserID(userID)
+	cred, err := s.ensureCredential(ctx, userID, time.Now().Unix())
 	if err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "凭证不存在")
 	}

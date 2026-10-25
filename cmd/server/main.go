@@ -45,6 +45,10 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	// 后台任务：订单超时取消、自动确认、公告发布（Redis 锁保证单实例）。
+	stopJobs := app.Jobs.Start(context.Background(), time.Minute)
+	defer stopJobs()
+
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.Port),
 		Handler:           router,

@@ -6,17 +6,25 @@ import (
 	"errors"
 	"time"
 
+	"dawn-errand/internal/domain/address"
+	"dawn-errand/internal/domain/catalog"
 	"dawn-errand/internal/domain/cms"
 	"dawn-errand/internal/domain/complaint"
+	"dawn-errand/internal/domain/coupon"
 	"dawn-errand/internal/domain/finance"
 	"dawn-errand/internal/domain/identity"
 	"dawn-errand/internal/domain/merchant"
+	"dawn-errand/internal/domain/notification"
 	"dawn-errand/internal/domain/order"
 	"dawn-errand/internal/domain/realname"
+	"dawn-errand/internal/domain/refund"
+	"dawn-errand/internal/domain/review"
 	"dawn-errand/internal/domain/rider"
 	"dawn-errand/internal/domain/system"
 	"dawn-errand/internal/domain/tenant"
+	"dawn-errand/internal/domain/tracking"
 	"dawn-errand/internal/domain/userprofile"
+	"dawn-errand/internal/domain/wallet"
 )
 
 // ErrNotFound 通用未找到错误（仓储层统一映射）。
@@ -49,6 +57,8 @@ type RepoUnit struct {
 	Merchants      merchant.MerchantRepository
 	Riders         rider.RiderRepository
 	Orders         order.OrderRepository
+	OrderEvents    order.EventRepository
+	Payments       order.PaymentRepository
 	Complaints     complaint.ComplaintRepository
 	Withdrawals    finance.WithdrawalRepository
 	Settlements    finance.SettlementRepository
@@ -56,6 +66,14 @@ type RepoUnit struct {
 	FeeRules       cms.FeeRuleRepository
 	Profiles       userprofile.ProfileRepository
 	RealNames      realname.Repository
+	Catalog        catalog.Repository
+	Addresses      address.Repository
+	Locations      tracking.Repository
+	Notifications  notification.Repository
+	Wallets        wallet.Repository
+	Reviews        review.Repository
+	Refunds        refund.Repository
+	Coupons        coupon.Repository
 	Audit          AuditLogger
 }
 
@@ -132,6 +150,25 @@ type CodeStore interface {
 type RateLimiter interface {
 	// Allow 判定是否放行；limit 为窗口内最大次数。
 	Allow(ctx context.Context, key string, limit int, window time.Duration) (bool, error)
+}
+
+// Locker 分布式锁端口（Redis SETNX 实现，用于定时任务单实例执行）。
+type Locker interface {
+	// TryLock 尝试加锁；成功返回 true。
+	TryLock(ctx context.Context, key string, ttl time.Duration) (bool, error)
+	// Unlock 释放锁。
+	Unlock(ctx context.Context, key string) error
+}
+
+// GeoStore 骑手位置地理索引（Redis GEO，供派单/附近查询扩展）。
+type GeoStore interface {
+	SetRiderLocation(ctx context.Context, regionID, riderID string, lat, lng float64) error
+}
+
+// PayoutGateway 提现打款端口（Mock/银行/微信代付可替换）。
+type PayoutGateway interface {
+	// Payout 发起打款，返回渠道回执号。
+	Payout(ctx context.Context, withdrawalID, partyType, partyID string, amount float64) (string, error)
 }
 
 // PolicyManager 权限策略管理端口（Casbin 实现）。

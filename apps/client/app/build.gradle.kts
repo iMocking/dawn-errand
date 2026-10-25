@@ -18,8 +18,8 @@ android {
         applicationId = "com.dawnerrand.client"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.2.1"
         buildConfigField("String", "API_BASE_URL", "\"$clientApiBaseUrl\"")
         buildConfigField("String", "AMAP_KEY", "\"$amapKey\"")
         manifestPlaceholders["amapKey"] = amapKey

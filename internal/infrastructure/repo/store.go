@@ -37,6 +37,8 @@ func (s *Store) Repos() *application.RepoUnit {
 		Merchants:      MerchantRepo{client: s.client},
 		Riders:         RiderRepo{client: s.client},
 		Orders:         OrderRepo{client: s.client},
+		OrderEvents:    OrderEventRepo{client: s.client},
+		Payments:       PaymentRepo{client: s.client},
 		Complaints:     ComplaintRepo{client: s.client},
 		Withdrawals:    WithdrawalRepo{client: s.client},
 		Settlements:    SettlementRepo{client: s.client},
@@ -44,6 +46,14 @@ func (s *Store) Repos() *application.RepoUnit {
 		FeeRules:       FeeRuleRepo{client: s.client},
 		Profiles:       ProfileRepo{client: s.client},
 		RealNames:      RealNameRepo{client: s.client},
+		Catalog:        CatalogRepo{client: s.client},
+		Addresses:      AddressRepo{client: s.client},
+		Locations:      TrackingRepo{client: s.client},
+		Notifications:  NotificationRepo{client: s.client},
+		Wallets:        WalletRepo{client: s.client},
+		Reviews:        ReviewRepo{client: s.client},
+		Refunds:        RefundRepo{client: s.client},
+		Coupons:        CouponRepo{client: s.client},
 		Audit:          AuditRepo{client: s.client},
 	}
 }

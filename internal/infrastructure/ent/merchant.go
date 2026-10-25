@@ -43,6 +43,22 @@ type Merchant struct {
 	BankAccount string `json:"bank_account,omitempty"`
 	// DeliveryMethod holds the value of the "delivery_method" field.
 	DeliveryMethod string `json:"delivery_method,omitempty"`
+	// Lat holds the value of the "lat" field.
+	Lat float64 `json:"lat,omitempty"`
+	// Lng holds the value of the "lng" field.
+	Lng float64 `json:"lng,omitempty"`
+	// AutoAccept holds the value of the "auto_accept" field.
+	AutoAccept bool `json:"auto_accept,omitempty"`
+	// MinPrice holds the value of the "min_price" field.
+	MinPrice float64 `json:"min_price,omitempty"`
+	// DeliveryFee holds the value of the "delivery_fee" field.
+	DeliveryFee float64 `json:"delivery_fee,omitempty"`
+	// PackingFee holds the value of the "packing_fee" field.
+	PackingFee float64 `json:"packing_fee,omitempty"`
+	// Announcement holds the value of the "announcement" field.
+	Announcement string `json:"announcement,omitempty"`
+	// ServicePhone holds the value of the "service_phone" field.
+	ServicePhone string `json:"service_phone,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
 	// AuditStatus holds the value of the "audit_status" field.
@@ -97,11 +113,13 @@ func (*Merchant) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case merchant.FieldCertLabels:
 			values[i] = new([]byte)
-		case merchant.FieldCommission, merchant.FieldRating, merchant.FieldMonthlyRevenue, merchant.FieldAvgOrder, merchant.FieldGoodRate, merchant.FieldTodayRevenue, merchant.FieldOnTimeRate:
+		case merchant.FieldAutoAccept:
+			values[i] = new(sql.NullBool)
+		case merchant.FieldCommission, merchant.FieldLat, merchant.FieldLng, merchant.FieldMinPrice, merchant.FieldDeliveryFee, merchant.FieldPackingFee, merchant.FieldRating, merchant.FieldMonthlyRevenue, merchant.FieldAvgOrder, merchant.FieldGoodRate, merchant.FieldTodayRevenue, merchant.FieldOnTimeRate:
 			values[i] = new(sql.NullFloat64)
 		case merchant.FieldAppliedAt, merchant.FieldMonthlyOrders, merchant.FieldJoinedAt, merchant.FieldLastUpdatedAt, merchant.FieldCompleteness, merchant.FieldReviewCount, merchant.FieldTodayOrders, merchant.FieldPendingAbnormal, merchant.FieldUpdatedAt:
 			values[i] = new(sql.NullInt64)
-		case merchant.FieldID, merchant.FieldRegionID, merchant.FieldOwnerUserID, merchant.FieldName, merchant.FieldCategory, merchant.FieldAddress, merchant.FieldAddressSub, merchant.FieldContact, merchant.FieldPhone, merchant.FieldOpenHours, merchant.FieldDeliveryRange, merchant.FieldBankAccount, merchant.FieldDeliveryMethod, merchant.FieldStatus, merchant.FieldAuditStatus, merchant.FieldApplyNo, merchant.FieldOperator, merchant.FieldRejectReason, merchant.FieldLastOperation:
+		case merchant.FieldID, merchant.FieldRegionID, merchant.FieldOwnerUserID, merchant.FieldName, merchant.FieldCategory, merchant.FieldAddress, merchant.FieldAddressSub, merchant.FieldContact, merchant.FieldPhone, merchant.FieldOpenHours, merchant.FieldDeliveryRange, merchant.FieldBankAccount, merchant.FieldDeliveryMethod, merchant.FieldAnnouncement, merchant.FieldServicePhone, merchant.FieldStatus, merchant.FieldAuditStatus, merchant.FieldApplyNo, merchant.FieldOperator, merchant.FieldRejectReason, merchant.FieldLastOperation:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -201,6 +219,54 @@ func (m *Merchant) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field delivery_method", values[i])
 			} else if value.Valid {
 				m.DeliveryMethod = value.String
+			}
+		case merchant.FieldLat:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field lat", values[i])
+			} else if value.Valid {
+				m.Lat = value.Float64
+			}
+		case merchant.FieldLng:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field lng", values[i])
+			} else if value.Valid {
+				m.Lng = value.Float64
+			}
+		case merchant.FieldAutoAccept:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field auto_accept", values[i])
+			} else if value.Valid {
+				m.AutoAccept = value.Bool
+			}
+		case merchant.FieldMinPrice:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field min_price", values[i])
+			} else if value.Valid {
+				m.MinPrice = value.Float64
+			}
+		case merchant.FieldDeliveryFee:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_fee", values[i])
+			} else if value.Valid {
+				m.DeliveryFee = value.Float64
+			}
+		case merchant.FieldPackingFee:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field packing_fee", values[i])
+			} else if value.Valid {
+				m.PackingFee = value.Float64
+			}
+		case merchant.FieldAnnouncement:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field announcement", values[i])
+			} else if value.Valid {
+				m.Announcement = value.String
+			}
+		case merchant.FieldServicePhone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field service_phone", values[i])
+			} else if value.Valid {
+				m.ServicePhone = value.String
 			}
 		case merchant.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -410,6 +476,30 @@ func (m *Merchant) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("delivery_method=")
 	builder.WriteString(m.DeliveryMethod)
+	builder.WriteString(", ")
+	builder.WriteString("lat=")
+	builder.WriteString(fmt.Sprintf("%v", m.Lat))
+	builder.WriteString(", ")
+	builder.WriteString("lng=")
+	builder.WriteString(fmt.Sprintf("%v", m.Lng))
+	builder.WriteString(", ")
+	builder.WriteString("auto_accept=")
+	builder.WriteString(fmt.Sprintf("%v", m.AutoAccept))
+	builder.WriteString(", ")
+	builder.WriteString("min_price=")
+	builder.WriteString(fmt.Sprintf("%v", m.MinPrice))
+	builder.WriteString(", ")
+	builder.WriteString("delivery_fee=")
+	builder.WriteString(fmt.Sprintf("%v", m.DeliveryFee))
+	builder.WriteString(", ")
+	builder.WriteString("packing_fee=")
+	builder.WriteString(fmt.Sprintf("%v", m.PackingFee))
+	builder.WriteString(", ")
+	builder.WriteString("announcement=")
+	builder.WriteString(m.Announcement)
+	builder.WriteString(", ")
+	builder.WriteString("service_phone=")
+	builder.WriteString(m.ServicePhone)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(m.Status)

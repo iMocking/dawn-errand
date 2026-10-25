@@ -20,6 +20,10 @@ type Settlement struct {
 	RegionID string `json:"region_id,omitempty"`
 	// Party holds the value of the "party" field.
 	Party string `json:"party,omitempty"`
+	// PartyType holds the value of the "party_type" field.
+	PartyType string `json:"party_type,omitempty"`
+	// PartyID holds the value of the "party_id" field.
+	PartyID string `json:"party_id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Amount holds the value of the "amount" field.
@@ -44,7 +48,7 @@ func (*Settlement) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case settlement.FieldSettledAt:
 			values[i] = new(sql.NullInt64)
-		case settlement.FieldID, settlement.FieldRegionID, settlement.FieldParty, settlement.FieldType, settlement.FieldStatus, settlement.FieldPeriod, settlement.FieldAction:
+		case settlement.FieldID, settlement.FieldRegionID, settlement.FieldParty, settlement.FieldPartyType, settlement.FieldPartyID, settlement.FieldType, settlement.FieldStatus, settlement.FieldPeriod, settlement.FieldAction:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -78,6 +82,18 @@ func (s *Settlement) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field party", values[i])
 			} else if value.Valid {
 				s.Party = value.String
+			}
+		case settlement.FieldPartyType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field party_type", values[i])
+			} else if value.Valid {
+				s.PartyType = value.String
+			}
+		case settlement.FieldPartyID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field party_id", values[i])
+			} else if value.Valid {
+				s.PartyID = value.String
 			}
 		case settlement.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -156,6 +172,12 @@ func (s *Settlement) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("party=")
 	builder.WriteString(s.Party)
+	builder.WriteString(", ")
+	builder.WriteString("party_type=")
+	builder.WriteString(s.PartyType)
+	builder.WriteString(", ")
+	builder.WriteString("party_id=")
+	builder.WriteString(s.PartyID)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(s.Type)

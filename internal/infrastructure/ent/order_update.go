@@ -379,6 +379,473 @@ func (ou *OrderUpdate) SetNillableFundFlow(s *string) *OrderUpdate {
 	return ou
 }
 
+// SetClientOrderNo sets the "client_order_no" field.
+func (ou *OrderUpdate) SetClientOrderNo(s string) *OrderUpdate {
+	ou.mutation.SetClientOrderNo(s)
+	return ou
+}
+
+// SetNillableClientOrderNo sets the "client_order_no" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableClientOrderNo(s *string) *OrderUpdate {
+	if s != nil {
+		ou.SetClientOrderNo(*s)
+	}
+	return ou
+}
+
+// SetAddressID sets the "address_id" field.
+func (ou *OrderUpdate) SetAddressID(s string) *OrderUpdate {
+	ou.mutation.SetAddressID(s)
+	return ou
+}
+
+// SetNillableAddressID sets the "address_id" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableAddressID(s *string) *OrderUpdate {
+	if s != nil {
+		ou.SetAddressID(*s)
+	}
+	return ou
+}
+
+// SetAddressSnapshot sets the "address_snapshot" field.
+func (ou *OrderUpdate) SetAddressSnapshot(b []byte) *OrderUpdate {
+	ou.mutation.SetAddressSnapshot(b)
+	return ou
+}
+
+// ClearAddressSnapshot clears the value of the "address_snapshot" field.
+func (ou *OrderUpdate) ClearAddressSnapshot() *OrderUpdate {
+	ou.mutation.ClearAddressSnapshot()
+	return ou
+}
+
+// SetPickupLat sets the "pickup_lat" field.
+func (ou *OrderUpdate) SetPickupLat(f float64) *OrderUpdate {
+	ou.mutation.ResetPickupLat()
+	ou.mutation.SetPickupLat(f)
+	return ou
+}
+
+// SetNillablePickupLat sets the "pickup_lat" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillablePickupLat(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetPickupLat(*f)
+	}
+	return ou
+}
+
+// AddPickupLat adds f to the "pickup_lat" field.
+func (ou *OrderUpdate) AddPickupLat(f float64) *OrderUpdate {
+	ou.mutation.AddPickupLat(f)
+	return ou
+}
+
+// SetPickupLng sets the "pickup_lng" field.
+func (ou *OrderUpdate) SetPickupLng(f float64) *OrderUpdate {
+	ou.mutation.ResetPickupLng()
+	ou.mutation.SetPickupLng(f)
+	return ou
+}
+
+// SetNillablePickupLng sets the "pickup_lng" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillablePickupLng(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetPickupLng(*f)
+	}
+	return ou
+}
+
+// AddPickupLng adds f to the "pickup_lng" field.
+func (ou *OrderUpdate) AddPickupLng(f float64) *OrderUpdate {
+	ou.mutation.AddPickupLng(f)
+	return ou
+}
+
+// SetDeliveryLat sets the "delivery_lat" field.
+func (ou *OrderUpdate) SetDeliveryLat(f float64) *OrderUpdate {
+	ou.mutation.ResetDeliveryLat()
+	ou.mutation.SetDeliveryLat(f)
+	return ou
+}
+
+// SetNillableDeliveryLat sets the "delivery_lat" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDeliveryLat(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetDeliveryLat(*f)
+	}
+	return ou
+}
+
+// AddDeliveryLat adds f to the "delivery_lat" field.
+func (ou *OrderUpdate) AddDeliveryLat(f float64) *OrderUpdate {
+	ou.mutation.AddDeliveryLat(f)
+	return ou
+}
+
+// SetDeliveryLng sets the "delivery_lng" field.
+func (ou *OrderUpdate) SetDeliveryLng(f float64) *OrderUpdate {
+	ou.mutation.ResetDeliveryLng()
+	ou.mutation.SetDeliveryLng(f)
+	return ou
+}
+
+// SetNillableDeliveryLng sets the "delivery_lng" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDeliveryLng(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetDeliveryLng(*f)
+	}
+	return ou
+}
+
+// AddDeliveryLng adds f to the "delivery_lng" field.
+func (ou *OrderUpdate) AddDeliveryLng(f float64) *OrderUpdate {
+	ou.mutation.AddDeliveryLng(f)
+	return ou
+}
+
+// SetDeliveryDistanceKm sets the "delivery_distance_km" field.
+func (ou *OrderUpdate) SetDeliveryDistanceKm(f float64) *OrderUpdate {
+	ou.mutation.ResetDeliveryDistanceKm()
+	ou.mutation.SetDeliveryDistanceKm(f)
+	return ou
+}
+
+// SetNillableDeliveryDistanceKm sets the "delivery_distance_km" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDeliveryDistanceKm(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetDeliveryDistanceKm(*f)
+	}
+	return ou
+}
+
+// AddDeliveryDistanceKm adds f to the "delivery_distance_km" field.
+func (ou *OrderUpdate) AddDeliveryDistanceKm(f float64) *OrderUpdate {
+	ou.mutation.AddDeliveryDistanceKm(f)
+	return ou
+}
+
+// SetDeliveryFee sets the "delivery_fee" field.
+func (ou *OrderUpdate) SetDeliveryFee(f float64) *OrderUpdate {
+	ou.mutation.ResetDeliveryFee()
+	ou.mutation.SetDeliveryFee(f)
+	return ou
+}
+
+// SetNillableDeliveryFee sets the "delivery_fee" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDeliveryFee(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetDeliveryFee(*f)
+	}
+	return ou
+}
+
+// AddDeliveryFee adds f to the "delivery_fee" field.
+func (ou *OrderUpdate) AddDeliveryFee(f float64) *OrderUpdate {
+	ou.mutation.AddDeliveryFee(f)
+	return ou
+}
+
+// SetPackingFee sets the "packing_fee" field.
+func (ou *OrderUpdate) SetPackingFee(f float64) *OrderUpdate {
+	ou.mutation.ResetPackingFee()
+	ou.mutation.SetPackingFee(f)
+	return ou
+}
+
+// SetNillablePackingFee sets the "packing_fee" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillablePackingFee(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetPackingFee(*f)
+	}
+	return ou
+}
+
+// AddPackingFee adds f to the "packing_fee" field.
+func (ou *OrderUpdate) AddPackingFee(f float64) *OrderUpdate {
+	ou.mutation.AddPackingFee(f)
+	return ou
+}
+
+// SetDiscountAmount sets the "discount_amount" field.
+func (ou *OrderUpdate) SetDiscountAmount(f float64) *OrderUpdate {
+	ou.mutation.ResetDiscountAmount()
+	ou.mutation.SetDiscountAmount(f)
+	return ou
+}
+
+// SetNillableDiscountAmount sets the "discount_amount" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDiscountAmount(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetDiscountAmount(*f)
+	}
+	return ou
+}
+
+// AddDiscountAmount adds f to the "discount_amount" field.
+func (ou *OrderUpdate) AddDiscountAmount(f float64) *OrderUpdate {
+	ou.mutation.AddDiscountAmount(f)
+	return ou
+}
+
+// SetCouponAmount sets the "coupon_amount" field.
+func (ou *OrderUpdate) SetCouponAmount(f float64) *OrderUpdate {
+	ou.mutation.ResetCouponAmount()
+	ou.mutation.SetCouponAmount(f)
+	return ou
+}
+
+// SetNillableCouponAmount sets the "coupon_amount" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableCouponAmount(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetCouponAmount(*f)
+	}
+	return ou
+}
+
+// AddCouponAmount adds f to the "coupon_amount" field.
+func (ou *OrderUpdate) AddCouponAmount(f float64) *OrderUpdate {
+	ou.mutation.AddCouponAmount(f)
+	return ou
+}
+
+// SetCouponID sets the "coupon_id" field.
+func (ou *OrderUpdate) SetCouponID(s string) *OrderUpdate {
+	ou.mutation.SetCouponID(s)
+	return ou
+}
+
+// SetNillableCouponID sets the "coupon_id" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableCouponID(s *string) *OrderUpdate {
+	if s != nil {
+		ou.SetCouponID(*s)
+	}
+	return ou
+}
+
+// SetPaymentStatus sets the "payment_status" field.
+func (ou *OrderUpdate) SetPaymentStatus(s string) *OrderUpdate {
+	ou.mutation.SetPaymentStatus(s)
+	return ou
+}
+
+// SetNillablePaymentStatus sets the "payment_status" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillablePaymentStatus(s *string) *OrderUpdate {
+	if s != nil {
+		ou.SetPaymentStatus(*s)
+	}
+	return ou
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (ou *OrderUpdate) SetAcceptedAt(i int64) *OrderUpdate {
+	ou.mutation.ResetAcceptedAt()
+	ou.mutation.SetAcceptedAt(i)
+	return ou
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableAcceptedAt(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetAcceptedAt(*i)
+	}
+	return ou
+}
+
+// AddAcceptedAt adds i to the "accepted_at" field.
+func (ou *OrderUpdate) AddAcceptedAt(i int64) *OrderUpdate {
+	ou.mutation.AddAcceptedAt(i)
+	return ou
+}
+
+// SetReadyAt sets the "ready_at" field.
+func (ou *OrderUpdate) SetReadyAt(i int64) *OrderUpdate {
+	ou.mutation.ResetReadyAt()
+	ou.mutation.SetReadyAt(i)
+	return ou
+}
+
+// SetNillableReadyAt sets the "ready_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableReadyAt(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetReadyAt(*i)
+	}
+	return ou
+}
+
+// AddReadyAt adds i to the "ready_at" field.
+func (ou *OrderUpdate) AddReadyAt(i int64) *OrderUpdate {
+	ou.mutation.AddReadyAt(i)
+	return ou
+}
+
+// SetPickedAt sets the "picked_at" field.
+func (ou *OrderUpdate) SetPickedAt(i int64) *OrderUpdate {
+	ou.mutation.ResetPickedAt()
+	ou.mutation.SetPickedAt(i)
+	return ou
+}
+
+// SetNillablePickedAt sets the "picked_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillablePickedAt(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetPickedAt(*i)
+	}
+	return ou
+}
+
+// AddPickedAt adds i to the "picked_at" field.
+func (ou *OrderUpdate) AddPickedAt(i int64) *OrderUpdate {
+	ou.mutation.AddPickedAt(i)
+	return ou
+}
+
+// SetDeliveredAt sets the "delivered_at" field.
+func (ou *OrderUpdate) SetDeliveredAt(i int64) *OrderUpdate {
+	ou.mutation.ResetDeliveredAt()
+	ou.mutation.SetDeliveredAt(i)
+	return ou
+}
+
+// SetNillableDeliveredAt sets the "delivered_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDeliveredAt(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetDeliveredAt(*i)
+	}
+	return ou
+}
+
+// AddDeliveredAt adds i to the "delivered_at" field.
+func (ou *OrderUpdate) AddDeliveredAt(i int64) *OrderUpdate {
+	ou.mutation.AddDeliveredAt(i)
+	return ou
+}
+
+// SetCanceledAt sets the "canceled_at" field.
+func (ou *OrderUpdate) SetCanceledAt(i int64) *OrderUpdate {
+	ou.mutation.ResetCanceledAt()
+	ou.mutation.SetCanceledAt(i)
+	return ou
+}
+
+// SetNillableCanceledAt sets the "canceled_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableCanceledAt(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetCanceledAt(*i)
+	}
+	return ou
+}
+
+// AddCanceledAt adds i to the "canceled_at" field.
+func (ou *OrderUpdate) AddCanceledAt(i int64) *OrderUpdate {
+	ou.mutation.AddCanceledAt(i)
+	return ou
+}
+
+// SetConfirmedAt sets the "confirmed_at" field.
+func (ou *OrderUpdate) SetConfirmedAt(i int64) *OrderUpdate {
+	ou.mutation.ResetConfirmedAt()
+	ou.mutation.SetConfirmedAt(i)
+	return ou
+}
+
+// SetNillableConfirmedAt sets the "confirmed_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableConfirmedAt(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetConfirmedAt(*i)
+	}
+	return ou
+}
+
+// AddConfirmedAt adds i to the "confirmed_at" field.
+func (ou *OrderUpdate) AddConfirmedAt(i int64) *OrderUpdate {
+	ou.mutation.AddConfirmedAt(i)
+	return ou
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (ou *OrderUpdate) SetReviewedAt(i int64) *OrderUpdate {
+	ou.mutation.ResetReviewedAt()
+	ou.mutation.SetReviewedAt(i)
+	return ou
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableReviewedAt(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetReviewedAt(*i)
+	}
+	return ou
+}
+
+// AddReviewedAt adds i to the "reviewed_at" field.
+func (ou *OrderUpdate) AddReviewedAt(i int64) *OrderUpdate {
+	ou.mutation.AddReviewedAt(i)
+	return ou
+}
+
+// SetCancelReason sets the "cancel_reason" field.
+func (ou *OrderUpdate) SetCancelReason(s string) *OrderUpdate {
+	ou.mutation.SetCancelReason(s)
+	return ou
+}
+
+// SetNillableCancelReason sets the "cancel_reason" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableCancelReason(s *string) *OrderUpdate {
+	if s != nil {
+		ou.SetCancelReason(*s)
+	}
+	return ou
+}
+
+// SetRiderEarning sets the "rider_earning" field.
+func (ou *OrderUpdate) SetRiderEarning(f float64) *OrderUpdate {
+	ou.mutation.ResetRiderEarning()
+	ou.mutation.SetRiderEarning(f)
+	return ou
+}
+
+// SetNillableRiderEarning sets the "rider_earning" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableRiderEarning(f *float64) *OrderUpdate {
+	if f != nil {
+		ou.SetRiderEarning(*f)
+	}
+	return ou
+}
+
+// AddRiderEarning adds f to the "rider_earning" field.
+func (ou *OrderUpdate) AddRiderEarning(f float64) *OrderUpdate {
+	ou.mutation.AddRiderEarning(f)
+	return ou
+}
+
+// SetPickupCode sets the "pickup_code" field.
+func (ou *OrderUpdate) SetPickupCode(s string) *OrderUpdate {
+	ou.mutation.SetPickupCode(s)
+	return ou
+}
+
+// SetNillablePickupCode sets the "pickup_code" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillablePickupCode(s *string) *OrderUpdate {
+	if s != nil {
+		ou.SetPickupCode(*s)
+	}
+	return ou
+}
+
+// SetDeliveryCode sets the "delivery_code" field.
+func (ou *OrderUpdate) SetDeliveryCode(s string) *OrderUpdate {
+	ou.mutation.SetDeliveryCode(s)
+	return ou
+}
+
+// SetNillableDeliveryCode sets the "delivery_code" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDeliveryCode(s *string) *OrderUpdate {
+	if s != nil {
+		ou.SetDeliveryCode(*s)
+	}
+	return ou
+}
+
 // Mutation returns the OrderMutation object of the builder.
 func (ou *OrderUpdate) Mutation() *OrderMutation {
 	return ou.mutation
@@ -481,6 +948,41 @@ func (ou *OrderUpdate) check() error {
 	if v, ok := ou.mutation.FundFlow(); ok {
 		if err := order.FundFlowValidator(v); err != nil {
 			return &ValidationError{Name: "fund_flow", err: fmt.Errorf(`ent: validator failed for field "Order.fund_flow": %w`, err)}
+		}
+	}
+	if v, ok := ou.mutation.ClientOrderNo(); ok {
+		if err := order.ClientOrderNoValidator(v); err != nil {
+			return &ValidationError{Name: "client_order_no", err: fmt.Errorf(`ent: validator failed for field "Order.client_order_no": %w`, err)}
+		}
+	}
+	if v, ok := ou.mutation.AddressID(); ok {
+		if err := order.AddressIDValidator(v); err != nil {
+			return &ValidationError{Name: "address_id", err: fmt.Errorf(`ent: validator failed for field "Order.address_id": %w`, err)}
+		}
+	}
+	if v, ok := ou.mutation.CouponID(); ok {
+		if err := order.CouponIDValidator(v); err != nil {
+			return &ValidationError{Name: "coupon_id", err: fmt.Errorf(`ent: validator failed for field "Order.coupon_id": %w`, err)}
+		}
+	}
+	if v, ok := ou.mutation.PaymentStatus(); ok {
+		if err := order.PaymentStatusValidator(v); err != nil {
+			return &ValidationError{Name: "payment_status", err: fmt.Errorf(`ent: validator failed for field "Order.payment_status": %w`, err)}
+		}
+	}
+	if v, ok := ou.mutation.CancelReason(); ok {
+		if err := order.CancelReasonValidator(v); err != nil {
+			return &ValidationError{Name: "cancel_reason", err: fmt.Errorf(`ent: validator failed for field "Order.cancel_reason": %w`, err)}
+		}
+	}
+	if v, ok := ou.mutation.PickupCode(); ok {
+		if err := order.PickupCodeValidator(v); err != nil {
+			return &ValidationError{Name: "pickup_code", err: fmt.Errorf(`ent: validator failed for field "Order.pickup_code": %w`, err)}
+		}
+	}
+	if v, ok := ou.mutation.DeliveryCode(); ok {
+		if err := order.DeliveryCodeValidator(v); err != nil {
+			return &ValidationError{Name: "delivery_code", err: fmt.Errorf(`ent: validator failed for field "Order.delivery_code": %w`, err)}
 		}
 	}
 	return nil
@@ -599,6 +1101,135 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ou.mutation.FundFlow(); ok {
 		_spec.SetField(order.FieldFundFlow, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.ClientOrderNo(); ok {
+		_spec.SetField(order.FieldClientOrderNo, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.AddressID(); ok {
+		_spec.SetField(order.FieldAddressID, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.AddressSnapshot(); ok {
+		_spec.SetField(order.FieldAddressSnapshot, field.TypeBytes, value)
+	}
+	if ou.mutation.AddressSnapshotCleared() {
+		_spec.ClearField(order.FieldAddressSnapshot, field.TypeBytes)
+	}
+	if value, ok := ou.mutation.PickupLat(); ok {
+		_spec.SetField(order.FieldPickupLat, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedPickupLat(); ok {
+		_spec.AddField(order.FieldPickupLat, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.PickupLng(); ok {
+		_spec.SetField(order.FieldPickupLng, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedPickupLng(); ok {
+		_spec.AddField(order.FieldPickupLng, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.DeliveryLat(); ok {
+		_spec.SetField(order.FieldDeliveryLat, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedDeliveryLat(); ok {
+		_spec.AddField(order.FieldDeliveryLat, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.DeliveryLng(); ok {
+		_spec.SetField(order.FieldDeliveryLng, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedDeliveryLng(); ok {
+		_spec.AddField(order.FieldDeliveryLng, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.DeliveryDistanceKm(); ok {
+		_spec.SetField(order.FieldDeliveryDistanceKm, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedDeliveryDistanceKm(); ok {
+		_spec.AddField(order.FieldDeliveryDistanceKm, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.DeliveryFee(); ok {
+		_spec.SetField(order.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedDeliveryFee(); ok {
+		_spec.AddField(order.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.PackingFee(); ok {
+		_spec.SetField(order.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedPackingFee(); ok {
+		_spec.AddField(order.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.DiscountAmount(); ok {
+		_spec.SetField(order.FieldDiscountAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedDiscountAmount(); ok {
+		_spec.AddField(order.FieldDiscountAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.CouponAmount(); ok {
+		_spec.SetField(order.FieldCouponAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedCouponAmount(); ok {
+		_spec.AddField(order.FieldCouponAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.CouponID(); ok {
+		_spec.SetField(order.FieldCouponID, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.PaymentStatus(); ok {
+		_spec.SetField(order.FieldPaymentStatus, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.AcceptedAt(); ok {
+		_spec.SetField(order.FieldAcceptedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedAcceptedAt(); ok {
+		_spec.AddField(order.FieldAcceptedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.ReadyAt(); ok {
+		_spec.SetField(order.FieldReadyAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedReadyAt(); ok {
+		_spec.AddField(order.FieldReadyAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.PickedAt(); ok {
+		_spec.SetField(order.FieldPickedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedPickedAt(); ok {
+		_spec.AddField(order.FieldPickedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.DeliveredAt(); ok {
+		_spec.SetField(order.FieldDeliveredAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedDeliveredAt(); ok {
+		_spec.AddField(order.FieldDeliveredAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.CanceledAt(); ok {
+		_spec.SetField(order.FieldCanceledAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedCanceledAt(); ok {
+		_spec.AddField(order.FieldCanceledAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.ConfirmedAt(); ok {
+		_spec.SetField(order.FieldConfirmedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedConfirmedAt(); ok {
+		_spec.AddField(order.FieldConfirmedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.ReviewedAt(); ok {
+		_spec.SetField(order.FieldReviewedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedReviewedAt(); ok {
+		_spec.AddField(order.FieldReviewedAt, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.CancelReason(); ok {
+		_spec.SetField(order.FieldCancelReason, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.RiderEarning(); ok {
+		_spec.SetField(order.FieldRiderEarning, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.AddedRiderEarning(); ok {
+		_spec.AddField(order.FieldRiderEarning, field.TypeFloat64, value)
+	}
+	if value, ok := ou.mutation.PickupCode(); ok {
+		_spec.SetField(order.FieldPickupCode, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.DeliveryCode(); ok {
+		_spec.SetField(order.FieldDeliveryCode, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ou.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -972,6 +1603,473 @@ func (ouo *OrderUpdateOne) SetNillableFundFlow(s *string) *OrderUpdateOne {
 	return ouo
 }
 
+// SetClientOrderNo sets the "client_order_no" field.
+func (ouo *OrderUpdateOne) SetClientOrderNo(s string) *OrderUpdateOne {
+	ouo.mutation.SetClientOrderNo(s)
+	return ouo
+}
+
+// SetNillableClientOrderNo sets the "client_order_no" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableClientOrderNo(s *string) *OrderUpdateOne {
+	if s != nil {
+		ouo.SetClientOrderNo(*s)
+	}
+	return ouo
+}
+
+// SetAddressID sets the "address_id" field.
+func (ouo *OrderUpdateOne) SetAddressID(s string) *OrderUpdateOne {
+	ouo.mutation.SetAddressID(s)
+	return ouo
+}
+
+// SetNillableAddressID sets the "address_id" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableAddressID(s *string) *OrderUpdateOne {
+	if s != nil {
+		ouo.SetAddressID(*s)
+	}
+	return ouo
+}
+
+// SetAddressSnapshot sets the "address_snapshot" field.
+func (ouo *OrderUpdateOne) SetAddressSnapshot(b []byte) *OrderUpdateOne {
+	ouo.mutation.SetAddressSnapshot(b)
+	return ouo
+}
+
+// ClearAddressSnapshot clears the value of the "address_snapshot" field.
+func (ouo *OrderUpdateOne) ClearAddressSnapshot() *OrderUpdateOne {
+	ouo.mutation.ClearAddressSnapshot()
+	return ouo
+}
+
+// SetPickupLat sets the "pickup_lat" field.
+func (ouo *OrderUpdateOne) SetPickupLat(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetPickupLat()
+	ouo.mutation.SetPickupLat(f)
+	return ouo
+}
+
+// SetNillablePickupLat sets the "pickup_lat" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillablePickupLat(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetPickupLat(*f)
+	}
+	return ouo
+}
+
+// AddPickupLat adds f to the "pickup_lat" field.
+func (ouo *OrderUpdateOne) AddPickupLat(f float64) *OrderUpdateOne {
+	ouo.mutation.AddPickupLat(f)
+	return ouo
+}
+
+// SetPickupLng sets the "pickup_lng" field.
+func (ouo *OrderUpdateOne) SetPickupLng(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetPickupLng()
+	ouo.mutation.SetPickupLng(f)
+	return ouo
+}
+
+// SetNillablePickupLng sets the "pickup_lng" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillablePickupLng(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetPickupLng(*f)
+	}
+	return ouo
+}
+
+// AddPickupLng adds f to the "pickup_lng" field.
+func (ouo *OrderUpdateOne) AddPickupLng(f float64) *OrderUpdateOne {
+	ouo.mutation.AddPickupLng(f)
+	return ouo
+}
+
+// SetDeliveryLat sets the "delivery_lat" field.
+func (ouo *OrderUpdateOne) SetDeliveryLat(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetDeliveryLat()
+	ouo.mutation.SetDeliveryLat(f)
+	return ouo
+}
+
+// SetNillableDeliveryLat sets the "delivery_lat" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDeliveryLat(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetDeliveryLat(*f)
+	}
+	return ouo
+}
+
+// AddDeliveryLat adds f to the "delivery_lat" field.
+func (ouo *OrderUpdateOne) AddDeliveryLat(f float64) *OrderUpdateOne {
+	ouo.mutation.AddDeliveryLat(f)
+	return ouo
+}
+
+// SetDeliveryLng sets the "delivery_lng" field.
+func (ouo *OrderUpdateOne) SetDeliveryLng(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetDeliveryLng()
+	ouo.mutation.SetDeliveryLng(f)
+	return ouo
+}
+
+// SetNillableDeliveryLng sets the "delivery_lng" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDeliveryLng(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetDeliveryLng(*f)
+	}
+	return ouo
+}
+
+// AddDeliveryLng adds f to the "delivery_lng" field.
+func (ouo *OrderUpdateOne) AddDeliveryLng(f float64) *OrderUpdateOne {
+	ouo.mutation.AddDeliveryLng(f)
+	return ouo
+}
+
+// SetDeliveryDistanceKm sets the "delivery_distance_km" field.
+func (ouo *OrderUpdateOne) SetDeliveryDistanceKm(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetDeliveryDistanceKm()
+	ouo.mutation.SetDeliveryDistanceKm(f)
+	return ouo
+}
+
+// SetNillableDeliveryDistanceKm sets the "delivery_distance_km" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDeliveryDistanceKm(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetDeliveryDistanceKm(*f)
+	}
+	return ouo
+}
+
+// AddDeliveryDistanceKm adds f to the "delivery_distance_km" field.
+func (ouo *OrderUpdateOne) AddDeliveryDistanceKm(f float64) *OrderUpdateOne {
+	ouo.mutation.AddDeliveryDistanceKm(f)
+	return ouo
+}
+
+// SetDeliveryFee sets the "delivery_fee" field.
+func (ouo *OrderUpdateOne) SetDeliveryFee(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetDeliveryFee()
+	ouo.mutation.SetDeliveryFee(f)
+	return ouo
+}
+
+// SetNillableDeliveryFee sets the "delivery_fee" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDeliveryFee(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetDeliveryFee(*f)
+	}
+	return ouo
+}
+
+// AddDeliveryFee adds f to the "delivery_fee" field.
+func (ouo *OrderUpdateOne) AddDeliveryFee(f float64) *OrderUpdateOne {
+	ouo.mutation.AddDeliveryFee(f)
+	return ouo
+}
+
+// SetPackingFee sets the "packing_fee" field.
+func (ouo *OrderUpdateOne) SetPackingFee(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetPackingFee()
+	ouo.mutation.SetPackingFee(f)
+	return ouo
+}
+
+// SetNillablePackingFee sets the "packing_fee" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillablePackingFee(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetPackingFee(*f)
+	}
+	return ouo
+}
+
+// AddPackingFee adds f to the "packing_fee" field.
+func (ouo *OrderUpdateOne) AddPackingFee(f float64) *OrderUpdateOne {
+	ouo.mutation.AddPackingFee(f)
+	return ouo
+}
+
+// SetDiscountAmount sets the "discount_amount" field.
+func (ouo *OrderUpdateOne) SetDiscountAmount(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetDiscountAmount()
+	ouo.mutation.SetDiscountAmount(f)
+	return ouo
+}
+
+// SetNillableDiscountAmount sets the "discount_amount" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDiscountAmount(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetDiscountAmount(*f)
+	}
+	return ouo
+}
+
+// AddDiscountAmount adds f to the "discount_amount" field.
+func (ouo *OrderUpdateOne) AddDiscountAmount(f float64) *OrderUpdateOne {
+	ouo.mutation.AddDiscountAmount(f)
+	return ouo
+}
+
+// SetCouponAmount sets the "coupon_amount" field.
+func (ouo *OrderUpdateOne) SetCouponAmount(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetCouponAmount()
+	ouo.mutation.SetCouponAmount(f)
+	return ouo
+}
+
+// SetNillableCouponAmount sets the "coupon_amount" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableCouponAmount(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetCouponAmount(*f)
+	}
+	return ouo
+}
+
+// AddCouponAmount adds f to the "coupon_amount" field.
+func (ouo *OrderUpdateOne) AddCouponAmount(f float64) *OrderUpdateOne {
+	ouo.mutation.AddCouponAmount(f)
+	return ouo
+}
+
+// SetCouponID sets the "coupon_id" field.
+func (ouo *OrderUpdateOne) SetCouponID(s string) *OrderUpdateOne {
+	ouo.mutation.SetCouponID(s)
+	return ouo
+}
+
+// SetNillableCouponID sets the "coupon_id" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableCouponID(s *string) *OrderUpdateOne {
+	if s != nil {
+		ouo.SetCouponID(*s)
+	}
+	return ouo
+}
+
+// SetPaymentStatus sets the "payment_status" field.
+func (ouo *OrderUpdateOne) SetPaymentStatus(s string) *OrderUpdateOne {
+	ouo.mutation.SetPaymentStatus(s)
+	return ouo
+}
+
+// SetNillablePaymentStatus sets the "payment_status" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillablePaymentStatus(s *string) *OrderUpdateOne {
+	if s != nil {
+		ouo.SetPaymentStatus(*s)
+	}
+	return ouo
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (ouo *OrderUpdateOne) SetAcceptedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetAcceptedAt()
+	ouo.mutation.SetAcceptedAt(i)
+	return ouo
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableAcceptedAt(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetAcceptedAt(*i)
+	}
+	return ouo
+}
+
+// AddAcceptedAt adds i to the "accepted_at" field.
+func (ouo *OrderUpdateOne) AddAcceptedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.AddAcceptedAt(i)
+	return ouo
+}
+
+// SetReadyAt sets the "ready_at" field.
+func (ouo *OrderUpdateOne) SetReadyAt(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetReadyAt()
+	ouo.mutation.SetReadyAt(i)
+	return ouo
+}
+
+// SetNillableReadyAt sets the "ready_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableReadyAt(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetReadyAt(*i)
+	}
+	return ouo
+}
+
+// AddReadyAt adds i to the "ready_at" field.
+func (ouo *OrderUpdateOne) AddReadyAt(i int64) *OrderUpdateOne {
+	ouo.mutation.AddReadyAt(i)
+	return ouo
+}
+
+// SetPickedAt sets the "picked_at" field.
+func (ouo *OrderUpdateOne) SetPickedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetPickedAt()
+	ouo.mutation.SetPickedAt(i)
+	return ouo
+}
+
+// SetNillablePickedAt sets the "picked_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillablePickedAt(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetPickedAt(*i)
+	}
+	return ouo
+}
+
+// AddPickedAt adds i to the "picked_at" field.
+func (ouo *OrderUpdateOne) AddPickedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.AddPickedAt(i)
+	return ouo
+}
+
+// SetDeliveredAt sets the "delivered_at" field.
+func (ouo *OrderUpdateOne) SetDeliveredAt(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetDeliveredAt()
+	ouo.mutation.SetDeliveredAt(i)
+	return ouo
+}
+
+// SetNillableDeliveredAt sets the "delivered_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDeliveredAt(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetDeliveredAt(*i)
+	}
+	return ouo
+}
+
+// AddDeliveredAt adds i to the "delivered_at" field.
+func (ouo *OrderUpdateOne) AddDeliveredAt(i int64) *OrderUpdateOne {
+	ouo.mutation.AddDeliveredAt(i)
+	return ouo
+}
+
+// SetCanceledAt sets the "canceled_at" field.
+func (ouo *OrderUpdateOne) SetCanceledAt(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetCanceledAt()
+	ouo.mutation.SetCanceledAt(i)
+	return ouo
+}
+
+// SetNillableCanceledAt sets the "canceled_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableCanceledAt(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetCanceledAt(*i)
+	}
+	return ouo
+}
+
+// AddCanceledAt adds i to the "canceled_at" field.
+func (ouo *OrderUpdateOne) AddCanceledAt(i int64) *OrderUpdateOne {
+	ouo.mutation.AddCanceledAt(i)
+	return ouo
+}
+
+// SetConfirmedAt sets the "confirmed_at" field.
+func (ouo *OrderUpdateOne) SetConfirmedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetConfirmedAt()
+	ouo.mutation.SetConfirmedAt(i)
+	return ouo
+}
+
+// SetNillableConfirmedAt sets the "confirmed_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableConfirmedAt(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetConfirmedAt(*i)
+	}
+	return ouo
+}
+
+// AddConfirmedAt adds i to the "confirmed_at" field.
+func (ouo *OrderUpdateOne) AddConfirmedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.AddConfirmedAt(i)
+	return ouo
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (ouo *OrderUpdateOne) SetReviewedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetReviewedAt()
+	ouo.mutation.SetReviewedAt(i)
+	return ouo
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableReviewedAt(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetReviewedAt(*i)
+	}
+	return ouo
+}
+
+// AddReviewedAt adds i to the "reviewed_at" field.
+func (ouo *OrderUpdateOne) AddReviewedAt(i int64) *OrderUpdateOne {
+	ouo.mutation.AddReviewedAt(i)
+	return ouo
+}
+
+// SetCancelReason sets the "cancel_reason" field.
+func (ouo *OrderUpdateOne) SetCancelReason(s string) *OrderUpdateOne {
+	ouo.mutation.SetCancelReason(s)
+	return ouo
+}
+
+// SetNillableCancelReason sets the "cancel_reason" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableCancelReason(s *string) *OrderUpdateOne {
+	if s != nil {
+		ouo.SetCancelReason(*s)
+	}
+	return ouo
+}
+
+// SetRiderEarning sets the "rider_earning" field.
+func (ouo *OrderUpdateOne) SetRiderEarning(f float64) *OrderUpdateOne {
+	ouo.mutation.ResetRiderEarning()
+	ouo.mutation.SetRiderEarning(f)
+	return ouo
+}
+
+// SetNillableRiderEarning sets the "rider_earning" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableRiderEarning(f *float64) *OrderUpdateOne {
+	if f != nil {
+		ouo.SetRiderEarning(*f)
+	}
+	return ouo
+}
+
+// AddRiderEarning adds f to the "rider_earning" field.
+func (ouo *OrderUpdateOne) AddRiderEarning(f float64) *OrderUpdateOne {
+	ouo.mutation.AddRiderEarning(f)
+	return ouo
+}
+
+// SetPickupCode sets the "pickup_code" field.
+func (ouo *OrderUpdateOne) SetPickupCode(s string) *OrderUpdateOne {
+	ouo.mutation.SetPickupCode(s)
+	return ouo
+}
+
+// SetNillablePickupCode sets the "pickup_code" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillablePickupCode(s *string) *OrderUpdateOne {
+	if s != nil {
+		ouo.SetPickupCode(*s)
+	}
+	return ouo
+}
+
+// SetDeliveryCode sets the "delivery_code" field.
+func (ouo *OrderUpdateOne) SetDeliveryCode(s string) *OrderUpdateOne {
+	ouo.mutation.SetDeliveryCode(s)
+	return ouo
+}
+
+// SetNillableDeliveryCode sets the "delivery_code" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDeliveryCode(s *string) *OrderUpdateOne {
+	if s != nil {
+		ouo.SetDeliveryCode(*s)
+	}
+	return ouo
+}
+
 // Mutation returns the OrderMutation object of the builder.
 func (ouo *OrderUpdateOne) Mutation() *OrderMutation {
 	return ouo.mutation
@@ -1087,6 +2185,41 @@ func (ouo *OrderUpdateOne) check() error {
 	if v, ok := ouo.mutation.FundFlow(); ok {
 		if err := order.FundFlowValidator(v); err != nil {
 			return &ValidationError{Name: "fund_flow", err: fmt.Errorf(`ent: validator failed for field "Order.fund_flow": %w`, err)}
+		}
+	}
+	if v, ok := ouo.mutation.ClientOrderNo(); ok {
+		if err := order.ClientOrderNoValidator(v); err != nil {
+			return &ValidationError{Name: "client_order_no", err: fmt.Errorf(`ent: validator failed for field "Order.client_order_no": %w`, err)}
+		}
+	}
+	if v, ok := ouo.mutation.AddressID(); ok {
+		if err := order.AddressIDValidator(v); err != nil {
+			return &ValidationError{Name: "address_id", err: fmt.Errorf(`ent: validator failed for field "Order.address_id": %w`, err)}
+		}
+	}
+	if v, ok := ouo.mutation.CouponID(); ok {
+		if err := order.CouponIDValidator(v); err != nil {
+			return &ValidationError{Name: "coupon_id", err: fmt.Errorf(`ent: validator failed for field "Order.coupon_id": %w`, err)}
+		}
+	}
+	if v, ok := ouo.mutation.PaymentStatus(); ok {
+		if err := order.PaymentStatusValidator(v); err != nil {
+			return &ValidationError{Name: "payment_status", err: fmt.Errorf(`ent: validator failed for field "Order.payment_status": %w`, err)}
+		}
+	}
+	if v, ok := ouo.mutation.CancelReason(); ok {
+		if err := order.CancelReasonValidator(v); err != nil {
+			return &ValidationError{Name: "cancel_reason", err: fmt.Errorf(`ent: validator failed for field "Order.cancel_reason": %w`, err)}
+		}
+	}
+	if v, ok := ouo.mutation.PickupCode(); ok {
+		if err := order.PickupCodeValidator(v); err != nil {
+			return &ValidationError{Name: "pickup_code", err: fmt.Errorf(`ent: validator failed for field "Order.pickup_code": %w`, err)}
+		}
+	}
+	if v, ok := ouo.mutation.DeliveryCode(); ok {
+		if err := order.DeliveryCodeValidator(v); err != nil {
+			return &ValidationError{Name: "delivery_code", err: fmt.Errorf(`ent: validator failed for field "Order.delivery_code": %w`, err)}
 		}
 	}
 	return nil
@@ -1222,6 +2355,135 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 	}
 	if value, ok := ouo.mutation.FundFlow(); ok {
 		_spec.SetField(order.FieldFundFlow, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.ClientOrderNo(); ok {
+		_spec.SetField(order.FieldClientOrderNo, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.AddressID(); ok {
+		_spec.SetField(order.FieldAddressID, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.AddressSnapshot(); ok {
+		_spec.SetField(order.FieldAddressSnapshot, field.TypeBytes, value)
+	}
+	if ouo.mutation.AddressSnapshotCleared() {
+		_spec.ClearField(order.FieldAddressSnapshot, field.TypeBytes)
+	}
+	if value, ok := ouo.mutation.PickupLat(); ok {
+		_spec.SetField(order.FieldPickupLat, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedPickupLat(); ok {
+		_spec.AddField(order.FieldPickupLat, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.PickupLng(); ok {
+		_spec.SetField(order.FieldPickupLng, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedPickupLng(); ok {
+		_spec.AddField(order.FieldPickupLng, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.DeliveryLat(); ok {
+		_spec.SetField(order.FieldDeliveryLat, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedDeliveryLat(); ok {
+		_spec.AddField(order.FieldDeliveryLat, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.DeliveryLng(); ok {
+		_spec.SetField(order.FieldDeliveryLng, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedDeliveryLng(); ok {
+		_spec.AddField(order.FieldDeliveryLng, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.DeliveryDistanceKm(); ok {
+		_spec.SetField(order.FieldDeliveryDistanceKm, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedDeliveryDistanceKm(); ok {
+		_spec.AddField(order.FieldDeliveryDistanceKm, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.DeliveryFee(); ok {
+		_spec.SetField(order.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedDeliveryFee(); ok {
+		_spec.AddField(order.FieldDeliveryFee, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.PackingFee(); ok {
+		_spec.SetField(order.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedPackingFee(); ok {
+		_spec.AddField(order.FieldPackingFee, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.DiscountAmount(); ok {
+		_spec.SetField(order.FieldDiscountAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedDiscountAmount(); ok {
+		_spec.AddField(order.FieldDiscountAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.CouponAmount(); ok {
+		_spec.SetField(order.FieldCouponAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedCouponAmount(); ok {
+		_spec.AddField(order.FieldCouponAmount, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.CouponID(); ok {
+		_spec.SetField(order.FieldCouponID, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.PaymentStatus(); ok {
+		_spec.SetField(order.FieldPaymentStatus, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.AcceptedAt(); ok {
+		_spec.SetField(order.FieldAcceptedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedAcceptedAt(); ok {
+		_spec.AddField(order.FieldAcceptedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.ReadyAt(); ok {
+		_spec.SetField(order.FieldReadyAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedReadyAt(); ok {
+		_spec.AddField(order.FieldReadyAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.PickedAt(); ok {
+		_spec.SetField(order.FieldPickedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedPickedAt(); ok {
+		_spec.AddField(order.FieldPickedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.DeliveredAt(); ok {
+		_spec.SetField(order.FieldDeliveredAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedDeliveredAt(); ok {
+		_spec.AddField(order.FieldDeliveredAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.CanceledAt(); ok {
+		_spec.SetField(order.FieldCanceledAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedCanceledAt(); ok {
+		_spec.AddField(order.FieldCanceledAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.ConfirmedAt(); ok {
+		_spec.SetField(order.FieldConfirmedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedConfirmedAt(); ok {
+		_spec.AddField(order.FieldConfirmedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.ReviewedAt(); ok {
+		_spec.SetField(order.FieldReviewedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedReviewedAt(); ok {
+		_spec.AddField(order.FieldReviewedAt, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.CancelReason(); ok {
+		_spec.SetField(order.FieldCancelReason, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.RiderEarning(); ok {
+		_spec.SetField(order.FieldRiderEarning, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.AddedRiderEarning(); ok {
+		_spec.AddField(order.FieldRiderEarning, field.TypeFloat64, value)
+	}
+	if value, ok := ouo.mutation.PickupCode(); ok {
+		_spec.SetField(order.FieldPickupCode, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.DeliveryCode(); ok {
+		_spec.SetField(order.FieldDeliveryCode, field.TypeString, value)
 	}
 	_node = &Order{config: ouo.config}
 	_spec.Assign = _node.assignValues

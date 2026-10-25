@@ -35,6 +35,19 @@ func (r OrderRepo) Save(o *order.Order) error {
 		SetGoods(mustJSON(o.Goods)).SetFees(mustJSON(o.Fees)).SetSteps(mustJSON(o.Steps)).
 		SetMerchant(mustJSON(o.Merchant)).SetUser(mustJSON(o.User)).SetRider(mustJSON(o.Rider)).
 		SetPayAmount(o.PayAmount).SetPayMethod(o.PayMethod).SetFundFlow(o.FundFlow).
+		SetClientOrderNo(o.ClientOrderNo).SetAddressID(o.AddressID).
+		SetAddressSnapshot(mustJSON(o.Address)).
+		SetPickupLat(o.PickupLat).SetPickupLng(o.PickupLng).
+		SetDeliveryLat(o.DeliveryLat).SetDeliveryLng(o.DeliveryLng).
+		SetDeliveryDistanceKm(o.DeliveryDistanceKM).
+		SetDeliveryFee(o.DeliveryFee).SetPackingFee(o.PackingFee).
+		SetDiscountAmount(o.DiscountAmount).SetCouponAmount(o.CouponAmount).SetCouponID(o.CouponID).
+		SetPaymentStatus(o.PaymentStatus).
+		SetAcceptedAt(o.AcceptedAt).SetReadyAt(o.ReadyAt).SetPickedAt(o.PickedAt).
+		SetDeliveredAt(o.DeliveredAt).SetCanceledAt(o.CanceledAt).
+		SetConfirmedAt(o.ConfirmedAt).SetReviewedAt(o.ReviewedAt).
+		SetCancelReason(o.CancelReason).SetRiderEarning(o.RiderEarning).
+		SetPickupCode(o.PickupCode).SetDeliveryCode(o.DeliveryCode).
 		Exec(ctx)
 	return err
 }
@@ -50,6 +63,18 @@ func toOrder(e *ent.Order) *order.Order {
 		Route: e.Route, UserName: e.UserName, RiderName: e.RiderName, Amount: e.Amount,
 		CreatedAt: e.CreatedAt, Channel: e.Channel, EstimatedArrival: e.EstimatedArrival,
 		Remark: e.Remark, PayAmount: e.PayAmount, PayMethod: e.PayMethod, FundFlow: e.FundFlow,
+		ClientOrderNo: e.ClientOrderNo, AddressID: e.AddressID,
+		PickupLat: e.PickupLat, PickupLng: e.PickupLng,
+		DeliveryLat: e.DeliveryLat, DeliveryLng: e.DeliveryLng,
+		DeliveryDistanceKM: e.DeliveryDistanceKm,
+		DeliveryFee:        e.DeliveryFee, PackingFee: e.PackingFee,
+		DiscountAmount: e.DiscountAmount, CouponAmount: e.CouponAmount, CouponID: e.CouponID,
+		PaymentStatus: e.PaymentStatus,
+		AcceptedAt:    e.AcceptedAt, ReadyAt: e.ReadyAt, PickedAt: e.PickedAt,
+		DeliveredAt: e.DeliveredAt, CanceledAt: e.CanceledAt,
+		ConfirmedAt: e.ConfirmedAt, ReviewedAt: e.ReviewedAt,
+		CancelReason: e.CancelReason, RiderEarning: e.RiderEarning,
+		PickupCode: e.PickupCode, DeliveryCode: e.DeliveryCode,
 	}
 	_ = json.Unmarshal(e.Goods, &o.Goods)
 	_ = json.Unmarshal(e.Fees, &o.Fees)
@@ -57,11 +82,28 @@ func toOrder(e *ent.Order) *order.Order {
 	_ = json.Unmarshal(e.Merchant, &o.Merchant)
 	_ = json.Unmarshal(e.User, &o.User)
 	_ = json.Unmarshal(e.Rider, &o.Rider)
+	_ = json.Unmarshal(e.AddressSnapshot, &o.Address)
 	return o
 }
 
 func (r OrderRepo) FindByID(id string) (*order.Order, error) {
 	e, err := r.client.Order.Get(context.Background(), id)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return toOrder(e), nil
+}
+
+func (r OrderRepo) FindByClientOrderNo(userID, clientOrderNo string) (*order.Order, error) {
+	if clientOrderNo == "" {
+		return nil, ErrNotFound
+	}
+	e, err := r.client.Order.Query().
+		Where(entorder.UserID(userID), entorder.ClientOrderNo(clientOrderNo)).
+		Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -78,7 +120,9 @@ func (r OrderRepo) List(q order.Query, sc tenant.Scope) ([]*order.Order, int64, 
 	if q.UserID != "" {
 		bq.Where(entorder.UserID(q.UserID))
 	}
-	if s := strings.TrimSpace(q.Status); s != "" {
+	if len(q.Statuses) > 0 {
+		bq.Where(entorder.StatusIn(q.Statuses...))
+	} else if s := strings.TrimSpace(q.Status); s != "" {
 		bq.Where(entorder.Status(s))
 	}
 	if k := strings.TrimSpace(q.Keyword); k != "" {
@@ -114,6 +158,131 @@ func (r OrderRepo) ListByUser(userID string, limit int) ([]*order.Order, error) 
 		Order(ent.Desc(entorder.FieldCreatedAt)).
 		Limit(limit).
 		All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*order.Order, 0, len(rows))
+	for _, e := range rows {
+		out = append(out, toOrder(e))
+	}
+	return out, nil
+}
+
+func (r OrderRepo) UpdateStatus(id string, from, to order.OrderStatus, p order.StatusPatch, now int64) (bool, error) {
+	upd := r.client.Order.Update().
+		Where(entorder.ID(id), entorder.Status(string(from))).
+		SetStatus(string(to))
+	if p.RiderID != "" {
+		upd.SetRiderID(p.RiderID)
+	}
+	if p.RiderName != "" {
+		upd.SetRiderName(p.RiderName)
+	}
+	if p.AcceptedAt > 0 {
+		upd.SetAcceptedAt(p.AcceptedAt)
+	}
+	if p.ReadyAt > 0 {
+		upd.SetReadyAt(p.ReadyAt)
+	}
+	if p.PickedAt > 0 {
+		upd.SetPickedAt(p.PickedAt)
+	}
+	if p.DeliveredAt > 0 {
+		upd.SetDeliveredAt(p.DeliveredAt)
+	}
+	if p.CanceledAt > 0 {
+		upd.SetCanceledAt(p.CanceledAt)
+	}
+	if p.ConfirmedAt > 0 {
+		upd.SetConfirmedAt(p.ConfirmedAt)
+	}
+	if p.ReviewedAt > 0 {
+		upd.SetReviewedAt(p.ReviewedAt)
+	}
+	if p.CancelReason != "" {
+		upd.SetCancelReason(p.CancelReason)
+	}
+	if p.PaymentStatus != "" {
+		upd.SetPaymentStatus(p.PaymentStatus)
+	}
+	if p.PayMethod != "" {
+		upd.SetPayMethod(p.PayMethod)
+	}
+	if p.FundFlow != "" {
+		upd.SetFundFlow(p.FundFlow)
+	}
+	if p.PickupCode != "" {
+		upd.SetPickupCode(p.PickupCode)
+	}
+	if p.DeliveryCode != "" {
+		upd.SetDeliveryCode(p.DeliveryCode)
+	}
+	if p.RiderEarning != nil {
+		upd.SetRiderEarning(*p.RiderEarning)
+	}
+	if p.DeliveryDistance != nil {
+		upd.SetDeliveryDistanceKm(*p.DeliveryDistance)
+	}
+	affected, err := upd.Save(context.Background())
+	return affected > 0, err
+}
+
+func (r OrderRepo) AssignRider(id, riderID, riderName string, now int64) (bool, error) {
+	affected, err := r.client.Order.Update().
+		Where(
+			entorder.ID(id),
+			entorder.Status(string(order.StatusReady)),
+			entorder.RiderID(""),
+		).
+		SetRiderID(riderID).SetRiderName(riderName).
+		Save(context.Background())
+	return affected > 0, err
+}
+
+func (r OrderRepo) ListPool(regionID string, page, pageSize int) ([]*order.Order, int64, error) {
+	ctx := context.Background()
+	bq := r.client.Order.Query().Where(
+		entorder.RegionID(regionID),
+		entorder.Status(string(order.StatusReady)),
+		entorder.RiderID(""),
+	)
+	total, err := bq.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	page, size := normalizePage(page, pageSize)
+	rows, err := bq.Order(ent.Asc(entorder.FieldCreatedAt)).
+		Offset((page - 1) * size).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]*order.Order, 0, len(rows))
+	for _, e := range rows {
+		out = append(out, toOrder(e))
+	}
+	return out, int64(total), nil
+}
+
+func (r OrderRepo) ListPendingPayBefore(before int64, limit int) ([]*order.Order, error) {
+	return r.listBefore(string(order.StatusPendingPay), entorder.FieldCreatedAt, before, limit)
+}
+
+func (r OrderRepo) ListDeliveredBefore(before int64, limit int) ([]*order.Order, error) {
+	return r.listBefore(string(order.StatusDelivered), entorder.FieldDeliveredAt, before, limit)
+}
+
+func (r OrderRepo) listBefore(status, field string, before int64, limit int) ([]*order.Order, error) {
+	if limit <= 0 || limit > 500 {
+		limit = 100
+	}
+	bq := r.client.Order.Query().Where(entorder.Status(status))
+	switch field {
+	case entorder.FieldCreatedAt:
+		bq.Where(entorder.CreatedAtLT(before))
+	case entorder.FieldDeliveredAt:
+		bq.Where(entorder.DeliveredAtLT(before), entorder.DeliveredAtGT(0))
+	}
+	rows, err := bq.Order(ent.Asc(entorder.FieldCreatedAt)).Limit(limit).All(context.Background())
 	if err != nil {
 		return nil, err
 	}

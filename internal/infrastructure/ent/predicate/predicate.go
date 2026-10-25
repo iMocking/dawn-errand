@@ -21,6 +21,12 @@ type Complaint func(*sql.Selector)
 // Credential is the predicate function for credential builders.
 type Credential func(*sql.Selector)
 
+// Dish is the predicate function for dish builders.
+type Dish func(*sql.Selector)
+
+// DishCategory is the predicate function for dishcategory builders.
+type DishCategory func(*sql.Selector)
+
 // EmailVerificationToken is the predicate function for emailverificationtoken builders.
 type EmailVerificationToken func(*sql.Selector)
 
@@ -33,20 +39,38 @@ type MailOutbox func(*sql.Selector)
 // Merchant is the predicate function for merchant builders.
 type Merchant func(*sql.Selector)
 
+// Notification is the predicate function for notification builders.
+type Notification func(*sql.Selector)
+
 // Order is the predicate function for order builders.
 type Order func(*sql.Selector)
+
+// OrderEvent is the predicate function for orderevent builders.
+type OrderEvent func(*sql.Selector)
 
 // PasswordResetToken is the predicate function for passwordresettoken builders.
 type PasswordResetToken func(*sql.Selector)
 
+// Payment is the predicate function for payment builders.
+type Payment func(*sql.Selector)
+
 // RealNameVerification is the predicate function for realnameverification builders.
 type RealNameVerification func(*sql.Selector)
+
+// Refund is the predicate function for refund builders.
+type Refund func(*sql.Selector)
 
 // Region is the predicate function for region builders.
 type Region func(*sql.Selector)
 
+// Review is the predicate function for review builders.
+type Review func(*sql.Selector)
+
 // Rider is the predicate function for rider builders.
 type Rider func(*sql.Selector)
+
+// RiderLocation is the predicate function for riderlocation builders.
+type RiderLocation func(*sql.Selector)
 
 // Settlement is the predicate function for settlement builders.
 type Settlement func(*sql.Selector)
@@ -57,8 +81,20 @@ type SystemSetting func(*sql.Selector)
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 
+// UserAddress is the predicate function for useraddress builders.
+type UserAddress func(*sql.Selector)
+
+// UserCoupon is the predicate function for usercoupon builders.
+type UserCoupon func(*sql.Selector)
+
 // UserProfile is the predicate function for userprofile builders.
 type UserProfile func(*sql.Selector)
+
+// WalletAccount is the predicate function for walletaccount builders.
+type WalletAccount func(*sql.Selector)
+
+// WalletTransaction is the predicate function for wallettransaction builders.
+type WalletTransaction func(*sql.Selector)
 
 // Withdrawal is the predicate function for withdrawal builders.
 type Withdrawal func(*sql.Selector)

@@ -58,7 +58,7 @@ func (h *Handler) CreateMerchant(c *gin.Context) {
 		Contact: in.Contact, Phone: in.Phone, Address: in.Address, AddressSub: in.AddressSub,
 		OpenHours: in.OpenHours, DeliveryRange: in.DeliveryRange, Commission: in.Commission,
 		DeliveryMethod: in.DeliveryMethod,
-		Status: merchant.MerchantStatusRest, Operator: in.Contact,
+		Status:         merchant.MerchantStatusRest, Operator: in.Contact,
 	}
 	if err := h.Merchants.Create(c.Request.Context(), m, scope(c)); err != nil {
 		response.Err(c, err)
@@ -68,7 +68,8 @@ func (h *Handler) CreateMerchant(c *gin.Context) {
 }
 
 // GetMerchantStats GET /merchants/stats。
-func (h *Handler) GetMerchantStats(c *gin.Context) {	st, err := h.Merchants.Stats(c.Request.Context(), scope(c))
+func (h *Handler) GetMerchantStats(c *gin.Context) {
+	st, err := h.Merchants.Stats(c.Request.Context(), scope(c))
 	if err != nil {
 		response.Err(c, err)
 		return

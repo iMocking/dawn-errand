@@ -54,7 +54,7 @@ func (h *Handler) CreateRider(c *gin.Context) {
 		RegionID: in.RegionID, Name: strings.TrimSpace(in.Name), Phone: in.Phone,
 		Area: in.Area, Tool: in.Tool, OrderTypes: in.OrderTypes, IDCard: in.IDCard,
 		ServiceType: in.ServiceType,
-		Status: rider.RiderOffline, IDCheck: "待补充", NoticeType: "none",
+		Status:      rider.RiderOffline, IDCheck: "待补充", NoticeType: "none",
 	}
 	if err := h.Riders.Create(c.Request.Context(), r, scope(c)); err != nil {
 		response.Err(c, err)
