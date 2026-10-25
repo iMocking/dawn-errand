@@ -1,0 +1,86 @@
+<html style="margin:0;padding:0;">
+<title>曙光跑腿客户端 · 高德地图配送追踪架构（v1.2.0）</title>
+<div style="width:100%;box-sizing:border-box;font-family:-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;background:#F7F8FA;padding:16px;color:#1D2129;">
+
+  <!-- 标题 -->
+  <div style="font-size:18px;font-weight:700;margin-bottom:4px;">曙光跑腿客户端 · 高德地图配送追踪架构</div>
+  <div style="font-size:13px;color:#86909C;margin-bottom:14px;">apps/client · v1.2.0 · MVVM 数据驱动 · 合包 3dmap-location-search 11.3.100_loc11.3.101_sea9.8.1（Maven Central）</div>
+
+  <!-- 配置/外部依赖 -->
+  <div style="background:#FFFFFF;border:1px solid #E5E6EB;border-radius:10px;padding:10px 14px;margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:600;color:#FF6B2C;margin-bottom:6px;">工程接入（构建时）</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <span style="font-size:12px;background:#FFF3E8;color:#E85500;padding:3px 8px;border-radius:6px;">-PamapKey → BuildConfig + manifestPlaceholders</span>
+      <span style="font-size:12px;background:#F2F3F5;color:#4E5969;padding:3px 8px;border-radius:6px;">meta-data com.amap.api.v2.apikey</span>
+      <span style="font-size:12px;background:#F2F3F5;color:#4E5969;padding:3px 8px;border-radius:6px;">定位权限 FINE/COARSE</span>
+      <span style="font-size:12px;background:#F2F3F5;color:#4E5969;padding:3px 8px;border-radius:6px;">APSService 手动声明（合包无自带 manifest）</span>
+      <span style="font-size:12px;background:#F2F3F5;color:#4E5969;padding:3px 8px;border-radius:6px;">ClientApp.initAmapPrivacy 合规前置</span>
+      <span style="font-size:12px;background:#E8F3EE;color:#009262;padding:3px 8px;border-radius:6px;">ABI arm64-v8a / armeabi-v7a（74MB APK）</span>
+    </div>
+  </div>
+
+  <!-- 主流程 -->
+  <div style="display:flex;flex-wrap:wrap;gap:12px;">
+
+    <!-- 左：MVVM 三层数据流 -->
+    <div style="flex:1;min-width:320px;background:#FFFFFF;border:1px solid #E5E6EB;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:13px;font-weight:600;color:#1D2129;margin-bottom:8px;">数据流（单一数据源 StateFlow）</div>
+
+      <!-- 数据层 -->
+      <div style="background:#E8F3EE;border:1px solid #B7E3D2;border-radius:8px;padding:8px 10px;">
+        <div style="font-size:12px;font-weight:700;color:#009262;">数据源 · TrackingRepository.stateFor(order, progress)</div>
+        <div style="font-size:12px;color:#4E5969;margin-top:3px;">演示：浠水县镇中心→王家湾村 7 点乡道 · Haversine 里程/航向/ETA</div>
+        <div style="font-size:12px;color:#86909C;margin-top:2px;">替换点：GET /orders/:id/track（后端就绪后仅换此层）</div>
+      </div>
+
+      <div style="text-align:center;color:#FF6B2C;font-size:13px;font-weight:700;padding:3px 0;">▼ 配送中每 2s 推进 0.04（模拟骑手移动）</div>
+
+      <!-- ViewModel -->
+      <div style="background:#FFF3E8;border:1px solid #FFD4B8;border-radius:8px;padding:8px 10px;">
+        <div style="font-size:12px;font-weight:700;color:#E85500;">OrderTrackViewModel</div>
+        <div style="font-size:12px;color:#4E5969;margin-top:3px;">uiState: StateFlow&lt;OrderTrack?&gt; · 阶段映射 NOT_PAID / WAITING_ACCEPT / DELIVERING / ARRIVED / CANCELED / REFUND</div>
+      </div>
+
+      <div style="text-align:center;color:#FF6B2C;font-size:13px;font-weight:700;padding:3px 0;">▼ 数据驱动渲染</div>
+
+      <!-- 视图 -->
+      <div style="background:#EEF4FF;border:1px solid #C6D7F8;border-radius:8px;padding:8px 10px;">
+        <div style="font-size:12px;font-weight:700;color:#2B5FD9;">OrderTrackActivity</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+          <span style="font-size:12px;background:#FFFFFF;border:1px solid #C6D7F8;color:#2B5FD9;padding:3px 8px;border-radius:6px;">状态卡（标题/描述/ETA 分钟/剩余公里）</span>
+          <span style="font-size:12px;background:#FFFFFF;border:1px solid #C6D7F8;color:#2B5FD9;padding:3px 8px;border-radius:6px;">进度 4 步 + 骑手卡（联系/呼叫）</span>
+          <span style="font-size:12px;background:#FFFFFF;border:1px solid #C6D7F8;color:#2B5FD9;padding:3px 8px;border-radius:6px;">地图：取货/送达/骑手 Marker + 路线 + 相机跟随</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：高德 SDK 层 -->
+    <div style="flex:1;min-width:280px;background:#FFFFFF;border:1px solid #E5E6EB;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:13px;font-weight:600;color:#1D2129;margin-bottom:8px;">高德 SDK 合包（com.amap.api:3dmap-location-search）</div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#F2F3F5;border-radius:8px;padding:8px 10px;">
+          <div style="font-size:12px;font-weight:700;">3D 地图 SDK V11.3.100</div>
+          <div style="font-size:12px;color:#4E5969;">MapView / AMap / MarkerOptions / PolylineOptions / CameraUpdate / BitmapDescriptorFactory / LocationSource</div>
+        </div>
+        <div style="background:#F2F3F5;border-radius:8px;padding:8px 10px;">
+          <div style="font-size:12px;font-weight:700;">定位 SDK V11.3.101</div>
+          <div style="font-size:12px;color:#4E5969;">AMapLocationClient（AmapLocationSource → 我的位置蓝点 + 定位按钮）</div>
+        </div>
+        <div style="background:#F2F3F5;border-radius:8px;padding:8px 10px;">
+          <div style="font-size:12px;font-weight:700;">搜索 SDK V9.8.1（合包含入，本期未调用）</div>
+        </div>
+        <div style="background:#FFF7E6;border-radius:8px;padding:8px 10px;font-size:12px;color:#B25E00;">
+          ⚠ 运行时前置：高德 Key（包名 com.dawnerrand.client + 签名 SHA1）未注入则地图不渲染（INVALID_USER_KEY），其余功能正常
+        </div>
+        <div style="background:#F7F8FA;border-radius:8px;padding:8px 10px;font-size:12px;color:#86909C;">
+          地图标记位图由 MapPins 用矢量图标 + 圆底动态绘制（绿·购物袋 / 橙·电动车 / 红·家）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <div style="font-size:12px;color:#86909C;margin-top:12px;">验证：assembleDebug 成功；模拟器实测 so 加载成功、无崩溃、骑手模拟移动生效（0.8→4.7 公里）、定位权限与 APSService 生效。详见 docs/客户端高德地图适配说明.md</div>
+</div>
+</html>
