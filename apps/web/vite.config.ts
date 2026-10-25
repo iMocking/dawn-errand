@@ -13,20 +13,29 @@ function mockRequestId(): string {
   return out
 }
 
+/** 支持的多语言：中文 / 英语 / 西班牙语 */
+export const MOCK_LOCALES = ['zh', 'en', 'es'] as const
+
 /**
  * 官网 mock 中间件契约：
- *   GET /api/site/common   → mock/common.json   公共数据（导航 / 页脚）
- *   GET /api/site/home     → mock/home.json     首页数据
- *   GET /api/site/download → mock/download.json 下载中心
- *   GET /api/site/faq      → mock/faq.json      常见问题
- *   GET /api/site/contact  → mock/contact.json  商务合作
+ *   GET /api/site/common?lang=zh   → mock/common.zh.json   公共数据（导航 / 页脚）
+ *   GET /api/site/home?lang=en     → mock/home.en.json     首页数据
+ *   GET /api/site/download?lang=es → mock/download.es.json 下载中心
+ *   GET /api/site/faq              → mock/faq.json         常见问题（缺省 lang 时回退默认语言）
+ *   GET /api/site/contact          → mock/contact.json     商务合作
+ * lang ∈ zh / en / es；lang 缺失或对应文件不存在时回退默认 mock/{name}.json。
  * 统一返回 { message, body, request_id, code }，code === 0 表示成功。
  */
-function resolveMock(pathname: string, mockDir: string): unknown | null {
+function resolveMock(pathname: string, mockDir: string, lang?: string): unknown | null {
   const segments = pathname.split('/').filter(Boolean)
   if (segments[0] !== 'site') return null
   const name = segments[1]
   if (!name) return null
+  // 语言文件优先（仅白名单内），缺失回退默认文件
+  if (lang && (MOCK_LOCALES as readonly string[]).includes(lang)) {
+    const l10n = join(mockDir, `${name}.${lang}.json`)
+    if (existsSync(l10n)) return JSON.parse(readFileSync(l10n, 'utf-8'))
+  }
   const p = join(mockDir, `${name}.json`)
   if (!existsSync(p)) return null
   return JSON.parse(readFileSync(p, 'utf-8'))
@@ -55,7 +64,8 @@ function mockPlugin(): Plugin {
 
         if (req.method !== 'GET') return send(405, 'mock: method not allowed', null, 405)
 
-        const data = resolveMock(pathname, mockDir)
+        const lang = url.searchParams.get('lang') ?? undefined
+        const data = resolveMock(pathname, mockDir, lang)
         if (data === null) return send(404, 'mock: not found', null, 404)
         return send(0, 'ok', data)
       })

@@ -35,11 +35,12 @@
 - **常见问题**：10 条问答折叠面板
 - **商务合作**：4 种合作模式（城市合伙人 / 商家 / 骑手 / 区域代理）、合作流程、联系方式与表单
 - **多端适配**：响应式支持 PC 与移动端（断点 768 / 1024），核心交互（汉堡菜单、FAQ 折叠、下载 / 表单 toast）均已可用
+- **多语言适配**：中 / 英 / 西班牙语三语切换（导航栏 `中 / EN / ES`，移动端在汉堡菜单内），语言选择持久化（localStorage）；全站导航、页脚、首页、下载中心、版本子页、FAQ、商务合作表单文案均随语言切换，`<html lang>` 与页面标题同步更新
 
 实现要点：
 
 - **技术栈**：Vue 3 + TypeScript（strict）+ TailwindCSS + vue-router + pinia + 统一 axios（拦截器解包 `{message, body, request_id, code}`，`code === 0` 为成功）
-- **文本数据全部 JSON 化**：页面文案零硬编码，统一提取至 `apps/web/mock/{common,home,download,faq,contact}.json`，由 Vite mock 中间件（`GET /api/site/*`，模拟 80–240ms 延迟）经请求渲染；关闭 mock 时自动代理到后端 `:8080`
+- **文本数据全部 JSON 化**：页面文案零硬编码，统一提取至 `apps/web/mock/{common,home,download,faq,contact}.json`，由 Vite mock 中间件（`GET /api/site/*`，模拟 80–240ms 延迟）经请求渲染；多语言按 `?lang=zh|en|es` 返回 `mock/{name}.{lang}.json`，缺失回退默认语言；关闭 mock 时自动代理到后端 `:8080`
 - **设计稿**：一阶段响应式设计稿位于 `design/web/`（index / download / download-app / faq / contact 五页，其中 download-app 为各端历史版本子页设计稿），与工程实现保持同步，均通过双视口（1440×900 / 390×844）自检
 - **质量门禁**：typecheck / lint / build 三查通过；Playwright 双视口渲染无 console 错误，核心交互断言通过
 

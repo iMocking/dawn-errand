@@ -1,25 +1,36 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { siteApi } from '@/api/site'
+import { useSiteStore } from '@/stores/site'
 import type { ContactData } from '@/types'
 import SvgIcon from '@/components/SvgIcon.vue'
 
+const site = useSiteStore()
 const data = ref<ContactData | null>(null)
 const error = ref(false)
 const toastMsg = ref('')
 const form = reactive<Record<string, string>>({})
 let toastTimer: ReturnType<typeof setTimeout> | null = null
 
-onMounted(async () => {
+async function load() {
   try {
-    data.value = await siteApi.contact()
+    data.value = await siteApi.contact(site.locale)
     // 初始化下拉字段默认值
     const intent = data.value.contactSection.form.fields.find((f) => f.type === 'select')
     if (intent?.options?.length) form[intent.name] = intent.options[0]
   } catch {
     error.value = true
   }
-})
+}
+
+onMounted(load)
+watch(
+  () => site.locale,
+  () => {
+    error.value = false
+    load()
+  },
+)
 
 function showToast(msg: string) {
   toastMsg.value = msg
@@ -37,7 +48,7 @@ function onSubmit() {
 
 <template>
   <div v-if="error" class="mx-auto max-w-3xl px-4 py-24 text-center">
-    <p class="text-base text-ink-2">内容加载失败，请稍后刷新重试。</p>
+    <p class="text-base text-ink-2">{{ site.common?.ui.loadError ?? '内容加载失败，请稍后刷新重试。' }}</p>
   </div>
 
   <template v-else-if="data">
@@ -142,7 +153,7 @@ function onSubmit() {
         </div>
 
         <div class="notice">
-          <b>说明：</b>{{ data.notice }}
+          <b>{{ data.noticeLabel }}</b>{{ data.notice }}
         </div>
       </div>
     </section>

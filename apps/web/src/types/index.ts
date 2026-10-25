@@ -16,6 +16,9 @@ export interface SiteLink {
 /** 导航 CTA 样式 */
 export type CtaStyle = 'primary' | 'ghost' | 'outline' | 'white'
 
+/** 支持的语言：中文 / 英语 / 西班牙语 */
+export type Locale = 'zh' | 'en' | 'es'
+
 /** 公共数据（导航 / 页脚） */
 export interface CommonData {
   siteName: string
@@ -27,6 +30,11 @@ export interface CommonData {
     columns: Array<{ title: string; links: SiteLink[] }>
     bottomLeft: string
     bottomRight: string
+  }
+  ui: {
+    loadError: string
+    menuLabel: string
+    titleMap: Record<'home' | 'download' | 'downloadApp' | 'faq' | 'contact', string>
   }
 }
 
@@ -166,6 +174,24 @@ export interface DownloadData {
     }
   }
   scanNote: string
+  scanNoteTitle: string
+  /** 版本子页静态文案（各语言 mock 自带翻译） */
+  subPage: {
+    kicker: string
+    backLabel: string
+    platTitle: string
+    platDesc: string
+    latestLabel: string
+    downloadLatest: string
+    comingSoon: string
+    verTitle: string
+    verDesc: string
+    downloadSuffix: string
+    noneLabel: string
+    notFound: string
+    notFoundDesc: string
+    toastPkg: string
+  }
   appVersions: AppVersionData[]
 }
 
@@ -246,4 +272,5 @@ export interface ContactData {
     }
   }
   notice: string
+  noticeLabel: string
 }

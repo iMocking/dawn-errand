@@ -1,0 +1,103 @@
+{
+  "hero": {
+    "titleLines": ["Cada pedido de cada pueblo", "entregado con cuidado"],
+    "lead": "Dawn Errand es una plataforma SaaS de recados y reparto de comida que cubre toda la cadena: pedidos de usuarios, aceptación de comercios, reparto de repartidores y operaciones de plataforma. Diseñada para operación multi-inquilino en múltiples ciudades y regiones: lista para usar y de calidad comercial.",
+    "stats": [
+      { "value": "12.800+", "label": "Pueblos cubiertos" },
+      { "value": "86.000+", "label": "Usuarios registrados" },
+      { "value": "4.320+", "label": "Repartidores aliados" }
+    ],
+    "devicesLabel": "Usuario · Comercio · Repartidor · Administración"
+  },
+  "capabilities": {
+    "kicker": "CAPACIDADES",
+    "title": "Un solo sistema para toda la cadena",
+    "desc": "Desde pedidos y asignación hasta reparto y liquidación, todo lo que tu plataforma necesita está cubierto.",
+    "items": [
+      { "icon": "order", "title": "Pedidos y asignación", "desc": "Pedido con un solo toque; el sistema asigna repartidores automáticamente por distancia, capacidad y tarifas regionales, con asignación manual y ofertas." },
+      { "icon": "delivery", "title": "Reparto en tiempo real", "desc": "Flujo guiado para repartidores: aceptar, recoger y entregar, con navegación por mapa y comprobante de entrega." },
+      { "icon": "track", "title": "Seguimiento de pedidos", "desc": "Los usuarios ven el estado del pedido y la ubicación del repartidor en tiempo real; los comercios ven la aceptación, preparación y progreso del reparto." },
+      { "icon": "finance", "title": "Liquidación financiera", "desc": "Liquidación por pedido para repartidores, reparto de pagos a comercios y comisión transparente, con revisión de retiros y exportación de movimientos." },
+      { "icon": "role", "title": "Permisos multi-rol", "desc": "Roles aislados entre plataforma, comercio, repartidor y usuario, con control fino de permisos RBAC de Casbin para siete roles." },
+      { "icon": "region", "title": "Regiones y tarifas", "desc": "Tarifas de entrega, precio mínimo y reglas de comisión por región, con operación independiente en múltiples ciudades y sedes regionales." },
+      { "icon": "store", "title": "Gestión de comercios", "desc": "Revisión de alta, gestión de tienda, alta/baja de menú, cambio de estado operativo y estadísticas de negocio." },
+      { "icon": "rider", "title": "Gestión de repartidores", "desc": "Revisión de alta, estado en línea, historial de pedidos y valoraciones para garantizar la calidad del servicio." },
+      { "icon": "chart", "title": "Panel de datos", "desc": "Tendencias de pedidos, distribución del negocio, flujo de pedidos en vivo y pendientes: los datos de tu operación de un vistazo." }
+    ]
+  },
+  "scenarios": {
+    "kicker": "ESCENARIOS",
+    "title": "Casos de uso",
+    "desc": "De pueblos pequeños a cabeceras municipales, de barrios a centros comerciales — Dawn Errand se despliega en cualquier lugar.",
+    "items": [
+      { "num": "01", "icon": "pin", "title": "Recados de barrio", "desc": "Compras por encargo, recogida de paquetes, colas y recogidas urgentes: cubre las necesidades diarias de los residentes." },
+      { "num": "02", "icon": "van", "title": "Entrega en la misma ciudad", "desc": "Entrega exprés de documentos, llaves, credenciales y otros envíos urgentes, con recogida fija, progreso visible y tiempos controlados." },
+      { "num": "03", "icon": "food", "title": "Reparto de comida", "desc": "Los comercios abren tienda online y los repartidores recogen y entregan: un negocio de comida a domicilio para restaurantes locales." }
+    ]
+  },
+  "features": {
+    "kicker": "DESTACADOS",
+    "title": "Funciones clave",
+    "desc": "Construida sobre cinco cadenas: pedido, asignación, seguimiento de entrega, liquidación financiera y permisos multi-rol.",
+    "items": [
+      { "icon": "check", "tone": "orange", "title": "Pedido en un toque", "desc": "Indica la información de recogida y entrega y crea el pedido: una entrada única, ligera, para recados y comida." },
+      { "icon": "clock", "tone": "blue", "title": "Asignación inteligente", "desc": "Coincidencia automática por distancia y capacidad, con ofertas de repartidores y asignación manual para una planificación flexible." },
+      { "icon": "box", "tone": "green", "title": "Seguimiento del reparto", "desc": "Estado del pedido trazable en todo momento; usuarios, comercios y repartidores sincronizados en el progreso." },
+      { "icon": "card", "tone": "purple", "title": "Liquidación financiera", "desc": "Liquidación por pedido, reparto de pagos a comercios, revisión de retiros y exportación de movimientos: un flujo de dinero claro." },
+      { "icon": "shield", "tone": "yellow", "title": "Permisos multi-rol", "desc": "RBAC de siete roles con datos aislados entre plataforma, comercio, repartidor y usuario: seguro y conforme." },
+      { "icon": "lock", "tone": "orange", "title": "Estabilidad y seguridad", "desc": "Rotación de sesiones JWT, cifrado AES-GCM de datos sensibles e inicio de sesión con código de correo / SMS: seguro y auditable." }
+    ]
+  },
+  "pipeline": {
+    "title": "Arquitectura · Multi-dispositivo → Backend Go → Almacenamiento",
+    "nodes": [
+      { "name": "Web / Panel de administración", "tag": "Web · Vue 3" },
+      { "name": "Apps Usuario · Comercio · Repartidor", "tag": "Android · Kotlin" },
+      { "name": "Backend Go · Gin", "tag": "DDD 4 capas · JWT · RBAC Casbin", "strong": true },
+      { "name": "PostgreSQL 16 · Redis 7", "tag": "Datos de negocio · Sesiones / Límites / Códigos" }
+    ]
+  },
+  "ends": {
+    "kicker": "MULTI-DISPOSITIVO",
+    "title": "Matriz de producto multi-dispositivo",
+    "desc": "Una plataforma, cuatro extremos: los usuarios piden, los comercios aceptan, los repartidores entregan, los operadores gestionan.",
+    "items": [
+      { "icon": "phone", "tone": "orange", "name": "App de usuario", "role": "Android · MVVM", "desc": "Pide recados / comida, sigue los pedidos en tiempo real, gestiona direcciones, cupones y valoraciones.", "linkLabel": "Descargar App de usuario", "to": "/download" },
+      { "icon": "shop", "tone": "blue", "name": "App de comercio", "role": "Android · Kotlin", "desc": "Gestión de tienda, aceptación y preparación de pedidos, alta/baja de menú, estado operativo y estadísticas.", "linkLabel": "Descargar App de comercio", "to": "/download" },
+      { "icon": "bike", "tone": "green", "name": "App de repartidor", "role": "Android · Kotlin", "desc": "Aceptar pedidos, navegación de reparto, comprobante de entrega, liquidación por pedido e ingresos diarios.", "linkLabel": "Descargar App de repartidor", "to": "/download" },
+      { "icon": "console", "tone": "purple", "name": "Panel de administración", "role": "Web · Vue 3 + Tailwind", "desc": "Gestión completa de usuarios, comercios, repartidores, pedidos, finanzas y ajustes, con panel de datos.", "linkLabel": "Abrir panel de administración", "to": "/download" }
+    ]
+  },
+  "roadmap": {
+    "kicker": "HOJA DE RUTA",
+    "title": "Novedades",
+    "desc": "El proyecto avanza; las capacidades clave llegan una a una.",
+    "items": [
+      { "time": "Publicado", "title": "Bucle central multi-dispositivo", "desc": "Pedidos de usuarios, aceptación de comercios, reparto y operaciones conectados en los cuatro extremos y el panel.", "state": "done", "stateLabel": "Hecho" },
+      { "time": "Publicado", "title": "Identidad y permisos", "desc": "Inicio de sesión con código de correo / SMS, rotación de sesiones JWT, RBAC de Casbin con siete roles y aislamiento de datos.", "state": "done", "stateLabel": "Hecho" },
+      { "time": "Planificado", "title": "Pasarela de pago y conciliación", "desc": "Pago / reembolso / conciliación y reparto de liquidaciones a comercios, planificados.", "state": "plan", "stateLabel": "Planificado" },
+      { "time": "Planificado", "title": "Motor de asignación", "desc": "LBS de mapas, planificación de rutas y predicción ETA para una asignación más inteligente.", "state": "plan", "stateLabel": "Planificado" },
+      { "time": "Planificado", "title": "Mensajería y colas", "desc": "Colas de mensajes asíncronas, tareas de pedidos vencidos, notificaciones push multi-dispositivo y avisos en tiempo real.", "state": "plan", "stateLabel": "Planificado" },
+      { "time": "Planificado", "title": "Web y despliegue en la nube", "desc": "Sitio web oficial (presentación + centro de descargas), HTTPS y registro de dominio, monitoreo, alertas y CI/CD.", "state": "plan", "stateLabel": "Planificado" }
+    ]
+  },
+  "faqPreview": {
+    "kicker": "PREGUNTAS",
+    "title": "Preguntas frecuentes",
+    "desc": "Dudas habituales sobre alta, reparto, liquidación y colaboración.",
+    "items": [
+      { "q": "¿Cómo cobra la plataforma?", "a": "Las tarifas de entrega y las reglas de comisión se configuran por región; cada sede regional fija sus tarifas según capacidad local y volumen de pedidos. Confirma el plan con el equipo comercial antes del alta." },
+      { "q": "¿Cómo se dan de alta los comercios?", "a": "Envía los documentos de alta en la App de comercio; tras la revisión y aprobación, puedes abrir tu tienda. Se admite carga de documentos y revisión en línea, y los comercios gestionan menús y estado operativo de forma autónoma." },
+      { "q": "¿Cómo cobran los repartidores?", "a": "Los repartidores cobran por pedido, con detalle de ingresos visible en tiempo real. La plataforma liquida por ciclo y admite solicitudes y revisión de retiros." },
+      { "q": "¿Qué regiones se admiten?", "a": "La plataforma usa una arquitectura multi-inquilino que permite operación independiente en múltiples ciudades y sedes regionales, cada una con sus tarifas, capacidad y estrategia." }
+    ],
+    "moreLabel": "Ver más preguntas",
+    "moreTo": "/faq"
+  },
+  "cta": {
+    "title": "Lleva Dawn Errand a tu ciudad",
+    "desc": "Socios de ciudad, operadores regionales y comercios: únanse para servir la entrega inmediata local.",
+    "primary": { "label": "Contáctanos", "to": "/contact" },
+    "secondary": { "label": "Probar el producto", "to": "/download" }
+  }
+}

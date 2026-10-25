@@ -1,0 +1,210 @@
+{
+  "pageHead": {
+    "kicker": "DOWNLOAD CENTER",
+    "title": "Multi-end Download Center",
+    "desc": "Choose your role, open the release page of the matching app, and get Android, iOS and HarmonyOS packages including past releases."
+  },
+  "androidSection": {
+    "title": "App Downloads",
+    "desc": "User, merchant and rider apps are all live. Open a card to pick Android / iOS / HarmonyOS on the release page."
+  },
+  "apps": [
+    {
+      "key": "client",
+      "icon": "phone",
+      "tone": "orange",
+      "name": "Dawn Errand · User App",
+      "role": "Android · iOS · HarmonyOS",
+      "desc": "Order errands and food delivery, track orders in real time, manage addresses, coupons and reviews.",
+      "meta": ["Android / iOS / HarmonyOS", "≈ 32 MB", "v1.4.0"],
+      "btnLabel": "Download APK",
+      "linkLabel": "View Releases"
+    },
+    {
+      "key": "store",
+      "icon": "shop",
+      "tone": "blue",
+      "name": "Dawn Errand · Merchant App",
+      "role": "Android · iOS · HarmonyOS",
+      "desc": "Store management, order acceptance and cooking, menu on/off, business status and operating statistics.",
+      "meta": ["Android / iOS / HarmonyOS", "≈ 28 MB", "v1.3.0"],
+      "btnLabel": "Download APK",
+      "linkLabel": "View Releases"
+    },
+    {
+      "key": "driver",
+      "icon": "bike",
+      "tone": "green",
+      "name": "Dawn Errand · Rider App",
+      "role": "Android · iOS · HarmonyOS",
+      "desc": "Grab and accept orders, delivery navigation, proof of delivery, per-order settlement and daily income details.",
+      "meta": ["Android / iOS / HarmonyOS", "≈ 30 MB", "v1.4.0"],
+      "btnLabel": "Download APK",
+      "linkLabel": "View Releases"
+    }
+  ],
+  "adminSection": {
+    "title": "Admin Console & Entry",
+    "desc": "Platform operators run full operations management from the web admin console.",
+    "entry": {
+      "icon": "console",
+      "name": "Dawn Errand · Admin Console",
+      "role": "Web · Best viewed on a desktop browser",
+      "desc": "Full operations management for users, merchants, riders, orders, finance and settings, with data overview, onboarding review, financial settlement and regional rate configuration.",
+      "btnLabel": "Open Admin Console",
+      "demo": "Demo site: the console will be accessible once deployed"
+    }
+  },
+  "scanNote": "After the official release, users can scan a QR code on the homepage / marketing materials to download the matching app; on this demo, downloads and console links are simulated by toasts.",
+  "scanNoteTitle": "Scan to download: ",
+  "subPage": {
+    "kicker": "VERSION HISTORY",
+    "backLabel": "Back to Download Center",
+    "platTitle": "Choose a Platform",
+    "platDesc": "Android, iOS and HarmonyOS are supported; packages are simulated by toasts on this demo site.",
+    "latestLabel": "Latest version",
+    "downloadLatest": "Download Latest",
+    "comingSoon": "Coming Soon",
+    "verTitle": "Release History",
+    "verDesc": "Listed in reverse chronological order, with Android / iOS / HarmonyOS packages per release.",
+    "downloadSuffix": "Download",
+    "noneLabel": "N/A",
+    "notFound": "No matching app was found. Go back to the download center and choose another client.",
+    "notFoundDesc": "Please return to the download center and pick another client to view its releases.",
+    "toastPkg": "Demo site: packages pending official release"
+  },
+  "appVersions": [
+    {
+      "key": "client",
+      "name": "Dawn Errand · User App",
+      "sub": "Order errands and food delivery, track orders in real time, manage addresses, coupons and reviews",
+      "icon": "phone",
+      "tone": "orange",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.4.0",
+          "date": "2026-10-18",
+          "note": "Multi-tenant regional rates, order message center, independent pricing for townships / county seats and password-free payment.",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.3.2",
+          "date": "2026-09-30",
+          "note": "Improved identity verification flow, real-time rider location refresh, fewer delivery exceptions.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.3.0",
+          "date": "2026-08-25",
+          "note": "Coupons and order reviews, revamped address book with smart sorting of frequent addresses.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.1",
+          "date": "2026-07-10",
+          "note": "Fixed Android 12 notification permission compatibility; better ordering experience on weak networks.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-20",
+          "note": "First release: ordering / dispatching / tracking / settlement full chain available.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    },
+    {
+      "key": "store",
+      "name": "Dawn Errand · Merchant App",
+      "sub": "Store management, order acceptance and cooking, menu on/off, business status and operating statistics",
+      "icon": "shop",
+      "tone": "blue",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.3.0",
+          "date": "2026-10-12",
+          "note": "Operating statistics dashboard, cooking-timeout alerts and one-tap export of operating data.",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.2.2",
+          "date": "2026-09-05",
+          "note": "Batch menu on/off, inventory alerts and optimized receipt printing.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.0",
+          "date": "2026-07-28",
+          "note": "Scheduled business-status switching, multi-store switching and visual delivery-fee rules.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.1.1",
+          "date": "2026-06-15",
+          "note": "Fixed image loading on low-memory devices; upgraded voice alerts for new orders.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-25",
+          "note": "First release: store management / order acceptance / order list available.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    },
+    {
+      "key": "driver",
+      "name": "Dawn Errand · Rider App",
+      "sub": "Grab and accept orders, delivery navigation, proof of delivery, per-order settlement and daily income details",
+      "icon": "bike",
+      "tone": "green",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.4.0",
+          "date": "2026-10-20",
+          "note": "Per-order settlement details and daily income summary; visualized order-acceptance rewards.",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.3.1",
+          "date": "2026-09-18",
+          "note": "Optimized delivery navigation, photo proof of delivery and a refined exception-reporting flow.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.3.0",
+          "date": "2026-08-08",
+          "note": "Order-grabbing lobby with order filters; one-tap switching between online / busy states.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.0",
+          "date": "2026-06-30",
+          "note": "Voice alerts for new orders and quick order-card actions (accept / deliver / exception).",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-18",
+          "note": "First release: order grabbing / delivery navigation / per-order settlement available.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    }
+  ]
+}

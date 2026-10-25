@@ -1,20 +1,31 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { siteApi } from '@/api/site'
+import { useSiteStore } from '@/stores/site'
 import type { FaqData } from '@/types'
 import SvgIcon from '@/components/SvgIcon.vue'
 
+const site = useSiteStore()
 const data = ref<FaqData | null>(null)
 const error = ref(false)
 const openIdx = ref(0)
 
-onMounted(async () => {
+async function load() {
   try {
-    data.value = await siteApi.faq()
+    data.value = await siteApi.faq(site.locale)
   } catch {
     error.value = true
   }
-})
+}
+
+onMounted(load)
+watch(
+  () => site.locale,
+  () => {
+    error.value = false
+    load()
+  },
+)
 
 function toggle(idx: number) {
   openIdx.value = openIdx.value === idx ? -1 : idx
@@ -23,7 +34,7 @@ function toggle(idx: number) {
 
 <template>
   <div v-if="error" class="mx-auto max-w-3xl px-4 py-24 text-center">
-    <p class="text-base text-ink-2">内容加载失败，请稍后刷新重试。</p>
+    <p class="text-base text-ink-2">{{ site.common?.ui.loadError ?? '内容加载失败，请稍后刷新重试。' }}</p>
   </div>
 
   <template v-else-if="data">

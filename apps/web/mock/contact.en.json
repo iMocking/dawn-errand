@@ -1,0 +1,56 @@
+{
+  "pageHead": {
+    "kicker": "PARTNERSHIP",
+    "title": "Partnership",
+    "desc": "Bring Dawn Errand to your city and build the local on-demand delivery ecosystem together."
+  },
+  "modes": {
+    "title": "Partnership Models",
+    "desc": "Four ways to partner, for city partners, merchants, riders and channel partners.",
+    "items": [
+      { "id": "city", "icon": "pin", "tone": "orange", "title": "City Partner", "desc": "Own regional market operations and growth; the platform provides system, operations and support to serve the local errand / food-delivery market together.", "tag": "For: regional operation teams" },
+      { "id": "merchant", "icon": "shop", "tone": "blue", "title": "Merchant Onboarding", "desc": "Restaurants, retailers and convenience stores onboard and open stores, gaining online orders and store management to grow local business.", "tag": "For: local merchants & stores" },
+      { "id": "rider", "icon": "bike", "tone": "green", "title": "Rider Recruitment", "desc": "Part-time / full-time riders join to accept orders, with per-order settlement and transparent income; the platform provides delivery tools and support.", "tag": "For: couriers / capacity teams" },
+      { "icon": "handshake", "tone": "purple", "title": "Channel Partnership", "desc": "System integrators, SaaS channel partners and industry solution providers bring platform capabilities to more local markets.", "tag": "For: channel & solution partners" }
+    ]
+  },
+  "steps": {
+    "title": "How It Works",
+    "desc": "Four steps to partnership — simple and transparent.",
+    "items": [
+      { "num": "1", "title": "Submit Intent", "desc": "Submit your partnership intent and target region via the form below or contact channels." },
+      { "num": "2", "title": "Solution Discussion", "desc": "Our business team discusses regional context, partnership model and operating plan with you." },
+      { "num": "3", "title": "Sign & Deploy", "desc": "Confirm the details, sign the agreement, and the platform deploys and initializes the regional hub." },
+      { "num": "4", "title": "Launch Operations", "desc": "Merchant onboarding, rider recruitment and market promotion — local operations go live." }
+    ]
+  },
+  "contactSection": {
+    "title": "Contact Us",
+    "desc": "Leave your requirements and the business team will get back to you shortly.",
+    "cards": [
+      { "icon": "mail", "label": "Business email (placeholder)", "value": "hello@shuguang.local" },
+      { "icon": "tel", "label": "Phone (placeholder)", "value": "400-000-0000" },
+      { "icon": "chat", "label": "Online chat", "value": "Replies on weekdays 9:00–18:00 (demo)" },
+      { "icon": "clock", "label": "Product experience", "value": "Download the apps to try the full product flow" }
+    ],
+    "form": {
+      "fields": [
+        { "name": "name", "label": "Your name *", "type": "text", "placeholder": "Enter your name" },
+        { "name": "contact", "label": "Contact *", "type": "text", "placeholder": "Phone / email" },
+        {
+          "name": "intent",
+          "label": "Partnership intent",
+          "type": "select",
+          "options": ["City Partner", "Merchant Onboarding", "Rider Recruitment", "Channel Partnership", "Other"]
+        },
+        { "name": "region", "label": "Target region", "type": "text", "placeholder": "e.g. Wuhan, Hubei" },
+        { "name": "message", "label": "Requirements", "type": "textarea", "placeholder": "Briefly describe your partnership needs and situation" }
+      ],
+      "submitLabel": "Submit Partnership Intent",
+      "submitTip": "Demo site: submission is not live yet — please reach us by email / phone.",
+      "demo": "Demo site: submission is not live yet — please reach us by email / phone."
+    }
+  },
+  "notice": "This is a demo website; all contact details above are placeholders. For real cooperation, follow the channels officially published by the project.",
+  "noticeLabel": "Note: "
+}

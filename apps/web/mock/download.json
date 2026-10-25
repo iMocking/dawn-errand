@@ -56,6 +56,23 @@
     }
   },
   "scanNote": "扫码直达：正式发布后，用户可在官网首页 / 宣传物料中扫码直接下载对应客户端；当前为设计稿演示，下载与后台链接暂以提示代替。",
+  "scanNoteTitle": "扫码直达：",
+  "subPage": {
+    "kicker": "VERSION HISTORY",
+    "backLabel": "返回下载中心",
+    "platTitle": "选择平台下载",
+    "platDesc": "支持 Android、iOS 与鸿蒙 HarmonyOS，安装包在演示站点暂以提示代替。",
+    "latestLabel": "最新版本",
+    "downloadLatest": "下载最新版",
+    "comingSoon": "即将上线",
+    "verTitle": "历史版本",
+    "verDesc": "按发布时间倒序展示，支持 Android / iOS / 鸿蒙 平台安装包。",
+    "downloadSuffix": "下载",
+    "noneLabel": "暂无",
+    "notFound": "未找到对应的客户端，请返回下载中心重新选择。",
+    "notFoundDesc": "请返回下载中心，选择其他客户端查看历史版本。",
+    "toastPkg": "演示站点：安装包待正式发布"
+  },
   "appVersions": [
     {
       "key": "client",

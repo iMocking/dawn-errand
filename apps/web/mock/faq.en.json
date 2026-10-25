@@ -1,0 +1,22 @@
+{
+  "pageHead": {
+    "kicker": "FAQ",
+    "title": "Frequently Asked Questions",
+    "desc": "Common questions about onboarding, delivery, settlement and security — helping users, merchants and riders get started quickly."
+  },
+  "items": [
+    { "q": "How does the platform charge?", "a": "Delivery rates and commission rules are configured per region; each regional hub sets its own rates based on local capacity and order volume. Confirm the rate plan for your region with the business team before onboarding." },
+    { "q": "How do merchants onboard? What qualifications are required?", "a": "Submit onboarding materials in the Merchant App (business license, store info, contact person, etc.); once reviewed and approved, you can open your store. Qualification upload and online review are supported, and merchants manage menus and business status independently." },
+    { "q": "How do riders get paid? When can they withdraw?", "a": "Riders are settled per order with income details visible in real time. The platform reconciles by settlement cycle and supports withdrawal applications and review. The exact cycle follows the rules of your regional hub." },
+    { "q": "Which regions are supported?", "a": "The platform uses a multi-tenant architecture supporting independent operation across multiple cities and regional hubs. Each region configures its own rates, capacity and operating strategy — ideal for townships, county seats and community markets." },
+    { "q": "How do users order and pay?", "a": "After downloading the app, users fill in pickup and drop-off details to place an order, covering both errand and food-delivery scenarios. Online payment and cash on delivery are supported in the current version; a payment gateway is planned." },
+    { "q": "How is delivery timeliness guaranteed?", "a": "The system auto-dispatches by distance and capacity, with rider grab-order and manual assignment. A delivery dispatch engine (map LBS, route planning and ETA) is planned to further improve delivery timeliness." },
+    { "q": "How is account security protected?", "a": "Email / SMS verification-code login, JWT session rotation, AES-GCM encryption of sensitive data, end-to-end HTTPS, plus audit logs for traceability." },
+    { "q": "Who do I contact for support?", "a": "Contact the operations team of your regional hub, or submit a request through the Partnership page. On the demo site, use the contact details on the Partnership page." },
+    { "q": "Do you support custom branding and regional rates?", "a": "Yes. The platform is built for multi-tenant operation: each regional hub can configure independent rates, announcements and operating strategy to meet localized needs." },
+    { "q": "What roles and permissions does the platform have?", "a": "The platform ships with a seven-role RBAC permission system covering platform admin, regional admin, merchant, rider, user and more — with isolated data and fine-grained, controllable permissions." }
+  ],
+  "note": "Still have questions?",
+  "noteAction": "Check partnership and contact channels and submit your question — we will get back to you soon.",
+  "noteTo": "/contact"
+}

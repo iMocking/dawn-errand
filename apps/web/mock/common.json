@@ -44,5 +44,16 @@
     ],
     "bottomLeft": "© 2026 曙光跑腿 Dawn Errand · 项目演示官网",
     "bottomRight": "本站为产品设计稿，联系方式为演示占位，实际合作请通过正式渠道联系。"
+  },
+  "ui": {
+    "loadError": "内容加载失败，请稍后刷新重试。",
+    "menuLabel": "打开导航菜单",
+    "titleMap": {
+      "home": "首页",
+      "download": "下载中心",
+      "downloadApp": "版本下载",
+      "faq": "常见问题",
+      "contact": "商务合作"
+    }
   }
 }

@@ -2,10 +2,12 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { siteApi } from '@/api/site'
+import { useSiteStore } from '@/stores/site'
 import type { AppVersionData, DownloadData, PlatformId } from '@/types'
 import SvgIcon from '@/components/SvgIcon.vue'
 
 const route = useRoute()
+const site = useSiteStore()
 const data = ref<DownloadData | null>(null)
 const error = ref(false)
 const notFound = ref(false)
@@ -18,14 +20,24 @@ const app = computed<AppVersionData | null>(() => {
   return data.value.appVersions.find((a) => a.key === key) ?? null
 })
 
-onMounted(async () => {
+async function load() {
   try {
-    data.value = await siteApi.download()
-    if (!app.value) notFound.value = true
+    data.value = await siteApi.download(site.locale)
+    notFound.value = !app.value
   } catch {
     error.value = true
   }
-})
+}
+
+onMounted(load)
+watch(
+  () => site.locale,
+  () => {
+    error.value = false
+    notFound.value = false
+    load()
+  },
+)
 
 /** 某平台可下载的最新版本号；不可用返回 null */
 function latestVersion(appVal: AppVersionData, id: PlatformId): string | null {
@@ -49,9 +61,11 @@ function showToast(msg: string) {
 }
 
 watch(
-  app,
-  (val) => {
-    if (val) document.title = `${val.name} · 版本下载 · 曙光跑腿 Dawn Errand`
+  [app, () => site.common?.ui.titleMap.downloadApp],
+  ([val, sub]) => {
+    const siteName = site.common?.siteName ?? '曙光跑腿'
+    const pageTitle = sub ?? '版本下载'
+    if (val) document.title = `${val.name} · ${pageTitle} · ${siteName} Dawn Errand`
   },
   { immediate: true },
 )
@@ -59,16 +73,16 @@ watch(
 
 <template>
   <div v-if="error" class="mx-auto max-w-3xl px-4 py-24 text-center">
-    <p class="text-base text-ink-2">内容加载失败，请稍后刷新重试。</p>
+    <p class="text-base text-ink-2">{{ site.common?.ui.loadError ?? '内容加载失败，请稍后刷新重试。' }}</p>
   </div>
 
   <div
     v-else-if="notFound"
     class="mx-auto max-w-3xl px-4 py-24 text-center"
   >
-    <p class="text-base text-ink-2">未找到对应的客户端，请返回下载中心重新选择。</p>
+    <p class="text-base text-ink-2">{{ data?.subPage.notFound ?? '未找到对应的客户端，请返回下载中心重新选择。' }}</p>
     <router-link to="/download" class="btn btn-primary btn-lg mt-6 inline-flex">
-      返回下载中心
+      {{ data?.subPage.backLabel ?? '返回下载中心' }}
     </router-link>
   </div>
 
@@ -76,12 +90,12 @@ watch(
     <!-- 页头 -->
     <section class="page-head">
       <div class="wrap">
-        <span class="kicker">VERSION HISTORY</span>
-        <h1>{{ app.name }} · 历史版本</h1>
+        <span class="kicker">{{ data.subPage.kicker }}</span>
+        <h1>{{ app.name }} · {{ data.subPage.verTitle }}</h1>
         <p>{{ app.sub }}</p>
         <router-link to="/download" class="back">
           <SvgIcon name="arrow" :size="14" />
-          返回下载中心
+          {{ data.subPage.backLabel }}
         </router-link>
       </div>
     </section>
@@ -90,8 +104,8 @@ watch(
       <div class="wrap">
         <!-- 平台下载 -->
         <div class="sec-head">
-          <h2>选择平台下载</h2>
-          <p>支持 Android、iOS 与鸿蒙 HarmonyOS，安装包在演示站点暂以提示代替。</p>
+          <h2>{{ data.subPage.platTitle }}</h2>
+          <p>{{ data.subPage.platDesc }}</p>
         </div>
         <div class="grid-plat">
           <div v-for="p in app.platforms" :key="p.id" class="plat" :class="p.state">
@@ -103,28 +117,28 @@ watch(
               </span>
             </div>
             <p class="p-latest">
-              最新版本
+              {{ data.subPage.latestLabel }}
               <b>{{ latestVersion(app, p.id) ?? '—' }}</b>
             </p>
             <button
               v-if="p.state === 'ready'"
               type="button"
               class="btn btn-primary"
-              @click="showToast('演示站点：安装包待正式发布')"
+              @click="showToast(data.subPage.toastPkg)"
             >
               <SvgIcon name="download" :size="16" />
-              下载最新版
+              {{ data.subPage.downloadLatest }}
             </button>
             <button v-else type="button" class="btn btn-disabled" disabled>
-              即将上线
+              {{ data.subPage.comingSoon }}
             </button>
           </div>
         </div>
 
         <!-- 历史版本 -->
         <div class="sec-head ver-head">
-          <h2>历史版本</h2>
-          <p>按发布时间倒序展示，支持 Android / iOS / 鸿蒙 平台安装包。</p>
+          <h2>{{ data.subPage.verTitle }}</h2>
+          <p>{{ data.subPage.verDesc }}</p>
         </div>
         <div class="ver-list">
           <div v-for="v in app.versions" :key="v.version" class="ver">
@@ -143,17 +157,17 @@ watch(
                 class="pkg"
                 :class="{ on: pkgOk(v, p.id), off: !pkgOk(v, p.id) }"
                 :disabled="!pkgOk(v, p.id)"
-                @click="showToast('演示站点：安装包待正式发布')"
+                @click="showToast(data.subPage.toastPkg)"
               >
                 <SvgIcon :name="p.id" :size="14" />
-                {{ pkgOk(v, p.id) ? v.version + ' 下载' : '暂无' }}
+                {{ pkgOk(v, p.id) ? v.version + ' ' + data.subPage.downloadSuffix : data.subPage.noneLabel }}
               </button>
             </div>
           </div>
         </div>
 
         <div class="scan-note">
-          <b>扫码直达：</b>{{ data.scanNote }}
+          <b>{{ data.scanNoteTitle }}</b>{{ data.scanNote }}
         </div>
       </div>
     </section>

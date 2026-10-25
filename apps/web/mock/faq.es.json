@@ -1,0 +1,22 @@
+{
+  "pageHead": {
+    "kicker": "PREGUNTAS",
+    "title": "Preguntas frecuentes",
+    "desc": "Dudas habituales sobre alta, reparto, liquidación y seguridad — para que usuarios, comercios y repartidores empiecen rápido."
+  },
+  "items": [
+    { "q": "¿Cómo cobra la plataforma?", "a": "Las tarifas de entrega y las reglas de comisión se configuran por región; cada sede regional fija sus tarifas según capacidad local y volumen de pedidos. Confirma el plan de tarifas de tu región con el equipo comercial antes del alta." },
+    { "q": "¿Cómo se dan de alta los comercios? ¿Qué requisitos se necesitan?", "a": "Envía los documentos de alta en la App de comercio (licencia comercial, información de la tienda, contacto, etc.); tras la revisión y aprobación, puedes abrir tu tienda. Se admite carga de documentos y revisión en línea, y los comercios gestionan menús y estado operativo de forma autónoma." },
+    { "q": "¿Cómo cobran los repartidores? ¿Cuándo pueden retirar?", "a": "Los repartidores cobran por pedido, con detalle de ingresos visible en tiempo real. La plataforma liquida por ciclo y admite solicitudes y revisión de retiros. El ciclo exacto sigue las reglas de tu sede regional." },
+    { "q": "¿Qué regiones se admiten?", "a": "La plataforma usa una arquitectura multi-inquilino que permite operación independiente en múltiples ciudades y sedes regionales. Cada región configura sus tarifas, capacidad y estrategia — ideal para pueblos, cabeceras municipales y mercados de barrio." },
+    { "q": "¿Cómo piden y pagan los usuarios?", "a": "Tras descargar la app, los usuarios indican los datos de recogida y entrega para crear un pedido, en escenarios de recados y comida. La versión actual admite pago en línea y contra reembolso; una pasarela de pago está planificada." },
+    { "q": "¿Cómo se garantiza la puntualidad del reparto?", "a": "El sistema asigna automáticamente por distancia y capacidad, con ofertas de repartidores y asignación manual. Un motor de asignación de reparto (LBS de mapas, planificación de rutas y ETA) está planificado para mejorar aún más la puntualidad." },
+    { "q": "¿Cómo se protege la seguridad de la cuenta?", "a": "Inicio de sesión con código de correo / SMS, rotación de sesiones JWT, cifrado AES-GCM de datos sensibles, HTTPS de extremo a extremo y registros de auditoría para trazabilidad." },
+    { "q": "¿A quién contacto para soporte?", "a": "Contacta al equipo de operaciones de tu sede regional o envía una solicitud a través de la página de Colaboración. En el sitio de demostración, usa los datos de contacto de la página de Colaboración." },
+    { "q": "¿Admiten marca personalizada y tarifas regionales?", "a": "Sí. La plataforma está pensada para operación multi-inquilino: cada sede regional puede configurar tarifas, anuncios y estrategia independientes para cubrir necesidades locales." },
+    { "q": "¿Qué roles y permisos tiene la plataforma?", "a": "La plataforma incluye un sistema de permisos RBAC de siete roles que cubre administrador de plataforma, administrador regional, comercio, repartidor, usuario y más — con datos aislados y permisos de control fino." }
+  ],
+  "note": "¿Aún tienes dudas?",
+  "noteAction": "Consulta los canales de colaboración y contacto, envía tu pregunta y te responderemos pronto.",
+  "noteTo": "/contact"
+}

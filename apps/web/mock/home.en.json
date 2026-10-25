@@ -1,0 +1,103 @@
+{
+  "hero": {
+    "titleLines": ["Every order in every township", "delivered with care"],
+    "lead": "Dawn Errand is an errand / food-delivery SaaS platform covering the full chain — user ordering, merchant acceptance, rider delivery and platform operations. Built for multi-city, multi-region multi-tenant scenarios: ready to use out of the box and commercially deployable.",
+    "stats": [
+      { "value": "12,800+", "label": "Townships covered" },
+      { "value": "86,000+", "label": "Registered users" },
+      { "value": "4,320+", "label": "Partner riders" }
+    ],
+    "devicesLabel": "User · Merchant · Rider · Admin"
+  },
+  "capabilities": {
+    "kicker": "CAPABILITIES",
+    "title": "One system for the entire chain",
+    "desc": "From ordering and dispatching to delivery and settlement, everything your platform needs is covered.",
+    "items": [
+      { "icon": "order", "title": "Ordering & Dispatch", "desc": "One-tap ordering; the system auto-matches riders by distance, capacity and regional rates, with manual assignment and grab-order support." },
+      { "icon": "delivery", "title": "Real-time Delivery", "desc": "Step-by-step rider flow from accepting, pickup to delivery, with map navigation and proof-of-delivery." },
+      { "icon": "track", "title": "Order Tracking", "desc": "Users see order status and rider location in real time; merchants track acceptance, preparation and delivery progress." },
+      { "icon": "finance", "title": "Financial Settlement", "desc": "Per-order rider settlement, merchant payout splitting and transparent platform commission, with withdrawal review and statement export." },
+      { "icon": "role", "title": "Multi-role Permissions", "desc": "Isolated roles across platform, merchant, rider and user, with fine-grained Casbin RBAC covering seven roles." },
+      { "icon": "region", "title": "Regions & Rates", "desc": "Per-region delivery fees, starting prices and commission rules, supporting independent operation across cities and regional hubs." },
+      { "icon": "store", "title": "Merchant Management", "desc": "Merchant onboarding review, store management, menu on/off, business status switching and operating statistics." },
+      { "icon": "rider", "title": "Rider Management", "desc": "Rider onboarding review, online status, order history and delivery ratings to guarantee service quality." },
+      { "icon": "chart", "title": "Data Dashboard", "desc": "Order trends, business distribution, live order flow and to-do items — operating data at a glance." }
+    ]
+  },
+  "scenarios": {
+    "kicker": "SCENARIOS",
+    "title": "Use Cases",
+    "desc": "From small towns to county seats, from neighborhoods to business districts — Dawn Errand deploys anywhere.",
+    "items": [
+      { "num": "01", "icon": "pin", "title": "Community Errands", "desc": "Proxy buying, parcel pickup, queue waiting and urgent pickups — covering daily errand needs of community residents." },
+      { "num": "02", "icon": "van", "title": "Same-city Delivery", "desc": "Express delivery of documents, keys, credentials and other urgent items, with fixed pickup, visible progress and controlled timing." },
+      { "num": "03", "icon": "food", "title": "Food Delivery", "desc": "Merchants open online stores and riders pick up and deliver — building an online food-delivery business for township restaurants." }
+    ]
+  },
+  "features": {
+    "kicker": "HIGHLIGHTS",
+    "title": "Key Features",
+    "desc": "Built around five chains: ordering, dispatching, delivery tracking, financial settlement and multi-role permissions.",
+    "items": [
+      { "icon": "check", "tone": "orange", "title": "One-tap Ordering", "desc": "Fill in pickup and drop-off details and place an order — a unified, lightweight entry for errand and food-delivery scenarios." },
+      { "icon": "clock", "tone": "blue", "title": "Smart Dispatching", "desc": "Auto-match by distance and capacity, with rider grab-order and manual dispatch for flexible scheduling." },
+      { "icon": "box", "tone": "green", "title": "Delivery Tracking", "desc": "Order status fully traceable; users, merchants and riders stay in sync on delivery progress." },
+      { "icon": "card", "tone": "purple", "title": "Financial Settlement", "desc": "Per-order rider settlement, merchant payout splitting, withdrawal review and statement export for a clear money trail." },
+      { "icon": "shield", "tone": "yellow", "title": "Multi-role Permissions", "desc": "Seven-role RBAC with isolated data across platform, merchant, rider and user — secure and compliant." },
+      { "icon": "lock", "tone": "orange", "title": "Stability & Security", "desc": "JWT session rotation, AES-GCM encryption of sensitive data, email / SMS verification-code login — secure and auditable." }
+    ]
+  },
+  "pipeline": {
+    "title": "Architecture · Multi-end → Go Backend → Data Storage",
+    "nodes": [
+      { "name": "Website / Admin Console", "tag": "Web · Vue 3" },
+      { "name": "User · Merchant · Rider Apps", "tag": "Android · Kotlin" },
+      { "name": "Go Backend · Gin", "tag": "DDD 4-layer · JWT · Casbin RBAC", "strong": true },
+      { "name": "PostgreSQL 16 · Redis 7", "tag": "Business data · Sessions / Rate limit / Codes" }
+    ]
+  },
+  "ends": {
+    "kicker": "MULTI-END",
+    "title": "Multi-end Product Matrix",
+    "desc": "One platform, four ends working together: users order, merchants accept, riders deliver, operators manage.",
+    "items": [
+      { "icon": "phone", "tone": "orange", "name": "User App", "role": "Android · MVVM", "desc": "Order errands / food delivery, track orders in real time, manage addresses, coupons and reviews.", "linkLabel": "Download User App", "to": "/download" },
+      { "icon": "shop", "tone": "blue", "name": "Merchant App", "role": "Android · Kotlin", "desc": "Store management, order acceptance and cooking, menu on/off, business status and operating statistics.", "linkLabel": "Download Merchant App", "to": "/download" },
+      { "icon": "bike", "tone": "green", "name": "Rider App", "role": "Android · Kotlin", "desc": "Grab and accept orders, delivery navigation, proof of delivery, per-order settlement and daily income details.", "linkLabel": "Download Rider App", "to": "/download" },
+      { "icon": "console", "tone": "purple", "name": "Admin Console", "role": "Web · Vue 3 + Tailwind", "desc": "Full operations management for users, merchants, riders, orders, finance and settings, with a data dashboard.", "linkLabel": "Open Admin Console", "to": "/download" }
+    ]
+  },
+  "roadmap": {
+    "kicker": "ROADMAP",
+    "title": "Release Notes",
+    "desc": "The project keeps advancing; key capabilities ship one by one.",
+    "items": [
+      { "time": "Released", "title": "Multi-end Core Loop", "desc": "User ordering, merchant acceptance, rider delivery and platform operations are fully connected across four ends and the console.", "state": "done", "stateLabel": "Done" },
+      { "time": "Released", "title": "Identity & Permissions", "desc": "Email / SMS verification-code login, JWT session rotation, Casbin RBAC seven-role isolation and data isolation.", "state": "done", "stateLabel": "Done" },
+      { "time": "Planned", "title": "Payment Gateway & Reconciliation", "desc": "Payment / refund / reconciliation and merchant settlement splitting are planned.", "state": "plan", "stateLabel": "Planned" },
+      { "time": "Planned", "title": "Dispatch Engine", "desc": "Map LBS, route planning and ETA prediction to make dispatching smarter.", "state": "plan", "stateLabel": "Planned" },
+      { "time": "Planned", "title": "Messaging & Queues", "desc": "Async message queues, order-timeout jobs, multi-end push and real-time notifications.", "state": "plan", "stateLabel": "Planned" },
+      { "time": "Planned", "title": "Website & Cloud Deployment", "desc": "Official website (intro + multi-end download center), HTTPS and domain filing, monitoring, alerting and CI/CD.", "state": "plan", "stateLabel": "Planned" }
+    ]
+  },
+  "faqPreview": {
+    "kicker": "FAQ",
+    "title": "Frequently Asked Questions",
+    "desc": "Common questions about onboarding, delivery, settlement and partnership.",
+    "items": [
+      { "q": "How does the platform charge?", "a": "Delivery rates and commission rules are configured per region; each regional hub sets its own rates based on local capacity and order volume. Confirm the plan with the business team before onboarding." },
+      { "q": "How do merchants onboard?", "a": "Submit onboarding materials in the Merchant App; once reviewed and approved, you can open your store. Qualification upload and online review are supported, and merchants manage menus and business status independently." },
+      { "q": "How do riders get paid?", "a": "Riders are settled per order with income details visible in real time. The platform reconciles by settlement cycle and supports withdrawal applications and review." },
+      { "q": "Which regions are supported?", "a": "The platform uses a multi-tenant architecture supporting independent operation across multiple cities and regional hubs, each with its own rates, capacity and operating strategy." }
+    ],
+    "moreLabel": "View more questions",
+    "moreTo": "/faq"
+  },
+  "cta": {
+    "title": "Bring Dawn Errand to your city",
+    "desc": "City partners, regional operators and merchants are welcome to join and serve local on-demand delivery together.",
+    "primary": { "label": "Contact Us", "to": "/contact" },
+    "secondary": { "label": "Try the Product", "to": "/download" }
+  }
+}

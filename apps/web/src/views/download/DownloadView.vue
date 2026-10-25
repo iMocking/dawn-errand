@@ -1,21 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { siteApi } from '@/api/site'
+import { useSiteStore } from '@/stores/site'
 import type { DownloadData } from '@/types'
 import SvgIcon from '@/components/SvgIcon.vue'
 
+const site = useSiteStore()
 const data = ref<DownloadData | null>(null)
 const error = ref(false)
 const toastMsg = ref('')
 let toastTimer: ReturnType<typeof setTimeout> | null = null
 
-onMounted(async () => {
+async function load() {
   try {
-    data.value = await siteApi.download()
+    data.value = await siteApi.download(site.locale)
   } catch {
     error.value = true
   }
-})
+}
+
+onMounted(load)
+watch(
+  () => site.locale,
+  () => {
+    error.value = false
+    load()
+  },
+)
 
 function showToast(msg: string) {
   toastMsg.value = msg
@@ -28,7 +39,7 @@ function showToast(msg: string) {
 
 <template>
   <div v-if="error" class="mx-auto max-w-3xl px-4 py-24 text-center">
-    <p class="text-base text-ink-2">内容加载失败，请稍后刷新重试。</p>
+    <p class="text-base text-ink-2">{{ site.common?.ui.loadError ?? '内容加载失败，请稍后刷新重试。' }}</p>
   </div>
 
   <template v-else-if="data">
@@ -95,7 +106,7 @@ function showToast(msg: string) {
         </div>
 
         <div class="scan-note">
-          <b>扫码直达：</b>{{ data.scanNote }}
+          <b>{{ data.scanNoteTitle }}</b>{{ data.scanNote }}
         </div>
       </div>
     </section>

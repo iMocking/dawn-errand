@@ -1,0 +1,59 @@
+{
+  "siteName": "Dawn Errand",
+  "siteSub": "曙光跑腿",
+  "navLinks": [
+    { "label": "Home", "to": "/" },
+    { "label": "Download", "to": "/download" },
+    { "label": "FAQ", "to": "/faq" },
+    { "label": "Partnership", "to": "/contact" }
+  ],
+  "navCta": [
+    { "label": "Download Now", "to": "/download", "style": "ghost" },
+    { "label": "Partnership", "to": "/contact", "style": "primary" }
+  ],
+  "footer": {
+    "about": "An errand / food-delivery SaaS platform for townships and local markets — multi-end coverage, a ready-to-use, commercial-grade local on-demand delivery solution.",
+    "columns": [
+      {
+        "title": "Product",
+        "links": [
+          { "label": "Product Overview", "to": "/" },
+          { "label": "Multi-end Download", "to": "/download" },
+          { "label": "Release Notes", "to": "/#roadmap" },
+          { "label": "FAQ", "to": "/faq" }
+        ]
+      },
+      {
+        "title": "Partnership",
+        "links": [
+          { "label": "Partnership", "to": "/contact" },
+          { "label": "City Partner", "to": "/contact#city" },
+          { "label": "Merchant Onboarding", "to": "/contact#merchant" },
+          { "label": "Rider Recruitment", "to": "/contact#rider" }
+        ]
+      },
+      {
+        "title": "Contact & Support",
+        "links": [
+          { "label": "Contact Us", "to": "/contact" },
+          { "label": "Help Center", "to": "/faq" },
+          { "label": "Admin Console", "to": "/download" },
+          { "label": "hello@shuguang.local", "to": "mailto:hello@shuguang.local", "external": true }
+        ]
+      }
+    ],
+    "bottomLeft": "© 2026 Dawn Errand · Demo website",
+    "bottomRight": "This is a design demo. Contact details are placeholders — reach us through official channels for real cooperation."
+  },
+  "ui": {
+    "loadError": "Failed to load content. Please refresh and try again.",
+    "menuLabel": "Open navigation menu",
+    "titleMap": {
+      "home": "Home",
+      "download": "Download Center",
+      "downloadApp": "Release Downloads",
+      "faq": "FAQ",
+      "contact": "Partnership"
+    }
+  }
+}

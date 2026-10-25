@@ -1,20 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { siteApi } from '@/api/site'
+import { useSiteStore } from '@/stores/site'
 import type { HomeData } from '@/types'
 import SvgIcon from '@/components/SvgIcon.vue'
 
+const site = useSiteStore()
 const data = ref<HomeData | null>(null)
 const error = ref(false)
 const faqOpen = ref<Record<number, boolean>>({})
 
-onMounted(async () => {
+async function load() {
   try {
-    data.value = await siteApi.home()
+    data.value = await siteApi.home(site.locale)
   } catch {
     error.value = true
   }
-})
+}
+
+onMounted(load)
+// 语言切换后按新 locale 重新请求页面数据
+watch(
+  () => site.locale,
+  () => {
+    error.value = false
+    load()
+  },
+)
 
 function toggleFaq(idx: number) {
   faqOpen.value[idx] = !faqOpen.value[idx]
@@ -23,7 +35,7 @@ function toggleFaq(idx: number) {
 
 <template>
   <div v-if="error" class="mx-auto max-w-3xl px-4 py-24 text-center">
-    <p class="text-base text-ink-2">内容加载失败，请稍后刷新重试。</p>
+    <p class="text-base text-ink-2">{{ site.common?.ui.loadError ?? '内容加载失败，请稍后刷新重试。' }}</p>
   </div>
 
   <template v-else-if="data">

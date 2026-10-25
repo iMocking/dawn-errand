@@ -2,10 +2,17 @@
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSiteStore } from '@/stores/site'
+import type { Locale } from '@/types'
 import SvgIcon from './SvgIcon.vue'
 
 const route = useRoute()
 const site = useSiteStore()
+
+const LOCALES: Array<{ key: Locale; label: string }> = [
+  { key: 'zh', label: '中' },
+  { key: 'en', label: 'EN' },
+  { key: 'es', label: 'ES' },
+]
 
 const menuOpen = ref(false)
 watch(
@@ -57,7 +64,20 @@ const logoMark = 'M10 20c4.5 0 7-2 7-6.5M20 12.5a4 4 0 1 0-8 0 4 4 0 0 0 8 0z'
         </router-link>
       </nav>
 
+      <!-- 桌面：语言切换 + CTA -->
       <div class="hidden items-center gap-3 md:flex">
+        <div class="mr-1 flex items-center gap-0.5 rounded-lg border border-line bg-white p-0.5">
+          <button
+            v-for="l in LOCALES"
+            :key="l.key"
+            type="button"
+            class="rounded-md px-2 py-1 text-xs font-semibold transition-colors"
+            :class="site.locale === l.key ? 'bg-primary text-white' : 'text-ink-3 hover:bg-head hover:text-ink-1'"
+            @click="site.setLocale(l.key)"
+          >
+            {{ l.label }}
+          </button>
+        </div>
         <router-link
           v-for="cta in site.common?.navCta"
           :key="cta.to"
@@ -77,7 +97,7 @@ const logoMark = 'M10 20c4.5 0 7-2 7-6.5M20 12.5a4 4 0 1 0-8 0 4 4 0 0 0 8 0z'
       <button
         class="flex h-11 w-11 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-head md:hidden"
         :aria-expanded="menuOpen"
-        aria-label="打开导航菜单"
+        :aria-label="site.common?.ui.menuLabel ?? '菜单'"
         @click="menuOpen = !menuOpen"
       >
         <SvgIcon :name="menuOpen ? 'plus' : 'menu'" :size="22" />
@@ -119,6 +139,18 @@ const logoMark = 'M10 20c4.5 0 7-2 7-6.5M20 12.5a4 4 0 1 0-8 0 4 4 0 0 0 8 0z'
           >
             {{ cta.label }}
           </router-link>
+          <div class="mt-1 flex items-center justify-center gap-0.5 rounded-lg border border-line bg-white p-1">
+            <button
+              v-for="l in LOCALES"
+              :key="l.key"
+              type="button"
+              class="min-h-9 flex-1 rounded-md px-3 text-sm font-semibold transition-colors"
+              :class="site.locale === l.key ? 'bg-primary text-white' : 'text-ink-3 hover:bg-head hover:text-ink-1'"
+              @click="site.setLocale(l.key)"
+            >
+              {{ l.label }}
+            </button>
+          </div>
         </div>
       </div>
     </transition>

@@ -1,0 +1,56 @@
+{
+  "pageHead": {
+    "kicker": "COLABORACIÓN",
+    "title": "Colaboración",
+    "desc": "Lleva Dawn Errand a tu ciudad y construyamos juntos el ecosistema local de entrega inmediata."
+  },
+  "modes": {
+    "title": "Modelos de colaboración",
+    "desc": "Cuatro formas de colaborar, para socios de ciudad, comercios, repartidores y socios de canal.",
+    "items": [
+      { "id": "city", "icon": "pin", "tone": "orange", "title": "Socio de ciudad", "desc": "Gestiona la operación y el crecimiento de tu región; la plataforma ofrece sistema, operaciones y soporte para servir juntos el mercado local de recados / comida.", "tag": "Para: equipos de operación regional" },
+      { "id": "merchant", "icon": "shop", "tone": "blue", "title": "Alta de comercios", "desc": "Restaurantes, tiendas y supermercados se dan de alta y abren tienda, obteniendo pedidos en línea y gestión de tienda para crecer su negocio local.", "tag": "Para: comercios y tiendas locales" },
+      { "id": "rider", "icon": "bike", "tone": "green", "title": "Reclutamiento de repartidores", "desc": "Repartidores a tiempo parcial / completo se unen para aceptar pedidos, con liquidación por pedido e ingresos transparentes; la plataforma ofrece herramientas y soporte.", "tag": "Para: mensajeros / equipos de capacidad" },
+      { "icon": "handshake", "tone": "purple", "title": "Colaboración de canal", "desc": "Integradores de sistemas, socios de canal SaaS y proveedores de soluciones llevan las capacidades de la plataforma a más mercados locales.", "tag": "Para: socios de canal y soluciones" }
+    ]
+  },
+  "steps": {
+    "title": "Cómo funciona",
+    "desc": "Cuatro pasos para colaborar: simple y transparente.",
+    "items": [
+      { "num": "1", "title": "Envía tu interés", "desc": "Envía tu interés de colaboración y la región objetivo mediante el formulario o los canales de contacto." },
+      { "num": "2", "title": "Conversación de la solución", "desc": "Nuestro equipo comercial habla contigo sobre el contexto regional, el modelo y el plan de operación." },
+      { "num": "3", "title": "Firma y despliegue", "desc": "Confirma los detalles, firma el acuerdo y la plataforma despliega e inicializa la sede regional." },
+      { "num": "4", "title": "Inicio de la operación", "desc": "Alta de comercios, reclutamiento de repartidores y promoción — la operación local empieza." }
+    ]
+  },
+  "contactSection": {
+    "title": "Contáctanos",
+    "desc": "Déjanos tu necesidad y el equipo comercial te contactará pronto.",
+    "cards": [
+      { "icon": "mail", "label": "Email comercial (provisional)", "value": "hello@shuguang.local" },
+      { "icon": "tel", "label": "Teléfono (provisional)", "value": "400-000-0000" },
+      { "icon": "chat", "label": "Chat en línea", "value": "Respuestas en días laborables 9:00–18:00 (demo)" },
+      { "icon": "clock", "label": "Experiencia de producto", "value": "Descarga las apps para probar el flujo completo" }
+    ],
+    "form": {
+      "fields": [
+        { "name": "name", "label": "Tu nombre *", "type": "text", "placeholder": "Escribe tu nombre" },
+        { "name": "contact", "label": "Contacto *", "type": "text", "placeholder": "Teléfono / email" },
+        {
+          "name": "intent",
+          "label": "Intención de colaboración",
+          "type": "select",
+          "options": ["Socio de ciudad", "Alta de comercio", "Repartidor", "Colaboración de canal", "Otro"]
+        },
+        { "name": "region", "label": "Región objetivo", "type": "text", "placeholder": "p. ej. Wuhan, Hubei" },
+        { "name": "message", "label": "Descripción de la necesidad", "type": "textarea", "placeholder": "Describe brevemente tu necesidad y situación" }
+      ],
+      "submitLabel": "Enviar intención de colaboración",
+      "submitTip": "Sitio de demostración: el envío aún no está disponible — contáctanos por email / teléfono.",
+      "demo": "Sitio de demostración: el envío aún no está disponible — contáctanos por email / teléfono."
+    }
+  },
+  "notice": "Este es un sitio web de demostración; todos los datos de contacto anteriores son provisionales. Para colaborar de verdad, sigue los canales publicados oficialmente por el proyecto.",
+  "noticeLabel": "Nota: "
+}

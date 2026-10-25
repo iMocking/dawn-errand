@@ -1,0 +1,210 @@
+{
+  "pageHead": {
+    "kicker": "CENTRO DE DESCARGAS",
+    "title": "Centro de descargas multi-dispositivo",
+    "desc": "Elige tu rol, abre la página de versiones de la app correspondiente y obtén paquetes de Android, iOS y HarmonyOS, incluidas versiones anteriores."
+  },
+  "androidSection": {
+    "title": "Descargas de apps",
+    "desc": "Las apps de usuario, comercio y repartidor ya están publicadas. Abre una tarjeta y elige Android / iOS / HarmonyOS en la página de versiones."
+  },
+  "apps": [
+    {
+      "key": "client",
+      "icon": "phone",
+      "tone": "orange",
+      "name": "Dawn Errand · App de usuario",
+      "role": "Android · iOS · HarmonyOS",
+      "desc": "Pide recados y comida, sigue los pedidos en tiempo real, gestiona direcciones, cupones y valoraciones.",
+      "meta": ["Android / iOS / HarmonyOS", "≈ 32 MB", "v1.4.0"],
+      "btnLabel": "Descargar APK",
+      "linkLabel": "Ver versiones"
+    },
+    {
+      "key": "store",
+      "icon": "shop",
+      "tone": "blue",
+      "name": "Dawn Errand · App de comercio",
+      "role": "Android · iOS · HarmonyOS",
+      "desc": "Gestión de tienda, aceptación y preparación de pedidos, alta/baja de menú, estado operativo y estadísticas.",
+      "meta": ["Android / iOS / HarmonyOS", "≈ 28 MB", "v1.3.0"],
+      "btnLabel": "Descargar APK",
+      "linkLabel": "Ver versiones"
+    },
+    {
+      "key": "driver",
+      "icon": "bike",
+      "tone": "green",
+      "name": "Dawn Errand · App de repartidor",
+      "role": "Android · iOS · HarmonyOS",
+      "desc": "Aceptar pedidos, navegación de reparto, comprobante de entrega, liquidación por pedido e ingresos diarios.",
+      "meta": ["Android / iOS / HarmonyOS", "≈ 30 MB", "v1.4.0"],
+      "btnLabel": "Descargar APK",
+      "linkLabel": "Ver versiones"
+    }
+  ],
+  "adminSection": {
+    "title": "Panel de administración",
+    "desc": "Los operadores gestionan toda la operación desde el panel web de administración.",
+    "entry": {
+      "icon": "console",
+      "name": "Dawn Errand · Panel de administración",
+      "role": "Web · Mejor en navegador de escritorio",
+      "desc": "Gestión completa de usuarios, comercios, repartidores, pedidos, finanzas y ajustes, con vista general de datos, revisión de altas, liquidación financiera y configuración de tarifas por región.",
+      "btnLabel": "Abrir panel de administración",
+      "demo": "Sitio de demostración: el panel será accesible tras su despliegue"
+    }
+  },
+  "scanNote": "Tras la publicación oficial, los usuarios pueden escanear un código QR en la portada / materiales de marketing para descargar la app correspondiente; en este demo, las descargas y los enlaces del panel se simulan con avisos.",
+  "scanNoteTitle": "Escanea y descarga: ",
+  "subPage": {
+    "kicker": "HISTORIAL DE VERSIONES",
+    "backLabel": "Volver al centro de descargas",
+    "platTitle": "Elige una plataforma",
+    "platDesc": "Se admiten Android, iOS y HarmonyOS; en este sitio de demostración los paquetes se simulan con avisos.",
+    "latestLabel": "Última versión",
+    "downloadLatest": "Descargar última",
+    "comingSoon": "Próximamente",
+    "verTitle": "Historial de versiones",
+    "verDesc": "Ordenadas de más reciente a más antigua, con paquetes de Android / iOS / HarmonyOS por versión.",
+    "downloadSuffix": "Descargar",
+    "noneLabel": "N/D",
+    "notFound": "No se encontró ninguna app coincidente. Vuelve al centro de descargas y elige otro cliente.",
+    "notFoundDesc": "Regresa al centro de descargas y elige otro cliente para ver sus versiones.",
+    "toastPkg": "Sitio de demostración: paquetes pendientes de publicación oficial"
+  },
+  "appVersions": [
+    {
+      "key": "client",
+      "name": "Dawn Errand · App de usuario",
+      "sub": "Pide recados y comida, sigue los pedidos en tiempo real, gestiona direcciones, cupones y valoraciones",
+      "icon": "phone",
+      "tone": "orange",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.4.0",
+          "date": "2026-10-18",
+          "note": "Tarifas regionales multi-inquilino, centro de mensajes de pedidos, precios independientes para pueblos / cabeceras y pago sin contraseña.",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.3.2",
+          "date": "2026-09-30",
+          "note": "Flujo de verificación de identidad mejorado, ubicación del repartidor actualizada en tiempo real y menos incidencias de entrega.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.3.0",
+          "date": "2026-08-25",
+          "note": "Cupones y valoraciones de pedidos, agenda de direcciones rediseñada con ordenación inteligente de las frecuentes.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.1",
+          "date": "2026-07-10",
+          "note": "Corregida la compatibilidad de permisos de notificación en Android 12; mejor experiencia de pedido en redes débiles.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-20",
+          "note": "Primera versión: cadena completa de pedido / asignación / seguimiento / liquidación disponible.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    },
+    {
+      "key": "store",
+      "name": "Dawn Errand · App de comercio",
+      "sub": "Gestión de tienda, aceptación y preparación de pedidos, alta/baja de menú, estado operativo y estadísticas",
+      "icon": "shop",
+      "tone": "blue",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.3.0",
+          "date": "2026-10-12",
+          "note": "Panel de estadísticas de negocio, alertas de retraso en la preparación y exportación de datos en un toque.",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.2.2",
+          "date": "2026-09-05",
+          "note": "Alta/baja masiva de menú, alertas de inventario e impresión de tickets optimizada.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.0",
+          "date": "2026-07-28",
+          "note": "Cambio programado del estado operativo, gestión de varias tiendas y reglas de tarifa de entrega configurables visualmente.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.1.1",
+          "date": "2026-06-15",
+          "note": "Corregida la carga de imágenes en dispositivos de poca memoria; avisos de voz de pedidos nuevos mejorados.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-25",
+          "note": "Primera versión: gestión de tienda / aceptación de pedidos / lista de pedidos disponible.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    },
+    {
+      "key": "driver",
+      "name": "Dawn Errand · App de repartidor",
+      "sub": "Aceptar pedidos, navegación de reparto, comprobante de entrega, liquidación por pedido e ingresos diarios",
+      "icon": "bike",
+      "tone": "green",
+      "platforms": [
+        { "id": "android", "label": "Android", "note": "Android 7.0+", "state": "ready" },
+        { "id": "ios", "label": "iOS", "note": "iOS 13+", "state": "ready" },
+        { "id": "harmony", "label": "HarmonyOS", "note": "HarmonyOS NEXT", "state": "ready" }
+      ],
+      "versions": [
+        {
+          "version": "v1.4.0",
+          "date": "2026-10-20",
+          "note": "Detalle de liquidación por pedido y resumen de ingresos diarios; recompensas de aceptación visualizadas.",
+          "packages": { "android": true, "ios": true, "harmony": true }
+        },
+        {
+          "version": "v1.3.1",
+          "date": "2026-09-18",
+          "note": "Navegación de reparto optimizada, comprobante de entrega con foto y flujo de reporte de incidencias mejorado.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.3.0",
+          "date": "2026-08-08",
+          "note": "Sala de ofertas con filtros de pedidos; cambio en un toque entre estados en línea / ocupado.",
+          "packages": { "android": true, "ios": true, "harmony": false }
+        },
+        {
+          "version": "v1.2.0",
+          "date": "2026-06-30",
+          "note": "Avisos de voz para pedidos nuevos y acciones rápidas en la tarjeta del pedido (aceptar / entregar / incidencia).",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        },
+        {
+          "version": "v1.0.0",
+          "date": "2026-04-18",
+          "note": "Primera versión: ofertas / navegación de reparto / liquidación por pedido disponible.",
+          "packages": { "android": true, "ios": false, "harmony": false }
+        }
+      ]
+    }
+  ]
+}

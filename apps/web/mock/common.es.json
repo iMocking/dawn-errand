@@ -1,0 +1,59 @@
+{
+  "siteName": "Dawn Errand",
+  "siteSub": "曙光跑腿",
+  "navLinks": [
+    { "label": "Inicio", "to": "/" },
+    { "label": "Descargas", "to": "/download" },
+    { "label": "Preguntas", "to": "/faq" },
+    { "label": "Colaboración", "to": "/contact" }
+  ],
+  "navCta": [
+    { "label": "Descargar", "to": "/download", "style": "ghost" },
+    { "label": "Colaborar", "to": "/contact", "style": "primary" }
+  ],
+  "footer": {
+    "about": "Una plataforma SaaS de recados y reparto de comida para pueblos y mercados locales: cobertura multi-dispositivo, lista para usar y de calidad comercial para la entrega inmediata local.",
+    "columns": [
+      {
+        "title": "Producto",
+        "links": [
+          { "label": "Visión general", "to": "/" },
+          { "label": "Descargas", "to": "/download" },
+          { "label": "Novedades", "to": "/#roadmap" },
+          { "label": "Preguntas frecuentes", "to": "/faq" }
+        ]
+      },
+      {
+        "title": "Colaboración",
+        "links": [
+          { "label": "Colaboración", "to": "/contact" },
+          { "label": "Socio de ciudad", "to": "/contact#city" },
+          { "label": "Alta de comercios", "to": "/contact#merchant" },
+          { "label": "Reclutamiento de repartidores", "to": "/contact#rider" }
+        ]
+      },
+      {
+        "title": "Contacto y soporte",
+        "links": [
+          { "label": "Contáctanos", "to": "/contact" },
+          { "label": "Centro de ayuda", "to": "/faq" },
+          { "label": "Panel de administración", "to": "/download" },
+          { "label": "hello@shuguang.local", "to": "mailto:hello@shuguang.local", "external": true }
+        ]
+      }
+    ],
+    "bottomLeft": "© 2026 Dawn Errand · Sitio web de demostración",
+    "bottomRight": "Este es un demo de diseño. Los datos de contacto son provisionales: para colaborar de verdad, usa los canales oficiales."
+  },
+  "ui": {
+    "loadError": "No se pudo cargar el contenido. Actualiza la página e inténtalo de nuevo.",
+    "menuLabel": "Abrir menú de navegación",
+    "titleMap": {
+      "home": "Inicio",
+      "download": "Centro de descargas",
+      "downloadApp": "Descargas de versiones",
+      "faq": "Preguntas frecuentes",
+      "contact": "Colaboración"
+    }
+  }
+}
