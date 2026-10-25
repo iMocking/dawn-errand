@@ -318,10 +318,10 @@ function toggleFaq(idx: number) {
 .hero-inner {
   position: relative;
   z-index: 1;
-  padding: 64px 20px 56px;
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 26px;
 }
 .hero h1 {
   font-size: 32px;
