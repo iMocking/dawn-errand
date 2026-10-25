@@ -13,11 +13,18 @@ type Tone = 'orange' | 'green' | 'red' | 'blue' | 'gray' | 'yellow'
 
 /** 订单状态 → StatusTag tone（底色/字色照设计稿标签） */
 const STATUS_TONE: Record<string, Tone> = {
+  待支付: 'orange',
   待接单: 'red',
+  备餐中: 'yellow',
+  待取货: 'orange',
   配送中: 'yellow',
   已取件待送达: 'orange',
+  已送达: 'blue',
+  待评价: 'blue',
   已完成: 'green',
   已取消: 'gray',
+  退款售后: 'red',
+  已退款: 'gray',
   出餐超时: 'red',
   异常: 'red',
 }
@@ -32,7 +39,20 @@ const TYPE_TONE: Record<string, string> = {
 }
 
 const TYPE_TABS = ['全部', '外卖', '帮买', '帮送', '帮取', '帮办']
-const STATUS_TABS = ['全部', '待接单', '配送中', '已完成', '已取消', '异常']
+const STATUS_TABS = [
+  '全部',
+  '待支付',
+  '待接单',
+  '备餐中',
+  '待取货',
+  '配送中',
+  '已送达',
+  '待评价',
+  '已完成',
+  '已取消',
+  '退款售后',
+  '已退款',
+]
 
 const toast = useToast()
 

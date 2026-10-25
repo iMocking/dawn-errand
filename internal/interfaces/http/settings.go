@@ -9,7 +9,9 @@ import (
 	"dawn-errand/internal/domain/cms"
 	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/interfaces/middleware"
+	"dawn-errand/internal/pkg/errcode"
 	"dawn-errand/internal/pkg/response"
+	"dawn-errand/internal/pkg/ulidgen"
 )
 
 // GetSettings GET /settings。
@@ -66,6 +68,9 @@ func (h *Handler) SaveSettings(c *gin.Context) {
 		response.ErrStatus(c, 400, 1301, "缺少 action（create/update/disable/delete）")
 		return
 	}
+	if (in.Action == "create" || in.Action == "update") && in.Area != nil && in.Area.ID == "" {
+		in.Area.ID = ulidgen.New()
+	}
 	u := middleware.User(c)
 	if err := h.Settings.SaveArea(c.Request.Context(), admin.SaveAreaAction{Action: in.Action, Area: in.Area}, u.ID, scope(c)); err != nil {
 		response.Err(c, err)
@@ -101,6 +106,9 @@ func (h *Handler) SaveFeeRule(c *gin.Context) {
 	if err := bind(c, &in); err != nil {
 		response.Err(c, err)
 		return
+	}
+	if in.ID == "" {
+		in.ID = ulidgen.New()
 	}
 	u := middleware.User(c)
 	if err := h.Settings.SaveFeeRule(c.Request.Context(), in, u.ID, scope(c)); err != nil {
@@ -142,6 +150,21 @@ func (h *Handler) SaveAnnouncement(c *gin.Context) {
 	}
 	if in.Action == "" {
 		in.Action = "save"
+	}
+	switch in.Action {
+	case "发布":
+		in.Action = "publish"
+	case "下线":
+		in.Action = "offline"
+	case "撤回":
+		in.Action = "withdraw"
+	}
+	if in.Announcement.ID == "" {
+		if in.Action != "save" {
+			response.ErrStatus(c, 400, errcode.CodeBadRequest, "公告 id 必填")
+			return
+		}
+		in.Announcement.ID = ulidgen.New()
 	}
 	u := middleware.User(c)
 	if err := h.Settings.SaveAnnouncement(c.Request.Context(), in.Announcement, in.Action, u.ID, scope(c)); err != nil {

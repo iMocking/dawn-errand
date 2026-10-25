@@ -12,11 +12,11 @@ const (
 	WithdrawRejected WithdrawStatus = "已驳回"
 )
 
-// Event 提现时间线事件。
+// Event 提现时间线事件（JSON 小写，直接对齐管理端 DTO）。
 type Event struct {
-	Time     int64
-	Text     string
-	Operator string
+	Time     int64  `json:"time"`
+	Text     string `json:"text"`
+	Operator string `json:"operator"`
 }
 
 // Withdrawal 提现单聚合根。

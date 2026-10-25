@@ -118,7 +118,7 @@ async function onRealNameApprove() {
     await auditRealName(v.id, 'approve')
     d.verified = '已实名'
     d.realName = v.realName
-    d.realNameVerify.status = '已通过'
+    v.status = '已通过'
     toast.success('已通过实名认证')
     realNameOpen.value = false
   } finally {
@@ -133,8 +133,8 @@ async function onRealNameReject() {
   realNameSubmitting.value = true
   try {
     await auditRealName(v.id, 'reject', realNameRejectReason.value)
-    d.realNameVerify.status = '已驳回'
-    d.realNameVerify.rejectReason = realNameRejectReason.value
+    v.status = '已驳回'
+    v.rejectReason = realNameRejectReason.value
     toast.info('已驳回实名认证申请')
     realNameOpen.value = false
   } finally {

@@ -50,7 +50,7 @@ async function doRefresh(): Promise<string> {
   return body.token
 }
 
-function clearSession(toast: ReturnType<typeof useToast>) {
+function clearSession() {
   localStorage.removeItem('admin_token')
   localStorage.removeItem('admin_refresh_token')
   localStorage.removeItem('admin_user')
@@ -87,14 +87,14 @@ instance.interceptors.response.use(
         return instance(cfg)
       } catch {
         toast.error('登录已失效，请重新登录')
-        clearSession(toast)
+        clearSession()
         return Promise.reject(error)
       }
     }
 
     if (status === 401) {
       toast.error('登录已失效，请重新登录')
-      clearSession(toast)
+      clearSession()
     } else if (status === 403) {
       toast.error('无权限访问')
       location.href = '/403'

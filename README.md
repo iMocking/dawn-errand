@@ -52,6 +52,17 @@ pnpm install --store-dir "apps/web/node_modules/.store"   # 本机 pnpm 全局 s
 pnpm dev        # :5173，mock 数据渲染；与 apps/admin 同时开发时请错开端口
 ```
 
+管理后台（默认对接真实后端）：
+
+```powershell
+cd apps/admin
+pnpm install
+pnpm dev        # :5173，/api 代理到 http://localhost:8080；需先启动后端
+# 纯 mock：VITE_USE_MOCK=1 pnpm dev
+```
+
+超管账号由 `go run ./cmd/seed` 初始化（默认 `admin@shuguang`，一次性密码见 seed 输出；联调库另有测试超管）。管理端与官网同时开发时请错开端口：`pnpm exec vite --port 5174`。
+
 ---
 
 ## 系统架构

@@ -255,7 +255,7 @@ func TestWithdrawalFlow(t *testing.T) {
 	_ = json.Unmarshal(w2Detail.Timeline, &timeline)
 	foundPayout := false
 	for _, ev := range timeline {
-		if ev["Text"] == "打款成功" && ev["Operator"] != "" {
+		if ev["text"] == "打款成功" && ev["operator"] != "" {
 			foundPayout = true
 		}
 	}

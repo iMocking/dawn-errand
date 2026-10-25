@@ -185,7 +185,7 @@ export function saveFeeRule(payload: Record<string, unknown>) {
   for (const [from, to] of Object.entries(FEE_BODY_FIELDS)) {
     if (payload[from] !== undefined) body[to] = payload[from]
   }
-  if (payload.enabled !== undefined && body.status === undefined) {
+  if (payload.enabled !== undefined) {
     body.status = payload.enabled ? '已启用' : '已停用'
   }
   return http.post<Record<string, unknown>>('/settings/fee-rules', body)

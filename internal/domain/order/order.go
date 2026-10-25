@@ -29,51 +29,51 @@ const (
 
 // OrderGoods 商品明细。
 type OrderGoods struct {
-	DishID string
-	Name   string
-	Spec   string
-	Price  float64
-	Count  int
-	Amount float64
+	DishID string  `json:"dish_id"`
+	Name   string  `json:"name"`
+	Spec   string  `json:"spec"`
+	Price  float64 `json:"price"`
+	Count  int     `json:"count"`
+	Amount float64 `json:"amount"`
 }
 
 // OrderFee 费用明细。
 type OrderFee struct {
-	Label    string
-	Value    float64
-	Negative bool
+	Label    string  `json:"label"`
+	Value    float64 `json:"value"`
+	Negative bool    `json:"negative"`
 }
 
 // OrderStep 状态步骤。
 type OrderStep struct {
-	Title string
-	Time  int64  // 完成时间，0=未完成
-	State string // done / active / pending
-	Sub   string
+	Title string `json:"title"`
+	Time  int64  `json:"time"`  // 完成时间，0=未完成
+	State string `json:"state"` // done / active / pending
+	Sub   string `json:"sub"`
 }
 
 // MerchantSnapshot 商家快照。
 type MerchantSnapshot struct {
-	Name    string
-	Address string
-	Phone   string
-	Status  string
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Phone   string `json:"phone"`
+	Status  string `json:"status"`
 }
 
 // UserSnapshot 用户快照。
 type UserSnapshot struct {
-	Name    string
-	Address string
-	Phone   string
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Phone   string `json:"phone"`
 }
 
 // RiderSnapshot 骑手快照。
 type RiderSnapshot struct {
-	Name    string
-	Vehicle string
-	Phone   string
-	Service string
-	Score   string
+	Name    string `json:"name"`
+	Vehicle string `json:"vehicle"`
+	Phone   string `json:"phone"`
+	Service string `json:"service"`
+	Score   string `json:"score"`
 }
 
 // Order 订单聚合根。
