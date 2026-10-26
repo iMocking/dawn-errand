@@ -215,9 +215,10 @@ func (s *UsersService) Ban(ctx context.Context, id string, ban bool, operator st
 }
 
 // SetRole 修改用户后台角色。
-// 约束：仅全局管理员（非区域站长/非普通用户 scope）可操作；不能改自己；系统级身份（role=system）禁止修改。
+// 约束：仅 super_admin 可操作（防 cs_manager 等持 user:role 权限者垂直提权）；
+// 不能改自己；商家/司机绑定角色请走账号开通流程；系统级身份（role=system）禁止修改。
 func (s *UsersService) SetRole(ctx context.Context, id, role, operator string, sc tenant.Scope) error {
-	if sc.RegionOnly() || sc.UserOnly() {
+	if sc.Role != identity.RoleSuperAdmin {
 		return tenantDenied()
 	}
 	if id == operator {
@@ -233,6 +234,9 @@ func (s *UsersService) SetRole(ctx context.Context, id, role, operator string, s
 	if u.Role == identity.RoleSystem {
 		return errcode.New(errcode.CodeSettingInvalid, "系统服务身份不可修改角色")
 	}
+	if u.Role == identity.RoleMerchant || u.Role == identity.RoleDriver {
+		return errcode.New(errcode.CodeSettingInvalid, "商家/司机角色由入驻与账号开通流程管理，不可在此修改")
+	}
 	valid := false
 	for _, r := range identity.AllRoles {
 		if r == role {
@@ -240,7 +244,7 @@ func (s *UsersService) SetRole(ctx context.Context, id, role, operator string, s
 			break
 		}
 	}
-	if !valid || role == identity.RoleSystem {
+	if !valid || role == identity.RoleSystem || role == identity.RoleMerchant || role == identity.RoleDriver {
 		return errcode.New(errcode.CodeSettingInvalid, "不支持的岗位角色: "+role)
 	}
 	if err := s.Repos.Users.UpdateRole(id, role); err != nil {

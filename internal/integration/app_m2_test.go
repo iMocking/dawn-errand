@@ -423,6 +423,8 @@ func TestOrderAccess(t *testing.T) {
 	defer cleanupUserByEmail(t, email)
 	_, _ = do(t, http.MethodPost, "/api/merchants/"+m.ID+"/account", admin,
 		map[string]string{"email": email, "password": "Prov123456"})
+	// 先过入驻审核，让请求推进到「本店归属」校验而不是停在经营资格守卫上。
+	approveMerchant(t, m.ID)
 	otherStore, _ := loginAs(t, email, "Prov123456")
 	if r, _ := do(t, http.MethodPost, "/api/app/store/orders/"+orderID+"/accept", otherStore, nil); r.Code != 1705 {
 		t.Fatalf("跨店接单应 1705, got %d", r.Code)

@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import com.dawnerrand.driver.databinding.FragmentHomeBinding
 import com.dawnerrand.driver.ui.screens.navigation.NavigationActivity
 import com.dawnerrand.driver.ui.screens.orderdetail.OrderDetailActivity
+import com.dawnerrand.driver.ui.util.toast
 
 /**
  * 工作台：还原 design/driver/home.html（顶部渐变 + 今日收入环 + 上线开关 + 进行中订单 + 导航按钮）。
@@ -46,6 +47,9 @@ class HomeFragment : Fragment() {
         binding.switchOnline.onCheckedChange = { on ->
             vm.setOnline(on)
             binding.tvOnlineSub.text = if (on) "● 正在接单 · 绿杨乡片区" else "● 已下线 · 点击上线接单"
+        }
+        vm.statusError.observe(viewLifecycleOwner) { msg ->
+            if (msg != null) requireContext().toast(msg)
         }
 
         binding.layoutActiveOrder.setOnClickListener {

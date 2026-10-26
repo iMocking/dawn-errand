@@ -22,4 +22,7 @@ type Profile struct {
 type ProfileRepository interface {
 	Save(p *Profile) error
 	FindByUserID(userID string) (*Profile, error)
+	// AddBalance 原子增减余额；minBalance >= 0 时附加 balance >= minBalance 条件，
+	// 条件不满足或资料不存在时返回 affected=0（防双花，禁止 Find-then-Save 覆盖余额）。
+	AddBalance(userID string, delta, minBalance float64, now int64) (affected int, err error)
 }

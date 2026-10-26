@@ -3,10 +3,7 @@
 package assembly
 
 import (
-	"context"
 	"database/sql"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -22,7 +19,6 @@ import (
 	"dawn-errand/internal/application/jobs"
 	"dawn-errand/internal/application/system"
 	"dawn-errand/internal/config"
-	sysdomain "dawn-errand/internal/domain/system"
 	"dawn-errand/internal/infrastructure/casbin"
 	"dawn-errand/internal/infrastructure/crypto"
 	"dawn-errand/internal/infrastructure/ent"
@@ -32,6 +28,7 @@ import (
 	"dawn-errand/internal/infrastructure/redisc"
 	"dawn-errand/internal/infrastructure/repo"
 	"dawn-errand/internal/infrastructure/storage"
+	"dawn-errand/internal/infrastructure/syscfg"
 	"dawn-errand/internal/infrastructure/token"
 	"dawn-errand/internal/interfaces/http"
 	"dawn-errand/internal/interfaces/middleware"
@@ -57,78 +54,6 @@ type App struct {
 	Jobs     *jobs.Runner
 	Handler  *http.Handler
 	MW       *middleware.Middleware
-}
-
-// smtpConfigProvider 读取已保存的 SMTP 配置（解密密码；未配置返回空配置）。
-func smtpConfigProvider(cipher *crypto.Cipher, store *repo.Store) func() (*sysdomain.SMTPConfig, error) {
-	return func() (*sysdomain.SMTPConfig, error) {
-		rec, err := store.Repos().Settings.Get(sysdomain.KeySMTP)
-		if err != nil {
-			if errors.Is(err, application.ErrNotFound) {
-				return &sysdomain.SMTPConfig{}, nil
-			}
-			return nil, err
-		}
-		var cfg sysdomain.SMTPConfig
-		if err := json.Unmarshal([]byte(rec.ValueJSON), &cfg); err != nil {
-			return nil, err
-		}
-		if cfg.Password != "" && cfg.Password != "******" {
-			if plain, err := cipher.Decrypt(cfg.Password); err == nil {
-				cfg.Password = plain
-			}
-		}
-		return &cfg, nil
-	}
-}
-
-// localStorageProvider 读取已保存的本地存储配置；未配置时回退到启动配置。
-func localStorageProvider(store *repo.Store, cfg *config.Config) func() *sysdomain.LocalStorageConfig {
-	return func() *sysdomain.LocalStorageConfig {
-		def := &sysdomain.LocalStorageConfig{
-			RootDir:       cfg.StorageRootDir,
-			PublicBaseURL: cfg.StoragePublicURL,
-			MaxSizeMB:     cfg.StorageMaxSizeMB,
-		}
-		rec, err := store.Repos().Settings.Get(sysdomain.KeyLocal)
-		if err != nil {
-			return def
-		}
-		var c sysdomain.LocalStorageConfig
-		if err := json.Unmarshal([]byte(rec.ValueJSON), &c); err != nil {
-			return def
-		}
-		if c.RootDir == "" {
-			c.RootDir = def.RootDir
-		}
-		if c.PublicBaseURL == "" {
-			c.PublicBaseURL = def.PublicBaseURL
-		}
-		if c.MaxSizeMB <= 0 {
-			c.MaxSizeMB = def.MaxSizeMB
-		}
-		return &c
-	}
-}
-
-// outboxProvider dev 邮件发件箱查询。
-func outboxProvider(client *ent.Client) func(ctx context.Context, limit int) ([]application.MailEntry, error) {
-	return func(ctx context.Context, limit int) ([]application.MailEntry, error) {
-		if limit < 1 || limit > 200 {
-			limit = 50
-		}
-		rows, err := client.MailOutbox.Query().Order(ent.Desc("created_at")).Limit(limit).All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		out := make([]application.MailEntry, 0, len(rows))
-		for _, r := range rows {
-			out = append(out, application.MailEntry{
-				ID: r.ID, ToEmail: r.ToEmail, Subject: r.Subject, Body: r.Body, CreatedAt: r.CreatedAt,
-			})
-		}
-		return out, nil
-	}
 }
 
 // Build 装配全部依赖。
@@ -160,12 +85,14 @@ func Build(cfg *config.Config) (*App, error) {
 	}
 
 	cipher := crypto.New(cfg.ConfigCipherKey)
+	store.Cipher = cipher // 敏感字段（骑手身份证）透明加密
 	hasher := passwd.Hasher{}
 	tokens := token.NewManager(cfg.JWTSecret, rdb)
 	limiter := redisc.NewLimiter(rdb)
-	sender := mailer.NewSender(client, smtpConfigProvider(cipher, store))
-	fileCfg := localStorageProvider(store, cfg)()
-	fileStore := storage.NewLocal(localStorageProvider(store, cfg))
+	sender := mailer.NewSender(client, syscfg.SMTP(cipher, store))
+	localStorage := syscfg.LocalStorage(store, cfg)
+	fileCfg := localStorage()
+	fileStore := storage.NewLocal(localStorage)
 	storageMount := strings.Trim(fileCfg.PathPrefix, "/")
 	if storageMount == "" {
 		storageMount = "uploads"
@@ -178,7 +105,7 @@ func Build(cfg *config.Config) (*App, error) {
 	}
 	systemSvc := &system.Service{
 		Repos: repos, Tx: store, Hasher: hasher, Cipher: cipher,
-		Policies: enforcer, Cfg: cfg, Outbox: outboxProvider(client),
+		Policies: enforcer, Cfg: cfg, Outbox: syscfg.Outbox(client),
 	}
 
 	mw := &middleware.Middleware{
@@ -234,12 +161,7 @@ func Build(cfg *config.Config) (*App, error) {
 		CouponsAdmin:  &admin.CouponService{Repos: repos},
 		Workspace:     &admin.WorkspaceService{Repos: repos},
 	}
-	h.Ready = func(ctx context.Context) error {
-		if _, err := client.User.Query().Limit(1).Exist(ctx); err != nil {
-			return err
-		}
-		return rdb.Ping(ctx).Err()
-	}
+	h.Ready = syscfg.Ready(client, rdb)
 
 	return &App{
 		Cfg: cfg, Logger: logger, Client: client, Rdb: rdb,

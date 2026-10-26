@@ -57,7 +57,7 @@ func (h *Handler) GetReconciliation(c *gin.Context) {
 	if date == "" {
 		date = time.Now().UTC().Format("2006-01-02")
 	}
-	res, err := h.Finance.Reconciliation(c.Request.Context(), date)
+	res, err := h.Finance.Reconciliation(c.Request.Context(), date, scope(c))
 	if err != nil {
 		response.Err(c, err)
 		return

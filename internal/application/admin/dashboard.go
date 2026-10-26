@@ -143,7 +143,8 @@ func orderAccessOK(sc tenant.Scope, o *order.Order) bool {
 	case sc.UserOnly():
 		return o.UserID == sc.UserID
 	}
-	return true
+	// 默认拒绝：未识别角色不得放行（此前 return true 等于全量可见）。
+	return false
 }
 
 // merchantAccessOK 商家对象级隔离。

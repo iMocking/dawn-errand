@@ -4,14 +4,42 @@ import (
 	"context"
 	"strings"
 
+	"dawn-errand/internal/application"
 	"dawn-errand/internal/domain/rider"
 	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/infrastructure/ent"
 	entrider "dawn-errand/internal/infrastructure/ent/rider"
 )
 
-// RiderRepo 实现 rider.RiderRepository。
-type RiderRepo struct{ client *ent.Client }
+// RiderRepo 实现 rider.RiderRepository。Cipher 非空时身份证号透明加解密（v1: 前缀）。
+type RiderRepo struct {
+	client *ent.Client
+	Cipher application.ConfigCipher
+}
+
+// sealSecret 写入前加密（每次写入生成新密文，读路径始终返回解密值）。
+func (r RiderRepo) sealSecret(v string) string {
+	if v == "" || r.Cipher == nil {
+		return v
+	}
+	sealed, err := r.Cipher.Encrypt(v)
+	if err != nil {
+		return v
+	}
+	return sealed
+}
+
+// unsealSecret 读取后解密；非 v1 前缀视为存量明文原样返回（由上层脱敏兜底）。
+func (r RiderRepo) unsealSecret(v string) string {
+	if v == "" || r.Cipher == nil || !strings.HasPrefix(v, "v1:") {
+		return v
+	}
+	plain, err := r.Cipher.Decrypt(v)
+	if err != nil {
+		return ""
+	}
+	return plain
+}
 
 func (r RiderRepo) Save(m *rider.Rider) error {
 	ctx := context.Background()
@@ -27,7 +55,7 @@ func (r RiderRepo) Save(m *rider.Rider) error {
 			Where(entrider.ID(m.ID)).
 			SetRegionID(m.RegionID).SetUserID(m.UserID).
 			SetName(m.Name).SetPhone(m.Phone).SetArea(m.Area).SetTool(m.Tool).SetLevel(m.Level).
-			SetIDCard(m.IDCard).SetVehicle(m.Vehicle).SetAccount(m.Account).
+			SetIDCard(r.sealSecret(m.IDCard)).SetVehicle(m.Vehicle).SetAccount(m.Account).
 			SetStatus(string(m.Status)).SetAuditStatus(string(m.AuditStatus)).
 			SetApplyNo(m.ApplyNo).SetSubmittedAt(m.SubmittedAt).SetOrderTypes(m.OrderTypes).
 			SetIDCheck(m.IDCheck).SetNoticeType(m.NoticeType).SetNotice(m.Notice).
@@ -43,7 +71,7 @@ func (r RiderRepo) Save(m *rider.Rider) error {
 	return r.client.Rider.Create().
 		SetID(m.ID).SetRegionID(m.RegionID).SetUserID(m.UserID).
 		SetName(m.Name).SetPhone(m.Phone).SetArea(m.Area).SetTool(m.Tool).SetLevel(m.Level).
-		SetIDCard(m.IDCard).SetVehicle(m.Vehicle).SetAccount(m.Account).
+		SetIDCard(r.sealSecret(m.IDCard)).SetVehicle(m.Vehicle).SetAccount(m.Account).
 		SetStatus(string(m.Status)).SetAuditStatus(string(m.AuditStatus)).
 		SetApplyNo(m.ApplyNo).SetSubmittedAt(m.SubmittedAt).SetOrderTypes(m.OrderTypes).
 		SetIDCheck(m.IDCheck).SetNoticeType(m.NoticeType).SetNotice(m.Notice).
@@ -56,14 +84,14 @@ func (r RiderRepo) Save(m *rider.Rider) error {
 		Exec(ctx)
 }
 
-func toRider(e *ent.Rider) *rider.Rider {
+func (r RiderRepo) toRider(e *ent.Rider) *rider.Rider {
 	if e == nil {
 		return nil
 	}
 	return &rider.Rider{
 		ID: e.ID, RegionID: e.RegionID, UserID: e.UserID,
 		Name: e.Name, Phone: e.Phone, Area: e.Area, Tool: e.Tool, Level: e.Level,
-		IDCard: e.IDCard, Vehicle: e.Vehicle, Account: e.Account,
+		IDCard: r.unsealSecret(e.IDCard), Vehicle: e.Vehicle, Account: e.Account,
 		Status: rider.RiderStatus(e.Status), AuditStatus: rider.AuditStatus(e.AuditStatus),
 		ApplyNo: e.ApplyNo, SubmittedAt: e.SubmittedAt, OrderTypes: e.OrderTypes,
 		IDCheck: e.IDCheck, NoticeType: e.NoticeType, Notice: e.Notice,
@@ -84,7 +112,7 @@ func (r RiderRepo) FindByID(id string) (*rider.Rider, error) {
 		}
 		return nil, err
 	}
-	return toRider(e), nil
+	return r.toRider(e), nil
 }
 
 func (r RiderRepo) List(q rider.RiderQuery, sc tenant.Scope) ([]*rider.Rider, int64, error) {
@@ -112,7 +140,7 @@ func (r RiderRepo) List(q rider.RiderQuery, sc tenant.Scope) ([]*rider.Rider, in
 	}
 	out := make([]*rider.Rider, 0, len(rows))
 	for _, e := range rows {
-		out = append(out, toRider(e))
+		out = append(out, r.toRider(e))
 	}
 	return out, int64(total), nil
 }
@@ -146,7 +174,7 @@ func (r RiderRepo) AuditList(q rider.AuditQuery, sc tenant.Scope) ([]*rider.Ride
 	}
 	out := make([]*rider.Rider, 0, len(rows))
 	for _, e := range rows {
-		out = append(out, toRider(e))
+		out = append(out, r.toRider(e))
 	}
 	return out, int64(total), nil
 }

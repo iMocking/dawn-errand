@@ -1,6 +1,7 @@
 package http
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -52,9 +53,30 @@ func regionScope(c *gin.Context, regionID string) tenant.Scope {
 	return tenant.Scope{Role: "region_station", RegionID: regionID}
 }
 
+// areaBody 服务区域写入字段白名单（后台面 camelCase，与 apps/admin 现发送口径一致）。
+// 不再直绑 tenant.Region：实体一旦直绑，created_at/updated_at 就成了可写字段，
+// 而且新增实体字段会自动变成新的注入面。
+type areaBody struct {
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Status   string  `json:"status"`
+	Villages int     `json:"villages"`
+	RadiusKM float64 `json:"radiusKM"`
+	StartFee float64 `json:"startFee"`
+	FreeKM   float64 `json:"freeKM"`
+	Notice   string  `json:"notice"`
+}
+
+func (b areaBody) toInput() admin.SaveAreaInput {
+	return admin.SaveAreaInput{
+		ID: b.ID, Name: b.Name, Status: b.Status, Villages: b.Villages,
+		RadiusKM: b.RadiusKM, StartFee: b.StartFee, FreeKM: b.FreeKM, Notice: b.Notice,
+	}
+}
+
 type saveSettingsBody struct {
-	Action string         `json:"action"`
-	Area   *tenant.Region `json:"area"`
+	Action string    `json:"action"`
+	Area   *areaBody `json:"area"`
 }
 
 // SaveSettings POST /settings（区域新增/编辑/停用/删除）。
@@ -65,25 +87,55 @@ func (h *Handler) SaveSettings(c *gin.Context) {
 		return
 	}
 	if in.Action == "" {
-		response.ErrStatus(c, 400, 1301, "缺少 action（create/update/disable/delete）")
+		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "缺少 action（create/update/disable/delete）")
 		return
 	}
-	if (in.Action == "create" || in.Action == "update") && in.Area != nil && in.Area.ID == "" {
-		in.Area.ID = ulidgen.New()
+	var area *admin.SaveAreaInput
+	if in.Area != nil {
+		if (in.Action == "create" || in.Action == "update") && in.Area.ID == "" {
+			in.Area.ID = ulidgen.New() // 预生成，响应体需要回传新建 id
+		}
+		input := in.Area.toInput()
+		area = &input
 	}
 	u := middleware.User(c)
-	if err := h.Settings.SaveArea(c.Request.Context(), admin.SaveAreaAction{Action: in.Action, Area: in.Area}, u.ID, scope(c)); err != nil {
+	if err := h.Settings.SaveArea(c.Request.Context(), admin.SaveAreaAction{Action: in.Action, Area: area}, u.ID, scope(c)); err != nil {
 		response.Err(c, err)
 		return
 	}
-	response.OKMsg(c, "操作成功", gin.H{"action": in.Action, "id": areaID(in)})
+	id := ""
+	if in.Area != nil {
+		id = in.Area.ID
+	}
+	response.OKMsg(c, "操作成功", gin.H{"action": in.Action, "id": id})
 }
 
-func areaID(in saveSettingsBody) string {
-	if in.Area != nil {
-		return in.Area.ID
+// feeRuleBody 费率规则写入字段白名单。
+type feeRuleBody struct {
+	ID              string `json:"id"`
+	Category        string `json:"category"`
+	Name            string `json:"name"`
+	Status          string `json:"status"`
+	Value           string `json:"value"`
+	Desc            string `json:"desc"`
+	Accent          bool   `json:"accent"`
+	Highlight       bool   `json:"highlight"`
+	Rule            string `json:"rule"`
+	Example         string `json:"example"`
+	Fee             string `json:"fee"`
+	RiderShare      string `json:"riderShare"`
+	IconColor       string `json:"iconColor"`
+	Version         string `json:"version"`
+	NextEffectiveAt int64  `json:"nextEffectiveAt"`
+}
+
+func (b feeRuleBody) toInput() admin.SaveFeeRuleInput {
+	return admin.SaveFeeRuleInput{
+		ID: b.ID, Category: b.Category, Name: b.Name, Status: b.Status, Value: b.Value,
+		Desc: b.Desc, Accent: b.Accent, Highlight: b.Highlight, Rule: b.Rule, Example: b.Example,
+		Fee: b.Fee, RiderShare: b.RiderShare, IconColor: b.IconColor, Version: b.Version,
+		NextEffectiveAt: b.NextEffectiveAt,
 	}
-	return ""
 }
 
 // ListFeeRules GET /settings/fee-rules。
@@ -102,7 +154,7 @@ func (h *Handler) ListFeeRules(c *gin.Context) {
 
 // SaveFeeRule POST /settings/fee-rules。
 func (h *Handler) SaveFeeRule(c *gin.Context) {
-	var in cms.FeeRule
+	var in feeRuleBody
 	if err := bind(c, &in); err != nil {
 		response.Err(c, err)
 		return
@@ -111,7 +163,7 @@ func (h *Handler) SaveFeeRule(c *gin.Context) {
 		in.ID = ulidgen.New()
 	}
 	u := middleware.User(c)
-	if err := h.Settings.SaveFeeRule(c.Request.Context(), in, u.ID, scope(c)); err != nil {
+	if err := h.Settings.SaveFeeRule(c.Request.Context(), in.toInput(), u.ID, scope(c)); err != nil {
 		response.Err(c, err)
 		return
 	}
@@ -136,9 +188,32 @@ func (h *Handler) ListAnnouncements(c *gin.Context) {
 	pageResult(c, list, total, page, size)
 }
 
+// announcementBody 公告写入字段白名单。
+// created_by / created_at / action_name / stats 不再由请求体决定（原直绑 cms.Announcement 时可被任意覆盖）。
+type announcementBody struct {
+	ID          string   `json:"id"`
+	Title       string   `json:"title"`
+	Type        string   `json:"type"`
+	TypeTone    string   `json:"typeTone"`
+	Audience    string   `json:"audience"`
+	Status      string   `json:"status"`
+	Content     string   `json:"content"`
+	Tags        []string `json:"tags"`
+	PlannedAt   int64    `json:"plannedAt"`
+	PublishedAt int64    `json:"publishedAt"`
+}
+
+func (b announcementBody) toInput() admin.SaveAnnouncementInput {
+	return admin.SaveAnnouncementInput{
+		ID: b.ID, Title: b.Title, Type: b.Type, TypeTone: b.TypeTone, Audience: b.Audience,
+		Status: b.Status, Content: b.Content, Tags: b.Tags,
+		PlannedAt: b.PlannedAt, PublishedAt: b.PublishedAt,
+	}
+}
+
 type saveAnnouncementBody struct {
 	Action       string           `json:"action"`
-	Announcement cms.Announcement `json:"announcement"`
+	Announcement announcementBody `json:"announcement"`
 }
 
 // SaveAnnouncement POST /settings/announcements。
@@ -159,15 +234,11 @@ func (h *Handler) SaveAnnouncement(c *gin.Context) {
 	case "撤回":
 		in.Action = "withdraw"
 	}
-	if in.Announcement.ID == "" {
-		if in.Action != "save" {
-			response.ErrStatus(c, 400, errcode.CodeBadRequest, "公告 id 必填")
-			return
-		}
+	if in.Announcement.ID == "" && in.Action == "save" {
 		in.Announcement.ID = ulidgen.New()
 	}
 	u := middleware.User(c)
-	if err := h.Settings.SaveAnnouncement(c.Request.Context(), in.Announcement, in.Action, u.ID, scope(c)); err != nil {
+	if err := h.Settings.SaveAnnouncement(c.Request.Context(), in.Announcement.toInput(), in.Action, u.ID, scope(c)); err != nil {
 		response.Err(c, err)
 		return
 	}

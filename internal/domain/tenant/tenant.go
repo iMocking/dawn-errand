@@ -51,6 +51,13 @@ func (s Scope) RiderOnly() bool { return s.Role == "driver" }
 // UserOnly 是否仅限本人（正式会员）。
 func (s Scope) UserOnly() bool { return s.Role == "user" }
 
+// Recognized 角色是否被数据隔离策略显式覆盖。
+// 未知或新增角色返回 false，查询/鉴权侧据此默认拒绝——
+// 否则「没有匹配分支」会退化成「不加过滤 = 全局可见」。
+func (s Scope) Recognized() bool {
+	return s.IsGlobal() || s.RegionOnly() || s.MerchantOnly() || s.RiderOnly() || s.UserOnly()
+}
+
 // Principal 认证主体：由认证中间件构建，携带数据隔离所需绑定。
 type Principal struct {
 	UserID     string

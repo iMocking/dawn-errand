@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- debug 变体覆盖：开发期常把基址指向局域网后端（-PstoreApiBaseUrl=http://192.168.x.x:8080），
+     这类地址是明文 HTTP。release 变体不会打包本文件，仍走 src/main 下的白名单策略。 -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

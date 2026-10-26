@@ -341,6 +341,7 @@ func TestStoreResourceOwnership(t *testing.T) {
 			t.Fatal(err)
 		}
 		email = fmt.Sprintf("own%d%s@dawnerrand.local", suffix, m.ID[len(m.ID)-4:])
+		approveMerchant(t, m.ID)
 		p, _ := do(t, http.MethodPost, "/api/merchants/"+m.ID+"/account", admin,
 			map[string]string{"email": email, "password": "Prov123456"})
 		if p.Code != 0 {

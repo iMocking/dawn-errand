@@ -2,3 +2,8 @@ node_modules
 dist
 .DS_Store
 _shots
+
+# 本地环境变量：mock 开关等只属于个人开发机，禁止入库（.env.example 例外）
+.env
+.env.*
+!.env.example

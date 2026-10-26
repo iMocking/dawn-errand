@@ -10,7 +10,12 @@ import (
 	"dawn-errand/internal/pkg/metrics"
 )
 
-const lockKey = "jobs:runner"
+const (
+	lockKey = "jobs:runner"
+	// lockTTL 需大于单轮最坏耗时（三批 × BatchLimit 条，每条一个事务）。
+	// 锁提前过期会让第二个实例并行处理同一批订单，Unlock 只能删自己的 token，无法挽回。
+	lockTTL = 5 * time.Minute
+)
 
 // Runner 定时任务执行器。
 type Runner struct {
@@ -34,12 +39,12 @@ type Result struct {
 func (r *Runner) RunOnce(ctx context.Context) Result {
 	var res Result
 	if r.Locker != nil {
-		ok, err := r.Locker.TryLock(ctx, lockKey, 50*time.Second)
+		token, ok, err := r.Locker.TryLock(ctx, lockKey, lockTTL)
 		if err != nil || !ok {
 			res.Skipped = true
 			return res
 		}
-		defer func() { _ = r.Locker.Unlock(ctx, lockKey) }()
+		defer func() { _ = r.Locker.Unlock(ctx, lockKey, token) }()
 	}
 	now := time.Now().Unix()
 	limit := r.BatchLimit

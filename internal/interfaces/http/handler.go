@@ -94,9 +94,16 @@ func pathID(c *gin.Context) (string, error) {
 }
 
 // bind 绑定 JSON 请求体。
+// 失败细节只写进 c.Errors（由 AccessLog 入日志），响应侧固定泛化文案：
+// 逐字回显 `err.Error()` 会把结构体字段名、校验规则乃至底层错误暴露给调用方。
 func bind(c *gin.Context, v any) error {
 	if err := c.ShouldBindJSON(v); err != nil {
-		return errcode.NewStatus(http.StatusBadRequest, errcode.CodeBadRequest, "请求参数错误："+err.Error())
+		_ = c.Error(err)
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			return errcode.NewStatus(http.StatusRequestEntityTooLarge, errcode.CodeFileTooLarge, "请求体超过大小限制")
+		}
+		return errcode.NewStatus(http.StatusBadRequest, errcode.CodeBadRequest, "请求参数错误")
 	}
 	return nil
 }

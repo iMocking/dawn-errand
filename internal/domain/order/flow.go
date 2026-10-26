@@ -73,15 +73,25 @@ type Payment struct {
 	UpdatedAt int64
 }
 
+// ReconSummary 单日对账聚合结果（按支付时间归属）。
+type ReconSummary struct {
+	PaidCount      int64   // 支付成功笔数
+	PaidAmount     float64 // 支付成功金额
+	PaidOrderCount int64   // 能对到订单的支付笔数
+	OrderAmount    float64 // 上述订单的应付金额合计
+	MissingOrders  int64   // 找不到订单（或不在可见区域）的支付笔数
+	RefundCount    int64
+	RefundAmount   float64
+}
+
 // PaymentRepository 支付单仓储端口。
 type PaymentRepository interface {
 	Save(p *Payment) error
 	FindByOrder(orderID string) (*Payment, error)
 	UpdateStatus(id string, status PaymentStatus, tradeNo string, paidAt int64) error
-	// ListPaidBetween 指定时间段支付成功的支付单（对账）。
-	ListPaidBetween(start, end int64) ([]*Payment, error)
-	// ListRefundedBetween 指定时间段退款完成的支付单。
-	ListRefundedBetween(start, end int64) ([]*Payment, error)
+	// SummarizeRecon 聚合指定支付时间窗口的对账口径；regionID 为空表示全平台。
+	// 聚合在仓储层完成（只取轻量列 + 订单批量匹配），禁止逐单 FindByID 造成 N+1。
+	SummarizeRecon(start, end int64, regionID string) (*ReconSummary, error)
 }
 
 // Code 返回订单状态的 App 机器码（后台展示仍用中文 status）。

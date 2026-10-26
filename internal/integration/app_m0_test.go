@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"dawn-errand/internal/infrastructure/ent/credential"
+	"dawn-errand/internal/infrastructure/ent/dish"
 	"dawn-errand/internal/infrastructure/ent/user"
 	entuserprofile "dawn-errand/internal/infrastructure/ent/userprofile"
 )
@@ -54,6 +55,35 @@ func cleanupUserByEmail(t *testing.T, email string) {
 // sessionCache 缓存联调账号 token，避免测试间重复登录触发限流（30/min/IP）。
 var sessionCache = map[string]struct{ Token, Role string }{}
 
+// clearRateLimitKeys 清空历史限流计数。限流状态存在 Redis、跨测试进程累积，
+// 反复运行同一批用例会让 auth:login:<account>（10/5min）、rl:<prefix>:<ip> 长期超限。
+func clearRateLimitKeys() {
+	ctx := context.Background()
+	for _, pat := range []string{"rl:*", "auth:login:*", "auth:resend:*", "auth:forgot:*", "auth:sms:*"} {
+		keys, err := appInst.Rdb.Keys(ctx, pat).Result()
+		if err != nil {
+			panic(err)
+		}
+		if len(keys) > 0 {
+			if err := appInst.Rdb.Del(ctx, keys...).Err(); err != nil {
+				panic(err)
+			}
+		}
+	}
+}
+
+// resetSeedStock 还原 cmd/seed 目录菜品的库存。下单会扣库存而 seed 对已存在菜品是跳过写入，
+// 多轮套件会把 D001 等消耗到 0，导致后续用例报「商品库存不足」——这是测试数据漂移，不是产品缺陷。
+func resetSeedStock() {
+	ctx := context.Background()
+	stock := map[string]int{"D001": 50, "D002": 20, "D004": 30, "D005": 100}
+	for id, n := range stock {
+		if _, err := client.Dish.Update().Where(dish.ID(id)).SetStock(n).Save(ctx); err != nil {
+			panic(err)
+		}
+	}
+}
+
 func loginAs(t *testing.T, account, password string) (token string, role string) {
 	t.Helper()
 	key := account + "\x00" + password
@@ -63,6 +93,14 @@ func loginAs(t *testing.T, account, password string) (token string, role string)
 	r, _ := do(t, http.MethodPost, "/api/auth/login", "", map[string]string{
 		"account": account, "password": password,
 	})
+	// 套件内登录次数多（IP 级 30/min 中间件限流），计数在 Redis 中跨用例累积；
+	// 命中限流就清键重试一次，避免用例顺序影响结果。
+	if r.Code == 1007 {
+		clearRateLimitKeys()
+		r, _ = do(t, http.MethodPost, "/api/auth/login", "", map[string]string{
+			"account": account, "password": password,
+		})
+	}
 	if r.Code != 0 {
 		t.Fatalf("login %s code=%d msg=%s", account, r.Code, r.Message)
 	}
@@ -245,6 +283,8 @@ func TestProvisionAccountAndAppContext(t *testing.T) {
 	if storeRole != "merchant" {
 		t.Fatalf("开通账号 role=%s", storeRole)
 	}
+	// 经营端点要求审核通过：先走完入驻审核再看店铺上下文。
+	approveMerchant(t, mCreated.ID)
 	me, _ := do(t, http.MethodGet, "/api/app/store/me", storeTok, nil)
 	if me.Code != 0 {
 		t.Fatalf("store me code=%d msg=%s", me.Code, me.Message)
@@ -296,6 +336,7 @@ func TestProvisionAccountAndAppContext(t *testing.T) {
 	if driverRole != "driver" {
 		t.Fatalf("开通骑手 role=%s", driverRole)
 	}
+	approveRider(t, rCreated.ID) // 接单端点要求审核通过：先满足入驻状态再看骑手上下文
 	dm, _ := do(t, http.MethodGet, "/api/app/driver/me", driverTok, nil)
 	if dm.Code != 0 {
 		t.Fatalf("driver me code=%d msg=%s", dm.Code, dm.Message)
@@ -438,12 +479,17 @@ func TestAppClientProfileRegionAndUpload(t *testing.T) {
 		filepath.FromSlash(strings.TrimPrefix(strings.TrimPrefix(maskedBody.URL, "http://localhost:8080"), "/uploads/"))))
 }
 
-// doMultipart 发送 multipart/form-data 请求并解析统一响应。
-func doMultipart(t *testing.T, path, token, field, filename string, data []byte) *resp {
+// doMultipart 发送 multipart/form-data 请求并解析统一响应；extra 为额外的普通表单字段（键值交替）。
+func doMultipart(t *testing.T, path, token, field, filename string, data []byte, extra ...string) *resp {
 	t.Helper()
 	setup()
 	var buf bytes.Buffer
 	w := multipart.NewWriter(&buf)
+	for i := 0; i+1 < len(extra); i += 2 {
+		if err := w.WriteField(extra[i], extra[i+1]); err != nil {
+			t.Fatal(err)
+		}
+	}
 	fw, err := w.CreateFormFile(field, filename)
 	if err != nil {
 		t.Fatal(err)

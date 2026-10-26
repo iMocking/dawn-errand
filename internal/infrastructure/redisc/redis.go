@@ -3,6 +3,8 @@ package redisc
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -77,14 +79,38 @@ type Locker struct {
 // NewLocker 构建分布式锁。
 func NewLocker(rdb *redis.Client) *Locker { return &Locker{rdb: rdb} }
 
-// TryLock 尝试加锁（SET NX + TTL）。
-func (l *Locker) TryLock(ctx context.Context, key string, ttl time.Duration) (bool, error) {
-	return l.rdb.SetNX(ctx, key, "1", ttl).Result()
+// unlockScript 比对持有者 token 后再删除：无条件 DEL 会删掉其他实例在本实例
+// 任务超时、锁被接管后新加的锁，导致两个实例同时跑同一批任务。
+var unlockScript = redis.NewScript(`
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+	return redis.call("DEL", KEYS[1])
+end
+return 0
+`)
+
+// TryLock 尝试加锁（SET NX + TTL），成功返回本次持有的唯一 token。
+func (l *Locker) TryLock(ctx context.Context, key string, ttl time.Duration) (string, bool, error) {
+	buf := make([]byte, 16)
+	if _, err := rand.Read(buf); err != nil {
+		return "", false, err
+	}
+	token := hex.EncodeToString(buf)
+	ok, err := l.rdb.SetNX(ctx, key, token, ttl).Result()
+	if err != nil {
+		return "", false, err
+	}
+	if !ok {
+		return "", false, nil
+	}
+	return token, true, nil
 }
 
-// Unlock 释放锁。
-func (l *Locker) Unlock(ctx context.Context, key string) error {
-	return l.rdb.Del(ctx, key).Err()
+// Unlock 释放锁；token 不匹配（锁已被他人持有或已过期）时不做任何删除。
+func (l *Locker) Unlock(ctx context.Context, key, token string) error {
+	if token == "" {
+		return nil
+	}
+	return unlockScript.Run(ctx, l.rdb, []string{key}, token).Err()
 }
 
 // GeoStore 基于 Redis GEO 的骑手位置索引。

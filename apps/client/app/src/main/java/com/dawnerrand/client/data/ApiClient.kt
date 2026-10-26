@@ -1,5 +1,6 @@
 package com.dawnerrand.client.data
 
+import android.util.Log
 import com.dawnerrand.client.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,6 +27,8 @@ data class SmsLoginResult(
  */
 object ApiClient {
 
+    private const val TAG = "ApiClient"
+
     private val baseUrl: String = BuildConfig.API_BASE_URL.trimEnd('/')
 
     /** 邮箱/密码登录：POST /api/auth/login（account 支持邮箱或手机号） */
@@ -46,10 +49,13 @@ object ApiClient {
             )
         }
 
-    /** GET 请求（携带当前会话 token），返回 body 对象；失败返回 null */
+    /** GET 请求（携带当前会话 token），返回 body 对象；失败返回 null，原因已落日志。 */
     suspend fun getObject(path: String): JSONObject? = withContext(Dispatchers.IO) {
         val token = DemoRepository.session()?.token
-        if (token.isNullOrBlank()) return@withContext null
+        if (token.isNullOrBlank()) {
+            Log.w(TAG, "GET $path -> 跳过：本地无会话 token")
+            return@withContext null
+        }
         val url = URL(baseUrl + path)
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
@@ -63,13 +69,25 @@ object ApiClient {
                 UUID.randomUUID().toString().replace("-", "").uppercase(),
             )
         }
+        val requestId = conn.getRequestProperty("X-Request-ID")
         try {
             val httpCode = conn.responseCode
             val stream = if (httpCode in 200..299) conn.inputStream else conn.errorStream
             val text = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
-            val json = runCatching { JSONObject(text) }.getOrNull() ?: return@withContext null
-            if (json.optInt("code", -1) == 0) json.optJSONObject("body") else null
+            val json = runCatching { JSONObject(text) }.getOrNull()
+            if (json == null) {
+                // 非统一信封（网关页、5xx HTML、405 纯文本…），只可能来自服务端异常或链路劫持，必须留痕。
+                Log.w(TAG, "GET $path -> 响应格式异常 http=$httpCode req=$requestId body=${text.take(200)}")
+                return@withContext null
+            }
+            val code = json.optInt("code", -1)
+            if (code != 0) {
+                Log.w(TAG, "GET $path -> code=$code http=$httpCode ${json.optString("message")} req=$requestId")
+                return@withContext null
+            }
+            json.optJSONObject("body")
         } catch (e: Exception) {
+            Log.w(TAG, "GET $path -> ${e.javaClass.simpleName}: ${e.message} req=$requestId")
             null
         } finally {
             conn.disconnect()
@@ -127,6 +145,10 @@ object ApiClient {
                 if (httpCode in 200..299) "请求失败" else "服务暂不可用（HTTP $httpCode）"
             }
             if (httpCode !in 200..299 || code != 0) {
+                Log.w(
+                    TAG,
+                    "POST $path -> code=$code http=$httpCode $message req=${json?.optString("request_id")}",
+                )
                 throw ApiException(if (code > 0) code else -1, message)
             }
             return ApiEnvelope(

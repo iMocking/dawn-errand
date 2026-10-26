@@ -10,8 +10,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/big"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"dawn-errand/internal/application"
@@ -232,11 +234,15 @@ func (s *Service) Login(ctx context.Context, account, password string) (*LoginRe
 			Action: "auth.login", Object: account, Result: "fail",
 			RequestID: reqID(ctx), IP: ipFrom(ctx),
 		})
+		// 防计时侧信道：账号不存在也执行一次真实 Argon2 校验，
+		// 使「不存在 / 密码错误」两条路径 CPU 耗时同量级。
+		s.dummyVerify(password)
 		// 防枚举：账号不存在与密码错误同响应
 		return nil, errcode.NewStatus(401, errcode.CodeInvalidCredentials, "账号或密码错误")
 	}
 	cred, err := s.Repos.Credentials.FindByUserID(u.ID)
 	if err != nil {
+		s.dummyVerify(password)
 		return nil, errcode.NewStatus(401, errcode.CodeInvalidCredentials, "账号或密码错误")
 	}
 	if !s.Hasher.Verify(cred.PasswordHash, password) {
@@ -254,6 +260,20 @@ func (s *Service) Login(ctx context.Context, account, password string) (*LoginRe
 	}
 
 	return s.issueTokens(ctx, u, "auth.login")
+}
+
+// dummyHash 首次使用时按当前 Argon2 参数生成，之后复用，避免真实用户存在。
+var (
+	dummyHashOnce sync.Once
+	dummyHash     string
+)
+
+// dummyVerify 对占位哈希执行一次真实校验，抹平「账号不存在」与「密码错误」的耗时差异。
+func (s *Service) dummyVerify(password string) {
+	dummyHashOnce.Do(func() {
+		dummyHash, _ = s.Hasher.Hash("dawn-errand-timing-equalizer")
+	})
+	_ = s.Hasher.Verify(dummyHash, password)
 }
 
 // SendSMSCodeResult 发送验证码结果；dev 环境回显验证码便于联调（不落日志）。
@@ -308,6 +328,13 @@ func (s *Service) LoginBySMS(ctx context.Context, phone, code string) (*LoginRes
 			Action: "auth.sms.login", Object: phone, Result: "fail",
 			RequestID: reqID(ctx), IP: ipFrom(ctx),
 		})
+		// 防爆破：按手机号计数，连续 5 次错误立即作废验证码（重新获取成本高于猜测收益）。
+		if stored != "" {
+			ok, lerr := s.Limiter.Allow(ctx, "auth:sms:fail:"+phone, 5, 10*time.Minute)
+			if lerr == nil && !ok {
+				_ = s.Codes.Delete(ctx, key)
+			}
+		}
 		return nil, errcode.NewStatus(401, errcode.CodeCaptchaInvalid, "验证码错误或已过期")
 	}
 	if err := s.Codes.Delete(ctx, key); err != nil {
@@ -456,10 +483,59 @@ func (s *Service) Refresh(ctx context.Context, userID, refreshToken string) (*Lo
 	}, nil
 }
 
-// Logout 登出：撤销刷新令牌。
-func (s *Service) Logout(ctx context.Context, userID, refreshToken string) error {
-	if refreshToken != "" {
-		_ = s.Tokens.RevokeRefreshToken(ctx, userID, refreshToken)
+// RefreshAll 刷新令牌并吊销该用户其他全部会话（异地登录 / 踢出其他设备）。
+// 与 Refresh 的区别：先提升会话版本使其他设备 access token 立即失效，
+// 再清空全部刷新令牌并只为当前设备签发新的一对。
+func (s *Service) RefreshAll(ctx context.Context, userID, refreshToken string) (*LoginResult, error) {
+	if err := s.Tokens.VerifyRefreshToken(ctx, userID, refreshToken); err != nil {
+		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "刷新令牌无效或已过期")
+	}
+	u, err := s.Repos.Users.FindByID(userID)
+	if err != nil {
+		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "用户不存在")
+	}
+	if !u.IsActive() {
+		return nil, errcode.NewStatus(403, errcode.CodeUserBanned, "账号已被封禁")
+	}
+	if _, err := s.ensureCredential(ctx, userID, time.Now().Unix()); err != nil {
+		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "凭证不存在")
+	}
+	ver, err := s.Repos.Credentials.BumpSessionVersion(userID)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.Tokens.RevokeRefreshTokens(ctx, userID); err != nil {
+		return nil, err
+	}
+	access, err := s.Tokens.IssueAccessToken(application.TokenClaims{
+		UserID: u.ID, Role: u.Role, SessionVersion: ver,
+	}, s.Cfg.AccessTokenTTL)
+	if err != nil {
+		return nil, err
+	}
+	refresh, _, err := s.Tokens.IssueRefreshToken(ctx, u.ID, s.Cfg.RefreshTokenTTL)
+	if err != nil {
+		return nil, err
+	}
+	return &LoginResult{
+		AccessToken: access, RefreshToken: refresh, User: u,
+		Permissions: s.Enforcer.PermissionsForRole(u.Role),
+	}, nil
+}
+
+// Logout 登出。
+// allDevices=true：撤销该用户全部刷新令牌并提升会话版本，所有设备的 access token 立即失效；
+// allDevices=false：仅撤销当前设备持有的刷新令牌，其他设备会话不受影响，
+// 当前设备的 access token 靠客户端本地清除 + 短 TTL 自然过期（不提升会话版本，否则会误伤其他端）。
+func (s *Service) Logout(ctx context.Context, userID, refreshToken string, allDevices bool) error {
+	if !allDevices {
+		if refreshToken != "" {
+			return s.Tokens.RevokeRefreshToken(ctx, userID, refreshToken)
+		}
+		return nil
+	}
+	if err := s.Tokens.RevokeRefreshTokens(ctx, userID); err != nil {
+		return err
 	}
 	// 提升会话版本使已签发 access token 全部失效。
 	if _, err := s.Repos.Credentials.BumpSessionVersion(userID); err != nil {
@@ -604,13 +680,13 @@ func newToken() string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
-// smsCode 生成 6 位数字验证码（crypto/rand 安全随机源）。
+// smsCode 生成 6 位数字验证码（crypto/rand 均匀取样，无取模偏差）。
 func smsCode() string {
-	b := make([]byte, 6)
-	if _, err := rand.Read(b); err != nil {
+	n, err := rand.Int(rand.Reader, big.NewInt(1000000))
+	if err != nil {
 		return "000000"
 	}
-	return fmt.Sprintf("%d%d%d%d%d%d", b[0]%10, b[1]%10, b[2]%10, b[3]%10, b[4]%10, b[5]%10)
+	return fmt.Sprintf("%06d", n.Int64())
 }
 
 func hashToken(t string) string {

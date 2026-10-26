@@ -77,7 +77,8 @@ export default defineConfig(({ mode }) => {
   // 官网数据链路开关：
   // - 默认（VITE_USE_MOCK 未设置或非 '1'）：/api/* 由 server.proxy 转发到真实后端（http://localhost:8080）
   // - VITE_USE_MOCK=1：由 mockPlugin 中间件接管，返回 ./mock/*.json（无需后端即可开发）
-  const useMock = loadEnv(mode, process.cwd(), '').VITE_USE_MOCK === '1'
+  // mock 中间件只在 dev 挂载：开关留在本地 .env 里也不会在 build 时改变产物链路。
+  const useMock = mode !== 'production' && loadEnv(mode, process.cwd(), '').VITE_USE_MOCK === '1'
 
   return {
     plugins: useMock ? [vue(), mockPlugin()] : [vue()],

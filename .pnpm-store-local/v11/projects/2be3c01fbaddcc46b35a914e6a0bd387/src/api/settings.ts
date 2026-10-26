@@ -120,8 +120,8 @@ export function getSettings() {
  * 前端调用传入扁平 payload，此处归一为后端结构并映射操作名：
  * - action 别名：停用→disable、删除→delete，其余原样透传
  * - 编辑（update）需携带完整区域对象，避免整行覆盖清空 status / free_km / notice
- * 注意：后端 tenant.Region 无 json tag，JSON 绑定按 Go 字段名大小写不敏感匹配，
- * 多词字段须发 camelCase（radiusKM / startFee / freeKM），snake_case 键会被静默丢弃。
+ * 注意：后端已改为白名单 DTO（camelCase json tag），表外的键静默丢弃；
+ * created_at / updated_at 由服务端生成，多词字段必须按 camelCase 发送（radiusKM / startFee / freeKM）。
  */
 const AREA_BODY_FIELDS: Record<string, string> = {
   id: 'id',
@@ -156,9 +156,9 @@ export function getFeeRules(q: PageQuery = {}) {
 
 /**
  * 编辑规则 / 启用切换：POST /api/settings/fee-rules
- * 后端契约：请求体为完整 cms.FeeRule 对象（名称必填；无 json tag，多词字段发 camelCase）。
- * - 启用切换只传 { id, enabled } 时补 status（后端以 status 持久化、enabled 派生）
- * - 前端表单遗留字段（action / start_fee / continue_fee / far_fee / cap 等）后端不存在，丢弃
+ * 后端契约：白名单 DTO feeRuleBody（camelCase 多词字段 riderShare / iconColor / nextEffectiveAt）。
+ * - 启用切换只传 { id, enabled } 时补 status（后端以 status 持久化，enabled 由 status 派生，请求体的 enabled 被忽略）
+ * - updatedAt 由服务端写入，请求体不再生效；前端表单遗留字段（action / start_fee / continue_fee / far_fee / cap 等）后端不存在，丢弃
  */
 const FEE_BODY_FIELDS: Record<string, string> = {
   id: 'id',
@@ -201,6 +201,8 @@ export function getAnnouncements(q: PageQuery = {}) {
  * 后端契约：{ action: 'save' | 'publish' | 'offline' | 'review' | 'withdraw', announcement: Announcement }
  * - action 别名：create/update→save、发布→publish、下线→offline、撤回→withdraw
  * - 编辑（save）需携带完整公告对象，避免整行覆盖清空 status / type_tone / 计划时间等
+ * - 后端为白名单 DTO（announcementBody）：createdBy / createdAt / actionName / stats 不在其中，
+ *   编辑时由服务端从原行继承，请求体传了也不生效
  */
 const ANN_ACTION_ALIAS: Record<string, string> = {
   create: 'save',

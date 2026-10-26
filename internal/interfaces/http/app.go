@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"dawn-errand/internal/interfaces/middleware"
 	"dawn-errand/internal/pkg/errcode"
 	"dawn-errand/internal/pkg/response"
+	"dawn-errand/internal/pkg/ulidgen"
 )
 
 // ===== App 面：用户端 / 商家端 / 骑手端上下文 =====
@@ -191,6 +193,12 @@ func (h *Handler) AppUpload(c *gin.Context) {
 	}
 	fh, err := c.FormFile("file")
 	if err != nil {
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			response.ErrStatus(c, http.StatusRequestEntityTooLarge, errcode.CodeFileTooLarge, "文件超过大小限制")
+			return
+		}
+		_ = c.Error(err)
 		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "请选择要上传的文件")
 		return
 	}
@@ -219,14 +227,41 @@ func (h *Handler) AppUpload(c *gin.Context) {
 		return
 	}
 	mime := http.DetectContentType(data)
-	url, err := h.Storage.Put(c.Request.Context(), data, fh.Filename, mime)
+	// purpose（旧文档字段名 scene 兼容）白名单：
+	// 证件类一律进私有桶（仅归属主体与平台/区域管理员经鉴权路由可读），图片类进公开桶（静态挂载）。
+	// 未知值直接拒绝——若静默落公开桶，一次拼写错误（如 identity_pic）就会把身份证暴露到无需鉴权的 URL 下。
+	purpose := strings.ToLower(strings.TrimSpace(c.PostForm("purpose")))
+	if purpose == "" {
+		purpose = strings.ToLower(strings.TrimSpace(c.PostForm("scene")))
+	}
+	if purpose == "" {
+		purpose = "image" // 兼容未带用途的老调用方，按图片处理
+	}
+	privatePurpose := map[string]bool{"doc": true, "idcard": true, "id": true, "credential": true, "license": true, "cert": true}
+	publicPurpose := map[string]bool{
+		"image": true, "avatar": true, "dish": true, "store": true, "menu": true,
+		"proof": true, "delivery_proof": true, "complaint": true,
+	}
+	var url string
+	switch {
+	case !privatePurpose[purpose] && !publicPurpose[purpose]:
+		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "未知的 purpose 取值")
+		return
+	case privatePurpose[purpose]:
+		partyType, partyID := uploadParty(principal(c))
+		rel := partyType + "/" + partyID + "/" + ulidgen.New()
+		url, _, err = h.Storage.PutPrivate(c.Request.Context(), data, rel, fh.Filename, mime)
+	default:
+		url, err = h.Storage.Put(c.Request.Context(), data, fh.Filename, mime)
+	}
 	if err != nil {
+		_ = c.Error(err)
 		msg := err.Error()
 		switch {
 		case strings.Contains(msg, "大小"):
-			response.ErrStatus(c, http.StatusBadRequest, errcode.CodeFileTooLarge, msg)
+			response.ErrStatus(c, http.StatusBadRequest, errcode.CodeFileTooLarge, "文件超过大小限制")
 		case strings.Contains(msg, "类型"):
-			response.ErrStatus(c, http.StatusBadRequest, errcode.CodeFileTypeDenied, msg)
+			response.ErrStatus(c, http.StatusBadRequest, errcode.CodeFileTypeDenied, "文件类型不支持")
 		default:
 			response.ErrStatus(c, http.StatusInternalServerError, errcode.CodeInternal, "文件保存失败")
 		}
@@ -235,6 +270,90 @@ func (h *Handler) AppUpload(c *gin.Context) {
 	response.OK(c, gin.H{
 		"url": url, "name": fh.Filename, "size": len(data), "mime": mime,
 	})
+}
+
+// uploadParty 上传主体归属前缀（私有桶访问控制依据）。
+func uploadParty(p *tenant.Principal) (string, string) {
+	switch {
+	case p.MerchantID != "":
+		return "merchant", p.MerchantID
+	case p.RiderID != "":
+		return "rider", p.RiderID
+	default:
+		return "user", p.UserID
+	}
+}
+
+// privateFileReadable 私有桶读取归属判定：
+// 主体本人（前缀与自身绑定一致）可读；未知前缀一律拒绝；
+// 平台角色（全局作用域）可读，用于入驻与售后审核；
+// 区域站长限本区域商家/骑手的文件（复用管理用例的作用域校验），看不到普通用户文件；
+// 其余（其他商家/骑手/会员）拒绝——证件属 PII，不能因为「登录了」就可见。
+func (h *Handler) privateFileReadable(c *gin.Context, p *tenant.Principal, sc tenant.Scope, seg, id string) bool {
+	switch seg {
+	case "user":
+		if p.UserID == id {
+			return true
+		}
+	case "merchant":
+		if p.MerchantID == id {
+			return true
+		}
+	case "rider":
+		if p.RiderID == id {
+			return true
+		}
+	default:
+		return false
+	}
+	if sc.IsGlobal() {
+		return true
+	}
+	if sc.RegionOnly() {
+		if seg == "merchant" {
+			_, err := h.Merchants.Detail(c.Request.Context(), id, sc)
+			return err == nil
+		}
+		if seg == "rider" {
+			_, err := h.Riders.Detail(c.Request.Context(), id, sc)
+			return err == nil
+		}
+	}
+	return false
+}
+
+// PrivateUploadDownload GET /api/uploads/private/*rel：私有桶受控读取。
+// 归属校验见 privateFileReadable：主体本人 / 平台角色 / 本区域站长，其余 403。
+func (h *Handler) PrivateUploadDownload(c *gin.Context) {
+	rel := strings.TrimPrefix(c.Param("rel"), "/")
+	if rel == "" {
+		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "缺少文件路径")
+		return
+	}
+	p := principal(c)
+	if p == nil {
+		response.ErrStatus(c, http.StatusUnauthorized, errcode.CodeUnauthorized, "未认证")
+		return
+	}
+	sc := scope(c)
+	segs := strings.Split(rel, "/")
+	if len(segs) < 3 {
+		response.ErrStatus(c, http.StatusNotFound, errcode.CodeNotFound, "文件不存在")
+		return
+	}
+	if !h.privateFileReadable(c, p, sc, segs[0], segs[1]) {
+		response.ErrStatus(c, http.StatusForbidden, errcode.CodeForbidden, "无权访问该文件")
+		return
+	}
+	data, mime, err := h.Storage.ReadPrivate(c.Request.Context(), "private/"+rel)
+	if err != nil {
+		response.ErrStatus(c, http.StatusNotFound, errcode.CodeNotFound, "文件不存在")
+		return
+	}
+	if mime == "" {
+		mime = "application/octet-stream"
+	}
+	c.Data(http.StatusOK, mime, data)
 }
 
 // ===== 后台：商家/骑手账号开通 =====
@@ -258,7 +377,7 @@ func (h *Handler) ProvisionMerchantAccount(c *gin.Context) {
 	}
 	res, err := h.Accounts.ProvisionMerchant(c.Request.Context(), id, admin.ProvisionInput{
 		Email: in.Email, Phone: in.Phone, Password: in.Password, Name: in.Name,
-	}, middleware.User(c).ID)
+	}, middleware.User(c).ID, scope(c))
 	if err != nil {
 		response.Err(c, err)
 		return
@@ -285,7 +404,7 @@ func (h *Handler) ProvisionRiderAccount(c *gin.Context) {
 	}
 	res, err := h.Accounts.ProvisionRider(c.Request.Context(), id, admin.ProvisionInput{
 		Email: in.Email, Phone: in.Phone, Password: in.Password, Name: in.Name,
-	}, middleware.User(c).ID)
+	}, middleware.User(c).ID, scope(c))
 	if err != nil {
 		response.Err(c, err)
 		return

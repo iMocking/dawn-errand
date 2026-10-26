@@ -130,8 +130,11 @@ type WithdrawalRepository interface {
 	Save(w *Withdrawal) error
 	FindByID(id string) (*Withdrawal, error)
 	List(q WithdrawQuery, scope tenant.Scope) ([]*Withdrawal, int64, error)
-	// Audit 审核通过/驳回。
-	Audit(id string, approved bool, remark, operator string, now int64) error
+	// ClaimAudit 条件认领审核：仅当状态=待审核时置为目标状态并追加时间线；
+	// 返回 false 表示已被并发审核（防重复打款/重复退回）。
+	ClaimAudit(id string, approved bool, remark, operator string, now int64) (bool, error)
+	// RevertAuditToPending 把 fromStatus 状态回退为「待审核」以便重试（条件更新，回执留痕）。
+	RevertAuditToPending(id, fromStatus, operator string, now int64) error
 	// Stats 汇总统计（scope 隔离）。
 	Stats(scope tenant.Scope, now int64) (*Stats, error)
 	// CountPending 待审核数。

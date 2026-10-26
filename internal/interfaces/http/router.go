@@ -1,7 +1,9 @@
 package http
 
 import (
+	"crypto/subtle"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -13,13 +15,22 @@ import (
 	"dawn-errand/internal/pkg/response"
 )
 
+// defaultBodyLimitBytes 非上传接口的请求体上限（1MB）。
+const defaultBodyLimitBytes int64 = 1 << 20
+
 // NewRouter 组装 Gin 路由（/api 前缀，统一返回结构，对齐前端契约）。
 func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 	if h.Cfg.AppEnv == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
-	r.Use(mw.RequestID(), mw.Metrics(), mw.AccessLog(), mw.Recovery(), middleware.SecurityHeaders())
+	// 请求体上限：JSON 1MB，上传路由按 STORAGE_MAX_SIZE_MB + 1MB 余量放宽。
+	uploadMaxMB := h.Cfg.StorageMaxSizeMB
+	if uploadMaxMB <= 0 {
+		uploadMaxMB = 10
+	}
+	r.Use(mw.RequestID(), mw.Metrics(), mw.AccessLog(), mw.Recovery(), middleware.SecurityHeaders(),
+		middleware.BodyLimit(defaultBodyLimitBytes, (uploadMaxMB+1)*1024*1024))
 
 	// 健康检查与指标
 	r.GET("/healthz", func(c *gin.Context) {
@@ -36,14 +47,15 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 		}
 		response.OK(c, gin.H{"status": "ready"})
 	})
-	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	r.GET("/metrics", h.metricsHandler())
 
-	// 本地上传文件静态访问（存储根目录，文件由 /api/app/common/uploads 写入）。
+	// 本地上传文件静态访问：仅挂载公开桶子目录 <root>/<mount>；
+	// 私有桶（证件等 PII）位于 <root>/private，不在静态路由内，只能经 /api/uploads/private 鉴权读取。
 	mount := h.StorageMount
 	if mount == "" {
 		mount = "uploads"
 	}
-	r.Static("/"+strings.Trim(mount, "/"), h.Cfg.StorageRootDir)
+	r.Static("/"+strings.Trim(mount, "/"), filepath.Join(h.Cfg.StorageRootDir, strings.Trim(mount, "/")))
 
 	// 404/405 统一返回
 	r.NoRoute(func(c *gin.Context) {
@@ -83,6 +95,9 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			auth.GET("/realname-verification", h.MyRealName)
 			auth.POST("/realname-verification", h.SubmitRealName)
 
+			// 私有桶受控读取（需登录，归属校验在 handler 内）。
+			authd.GET("/uploads/private/*rel", h.PrivateUploadDownload)
+
 			// 系统配置（仅 super_admin）
 			sys := authd.Group("/system", mw.RequirePerm("system", "config"))
 			sys.GET("/config/smtp", h.GetSMTP)
@@ -107,7 +122,11 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 			// 数据总览
 			authd.GET("/dashboard", mw.RequirePerm("dashboard", "view"), h.GetDashboard)
 			authd.GET("/messages", mw.RequirePerm("dashboard", "view"), h.GetMessages)
-			authd.POST("/uploads", h.AppUpload)
+			// 管理端上传：仅限平台/区域管理角色（三端 App 走 /api/app/common/uploads），
+			// 避免任意登录用户借该路由向存储桶写文件。
+			authd.POST("/uploads",
+				mw.RequireAppRole(identity.RoleSuperAdmin, identity.RoleCSManager, identity.RoleCSAgent, identity.RoleRegionStation),
+				mw.RateLimit("upload", 60, time.Minute), h.AppUpload)
 
 			// 订单
 			orders := authd.Group("/orders")
@@ -255,11 +274,34 @@ func NewRouter(h *Handler, mw *middleware.Middleware) *gin.Engine {
 
 			common := appAPI.Group("/common", mw.Auth(),
 				mw.RequireAppRole(identity.RoleUser, identity.RoleMerchant, identity.RoleDriver))
-			common.POST("/uploads", h.AppUpload)
+			common.POST("/uploads", mw.RateLimit("app:upload", 60, time.Minute), h.AppUpload)
 			common.GET("/notifications", h.AppListNotifications)
 			common.POST("/notifications/read-all", h.AppReadAllNotifications)
 			common.POST("/notifications/:id/read", h.AppReadNotification)
 		}
 	}
 	return r
+}
+
+// metricsHandler /metrics 访问控制。
+// Prometheus 指标暴露业务量级与 Go 运行时信息（含内部路径、连接数），不应公网裸奔：
+// 配置 METRICS_TOKEN 后必须带 X-Metrics-Token；未配置时生产环境直接关闭，非生产环境放行便于本机调试。
+func (h *Handler) metricsHandler() gin.HandlerFunc {
+	prom := gin.WrapH(promhttp.Handler())
+	return func(c *gin.Context) {
+		token := h.Cfg.MetricsToken
+		if token == "" {
+			if h.Cfg.AppEnv == "prod" {
+				response.ErrStatus(c, http.StatusNotFound, 1401, "接口不存在")
+				return
+			}
+			prom(c)
+			return
+		}
+		if subtle.ConstantTimeCompare([]byte(c.GetHeader("X-Metrics-Token")), []byte(token)) != 1 {
+			response.ErrStatus(c, http.StatusUnauthorized, 1001, "指标访问令牌无效")
+			return
+		}
+		prom(c)
+	}
 }

@@ -78,9 +78,9 @@ object DriverRemoteRepository {
         }
     }
 
-    /** 上线/下线：PUT /api/app/driver/status */
-    fun setOnline(online: Boolean): Boolean =
-        ApiClient.postOk("/api/app/driver/status", JSONObject().put("online", online))
+    /** 上线/下线：PUT /api/app/driver/status；返回完整结果，失败原因由调用方决定怎么提示。 */
+    fun setOnline(online: Boolean): ApiClient.Resp =
+        ApiClient.putResp("/api/app/driver/status", JSONObject().put("online", online))
 
     fun grab(orderId: String): Boolean =
         ApiClient.postOk("/api/app/driver/orders/$orderId/grab", JSONObject()).also { if (it) refresh() }

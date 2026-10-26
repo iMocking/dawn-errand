@@ -17,6 +17,8 @@ import (
 // Store 仓储入口：持有 ent 客户端，提供事务运行器与全部仓储。
 type Store struct {
 	client *ent.Client
+	// Cipher 敏感字段加密器（装配后注入，nil 时相关仓储退化为明文直存）。
+	Cipher application.ConfigCipher
 }
 
 // NewStore 构建 Store。
@@ -35,7 +37,7 @@ func (s *Store) Repos() *application.RepoUnit {
 		Regions:        RegionRepo{client: s.client},
 		Settings:       SettingRepo{client: s.client},
 		Merchants:      MerchantRepo{client: s.client},
-		Riders:         RiderRepo{client: s.client},
+		Riders:         RiderRepo{client: s.client, Cipher: s.Cipher},
 		Orders:         OrderRepo{client: s.client},
 		OrderEvents:    OrderEventRepo{client: s.client},
 		Payments:       PaymentRepo{client: s.client},
@@ -75,29 +77,40 @@ func (s *Store) RunInTx(ctx context.Context, fn func(tx *application.RepoUnit) e
 
 // ---- 数据隔离辅助 ----
 
+// denyID 默认拒绝用的哨兵主键：任何真实记录（ULID/编码主键）都不会等于它，
+// 因此未知角色走的查询返回空集，而不是「无过滤 = 全表可见」。
+const denyID = "__tenant_denied__"
+
 // scopeMerchant 对商家查询应用数据隔离。
 func scopeMerchant(q *ent.MerchantQuery, sc tenant.Scope) {
 	switch {
+	case sc.IsGlobal():
 	case sc.MerchantOnly():
 		q.Where(merchant.ID(sc.MerchantID))
 	case sc.RegionOnly():
 		q.Where(merchant.RegionID(sc.RegionID))
+	default:
+		q.Where(merchant.ID(denyID))
 	}
 }
 
 // scopeRider 对骑手查询应用数据隔离。
 func scopeRider(q *ent.RiderQuery, sc tenant.Scope) {
 	switch {
+	case sc.IsGlobal():
 	case sc.RiderOnly():
 		q.Where(rider.ID(sc.RiderID))
 	case sc.RegionOnly():
 		q.Where(rider.RegionID(sc.RegionID))
+	default:
+		q.Where(rider.ID(denyID))
 	}
 }
 
 // scopeOrder 对订单查询应用数据隔离。
 func scopeOrder(q *ent.OrderQuery, sc tenant.Scope) {
 	switch {
+	case sc.IsGlobal():
 	case sc.UserOnly():
 		q.Where(order.UserID(sc.UserID))
 	case sc.RiderOnly():
@@ -106,13 +119,19 @@ func scopeOrder(q *ent.OrderQuery, sc tenant.Scope) {
 		q.Where(order.MerchantID(sc.MerchantID))
 	case sc.RegionOnly():
 		q.Where(order.RegionID(sc.RegionID))
+	default:
+		q.Where(order.ID(denyID))
 	}
 }
 
-// scopeUser 对用户查询应用数据隔离（区域站长仅见本区域用户）。
+// scopeUser 对用户查询应用数据隔离（区域站长仅见本区域用户，其余非平台角色默认拒绝）。
 func scopeUser(q *ent.UserQuery, sc tenant.Scope) {
-	if sc.RegionOnly() {
+	switch {
+	case sc.IsGlobal():
+	case sc.RegionOnly():
 		q.Where(user.RegionID(sc.RegionID))
+	default:
+		q.Where(user.ID(denyID))
 	}
 }
 

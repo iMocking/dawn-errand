@@ -95,6 +95,10 @@ type MailerPort interface {
 type StoragePort interface {
 	// Put 保存文件，返回公开访问 URL。
 	Put(ctx context.Context, data []byte, filename string, mime string) (string, error)
+	// PutPrivate 保存到私有桶（证件等 PII），返回受控访问 URL；rel 为桶内相对路径。
+	PutPrivate(ctx context.Context, data []byte, rel, filename, mime string) (url string, relOut string, err error)
+	// ReadPrivate 读取私有桶对象；实现必须拒绝路径穿越。
+	ReadPrivate(ctx context.Context, rel string) (data []byte, mime string, err error)
 	// TestConnection 测试存储可用性。
 	TestConnection(ctx context.Context) error
 }
@@ -124,7 +128,7 @@ type TokenManager interface {
 	UserIDForRefreshToken(ctx context.Context, token string) (string, error)
 	// VerifyRefreshToken 校验刷新令牌有效。
 	VerifyRefreshToken(ctx context.Context, userID, token string) error
-	// RevokeRefreshTokens 撤销用户全部刷新令牌。
+	// RevokeRefreshTokens 撤销用户全部刷新令牌（SCAN 遍历，并清理 dawn:rt:* 反向索引）。
 	RevokeRefreshTokens(ctx context.Context, userID string) error
 	// RevokeRefreshToken 撤销单个刷新令牌。
 	RevokeRefreshToken(ctx context.Context, userID, token string) error
@@ -154,10 +158,10 @@ type RateLimiter interface {
 
 // Locker 分布式锁端口（Redis SETNX 实现，用于定时任务单实例执行）。
 type Locker interface {
-	// TryLock 尝试加锁；成功返回 true。
-	TryLock(ctx context.Context, key string, ttl time.Duration) (bool, error)
-	// Unlock 释放锁。
-	Unlock(ctx context.Context, key string) error
+	// TryLock 尝试加锁；成功返回持有者 token（Unlock 时用于校验归属），未抢到返回 ok=false。
+	TryLock(ctx context.Context, key string, ttl time.Duration) (token string, ok bool, err error)
+	// Unlock 仅当持有者 token 与锁当前值一致时释放，避免删掉他人（超时后被接管）的锁。
+	Unlock(ctx context.Context, key, token string) error
 }
 
 // GeoStore 骑手位置地理索引（Redis GEO，供派单/附近查询扩展）。

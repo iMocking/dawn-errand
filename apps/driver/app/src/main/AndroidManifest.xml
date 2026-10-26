@@ -7,14 +7,16 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <!-- allowBackup=false：骑手会话 token 与定位、证件、提现卡号等资料不进 ADB 与云备份。
+         明文流量改由 network_security_config 按变体控制（release 只放行本机联调地址，debug 全放行）。 -->
     <application
         android:name=".DriverApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DawnDriver"
-        android:usesCleartextTraffic="true">
+        android:theme="@style/Theme.DawnDriver">
 
         <!-- 高德地图 API Key（console.amap.com 申请，包名 com.dawnerrand.driver + 发布版安全码 SHA1
              40:C4:92:A9:F0:D7:B4:B2:60:7E:E9:CE:7D:1C:A1:D5:52:8B:F2:E3） -->

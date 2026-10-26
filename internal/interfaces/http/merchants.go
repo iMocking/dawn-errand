@@ -225,7 +225,7 @@ func (h *Handler) ResetMerchantAccount(c *gin.Context) {
 		return
 	}
 	u := middleware.User(c)
-	res, err := h.Accounts.ResetMerchantPassword(c.Request.Context(), id, u.ID)
+	res, err := h.Accounts.ResetMerchantPassword(c.Request.Context(), id, u.ID, scope(c))
 	if err != nil {
 		response.Err(c, err)
 		return

@@ -105,9 +105,11 @@ func (h *Handler) LoginBySMS(c *gin.Context) {
 }
 
 // Refresh POST /auth/refresh（公开入口：凭 refresh_token 换新令牌，无 access token）。
+// all_devices=true 时同时吊销该用户其他设备的会话；缺省保持只轮换当前令牌的老契约。
 func (h *Handler) Refresh(c *gin.Context) {
 	var in struct {
 		RefreshToken string `json:"refresh_token"`
+		AllDevices   bool   `json:"all_devices"`
 	}
 	if err := bind(c, &in); err != nil || in.RefreshToken == "" {
 		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "refresh_token 必填")
@@ -118,7 +120,12 @@ func (h *Handler) Refresh(c *gin.Context) {
 		response.ErrStatus(c, http.StatusUnauthorized, errcode.CodeTokenInvalid, "刷新令牌无效或已过期")
 		return
 	}
-	lr, err := h.Auth.Refresh(c.Request.Context(), uid, in.RefreshToken)
+	var lr *auth.LoginResult
+	if in.AllDevices {
+		lr, err = h.Auth.RefreshAll(c.Request.Context(), uid, in.RefreshToken)
+	} else {
+		lr, err = h.Auth.Refresh(c.Request.Context(), uid, in.RefreshToken)
+	}
 	if err != nil {
 		response.Err(c, err)
 		return
@@ -127,13 +134,16 @@ func (h *Handler) Refresh(c *gin.Context) {
 }
 
 // Logout POST /auth/logout。
+// scope=current 仅登出当前设备；缺省或其他值一律按全端登出（最严格语义）。
 func (h *Handler) Logout(c *gin.Context) {
 	var in struct {
 		RefreshToken string `json:"refresh_token"`
+		Scope        string `json:"scope"`
 	}
 	_ = c.ShouldBindJSON(&in)
 	u := middleware.User(c)
-	if err := h.Auth.Logout(c.Request.Context(), u.ID, in.RefreshToken); err != nil {
+	allDevices := !strings.EqualFold(strings.TrimSpace(in.Scope), "current")
+	if err := h.Auth.Logout(c.Request.Context(), u.ID, in.RefreshToken, allDevices); err != nil {
 		response.Err(c, err)
 		return
 	}

@@ -158,7 +158,7 @@ func (h *Handler) GetRiderWorkspace(c *gin.Context) {
 		"trend":    ws.Trend,
 		"reviews":  gin.H{"list": reviews, "total": len(reviews), "rating": r.Rating},
 		"profile": gin.H{
-			"idCard": r.IDCard, "idCheck": r.IDCheck, "tool": r.Tool,
+			"idCard": maskIDCard(r.IDCard), "idCheck": r.IDCheck, "tool": r.Tool,
 			"vehicle": r.Vehicle, "account": r.Account, "docs": r.Docs,
 			"docCount": r.DocCount, "auditStatus": riderAuditText(r.AuditStatus),
 			"submittedAt": r.SubmittedAt, "joinedAt": r.JoinedAt,
@@ -214,7 +214,7 @@ func (h *Handler) ResetRiderAccount(c *gin.Context) {
 		return
 	}
 	u := middleware.User(c)
-	res, err := h.Accounts.ResetRiderPassword(c.Request.Context(), id, u.ID)
+	res, err := h.Accounts.ResetRiderPassword(c.Request.Context(), id, u.ID, scope(c))
 	if err != nil {
 		response.Err(c, err)
 		return

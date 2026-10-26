@@ -61,8 +61,13 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
         }
         _message.value = "发送中…"
         viewModelScope.launch {
-            val dev = withContext(Dispatchers.IO) { ApiClient.sendSmsCode(p) }
-            _message.value = if (dev.isNullOrBlank()) "验证码已发送，请查收短信" else "验证码已发送（开发环境：$dev）"
+            val resp = withContext(Dispatchers.IO) { ApiClient.sendSmsCode(p) }
+            if (!resp.ok) {
+                _message.value = resp.message.ifBlank { "验证码发送失败，请稍后重试" }
+                return@launch
+            }
+            val dev = resp.body?.optString("dev_code")?.takeIf { it.isNotBlank() }
+            _message.value = if (dev == null) "验证码已发送，请查收短信" else "验证码已发送（开发环境：$dev）"
         }
     }
 

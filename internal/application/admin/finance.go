@@ -87,35 +87,30 @@ type Reconciliation struct {
 }
 
 // Reconciliation 对账：支付单金额 vs 订单应付金额（按支付时间归属日期）。
-func (s *FinanceService) Reconciliation(ctx context.Context, date string) (*Reconciliation, error) {
+// 区域站长只看本区域；商家/司机/会员等角色无权查看平台对账。
+func (s *FinanceService) Reconciliation(ctx context.Context, date string, sc tenant.Scope) (*Reconciliation, error) {
+	regionID := ""
+	switch {
+	case sc.IsGlobal():
+	case sc.RegionOnly():
+		regionID = sc.RegionID
+	default:
+		return nil, tenantDenied()
+	}
 	day, err := time.ParseInLocation("2006-01-02", date, time.UTC)
 	if err != nil {
 		return nil, errcode.New(errcode.CodeBadRequest, "日期格式应为 YYYY-MM-DD")
 	}
-	start, end := day.Unix(), day.AddDate(0, 0, 1).Unix()
-	paid, err := s.Repos.Payments.ListPaidBetween(start, end)
+	sum, err := s.Repos.Payments.SummarizeRecon(day.Unix(), day.AddDate(0, 0, 1).Unix(), regionID)
 	if err != nil {
 		return nil, err
 	}
-	res := &Reconciliation{Date: day.Format("2006-01-02")}
-	for _, p := range paid {
-		res.PaymentCount++
-		res.PaymentAmount += p.Amount
-		o, err := s.Repos.Orders.FindByID(p.OrderID)
-		if err != nil {
-			res.MissingOrders++
-			continue
-		}
-		res.PaidOrders++
-		res.OrderAmount += o.PayAmount
-	}
-	refunded, err := s.Repos.Payments.ListRefundedBetween(start, end)
-	if err != nil {
-		return nil, err
-	}
-	for _, p := range refunded {
-		res.RefundCount++
-		res.RefundAmount += p.Amount
+	res := &Reconciliation{
+		Date:       day.Format("2006-01-02"),
+		PaidOrders: sum.PaidOrderCount, OrderAmount: sum.OrderAmount,
+		PaymentCount: sum.PaidCount, PaymentAmount: sum.PaidAmount,
+		RefundCount: sum.RefundCount, RefundAmount: sum.RefundAmount,
+		MissingOrders: sum.MissingOrders,
 	}
 	res.OrderAmount = round2Money(res.OrderAmount)
 	res.PaymentAmount = round2Money(res.PaymentAmount)
@@ -144,39 +139,59 @@ func (s *FinanceService) AuditWithdraw(ctx context.Context, id, action, remark, 
 	if action == "pass" && s.Payout == nil {
 		return errcode.New(errcode.CodePaymentFailed, "打款通道未配置")
 	}
-	if err := s.Repos.Withdrawals.Audit(id, action == "pass", remark, operator, time.Now().Unix()); err != nil {
+	now := time.Now().Unix()
+	// 条件认领：并发双审核仅一人生效，杜绝重复打款/重复退回。
+	claimed, err := s.Repos.Withdrawals.ClaimAudit(id, action == "pass", remark, operator, now)
+	if err != nil {
 		return err
 	}
-	// 通过：发起打款并记录回执。
-	if action == "pass" && s.Payout != nil {
+	if !claimed {
+		return errcode.New(errcode.CodeWithdrawStatus, "该提现单已审核")
+	}
+	// 通过：发起打款并记录回执；失败则回退待审核供重试（资金仍处扣划冻结态）。
+	if action == "pass" {
 		ref, err := s.Payout.Payout(ctx, id, w.PartyType, w.PartyID, w.Amount)
 		if err != nil {
-			return errcode.Wrap(err, errcode.CodePaymentFailed, "打款失败，请重试")
+			if verr := s.Repos.Withdrawals.RevertAuditToPending(id, string(finance.WithdrawApproved), operator, time.Now().Unix()); verr != nil {
+				return errcode.Wrap(err, errcode.CodePaymentFailed, "打款失败且状态回退异常，请人工对账")
+			}
+			return errcode.Wrap(err, errcode.CodePaymentFailed, "打款失败，已回退待审核，请重试")
 		}
 		if ref != "" {
 			if err := s.Repos.Withdrawals.MarkPayout(id, ref, time.Now().Unix()); err != nil {
 				return err
 			}
 		}
+		s.Repos.Audit.Record(ctx, application.AuditEntry{
+			UserID: operator, Action: "withdraw.audit", Object: id, Result: "success",
+			RequestID: application.RequestID(ctx), IP: application.ClientIP(ctx),
+		})
+		return nil
 	}
-	// 驳回：退回已扣减的钱包余额。
-	if action != "pass" && w.PartyID != "" && s.Tx != nil {
-		now := time.Now().Unix()
+	// 驳回：退回已扣减的钱包余额；失败则回退认领，保证状态与资金可重试对齐。
+	if w.PartyID != "" && s.Tx != nil {
+		rnow := time.Now().Unix()
 		if err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-			acc, err := tx.Wallets.Ensure(w.PartyType, w.PartyID, now)
+			acc, err := tx.Wallets.Ensure(w.PartyType, w.PartyID, rnow)
 			if err != nil {
 				return err
 			}
-			ok, updated, err := tx.Wallets.Adjust(w.PartyType, w.PartyID, w.Amount, true, now)
-			if err != nil || !ok || updated == nil {
+			ok, updated, err := tx.Wallets.Adjust(w.PartyType, w.PartyID, w.Amount, true, rnow)
+			if err != nil {
 				return err
+			}
+			if !ok || updated == nil {
+				return errcode.New(errcode.CodeWithdrawStatus, "退款入账失败")
 			}
 			return tx.Wallets.SaveTransaction(&wallet.Transaction{
 				AccountID: acc.ID, PartyType: w.PartyType, PartyID: w.PartyID,
 				Type: "withdraw_refund", Amount: w.Amount,
-				BalanceAfter: updated.Balance, Note: "提现驳回退回", CreatedAt: now,
+				BalanceAfter: updated.Balance, Note: "提现驳回退回", CreatedAt: rnow,
 			})
 		}); err != nil {
+			if verr := s.Repos.Withdrawals.RevertAuditToPending(id, string(finance.WithdrawRejected), operator, rnow); verr == nil {
+				return errcode.Wrap(err, errcode.CodeWithdrawStatus, "退款失败，已回退待审核，请重试驳回")
+			}
 			return err
 		}
 	}

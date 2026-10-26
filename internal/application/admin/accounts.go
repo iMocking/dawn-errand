@@ -11,6 +11,7 @@ import (
 
 	"dawn-errand/internal/application"
 	"dawn-errand/internal/domain/identity"
+	"dawn-errand/internal/domain/tenant"
 	"dawn-errand/internal/pkg/errcode"
 	"dawn-errand/internal/pkg/ulidgen"
 )
@@ -46,10 +47,14 @@ type ProvisionResult struct {
 }
 
 // ResetMerchantPassword 为已开通商家重置登录密码（旧会话立即失效）。
-func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID, operator string) (*ProvisionResult, error) {
+// sc 为操作者数据范围：非全局角色只能操作归属范围内的商家。
+func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID, operator string, sc tenant.Scope) (*ProvisionResult, error) {
 	m, err := s.Repos.Merchants.FindByID(merchantID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
+	}
+	if !merchantAccessOK(sc, m) {
+		return nil, tenantDenied()
 	}
 	if m.OwnerUserID == "" {
 		return nil, errcode.New(errcode.CodeMerchantStatus, "该商家尚未开通账号")
@@ -87,10 +92,13 @@ func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID,
 }
 
 // ResetRiderPassword 为已开通骑手重置登录密码（旧会话立即失效）。
-func (s *AccountsService) ResetRiderPassword(ctx context.Context, riderID, operator string) (*ProvisionResult, error) {
+func (s *AccountsService) ResetRiderPassword(ctx context.Context, riderID, operator string, sc tenant.Scope) (*ProvisionResult, error) {
 	r, err := s.Repos.Riders.FindByID(riderID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
+	}
+	if !riderAccessOK(sc, r) {
+		return nil, tenantDenied()
 	}
 	if r.UserID == "" {
 		return nil, errcode.New(errcode.CodeRiderStatus, "该骑手尚未开通账号")
@@ -128,16 +136,16 @@ func (s *AccountsService) ResetRiderPassword(ctx context.Context, riderID, opera
 }
 
 // ProvisionMerchant 为商家开通账号。
-func (s *AccountsService) ProvisionMerchant(ctx context.Context, merchantID string, in ProvisionInput, operator string) (*ProvisionResult, error) {
-	return s.provision(ctx, identity.RoleMerchant, merchantID, in, operator)
+func (s *AccountsService) ProvisionMerchant(ctx context.Context, merchantID string, in ProvisionInput, operator string, sc tenant.Scope) (*ProvisionResult, error) {
+	return s.provision(ctx, identity.RoleMerchant, merchantID, in, operator, sc)
 }
 
 // ProvisionRider 为骑手开通账号。
-func (s *AccountsService) ProvisionRider(ctx context.Context, riderID string, in ProvisionInput, operator string) (*ProvisionResult, error) {
-	return s.provision(ctx, identity.RoleDriver, riderID, in, operator)
+func (s *AccountsService) ProvisionRider(ctx context.Context, riderID string, in ProvisionInput, operator string, sc tenant.Scope) (*ProvisionResult, error) {
+	return s.provision(ctx, identity.RoleDriver, riderID, in, operator, sc)
 }
 
-func (s *AccountsService) provision(ctx context.Context, role, subjectID string, in ProvisionInput, operator string) (*ProvisionResult, error) {
+func (s *AccountsService) provision(ctx context.Context, role, subjectID string, in ProvisionInput, operator string, sc tenant.Scope) (*ProvisionResult, error) {
 	in.Email = strings.ToLower(strings.TrimSpace(in.Email))
 	in.Phone = strings.TrimSpace(in.Phone)
 	in.Name = strings.TrimSpace(in.Name)
@@ -165,6 +173,9 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 		if m.OwnerUserID != "" {
 			return nil, errcode.NewStatus(409, errcode.CodeConflict, "该商家已开通账号")
 		}
+		if !merchantAccessOK(sc, m) {
+			return nil, tenantDenied()
+		}
 		regionID = m.RegionID
 		defaultName = firstNonEmpty(m.Contact, m.Name)
 		placeholderEmail = "merchant." + m.ID + "@shuguang.local"
@@ -178,6 +189,9 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 		}
 		if r.UserID != "" {
 			return nil, errcode.NewStatus(409, errcode.CodeConflict, "该骑手已开通账号")
+		}
+		if !riderAccessOK(sc, r) {
+			return nil, tenantDenied()
 		}
 		regionID = r.RegionID
 		defaultName = r.Name

@@ -42,14 +42,9 @@ class LoginViewModel : ViewModel() {
             _state.value = LoginUiState.Error("请输入正确的11位手机号")
             return
         }
-        startCountdown()
         viewModelScope.launch {
-            val status = withContext(Dispatchers.IO) { ApiClient.sendSmsCode(phone) }
-            when (status) {
-                ApiClient.SmsStatus.OK -> _state.value = LoginUiState.Error("验证码已发送")
-                ApiClient.SmsStatus.DEMO_FALLBACK ->
-                    _state.value = LoginUiState.Error("验证码发送失败，请检查后端短信服务")
-            }
+            val resp = withContext(Dispatchers.IO) { ApiClient.sendSmsCode(phone) }
+            if (resp.ok) startCountdown() else _state.value = LoginUiState.Error(resp.message.ifBlank { "验证码发送失败，请稍后重试" })
         }
     }
 
@@ -69,11 +64,11 @@ class LoginViewModel : ViewModel() {
         }
         _state.value = LoginUiState.Sending
         viewModelScope.launch {
-            val ok = withContext(Dispatchers.IO) { ApiClient.smsLogin(phone, code) }
-            if (ok) {
-                _state.value = LoginUiState.Success(false)
+            val resp = withContext(Dispatchers.IO) { ApiClient.smsLogin(phone, code) }
+            _state.value = if (resp.ok) {
+                LoginUiState.Success(false)
             } else {
-                _state.value = LoginUiState.Error("验证码错误，请重试")
+                LoginUiState.Error(resp.message.ifBlank { "验证码错误，请重试" })
             }
         }
     }

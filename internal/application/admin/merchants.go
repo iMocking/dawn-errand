@@ -95,7 +95,7 @@ func (s *MerchantsService) AuditAction(ctx context.Context, id, action, reason, 
 		}
 		account, err = s.Accounts.ProvisionMerchant(ctx, id, ProvisionInput{
 			Email: m.Application.AccountEmail, Phone: phone, Name: m.Contact,
-		}, operator)
+		}, operator, sc)
 		if err != nil {
 			return nil, err
 		}

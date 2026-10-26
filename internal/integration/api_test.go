@@ -66,6 +66,8 @@ func setup() {
 	handler = app.Handler
 	appInst = app
 	router = apihandlers.NewRouter(app.Handler, app.MW)
+	clearRateLimitKeys()
+	resetSeedStock()
 }
 
 func do(t *testing.T, method, path string, token string, payload any) (*resp, http.Header) {
@@ -141,6 +143,29 @@ func loginAdmin(t *testing.T) string {
 	return body.Token
 }
 
+// approveMerchant 将商家置为「审核通过」。
+// 经营类 App 接口要求「审核通过 + 已绑定账号」同时满足（middleware.RequireAppRole）。
+// 这里直接改库作前置数据：走 /merchants/audit 需要完整的入驻资料，
+// 而资料完整性与审核流程本身已由 TestMerchantOnboarding* 覆盖。
+func approveMerchant(t *testing.T, merchantID string) {
+	t.Helper()
+	_, err := client.Merchant.UpdateOneID(merchantID).
+		SetAuditStatus("approved").Save(context.Background())
+	if err != nil {
+		t.Fatalf("approve merchant %s: %v", merchantID, err)
+	}
+}
+
+// approveRider 将骑手置为「审核通过」，与 approveMerchant 同理。
+func approveRider(t *testing.T, riderID string) {
+	t.Helper()
+	_, err := client.Rider.UpdateOneID(riderID).
+		SetAuditStatus("approved").Save(context.Background())
+	if err != nil {
+		t.Fatalf("approve rider %s: %v", riderID, err)
+	}
+}
+
 func cleanUser(t *testing.T, email string) {
 	t.Helper()
 	ctx := context.Background()
@@ -202,11 +227,16 @@ func TestBootstrapStatus(t *testing.T) {
 		t.Fatalf("code=%d msg=%s", r.Code, r.Message)
 	}
 	var body struct {
-		Initialized bool `json:"initialized"`
+		Initialized bool   `json:"initialized"`
+		AdminUserID string `json:"admin_user_id"`
+		InitAt      int64  `json:"init_at"`
 	}
 	_ = json.Unmarshal(r.Body, &body)
 	if !body.Initialized {
 		t.Fatal("expected initialized=true")
+	}
+	if body.AdminUserID != "" || body.InitAt != 0 {
+		t.Fatalf("公开状态端点不应泄露初始化细节: %+v", body)
 	}
 }
 
@@ -467,6 +497,39 @@ func TestMetrics(t *testing.T) {
 	router.ServeHTTP(w, req)
 	if !bytes.Contains(w.Body.Bytes(), []byte("dawn_http_requests_total")) {
 		t.Fatal("metrics 缺少 dawn_http_requests_total")
+	}
+}
+
+// TestMetricsTokenGate 校验 /metrics 令牌门（R3-10）：
+// 配置 METRICS_TOKEN 后，无/错令牌一律 401，正确令牌才暴露指标。
+func TestMetricsTokenGate(t *testing.T) {
+	setup()
+	const token = "itest-metrics-token"
+	savedCfg, savedRouter := appInst.Cfg.MetricsToken, router
+	appInst.Cfg.MetricsToken = token
+	router = apihandlers.NewRouter(appInst.Handler, appInst.MW)
+	defer func() {
+		appInst.Cfg.MetricsToken = savedCfg
+		router = savedRouter
+	}()
+
+	get := func(header string) (int, []byte) {
+		req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+		if header != "" {
+			req.Header.Set("X-Metrics-Token", header)
+		}
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		return w.Code, w.Body.Bytes()
+	}
+	if code, body := get(""); code != http.StatusUnauthorized || bytes.Contains(body, []byte("dawn_http_requests_total")) {
+		t.Fatalf("无令牌应 401 且不泄露指标, code=%d", code)
+	}
+	if code, _ := get("wrong-token"); code != http.StatusUnauthorized {
+		t.Fatalf("错误令牌应 401, got %d", code)
+	}
+	if code, body := get(token); code != http.StatusOK || !bytes.Contains(body, []byte("dawn_http_requests_total")) {
+		t.Fatalf("正确令牌应 200 返回指标, code=%d", code)
 	}
 }
 

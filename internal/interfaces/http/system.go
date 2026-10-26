@@ -11,18 +11,16 @@ import (
 	"dawn-errand/internal/pkg/response"
 )
 
-// BootstrapStatus GET /system/bootstrap/status。
+// BootstrapStatus GET /system/bootstrap/status（公开）。
+// 仅暴露「是否已初始化」，供安装向导判断入口；init_at / admin_user_id 属于内部信息，
+// 系统初始化完成后该端点不再有意义，不对外返回细节。
 func (h *Handler) BootstrapStatus(c *gin.Context) {
 	st, err := h.System.BootstrapStatus(c.Request.Context())
 	if err != nil {
 		response.Err(c, err)
 		return
 	}
-	response.OK(c, gin.H{
-		"initialized":   st.Initialized,
-		"init_at":       st.InitAt,
-		"admin_user_id": st.AdminUserID,
-	})
+	response.OK(c, gin.H{"initialized": st.Initialized})
 }
 
 // Bootstrap POST /system/bootstrap。

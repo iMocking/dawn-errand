@@ -10,6 +10,11 @@ val keystoreProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
+// 后端基址：构建时用 -PdriverApiBaseUrl=https://api.example.com 注入，与客户端 `-PclientApiBaseUrl` 同口径。
+// 默认值只服务模拟器本机联调；release 包对非本机地址强制 TLS（见 res/xml/network_security_config.xml）。
+val driverApiBaseUrl = (project.findProperty("driverApiBaseUrl") as String?)
+    ?: "http://10.0.2.2:8080"
+
 android {
     namespace = "com.dawnerrand.driver"
     compileSdk = 37
@@ -20,7 +25,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080\"")
+        buildConfigField("String", "API_BASE_URL", "\"$driverApiBaseUrl\"")
     }
 
     signingConfigs {

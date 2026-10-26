@@ -41,6 +41,11 @@ func main() {
 	}
 
 	router := apihandlers.NewRouter(app.Handler, app.MW)
+	// 仅信任配置的反向代理网段，防止伪造 X-Forwarded-For 绕过 IP 限流。
+	if err := router.SetTrustedProxies(cfg.TrustedProxyCIDRs); err != nil {
+		fmt.Fprintln(os.Stderr, "可信代理配置无效:", err)
+		os.Exit(1)
+	}
 	if cfg.AppEnv == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}

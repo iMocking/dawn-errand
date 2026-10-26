@@ -29,12 +29,19 @@ type Config struct {
 	StoragePublicURL string
 	StorageMaxSizeMB int64
 
+	// TrustedProxyCIDRS 可信反向代理网段（逗号分隔）。Gin 默认信任所有代理头，
+	// 不配置则 X-Forwarded-For 可伪造，IP 维度限流全部失效。"*" 表示信任全部（仅调试用）。
+	TrustedProxyCIDRs []string
+
 	// 订单超时任务
 	OrderPayTimeoutSec  int64 // 待支付超时（秒）
 	OrderAutoConfirmSec int64 // 送达后自动确认（秒）
 
 	// 支付回调签名密钥（真实渠道适配层验签）。
 	PaymentCallbackSecret string
+
+	// MetricsToken /metrics 访问令牌；为空时生产环境关闭该端点，非生产环境放行（本机调试）。
+	MetricsToken string
 }
 
 // Load 从环境变量加载配置；缺省值对应 .env.example。
@@ -58,10 +65,14 @@ func Load() *Config {
 		StoragePublicURL: getStr("STORAGE_PUBLIC_BASE_URL", "http://localhost:8080"),
 		StorageMaxSizeMB: int64(getInt("STORAGE_MAX_SIZE_MB", 10)),
 
+		TrustedProxyCIDRs: getStrList("TRUSTED_PROXY_CIDRS", []string{"127.0.0.1/32", "::1/128"}),
+
 		OrderPayTimeoutSec:  int64(getInt("ORDER_PAY_TIMEOUT_SEC", 900)),
 		OrderAutoConfirmSec: int64(getInt("ORDER_AUTO_CONFIRM_SEC", 86400)),
 
 		PaymentCallbackSecret: getStr("PAYMENT_CALLBACK_SECRET", "dev_payment_callback_secret"),
+
+		MetricsToken: getStr("METRICS_TOKEN", ""),
 	}
 }
 
@@ -78,6 +89,9 @@ func (c *Config) Validate() error {
 		return errors.New("生产环境 JWT_SECRET 必须为 ≥32 字节随机值，且不得使用 dev 默认值")
 	case containsDev(c.ConfigCipherKey):
 		return errors.New("生产环境 CONFIG_ENCRYPTION_KEY 必须更换")
+	case len(c.ConfigCipherKey) < 32:
+		// 密钥经 SHA-256 派生，长度本身不报错，但过短意味着熵不足、可被穷举。
+		return errors.New("生产环境 CONFIG_ENCRYPTION_KEY 至少 32 字节随机值")
 	case c.BootstrapToken == "" || containsDev(c.BootstrapToken):
 		return errors.New("生产环境 BOOTSTRAP_TOKEN 必须更换")
 	case c.PaymentCallbackSecret == "" || containsDev(c.PaymentCallbackSecret):
@@ -113,4 +127,22 @@ func getInt(key string, def int) int {
 		}
 	}
 	return def
+}
+
+func getStrList(key string, def []string) []string {
+	v := os.Getenv(key)
+	if v == "" {
+		return def
+	}
+	parts := strings.Split(v, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	if len(out) == 0 {
+		return def
+	}
+	return out
 }

@@ -4,6 +4,7 @@ package system
 import (
 	"context"
 	crand "crypto/rand"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -87,7 +88,8 @@ func (s *Service) Bootstrap(ctx context.Context, adminEmail, initToken string) (
 	if st.Initialized {
 		return nil, errcode.New(errcode.CodeAlreadyInit, "系统已完成初始化，禁止重复初始化")
 	}
-	if initToken == "" || initToken != s.Cfg.BootstrapToken {
+	// 常量时间比较：普通 != 会在首字节不匹配时立即返回，形成逐字节计时探测。
+	if initToken == "" || subtle.ConstantTimeCompare([]byte(initToken), []byte(s.Cfg.BootstrapToken)) != 1 {
 		s.Repos.Audit.Record(ctx, application.AuditEntry{
 			Action: "system.bootstrap", Object: "bootstrap", Result: "fail",
 			RequestID: reqID(ctx), IP: ipFrom(ctx),

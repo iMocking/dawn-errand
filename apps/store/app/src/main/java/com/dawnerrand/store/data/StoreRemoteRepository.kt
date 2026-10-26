@@ -111,21 +111,24 @@ object StoreRemoteRepository {
         )
     }
 
-    /** 订单动作：接单/拒单/出餐，成功后重新拉取订单。 */
-    fun accept(id: String): Boolean =
-        ApiClient.postOk("/api/app/store/orders/$id/accept", JSONObject()).also { if (it) refreshOrders() }
+    /** 订单动作：接单/拒单/出餐，成功才重新拉取；Resp 让 UI 能把后端原因显示出来。 */
+    fun accept(id: String): ApiClient.Resp =
+        ApiClient.postResp("/api/app/store/orders/$id/accept", JSONObject())
+            .also { if (it.ok) refreshOrders() }
 
-    fun reject(id: String, reason: String = "商家繁忙"): Boolean =
-        ApiClient.postOk(
+    fun reject(id: String, reason: String = "商家繁忙"): ApiClient.Resp =
+        ApiClient.postResp(
             "/api/app/store/orders/$id/reject",
             JSONObject().put("reason", reason),
-        ).also { if (it) refreshOrders() }
+        ).also { if (it.ok) refreshOrders() }
 
-    fun ready(id: String): Boolean =
-        ApiClient.postOk("/api/app/store/orders/$id/ready", JSONObject()).also { if (it) refreshOrders() }
+    fun ready(id: String): ApiClient.Resp =
+        ApiClient.postResp("/api/app/store/orders/$id/ready", JSONObject())
+            .also { if (it.ok) refreshOrders() }
 
+    /** 营业开关：后端是 PUT /api/app/store/status，POST 会被 405 拒绝。 */
     fun setOpen(open: Boolean): Boolean =
-        ApiClient.postOk("/api/app/store/status", JSONObject().put("open", open)).also {
+        ApiClient.putResp("/api/app/store/status", JSONObject().put("open", open)).ok.also {
             if (it) {
                 StoreRepository.shop = StoreRepository.shop.copy(
                     open = open, statusText = if (open) "营业中" else "休息中",

@@ -71,14 +71,37 @@ func (m *Middleware) AccessLog() gin.HandlerFunc {
 		start := time.Now()
 		c.Next()
 		latency := time.Since(start)
-		m.Logger.Info("http",
+		fields := []zap.Field{
 			zap.String("request_id", requestid.From(c.Request.Context())),
 			zap.String("method", c.Request.Method),
 			zap.String("path", c.FullPath()),
 			zap.Int("status", c.Writer.Status()),
 			zap.String("ip", c.ClientIP()),
 			zap.Duration("latency", latency),
-		)
+		}
+		// handler 经 c.Error() 记录的内部细节仅入日志，不出现在响应里。
+		if len(c.Errors) > 0 {
+			fields = append(fields, zap.String("detail", c.Errors.String()))
+		}
+		m.Logger.Info("http", fields...)
+	}
+}
+
+// BodyLimit 全局请求体上限。
+// JSON 接口 1MB 足够；上传（路径以 /uploads 结尾，multipart）放宽到存储上限 + 余量，
+// 由 http.MaxBytesReader 在读取阶段截断，避免超大请求体在解析时耗尽内存。
+func BodyLimit(defaultBytes, uploadBytes int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Body == nil {
+			c.Next()
+			return
+		}
+		max := defaultBytes
+		if strings.HasSuffix(c.Request.URL.Path, "/uploads") {
+			max = uploadBytes
+		}
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, max)
+		c.Next()
 	}
 }
 
@@ -223,8 +246,21 @@ func (m *Middleware) RequireAppRole(roles ...string) gin.HandlerFunc {
 				return
 			}
 			m, err := m.Merchants.FindByID(p.MerchantID)
-			if err != nil || (m.AuditStatus != merchant.AuditApproved && m.OwnerUserID == "") {
+			if err != nil {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeMerchantStatus, "商家信息不可用")
+				c.Abort()
+				return
+			}
+			// 审核通过与账号绑定是「且」关系：任一不满足都拒绝经营。
+			// 原写法 `!=approved && OwnerUserID==""` 只在两者同时不满足才拦截，
+			// 未审核但已绑定的商家可以照常下单经营。
+			if m.AuditStatus != merchant.AuditApproved {
 				response.ErrStatus(c, http.StatusForbidden, errcode.CodeMerchantStatus, "商家入驻审核未通过，暂不可经营")
+				c.Abort()
+				return
+			}
+			if m.OwnerUserID == "" {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeAccountUnbound, "账号未绑定商家，请联系平台开通")
 				c.Abort()
 				return
 			}
@@ -240,8 +276,19 @@ func (m *Middleware) RequireAppRole(roles ...string) gin.HandlerFunc {
 				return
 			}
 			r, err := m.Riders.FindByID(p.RiderID)
-			if err != nil || (r.AuditStatus != rider.AuditApproved && r.UserID == "") {
+			if err != nil {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeRiderStatus, "骑手信息不可用")
+				c.Abort()
+				return
+			}
+			// 与商家分支同规则：审核通过与账号绑定缺一不可。
+			if r.AuditStatus != rider.AuditApproved {
 				response.ErrStatus(c, http.StatusForbidden, errcode.CodeRiderStatus, "骑手入驻审核未通过，暂不可接单")
+				c.Abort()
+				return
+			}
+			if r.UserID == "" {
+				response.ErrStatus(c, http.StatusForbidden, errcode.CodeAccountUnbound, "账号未绑定骑手，请联系平台开通")
 				c.Abort()
 				return
 			}

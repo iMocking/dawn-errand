@@ -95,30 +95,30 @@ class OrdersActivity : AppCompatActivity() {
     private fun handleAction(order: StoreOrder, action: String) {
         when (action) {
             "接单" -> lifecycleScope.launch {
-                val ok = withContext(Dispatchers.IO) { StoreRemoteRepository.accept(order.id) }
-                if (ok) {
+                val resp = withContext(Dispatchers.IO) { StoreRemoteRepository.accept(order.id) }
+                if (resp.ok) {
                     vm.accept(order.id)
                     toast("已接单，请尽快制作")
                 } else {
-                    toast("接单失败，请刷新后重试")
+                    toast("接单失败：" + resp.message.ifBlank { "请刷新后重试" })
                 }
             }
             "拒单" -> lifecycleScope.launch {
-                val ok = withContext(Dispatchers.IO) { StoreRemoteRepository.reject(order.id) }
-                if (ok) {
+                val resp = withContext(Dispatchers.IO) { StoreRemoteRepository.reject(order.id) }
+                if (resp.ok) {
                     vm.reject(order.id)
                     toast("已拒单")
                 } else {
-                    toast("拒单失败，请刷新后重试")
+                    toast("拒单失败：" + resp.message.ifBlank { "请刷新后重试" })
                 }
             }
             "通知出餐" -> lifecycleScope.launch {
-                val ok = withContext(Dispatchers.IO) { StoreRemoteRepository.ready(order.id) }
-                if (ok) {
+                val resp = withContext(Dispatchers.IO) { StoreRemoteRepository.ready(order.id) }
+                if (resp.ok) {
                     vm.notifyReady(order.id)
                     toast("已通知骑手取餐")
                 } else {
-                    toast("出餐失败，请刷新后重试")
+                    toast("出餐失败：" + resp.message.ifBlank { "请刷新后重试" })
                 }
             }
             "查看配送" -> openDetail(order)

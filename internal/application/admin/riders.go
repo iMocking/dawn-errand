@@ -89,7 +89,7 @@ func (s *RidersService) AuditAction(ctx context.Context, id, action, reason, ope
 		}
 		account, err = s.Accounts.ProvisionRider(ctx, id, ProvisionInput{
 			Phone: strings.TrimSpace(r.Phone), Name: r.Name,
-		}, operator)
+		}, operator, sc)
 		if err != nil {
 			return nil, err
 		}

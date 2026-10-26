@@ -115,25 +115,41 @@ func (r WithdrawalRepo) List(q finance.WithdrawQuery, sc tenant.Scope) ([]*finan
 	return out, int64(total), nil
 }
 
-func (r WithdrawalRepo) Audit(id string, approved bool, remark, operator string, now int64) error {
+// ClaimAudit 条件认领审核：UPDATE ... WHERE status=待审核，命中 0 行说明已被并发审核。
+func (r WithdrawalRepo) ClaimAudit(id string, approved bool, remark, operator string, now int64) (bool, error) {
 	ctx := context.Background()
+	cur, err := r.FindByID(id)
+	if err != nil {
+		return false, err
+	}
 	status := string(finance.WithdrawApproved)
+	event := finance.Event{Time: now, Text: "审核通过（打款）", Operator: operator}
 	if !approved {
 		status = string(finance.WithdrawRejected)
+		event.Text = "驳回：" + remark
 	}
+	cur.Timeline = append(cur.Timeline, event)
+	affected, err := r.client.Withdrawal.Update().
+		Where(entwithdrawal.ID(id), entwithdrawal.Status(string(finance.WithdrawPending))).
+		SetStatus(status).SetRejectReason(remark).SetTimeline(mustJSON(cur.Timeline)).
+		Save(ctx)
+	if err != nil {
+		return false, err
+	}
+	return affected == 1, nil
+}
+
+// RevertAuditToPending 回退状态供重试（仅当前状态为 fromStatus 时生效，回执留痕）。
+func (r WithdrawalRepo) RevertAuditToPending(id, fromStatus, operator string, now int64) error {
 	cur, err := r.FindByID(id)
 	if err != nil {
 		return err
 	}
-	event := finance.Event{Time: now, Text: "审核通过（打款）", Operator: operator}
-	if !approved {
-		event.Text = "驳回：" + remark
-	}
-	cur.Timeline = append(cur.Timeline, event)
-	err = r.client.Withdrawal.UpdateOneID(id).
-		SetStatus(status).SetRejectReason(remark).SetTimeline(mustJSON(cur.Timeline)).
-		Exec(ctx)
-	return err
+	cur.Timeline = append(cur.Timeline, finance.Event{Time: now, Text: "回退待审核（重试）", Operator: operator})
+	return r.client.Withdrawal.Update().
+		Where(entwithdrawal.ID(id), entwithdrawal.Status(fromStatus)).
+		SetStatus(string(finance.WithdrawPending)).SetTimeline(mustJSON(cur.Timeline)).
+		Exec(context.Background())
 }
 
 func (r WithdrawalRepo) MarkPayout(id, ref string, now int64) error {

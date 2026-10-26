@@ -1087,27 +1087,28 @@ func refundedStatus(o *order.Order) string {
 	return o.PaymentStatus
 }
 
+// deductBalance 原子扣减余额：单条件 UPDATE，禁止 Find-then-Save（并发双花）。
 func deductBalance(tx *application.RepoUnit, userID string, amount float64, now int64) error {
-	p, err := tx.Profiles.FindByUserID(userID)
-	if err != nil {
+	if _, err := tx.Profiles.FindByUserID(userID); err != nil {
 		return errcode.New(errcode.CodeInsufficientFund, "余额不足，请更换支付方式")
 	}
-	if p.Balance+1e-9 < amount {
-		return errcode.New(errcode.CodeInsufficientFund, "余额不足，请更换支付方式")
-	}
-	p.Balance = round2(p.Balance - amount)
-	p.UpdatedAt = now
-	return tx.Profiles.Save(p)
-}
-
-func creditBalance(tx *application.RepoUnit, userID string, amount float64, now int64) error {
-	p, err := tx.Profiles.FindByUserID(userID)
+	affected, err := tx.Profiles.AddBalance(userID, -round2(amount), round2(amount), now)
 	if err != nil {
 		return err
 	}
-	p.Balance = round2(p.Balance + amount)
-	p.UpdatedAt = now
-	return tx.Profiles.Save(p)
+	if affected == 0 {
+		return errcode.New(errcode.CodeInsufficientFund, "余额不足，请更换支付方式")
+	}
+	return nil
+}
+
+// creditBalance 原子入账余额。
+func creditBalance(tx *application.RepoUnit, userID string, amount float64, now int64) error {
+	if _, err := tx.Profiles.FindByUserID(userID); err != nil {
+		return err
+	}
+	_, err := tx.Profiles.AddBalance(userID, round2(amount), -1, now)
+	return err
 }
 
 // randomCode 生成 4 位取送校验码（加密随机）。
