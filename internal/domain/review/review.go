@@ -1,6 +1,8 @@
 // Package review 订单评价。
 package review
 
+import "context"
+
 // Review 评价。
 type Review struct {
 	ID         string
@@ -27,9 +29,9 @@ type Query struct {
 
 // Repository 评价仓储端口。
 type Repository interface {
-	Save(r *Review) error
-	FindByOrder(orderID string) (*Review, error)
-	FindByID(id string) (*Review, error)
-	List(q Query) ([]*Review, int64, error)
-	Reply(id, merchantID, content string, now int64) (bool, error)
+	Save(ctx context.Context, r *Review) error
+	FindByOrder(ctx context.Context, orderID string) (*Review, error)
+	FindByID(ctx context.Context, id string) (*Review, error)
+	List(ctx context.Context, q Query) ([]*Review, int64, error)
+	Reply(ctx context.Context, id, merchantID, content string, now int64) (bool, error)
 }

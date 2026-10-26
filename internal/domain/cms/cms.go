@@ -1,6 +1,8 @@
 // Package cms 内容与运营配置限界上下文：公告、费率规则。
 package cms
 
+import "context"
+
 import "dawn-errand/internal/domain/tenant"
 
 // AnnouncementStatus 公告状态。
@@ -78,21 +80,21 @@ type FeeRule struct {
 
 // AnnouncementRepository 公告仓储端口。
 type AnnouncementRepository interface {
-	Save(a *Announcement) error
-	FindByID(id string) (*Announcement, error)
-	List(q AnnouncementQuery, scope tenant.Scope) ([]*Announcement, int64, error)
+	Save(ctx context.Context, a *Announcement) error
+	FindByID(ctx context.Context, id string) (*Announcement, error)
+	List(ctx context.Context, q AnnouncementQuery, scope tenant.Scope) ([]*Announcement, int64, error)
 	// ListDueScheduled 待发布的到期公告（cron 调度发布用）。
-	ListDueScheduled(now int64) ([]*Announcement, error)
+	ListDueScheduled(ctx context.Context, now int64) ([]*Announcement, error)
 	// MarkPublished 标记已发布。
-	MarkPublished(id string, now int64) error
+	MarkPublished(ctx context.Context, id string, now int64) error
 	// UpdateStatus 更新状态（下线/撤回/发布）。
-	UpdateStatus(id string, status AnnouncementStatus, now int64) error
+	UpdateStatus(ctx context.Context, id string, status AnnouncementStatus, now int64) error
 }
 
 // FeeRuleRepository 费率规则仓储端口。
 type FeeRuleRepository interface {
-	Save(r *FeeRule) error
-	List(scope tenant.Scope) ([]*FeeRule, error)
-	FindByID(id string) (*FeeRule, error)
-	Delete(id string) error
+	Save(ctx context.Context, r *FeeRule) error
+	List(ctx context.Context, scope tenant.Scope) ([]*FeeRule, error)
+	FindByID(ctx context.Context, id string) (*FeeRule, error)
+	Delete(ctx context.Context, id string) error
 }

@@ -1,6 +1,8 @@
 // Package catalog 商品目录限界上下文：菜品分类与菜品。
 package catalog
 
+import "context"
+
 // Category 菜品分类。
 type Category struct {
 	ID         string
@@ -45,18 +47,18 @@ type DishQuery struct {
 // Repository 商品目录仓储端口。
 type Repository interface {
 	// 分类
-	SaveCategory(c *Category) error
-	FindCategory(id string) (*Category, error)
-	ListCategories(merchantID string) ([]*Category, error)
-	DeleteCategory(id string) error
-	CountDishesByCategory(categoryID string) (int64, error)
+	SaveCategory(ctx context.Context, c *Category) error
+	FindCategory(ctx context.Context, id string) (*Category, error)
+	ListCategories(ctx context.Context, merchantID string) ([]*Category, error)
+	DeleteCategory(ctx context.Context, id string) error
+	CountDishesByCategory(ctx context.Context, categoryID string) (int64, error)
 	// 菜品
-	SaveDish(d *Dish) error
-	FindDish(id string) (*Dish, error)
-	ListDishes(q DishQuery) ([]*Dish, int64, error)
-	UpdateDishSale(id string, onSale bool, stock int, now int64) error
-	SoftDeleteDish(id string, now int64) error
-	CountDishes(merchantID string) (int64, error)
+	SaveDish(ctx context.Context, d *Dish) error
+	FindDish(ctx context.Context, id string) (*Dish, error)
+	ListDishes(ctx context.Context, q DishQuery) ([]*Dish, int64, error)
+	UpdateDishSale(ctx context.Context, id string, onSale bool, stock int, now int64) error
+	SoftDeleteDish(ctx context.Context, id string, now int64) error
+	CountDishes(ctx context.Context, merchantID string) (int64, error)
 	// AdjustStock 原子调整库存：delta<0 扣减（库存不足返回 false），delta>0 释放。
-	AdjustStock(dishID string, delta int) (bool, error)
+	AdjustStock(ctx context.Context, dishID string, delta int) (bool, error)
 }

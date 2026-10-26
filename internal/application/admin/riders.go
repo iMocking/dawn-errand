@@ -21,23 +21,23 @@ type RidersService struct {
 // List 骑手列表。
 func (s *RidersService) List(ctx context.Context, q rider.RiderQuery, sc tenant.Scope) ([]*rider.Rider, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Riders.List(q, sc)
+	return s.Repos.Riders.List(ctx, q, sc)
 }
 
 // Stats 骑手聚合。
 func (s *RidersService) Stats(ctx context.Context, sc tenant.Scope) (*rider.Stats, error) {
-	return s.Repos.Riders.Stats(sc)
+	return s.Repos.Riders.Stats(ctx, sc)
 }
 
 // AuditList 入驻审核列表。
 func (s *RidersService) AuditList(ctx context.Context, q rider.AuditQuery, sc tenant.Scope) ([]*rider.Rider, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Riders.AuditList(q, sc)
+	return s.Repos.Riders.AuditList(ctx, q, sc)
 }
 
 // Detail 骑手详情（对象级隔离）。
 func (s *RidersService) Detail(ctx context.Context, id string, sc tenant.Scope) (*rider.Rider, error) {
-	r, err := s.Repos.Riders.FindByID(id)
+	r, err := s.Repos.Riders.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
@@ -52,7 +52,7 @@ func (s *RidersService) Detail(ctx context.Context, id string, sc tenant.Scope) 
 
 // AuditAction 审核入驻：通过时自动开通骑手端账号并返回一次性初始密码。
 func (s *RidersService) AuditAction(ctx context.Context, id, action, reason, operator string, sc tenant.Scope) (*ProvisionResult, error) {
-	r, err := s.Repos.Riders.FindByID(id)
+	r, err := s.Repos.Riders.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "申请不存在")
@@ -70,7 +70,7 @@ func (s *RidersService) AuditAction(ctx context.Context, id, action, reason, ope
 		if strings.TrimSpace(reason) == "" {
 			return nil, errcode.New(errcode.CodeBadRequest, "驳回必须填写原因，便于补件")
 		}
-		if err := s.Repos.Riders.UpdateAudit(id, false, strings.TrimSpace(reason), operator, time.Now().Unix()); err != nil {
+		if err := s.Repos.Riders.UpdateAudit(ctx, id, false, strings.TrimSpace(reason), operator, time.Now().Unix()); err != nil {
 			return nil, err
 		}
 		s.audit(ctx, id, operator)
@@ -79,7 +79,7 @@ func (s *RidersService) AuditAction(ctx context.Context, id, action, reason, ope
 	if strings.TrimSpace(r.Phone) == "" {
 		return nil, errcode.New(errcode.CodeBadRequest, "骑手手机号必填，用于登录骑手端")
 	}
-	if err := s.Repos.Riders.UpdateAudit(id, true, "", operator, time.Now().Unix()); err != nil {
+	if err := s.Repos.Riders.UpdateAudit(ctx, id, true, "", operator, time.Now().Unix()); err != nil {
 		return nil, err
 	}
 	var account *ProvisionResult
@@ -107,7 +107,7 @@ func (s *RidersService) audit(ctx context.Context, id, operator string) {
 
 // Freeze 冻结/解冻骑手。
 func (s *RidersService) Freeze(ctx context.Context, id, action, operator string, sc tenant.Scope) error {
-	r, err := s.Repos.Riders.FindByID(id)
+	r, err := s.Repos.Riders.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
@@ -121,7 +121,7 @@ func (s *RidersService) Freeze(ctx context.Context, id, action, operator string,
 	if action == "unfreeze" {
 		status = rider.RiderOffline
 	}
-	if err := s.Repos.Riders.UpdateStatus(id, status, time.Now().Unix()); err != nil {
+	if err := s.Repos.Riders.UpdateStatus(ctx, id, status, time.Now().Unix()); err != nil {
 		return err
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -142,7 +142,7 @@ func (s *RidersService) Create(ctx context.Context, r *rider.Rider, sc tenant.Sc
 		}
 	} else if r.RegionID == "" {
 		// 超管未指定区域：使用第一个服务区域（ent schema region_id NotEmpty）。
-		regions, err := s.Repos.Regions.List()
+		regions, err := s.Repos.Regions.List(ctx)
 		if err != nil || len(regions) == 0 {
 			return errcode.New(errcode.CodeBadRequest, "未配置服务区域，无法创建骑手")
 		}
@@ -159,7 +159,7 @@ func (s *RidersService) Create(ctx context.Context, r *rider.Rider, sc tenant.Sc
 	if r.AuditStatus == "" {
 		r.AuditStatus = rider.AuditPending
 	}
-	return s.Repos.Riders.Save(r)
+	return s.Repos.Riders.Save(ctx, r)
 }
 
 func normalizeQ(page, size *int) {

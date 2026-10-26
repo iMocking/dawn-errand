@@ -11,7 +11,7 @@ import (
 // ReviewRepo 实现 review.Repository。
 type ReviewRepo struct{ client *ent.Client }
 
-func (r ReviewRepo) Save(v *review.Review) error {
+func (r ReviewRepo) Save(ctx context.Context, v *review.Review) error {
 	if v.ID == "" {
 		v.ID = newULID()
 	}
@@ -20,11 +20,11 @@ func (r ReviewRepo) Save(v *review.Review) error {
 		SetMerchantID(v.MerchantID).SetRiderID(v.RiderID).
 		SetRating(v.Rating).SetTags(v.Tags).SetContent(v.Content).SetImages(v.Images).
 		SetCreatedAt(v.CreatedAt).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r ReviewRepo) FindByOrder(orderID string) (*review.Review, error) {
-	e, err := r.client.Review.Query().Where(entreview.OrderID(orderID)).Only(context.Background())
+func (r ReviewRepo) FindByOrder(ctx context.Context, orderID string) (*review.Review, error) {
+	e, err := r.client.Review.Query().Where(entreview.OrderID(orderID)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -34,8 +34,8 @@ func (r ReviewRepo) FindByOrder(orderID string) (*review.Review, error) {
 	return toReview(e), nil
 }
 
-func (r ReviewRepo) FindByID(id string) (*review.Review, error) {
-	e, err := r.client.Review.Get(context.Background(), id)
+func (r ReviewRepo) FindByID(ctx context.Context, id string) (*review.Review, error) {
+	e, err := r.client.Review.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -45,8 +45,7 @@ func (r ReviewRepo) FindByID(id string) (*review.Review, error) {
 	return toReview(e), nil
 }
 
-func (r ReviewRepo) List(q review.Query) ([]*review.Review, int64, error) {
-	ctx := context.Background()
+func (r ReviewRepo) List(ctx context.Context, q review.Query) ([]*review.Review, int64, error) {
 	bq := r.client.Review.Query()
 	if q.MerchantID != "" {
 		bq.Where(entreview.MerchantID(q.MerchantID))
@@ -71,10 +70,10 @@ func (r ReviewRepo) List(q review.Query) ([]*review.Review, int64, error) {
 	return out, int64(total), nil
 }
 
-func (r ReviewRepo) Reply(id, merchantID, content string, now int64) (bool, error) {
+func (r ReviewRepo) Reply(ctx context.Context, id, merchantID, content string, now int64) (bool, error) {
 	affected, err := r.client.Review.Update().
 		Where(entreview.ID(id), entreview.MerchantID(merchantID)).
-		SetReply(content).SetRepliedAt(now).Save(context.Background())
+		SetReply(content).SetRepliedAt(now).Save(ctx)
 	return affected > 0, err
 }
 

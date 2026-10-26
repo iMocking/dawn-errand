@@ -17,12 +17,12 @@ type ComplaintsService struct {
 // List 工单列表。
 func (s *ComplaintsService) List(ctx context.Context, q complaint.Query, sc tenant.Scope) ([]*complaint.Complaint, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Complaints.List(q, sc)
+	return s.Repos.Complaints.List(ctx, q, sc)
 }
 
 // Detail 工单详情（对象级隔离）。
 func (s *ComplaintsService) Detail(ctx context.Context, id string, sc tenant.Scope) (*complaint.Complaint, error) {
-	c, err := s.Repos.Complaints.FindByID(id)
+	c, err := s.Repos.Complaints.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeComplaintNotFound, "工单不存在")

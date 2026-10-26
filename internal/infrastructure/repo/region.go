@@ -11,8 +11,7 @@ import (
 // RegionRepo 实现 tenant.RegionRepository。
 type RegionRepo struct{ client *ent.Client }
 
-func (r RegionRepo) Save(reg *tenant.Region) error {
-	ctx := context.Background()
+func (r RegionRepo) Save(ctx context.Context, reg *tenant.Region) error {
 	if reg.ID == "" {
 		reg.ID = newULID()
 	}
@@ -55,8 +54,8 @@ func toRegion(e *ent.Region) *tenant.Region {
 	}
 }
 
-func (r RegionRepo) FindByID(id string) (*tenant.Region, error) {
-	e, err := r.client.Region.Get(context.Background(), id)
+func (r RegionRepo) FindByID(ctx context.Context, id string) (*tenant.Region, error) {
+	e, err := r.client.Region.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -66,8 +65,8 @@ func (r RegionRepo) FindByID(id string) (*tenant.Region, error) {
 	return toRegion(e), nil
 }
 
-func (r RegionRepo) List() ([]*tenant.Region, error) {
-	rows, err := r.client.Region.Query().Order(ent.Asc(region.FieldName)).All(context.Background())
+func (r RegionRepo) List(ctx context.Context) ([]*tenant.Region, error) {
+	rows, err := r.client.Region.Query().Order(ent.Asc(region.FieldName)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -78,11 +77,11 @@ func (r RegionRepo) List() ([]*tenant.Region, error) {
 	return out, nil
 }
 
-func (r RegionRepo) ListByIDs(ids []string) ([]*tenant.Region, error) {
+func (r RegionRepo) ListByIDs(ctx context.Context, ids []string) ([]*tenant.Region, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	rows, err := r.client.Region.Query().Where(region.IDIn(ids...)).All(context.Background())
+	rows, err := r.client.Region.Query().Where(region.IDIn(ids...)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +92,6 @@ func (r RegionRepo) ListByIDs(ids []string) ([]*tenant.Region, error) {
 	return out, nil
 }
 
-func (r RegionRepo) Delete(id string) error {
-	return r.client.Region.DeleteOneID(id).Exec(context.Background())
+func (r RegionRepo) Delete(ctx context.Context, id string) error {
+	return r.client.Region.DeleteOneID(id).Exec(ctx)
 }

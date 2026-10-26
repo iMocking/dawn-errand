@@ -161,6 +161,7 @@ func (m *Middleware) RateLimit(prefix string, limit int, window time.Duration) g
 // Auth JWT 认证：校验令牌、会话版本、用户状态，注入 Principal。
 func (m *Middleware) Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx := c.Request.Context()
 		header := c.GetHeader("Authorization")
 		token := ""
 		if strings.HasPrefix(header, "Bearer ") {
@@ -179,7 +180,7 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		u, err := m.Users.FindByID(claims.UserID)
+		u, err := m.Users.FindByID(ctx, claims.UserID)
 		if err != nil {
 			metrics.AuthFailuresTotal.Inc()
 			response.ErrStatus(c, http.StatusUnauthorized, errcode.CodeTokenInvalid, "用户不存在")
@@ -192,7 +193,7 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		cred, err := m.Creds.FindByUserID(u.ID)
+		cred, err := m.Creds.FindByUserID(ctx, u.ID)
 		if err != nil || cred.SessionVersion != claims.SessionVersion {
 			metrics.AuthFailuresTotal.Inc()
 			response.ErrStatus(c, http.StatusUnauthorized, errcode.CodeTokenInvalid, "登录状态已失效，请重新登录")
@@ -232,6 +233,7 @@ func (m *Middleware) RequireAppRole(roles ...string) gin.HandlerFunc {
 		allowed[r] = true
 	}
 	return func(c *gin.Context) {
+		ctx := c.Request.Context()
 		p := Principal(c)
 		if !allowed[p.Role] {
 			response.ErrStatus(c, http.StatusForbidden, errcode.CodeRoleDenied, "当前账号无权访问该端")
@@ -245,7 +247,7 @@ func (m *Middleware) RequireAppRole(roles ...string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			m, err := m.Merchants.FindByID(p.MerchantID)
+			m, err := m.Merchants.FindByID(ctx, p.MerchantID)
 			if err != nil {
 				response.ErrStatus(c, http.StatusForbidden, errcode.CodeMerchantStatus, "商家信息不可用")
 				c.Abort()
@@ -275,7 +277,7 @@ func (m *Middleware) RequireAppRole(roles ...string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			r, err := m.Riders.FindByID(p.RiderID)
+			r, err := m.Riders.FindByID(ctx, p.RiderID)
 			if err != nil {
 				response.ErrStatus(c, http.StatusForbidden, errcode.CodeRiderStatus, "骑手信息不可用")
 				c.Abort()

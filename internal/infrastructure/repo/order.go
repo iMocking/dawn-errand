@@ -20,8 +20,7 @@ func mustJSON(v any) []byte {
 	return b
 }
 
-func (r OrderRepo) Save(o *order.Order) error {
-	ctx := context.Background()
+func (r OrderRepo) Save(ctx context.Context, o *order.Order) error {
 	if o.ID == "" {
 		o.ID = newULID()
 	}
@@ -86,8 +85,8 @@ func toOrder(e *ent.Order) *order.Order {
 	return o
 }
 
-func (r OrderRepo) FindByID(id string) (*order.Order, error) {
-	e, err := r.client.Order.Get(context.Background(), id)
+func (r OrderRepo) FindByID(ctx context.Context, id string) (*order.Order, error) {
+	e, err := r.client.Order.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -97,13 +96,13 @@ func (r OrderRepo) FindByID(id string) (*order.Order, error) {
 	return toOrder(e), nil
 }
 
-func (r OrderRepo) FindByClientOrderNo(userID, clientOrderNo string) (*order.Order, error) {
+func (r OrderRepo) FindByClientOrderNo(ctx context.Context, userID, clientOrderNo string) (*order.Order, error) {
 	if clientOrderNo == "" {
 		return nil, ErrNotFound
 	}
 	e, err := r.client.Order.Query().
 		Where(entorder.UserID(userID), entorder.ClientOrderNo(clientOrderNo)).
-		Only(context.Background())
+		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -113,8 +112,7 @@ func (r OrderRepo) FindByClientOrderNo(userID, clientOrderNo string) (*order.Ord
 	return toOrder(e), nil
 }
 
-func (r OrderRepo) List(q order.Query, sc tenant.Scope) ([]*order.Order, int64, error) {
-	ctx := context.Background()
+func (r OrderRepo) List(ctx context.Context, q order.Query, sc tenant.Scope) ([]*order.Order, int64, error) {
 	bq := r.client.Order.Query()
 	scopeOrder(bq, sc)
 	if q.UserID != "" {
@@ -149,7 +147,7 @@ func (r OrderRepo) List(q order.Query, sc tenant.Scope) ([]*order.Order, int64, 
 	return out, int64(total), nil
 }
 
-func (r OrderRepo) ListByMerchant(merchantID string, limit int) ([]*order.Order, error) {
+func (r OrderRepo) ListByMerchant(ctx context.Context, merchantID string, limit int) ([]*order.Order, error) {
 	if limit <= 0 {
 		limit = 100
 	}
@@ -157,7 +155,7 @@ func (r OrderRepo) ListByMerchant(merchantID string, limit int) ([]*order.Order,
 		Where(entorder.MerchantID(merchantID)).
 		Order(ent.Desc(entorder.FieldCreatedAt)).
 		Limit(limit).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +166,7 @@ func (r OrderRepo) ListByMerchant(merchantID string, limit int) ([]*order.Order,
 	return out, nil
 }
 
-func (r OrderRepo) ListByRider(riderID string, limit int) ([]*order.Order, error) {
+func (r OrderRepo) ListByRider(ctx context.Context, riderID string, limit int) ([]*order.Order, error) {
 	if limit <= 0 {
 		limit = 100
 	}
@@ -176,7 +174,7 @@ func (r OrderRepo) ListByRider(riderID string, limit int) ([]*order.Order, error
 		Where(entorder.RiderID(riderID)).
 		Order(ent.Desc(entorder.FieldCreatedAt)).
 		Limit(limit).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +185,7 @@ func (r OrderRepo) ListByRider(riderID string, limit int) ([]*order.Order, error
 	return out, nil
 }
 
-func (r OrderRepo) ListByUser(userID string, limit int) ([]*order.Order, error) {
+func (r OrderRepo) ListByUser(ctx context.Context, userID string, limit int) ([]*order.Order, error) {
 	if limit <= 0 {
 		limit = 10
 	}
@@ -195,7 +193,7 @@ func (r OrderRepo) ListByUser(userID string, limit int) ([]*order.Order, error) 
 		Where(entorder.UserID(userID)).
 		Order(ent.Desc(entorder.FieldCreatedAt)).
 		Limit(limit).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +204,7 @@ func (r OrderRepo) ListByUser(userID string, limit int) ([]*order.Order, error) 
 	return out, nil
 }
 
-func (r OrderRepo) UpdateStatus(id string, from, to order.OrderStatus, p order.StatusPatch, now int64) (bool, error) {
+func (r OrderRepo) UpdateStatus(ctx context.Context, id string, from, to order.OrderStatus, p order.StatusPatch, now int64) (bool, error) {
 	upd := r.client.Order.Update().
 		Where(entorder.ID(id), entorder.Status(string(from))).
 		SetStatus(string(to))
@@ -261,11 +259,11 @@ func (r OrderRepo) UpdateStatus(id string, from, to order.OrderStatus, p order.S
 	if p.DeliveryDistance != nil {
 		upd.SetDeliveryDistanceKm(*p.DeliveryDistance)
 	}
-	affected, err := upd.Save(context.Background())
+	affected, err := upd.Save(ctx)
 	return affected > 0, err
 }
 
-func (r OrderRepo) AssignRider(id, riderID, riderName string, now int64) (bool, error) {
+func (r OrderRepo) AssignRider(ctx context.Context, id, riderID, riderName string, now int64) (bool, error) {
 	affected, err := r.client.Order.Update().
 		Where(
 			entorder.ID(id),
@@ -273,12 +271,11 @@ func (r OrderRepo) AssignRider(id, riderID, riderName string, now int64) (bool, 
 			entorder.RiderID(""),
 		).
 		SetRiderID(riderID).SetRiderName(riderName).
-		Save(context.Background())
+		Save(ctx)
 	return affected > 0, err
 }
 
-func (r OrderRepo) ListPool(regionID string, page, pageSize int) ([]*order.Order, int64, error) {
-	ctx := context.Background()
+func (r OrderRepo) ListPool(ctx context.Context, regionID string, page, pageSize int) ([]*order.Order, int64, error) {
 	bq := r.client.Order.Query().Where(
 		entorder.RegionID(regionID),
 		entorder.Status(string(order.StatusReady)),
@@ -301,15 +298,15 @@ func (r OrderRepo) ListPool(regionID string, page, pageSize int) ([]*order.Order
 	return out, int64(total), nil
 }
 
-func (r OrderRepo) ListPendingPayBefore(before int64, limit int) ([]*order.Order, error) {
-	return r.listBefore(string(order.StatusPendingPay), entorder.FieldCreatedAt, before, limit)
+func (r OrderRepo) ListPendingPayBefore(ctx context.Context, before int64, limit int) ([]*order.Order, error) {
+	return r.listBefore(ctx, string(order.StatusPendingPay), entorder.FieldCreatedAt, before, limit)
 }
 
-func (r OrderRepo) ListDeliveredBefore(before int64, limit int) ([]*order.Order, error) {
-	return r.listBefore(string(order.StatusDelivered), entorder.FieldDeliveredAt, before, limit)
+func (r OrderRepo) ListDeliveredBefore(ctx context.Context, before int64, limit int) ([]*order.Order, error) {
+	return r.listBefore(ctx, string(order.StatusDelivered), entorder.FieldDeliveredAt, before, limit)
 }
 
-func (r OrderRepo) listBefore(status, field string, before int64, limit int) ([]*order.Order, error) {
+func (r OrderRepo) listBefore(ctx context.Context, status, field string, before int64, limit int) ([]*order.Order, error) {
 	if limit <= 0 || limit > 500 {
 		limit = 100
 	}
@@ -320,7 +317,7 @@ func (r OrderRepo) listBefore(status, field string, before int64, limit int) ([]
 	case entorder.FieldDeliveredAt:
 		bq.Where(entorder.DeliveredAtLT(before), entorder.DeliveredAtGT(0))
 	}
-	rows, err := bq.Order(ent.Asc(entorder.FieldCreatedAt)).Limit(limit).All(context.Background())
+	rows, err := bq.Order(ent.Asc(entorder.FieldCreatedAt)).Limit(limit).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -331,8 +328,7 @@ func (r OrderRepo) listBefore(status, field string, before int64, limit int) ([]
 	return out, nil
 }
 
-func (r OrderRepo) Stats(sc tenant.Scope, now int64) (*order.Stats, error) {
-	ctx := context.Background()
+func (r OrderRepo) Stats(ctx context.Context, sc tenant.Scope, now int64) (*order.Stats, error) {
 	dayStart := startOfDayUTC(now)
 	base := func() *ent.OrderQuery {
 		bq := r.client.Order.Query()
@@ -380,8 +376,7 @@ func (r OrderRepo) Stats(sc tenant.Scope, now int64) (*order.Stats, error) {
 	}, nil
 }
 
-func (r OrderRepo) Trend7d(sc tenant.Scope, now int64) ([]order.DayTrend, error) {
-	ctx := context.Background()
+func (r OrderRepo) Trend7d(ctx context.Context, sc tenant.Scope, now int64) ([]order.DayTrend, error) {
 	start := daysAgoStart(now, 6)
 	bq := r.client.Order.Query()
 	scopeOrder(bq, sc)
@@ -414,44 +409,43 @@ func (r OrderRepo) Trend7d(sc tenant.Scope, now int64) ([]order.DayTrend, error)
 	return out, nil
 }
 
-func (r OrderRepo) CountByRegion(regionID string, now int64) (int64, error) {
+func (r OrderRepo) CountByRegion(ctx context.Context, regionID string, now int64) (int64, error) {
 	n, err := r.client.Order.Query().
 		Where(entorder.RegionID(regionID), entorder.CreatedAtGTE(startOfDayUTC(now))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r OrderRepo) CountToday(now int64) (int64, error) {
+func (r OrderRepo) CountToday(ctx context.Context, now int64) (int64, error) {
 	n, err := r.client.Order.Query().
 		Where(entorder.CreatedAtGTE(startOfDayUTC(now))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r OrderRepo) SumTodayGMV(now int64) (float64, error) {
-	return sumFloat64(context.Background(), r.client.Order.Query().
+func (r OrderRepo) SumTodayGMV(ctx context.Context, now int64) (float64, error) {
+	return sumFloat64(ctx, r.client.Order.Query().
 		Where(entorder.CreatedAtGTE(startOfDayUTC(now))), entorder.FieldPayAmount)
 }
 
-func (r OrderRepo) CountUserOrders(userID string) (int64, error) {
-	n, err := r.client.Order.Query().Where(entorder.UserID(userID)).Count(context.Background())
+func (r OrderRepo) CountUserOrders(ctx context.Context, userID string) (int64, error) {
+	n, err := r.client.Order.Query().Where(entorder.UserID(userID)).Count(ctx)
 	return int64(n), err
 }
 
-func (r OrderRepo) CountUserMonth(userID string, now int64) (int64, error) {
+func (r OrderRepo) CountUserMonth(ctx context.Context, userID string, now int64) (int64, error) {
 	n, err := r.client.Order.Query().
 		Where(entorder.UserID(userID), entorder.CreatedAtGTE(daysAgoStart(now, 30))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r OrderRepo) CountUserSpent(userID string) (float64, error) {
-	return sumFloat64(context.Background(), r.client.Order.Query().
+func (r OrderRepo) CountUserSpent(ctx context.Context, userID string) (float64, error) {
+	return sumFloat64(ctx, r.client.Order.Query().
 		Where(entorder.UserID(userID)), entorder.FieldPayAmount)
 }
 
-func (r OrderRepo) CountActiveMonth(sc tenant.Scope, now int64) (int64, error) {
-	ctx := context.Background()
+func (r OrderRepo) CountActiveMonth(ctx context.Context, sc tenant.Scope, now int64) (int64, error) {
 	bq := r.client.Order.Query()
 	scopeOrder(bq, sc)
 	var rows []struct {
@@ -465,21 +459,20 @@ func (r OrderRepo) CountActiveMonth(sc tenant.Scope, now int64) (int64, error) {
 	return int64(len(rows)), nil
 }
 
-func (r OrderRepo) CountRecentActiveUsers(now int64) (int64, error) {
+func (r OrderRepo) CountRecentActiveUsers(ctx context.Context, now int64) (int64, error) {
 	var rows []struct {
 		UserID string `sql:"user_id"`
 		Count  int
 	}
 	if err := r.client.Order.Query().
 		Where(entorder.CreatedAtGTE(daysAgoStart(now, 7))).
-		GroupBy(entorder.FieldUserID).Aggregate(ent.Count()).Scan(context.Background(), &rows); err != nil {
+		GroupBy(entorder.FieldUserID).Aggregate(ent.Count()).Scan(ctx, &rows); err != nil {
 		return 0, err
 	}
 	return int64(len(rows)), nil
 }
 
-func (r OrderRepo) CountByType(sc tenant.Scope) (map[order.OrderType]int64, error) {
-	ctx := context.Background()
+func (r OrderRepo) CountByType(ctx context.Context, sc tenant.Scope) (map[order.OrderType]int64, error) {
 	bq := r.client.Order.Query()
 	scopeOrder(bq, sc)
 	var rows []struct {
@@ -496,9 +489,9 @@ func (r OrderRepo) CountByType(sc tenant.Scope) (map[order.OrderType]int64, erro
 	return out, nil
 }
 
-func (r OrderRepo) CountAll(sc tenant.Scope) (int64, error) {
+func (r OrderRepo) CountAll(ctx context.Context, sc tenant.Scope) (int64, error) {
 	bq := r.client.Order.Query()
 	scopeOrder(bq, sc)
-	n, err := bq.Count(context.Background())
+	n, err := bq.Count(ctx)
 	return int64(n), err
 }

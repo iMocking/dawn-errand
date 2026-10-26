@@ -48,7 +48,7 @@ func (s *FinanceAppService) Summary(ctx context.Context, partyType, partyID stri
 	if err != nil {
 		return nil, err
 	}
-	pendingSettle, err := s.Repos.Settlements.SumPendingByParty(partyType, partyID)
+	pendingSettle, err := s.Repos.Settlements.SumPendingByParty(ctx, partyType, partyID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,14 +87,14 @@ type FinanceRecord struct {
 
 // Settlements 结算单。
 func (s *FinanceAppService) Settlements(ctx context.Context, partyType, partyID string, page, size int) ([]*finance.Settlement, int64, error) {
-	return s.Repos.Settlements.List(finance.SettlementQuery{
+	return s.Repos.Settlements.List(ctx, finance.SettlementQuery{
 		Page: page, PageSize: size, PartyType: partyType, PartyID: partyID,
 	}, tenant.Scope{})
 }
 
 // Withdrawals 提现记录。
 func (s *FinanceAppService) Withdrawals(ctx context.Context, partyType, partyID string, page, size int) ([]*finance.Withdrawal, int64, error) {
-	return s.Repos.Withdrawals.List(finance.WithdrawQuery{
+	return s.Repos.Withdrawals.List(ctx, finance.WithdrawQuery{
 		Page: page, PageSize: size, PartyType: partyType, PartyID: partyID,
 	}, tenant.Scope{})
 }
@@ -104,7 +104,7 @@ func (s *FinanceAppService) CreateWithdrawal(ctx context.Context, partyType, par
 	if in.Amount <= 0 {
 		return nil, errcode.New(errcode.CodeBadRequest, "提现金额必须大于 0")
 	}
-	rule, err := s.withdrawRule()
+	rule, err := s.withdrawRule(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (s *FinanceAppService) CreateWithdrawal(ctx context.Context, partyType, par
 			fmt.Sprintf("单笔提现金额需在 ¥%.0f-¥%.0f 之间", rule.MinAmount, rule.MaxAmount))
 	}
 	now := time.Now().Unix()
-	count, err := s.Repos.Withdrawals.CountByPartySince(partyType, partyID, now-86400)
+	count, err := s.Repos.Withdrawals.CountByPartySince(ctx, partyType, partyID, now-86400)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (s *FinanceAppService) CreateWithdrawal(ctx context.Context, partyType, par
 		return nil, errcode.New(errcode.CodeWithdrawStatus, "今日提现次数已达上限")
 	}
 
-	name, regionID, defaultAccount := s.partyInfo(partyType, partyID)
+	name, regionID, defaultAccount := s.partyInfo(ctx, partyType, partyID)
 	if name == "" {
 		return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "主体不存在")
 	}
@@ -164,14 +164,14 @@ func (s *FinanceAppService) CreateWithdrawal(ctx context.Context, partyType, par
 
 	var w *finance.Withdrawal
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := debitWallet(tx, partyType, partyID, in.Amount, false, "withdraw", "", "提现申请", now)
+		ok, err := debitWallet(ctx, tx, partyType, partyID, in.Amount, false, "withdraw", "", "提现申请", now)
 		if err != nil {
 			return err
 		}
 		if !ok {
 			return errcode.New(errcode.CodeInsufficientFund, "可提现余额不足")
 		}
-		acc, err := tx.Wallets.Find(partyType, partyID)
+		acc, err := tx.Wallets.Find(ctx, partyType, partyID)
 		if err != nil {
 			return err
 		}
@@ -190,7 +190,7 @@ func (s *FinanceAppService) CreateWithdrawal(ctx context.Context, partyType, par
 				{Time: now, Text: "系统校验提现规则通过", Operator: "system"},
 			},
 		}
-		if err := tx.Withdrawals.Save(w); err != nil {
+		if err := tx.Withdrawals.Save(ctx, w); err != nil {
 			return err
 		}
 		return nil
@@ -204,7 +204,7 @@ func (s *FinanceAppService) CreateWithdrawal(ctx context.Context, partyType, par
 			return nil, errcode.Wrap(perr, errcode.CodePaymentFailed, "自动打款失败，请联系平台")
 		}
 		if ref != "" {
-			_ = s.Repos.Withdrawals.MarkPayout(w.ID, ref, now)
+			_ = s.Repos.Withdrawals.MarkPayout(ctx, w.ID, ref, now)
 		}
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -215,8 +215,8 @@ func (s *FinanceAppService) CreateWithdrawal(ctx context.Context, partyType, par
 	return w, nil
 }
 
-func (s *FinanceAppService) withdrawRule() (*system.WithdrawRuleConfig, error) {
-	rec, err := s.Repos.Settings.Get(system.KeyWithdrawRule)
+func (s *FinanceAppService) withdrawRule(ctx context.Context) (*system.WithdrawRuleConfig, error) {
+	rec, err := s.Repos.Settings.Get(ctx, system.KeyWithdrawRule)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return &system.WithdrawRuleConfig{
@@ -233,14 +233,14 @@ func (s *FinanceAppService) withdrawRule() (*system.WithdrawRuleConfig, error) {
 	return &cfg, nil
 }
 
-func (s *FinanceAppService) partyInfo(partyType, partyID string) (name, regionID, account string) {
+func (s *FinanceAppService) partyInfo(ctx context.Context, partyType, partyID string) (name, regionID, account string) {
 	switch partyType {
 	case "merchant":
-		if m, err := s.Repos.Merchants.FindByID(partyID); err == nil {
+		if m, err := s.Repos.Merchants.FindByID(ctx, partyID); err == nil {
 			return m.Name, m.RegionID, m.BankAccount
 		}
 	case "rider":
-		if r, err := s.Repos.Riders.FindByID(partyID); err == nil {
+		if r, err := s.Repos.Riders.FindByID(ctx, partyID); err == nil {
 			return r.Name, r.RegionID, r.Account
 		}
 	}

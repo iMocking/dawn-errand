@@ -322,7 +322,7 @@ func (h *Handler) privateFileReadable(c *gin.Context, p *tenant.Principal, sc te
 		if seg == "user" {
 			// 管理端代主体上传的证件落在 user/<上传的后台账号ID> 下，路径本身不含商家信息：
 			// 只有当该账号是平台角色时才放行，避免区域站长顺带读到普通会员的身份证。
-			owner, err := h.MW.Users.FindByID(id)
+			owner, err := h.MW.Users.FindByID(c.Request.Context(), id)
 			return err == nil && owner != nil && identity.IsPlatformRole(owner.Role)
 		}
 	}

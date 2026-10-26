@@ -22,8 +22,7 @@ func jsonUnmarshal(b []byte, v any) error {
 // WithdrawalRepo 实现 finance.WithdrawalRepository。
 type WithdrawalRepo struct{ client *ent.Client }
 
-func (r WithdrawalRepo) Save(w *finance.Withdrawal) error {
-	ctx := context.Background()
+func (r WithdrawalRepo) Save(ctx context.Context, w *finance.Withdrawal) error {
 	if w.ID == "" {
 		w.ID = newULID()
 	}
@@ -66,8 +65,8 @@ func toWithdrawal(e *ent.Withdrawal) *finance.Withdrawal {
 	return w
 }
 
-func (r WithdrawalRepo) FindByID(id string) (*finance.Withdrawal, error) {
-	e, err := r.client.Withdrawal.Get(context.Background(), id)
+func (r WithdrawalRepo) FindByID(ctx context.Context, id string) (*finance.Withdrawal, error) {
+	e, err := r.client.Withdrawal.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -77,8 +76,7 @@ func (r WithdrawalRepo) FindByID(id string) (*finance.Withdrawal, error) {
 	return toWithdrawal(e), nil
 }
 
-func (r WithdrawalRepo) List(q finance.WithdrawQuery, sc tenant.Scope) ([]*finance.Withdrawal, int64, error) {
-	ctx := context.Background()
+func (r WithdrawalRepo) List(ctx context.Context, q finance.WithdrawQuery, sc tenant.Scope) ([]*finance.Withdrawal, int64, error) {
 	bq := r.client.Withdrawal.Query()
 	if sc.RegionOnly() {
 		bq.Where(entwithdrawal.RegionID(sc.RegionID))
@@ -116,9 +114,8 @@ func (r WithdrawalRepo) List(q finance.WithdrawQuery, sc tenant.Scope) ([]*finan
 }
 
 // ClaimAudit 条件认领审核：UPDATE ... WHERE status=待审核，命中 0 行说明已被并发审核。
-func (r WithdrawalRepo) ClaimAudit(id string, approved bool, remark, operator string, now int64) (bool, error) {
-	ctx := context.Background()
-	cur, err := r.FindByID(id)
+func (r WithdrawalRepo) ClaimAudit(ctx context.Context, id string, approved bool, remark, operator string, now int64) (bool, error) {
+	cur, err := r.FindByID(ctx, id)
 	if err != nil {
 		return false, err
 	}
@@ -140,8 +137,8 @@ func (r WithdrawalRepo) ClaimAudit(id string, approved bool, remark, operator st
 }
 
 // RevertAuditToPending 回退状态供重试（仅当前状态为 fromStatus 时生效，回执留痕）。
-func (r WithdrawalRepo) RevertAuditToPending(id, fromStatus, operator string, now int64) error {
-	cur, err := r.FindByID(id)
+func (r WithdrawalRepo) RevertAuditToPending(ctx context.Context, id, fromStatus, operator string, now int64) error {
+	cur, err := r.FindByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -149,21 +146,20 @@ func (r WithdrawalRepo) RevertAuditToPending(id, fromStatus, operator string, no
 	return r.client.Withdrawal.Update().
 		Where(entwithdrawal.ID(id), entwithdrawal.Status(fromStatus)).
 		SetStatus(string(finance.WithdrawPending)).SetTimeline(mustJSON(cur.Timeline)).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r WithdrawalRepo) MarkPayout(id, ref string, now int64) error {
-	cur, err := r.FindByID(id)
+func (r WithdrawalRepo) MarkPayout(ctx context.Context, id, ref string, now int64) error {
+	cur, err := r.FindByID(ctx, id)
 	if err != nil {
 		return err
 	}
 	cur.Timeline = append(cur.Timeline, finance.Event{Time: now, Text: "打款成功", Operator: ref})
 	return r.client.Withdrawal.UpdateOneID(id).
-		SetTimeline(mustJSON(cur.Timeline)).Exec(context.Background())
+		SetTimeline(mustJSON(cur.Timeline)).Exec(ctx)
 }
 
-func (r WithdrawalRepo) Stats(sc tenant.Scope, now int64) (*finance.Stats, error) {
-	ctx := context.Background()
+func (r WithdrawalRepo) Stats(ctx context.Context, sc tenant.Scope, now int64) (*finance.Stats, error) {
 	dayStart := startOfDayUTC(now)
 	base := func() *ent.WithdrawalQuery {
 		bq := r.client.Withdrawal.Query()
@@ -205,23 +201,23 @@ func (r WithdrawalRepo) Stats(sc tenant.Scope, now int64) (*finance.Stats, error
 	}, nil
 }
 
-func (r WithdrawalRepo) CountPending() (int64, error) {
+func (r WithdrawalRepo) CountPending(ctx context.Context) (int64, error) {
 	n, err := r.client.Withdrawal.Query().
 		Where(entwithdrawal.Status(string(finance.WithdrawPending))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r WithdrawalRepo) CountByPartySince(partyType, partyID string, since int64) (int64, error) {
+func (r WithdrawalRepo) CountByPartySince(ctx context.Context, partyType, partyID string, since int64) (int64, error) {
 	n, err := r.client.Withdrawal.Query().
 		Where(entwithdrawal.PartyType(partyType), entwithdrawal.PartyID(partyID),
 			entwithdrawal.CreatedAtGTE(since)).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r WithdrawalRepo) SumPendingByParty(partyType, partyID string) (float64, error) {
-	return sumFloat64(context.Background(), r.client.Withdrawal.Query().
+func (r WithdrawalRepo) SumPendingByParty(ctx context.Context, partyType, partyID string) (float64, error) {
+	return sumFloat64(ctx, r.client.Withdrawal.Query().
 		Where(entwithdrawal.PartyType(partyType), entwithdrawal.PartyID(partyID),
 			entwithdrawal.Status(string(finance.WithdrawPending))),
 		entwithdrawal.FieldAmount)
@@ -230,8 +226,7 @@ func (r WithdrawalRepo) SumPendingByParty(partyType, partyID string) (float64, e
 // SettlementRepo 实现 finance.SettlementRepository。
 type SettlementRepo struct{ client *ent.Client }
 
-func (r SettlementRepo) Save(s *finance.Settlement) error {
-	ctx := context.Background()
+func (r SettlementRepo) Save(ctx context.Context, s *finance.Settlement) error {
 	if s.ID == "" {
 		s.ID = newULID()
 	}
@@ -257,8 +252,7 @@ func toSettlement(e *ent.Settlement) *finance.Settlement {
 	}
 }
 
-func (r SettlementRepo) List(q finance.SettlementQuery, sc tenant.Scope) ([]*finance.Settlement, int64, error) {
-	ctx := context.Background()
+func (r SettlementRepo) List(ctx context.Context, q finance.SettlementQuery, sc tenant.Scope) ([]*finance.Settlement, int64, error) {
 	bq := r.client.Settlement.Query()
 	if sc.RegionOnly() {
 		bq.Where(entsettlement.RegionID(sc.RegionID))
@@ -297,15 +291,14 @@ func (r SettlementRepo) List(q finance.SettlementQuery, sc tenant.Scope) ([]*fin
 	return out, int64(total), nil
 }
 
-func (r SettlementRepo) SumPendingByParty(partyType, partyID string) (float64, error) {
-	return sumFloat64(context.Background(), r.client.Settlement.Query().
+func (r SettlementRepo) SumPendingByParty(ctx context.Context, partyType, partyID string) (float64, error) {
+	return sumFloat64(ctx, r.client.Settlement.Query().
 		Where(entsettlement.PartyType(partyType), entsettlement.PartyID(partyID),
 			entsettlement.Status(string(finance.SettlementProcessing))),
 		entsettlement.FieldAmount)
 }
 
-func (r SettlementRepo) Stats(sc tenant.Scope, now int64) (*finance.SettlementStats, error) {
-	ctx := context.Background()
+func (r SettlementRepo) Stats(ctx context.Context, sc tenant.Scope, now int64) (*finance.SettlementStats, error) {
 	dayStart := startOfDayUTC(now)
 	weekStart := daysAgoStart(now, 7)
 	monthStart := daysAgoStart(now, 30)

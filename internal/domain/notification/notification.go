@@ -1,6 +1,8 @@
 // Package notification 站内通知。
 package notification
 
+import "context"
+
 // Notification 站内通知。
 type Notification struct {
 	ID        string
@@ -15,11 +17,11 @@ type Notification struct {
 
 // Repository 通知仓储端口。
 type Repository interface {
-	Save(n *Notification) error
-	ListByUser(userID string, page, pageSize int) ([]*Notification, int64, error)
-	CountUnread(userID string) (int64, error)
-	MarkRead(userID, id string, now int64) error
-	MarkAllRead(userID string, now int64) error
+	Save(ctx context.Context, n *Notification) error
+	ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*Notification, int64, error)
+	CountUnread(ctx context.Context, userID string) (int64, error)
+	MarkRead(ctx context.Context, userID, id string, now int64) error
+	MarkAllRead(ctx context.Context, userID string, now int64) error
 	// DeleteBefore 清理历史通知。
-	DeleteBefore(before int64) error
+	DeleteBefore(ctx context.Context, before int64) error
 }

@@ -1,6 +1,8 @@
 // Package tenant 租户与数据隔离限界上下文。
 package tenant
 
+import "context"
+
 // RegionStatus 服务区域状态。
 type RegionStatus string
 
@@ -80,10 +82,10 @@ func (p Principal) Scope() Scope {
 
 // RegionRepository 区域仓储端口。
 type RegionRepository interface {
-	Save(r *Region) error
-	FindByID(id string) (*Region, error)
-	List() ([]*Region, error)
+	Save(ctx context.Context, r *Region) error
+	FindByID(ctx context.Context, id string) (*Region, error)
+	List(ctx context.Context) ([]*Region, error)
 	// ListByIDs 按 ID 批量查询。
-	ListByIDs(ids []string) ([]*Region, error)
-	Delete(id string) error
+	ListByIDs(ctx context.Context, ids []string) ([]*Region, error)
+	Delete(ctx context.Context, id string) error
 }

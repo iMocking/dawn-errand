@@ -11,8 +11,7 @@ import (
 // ProfileRepo 实现 userprofile.ProfileRepository。
 type ProfileRepo struct{ client *ent.Client }
 
-func (r ProfileRepo) Save(p *userprofile.Profile) error {
-	ctx := context.Background()
+func (r ProfileRepo) Save(ctx context.Context, p *userprofile.Profile) error {
 	exists, err := r.client.UserProfile.Query().Where(entuserprofile.UserID(p.UserID)).Exist(ctx)
 	if err != nil {
 		return err
@@ -57,10 +56,10 @@ func toProfile(e *ent.UserProfile) *userprofile.Profile {
 	}
 }
 
-func (r ProfileRepo) FindByUserID(userID string) (*userprofile.Profile, error) {
+func (r ProfileRepo) FindByUserID(ctx context.Context, userID string) (*userprofile.Profile, error) {
 	e, err := r.client.UserProfile.Query().
 		Where(entuserprofile.UserID(userID)).
-		Only(context.Background())
+		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -72,11 +71,11 @@ func (r ProfileRepo) FindByUserID(userID string) (*userprofile.Profile, error) {
 
 // AddBalance 原子增减余额：单条 UPDATE ... SET balance = balance + delta [WHERE balance >= min]。
 // minBalance >= 0 时附加余额下限条件；profile 不存在时 Update 不命中，affected=0。
-func (r ProfileRepo) AddBalance(userID string, delta, minBalance float64, now int64) (int, error) {
+func (r ProfileRepo) AddBalance(ctx context.Context, userID string, delta, minBalance float64, now int64) (int, error) {
 	q := r.client.UserProfile.Update().Where(entuserprofile.UserID(userID))
 	if minBalance >= 0 {
 		q = q.Where(entuserprofile.BalanceGTE(minBalance))
 	}
-	res, err := q.AddBalance(delta).SetUpdatedAt(now).Save(context.Background())
+	res, err := q.AddBalance(delta).SetUpdatedAt(now).Save(ctx)
 	return res, err
 }

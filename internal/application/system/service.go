@@ -43,7 +43,7 @@ func (s *Service) EnsureSystemUsers(ctx context.Context) error {
 		now := time.Now().Unix()
 		for _, si := range identity.SystemIdentities {
 			email := strings.ToLower(strings.TrimSpace(si.Email))
-			existing, err := tx.Users.FindByEmail(email)
+			existing, err := tx.Users.FindByEmail(ctx, email)
 			if err == nil {
 				if existing.Role == identity.RoleSystem {
 					continue // 已存在系统身份，幂等跳过
@@ -54,7 +54,7 @@ func (s *Service) EnsureSystemUsers(ctx context.Context) error {
 			if !errors.Is(err, application.ErrNotFound) {
 				return err
 			}
-			if err := tx.Users.Save(&identity.User{
+			if err := tx.Users.Save(ctx, &identity.User{
 				Email: email, Name: si.Name, Status: identity.UserStatusActive,
 				EmailVerified: true, Role: identity.RoleSystem,
 				RegisteredAt: now, UpdatedAt: now,
@@ -68,7 +68,7 @@ func (s *Service) EnsureSystemUsers(ctx context.Context) error {
 
 // BootstrapStatus 初始化状态。
 func (s *Service) BootstrapStatus(ctx context.Context) (*system.BootstrapState, error) {
-	return s.Repos.Settings.GetBootstrap()
+	return s.Repos.Settings.GetBootstrap(ctx)
 }
 
 // BootstrapResult 初始化结果（一次性返回超管初始密码）。
@@ -81,7 +81,7 @@ type BootstrapResult struct {
 
 // Bootstrap 幂等初始化：创建超级管理员、默认策略、系统配置、初始化标记。
 func (s *Service) Bootstrap(ctx context.Context, adminEmail, initToken string) (*BootstrapResult, error) {
-	st, err := s.Repos.Settings.GetBootstrap()
+	st, err := s.Repos.Settings.GetBootstrap(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -115,10 +115,10 @@ func (s *Service) Bootstrap(ctx context.Context, adminEmail, initToken string) (
 			Status: identity.UserStatusActive, EmailVerified: true,
 			Role: identity.RoleSuperAdmin, RegisteredAt: now, UpdatedAt: now,
 		}
-		if err := tx.Users.Save(u); err != nil {
+		if err := tx.Users.Save(ctx, u); err != nil {
 			return err
 		}
-		if err := tx.Credentials.Save(&identity.Credential{
+		if err := tx.Credentials.Save(ctx, &identity.Credential{
 			UserID: adminID, PasswordHash: hash, SessionVersion: 1, UpdatedAt: now,
 		}); err != nil {
 			return err
@@ -141,7 +141,7 @@ func (s *Service) Bootstrap(ctx context.Context, adminEmail, initToken string) (
 	if err := s.EnsureSystemUsers(ctx); err != nil {
 		return nil, errcode.Wrap(err, errcode.CodeInternal, "系统级身份创建失败")
 	}
-	if err := s.Repos.Settings.MarkInitialized(adminID, now); err != nil {
+	if err := s.Repos.Settings.MarkInitialized(ctx, adminID, now); err != nil {
 		return nil, err
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -156,9 +156,9 @@ func (s *Service) Bootstrap(ctx context.Context, adminEmail, initToken string) (
 
 func (s *Service) seedDefaultSettings(ctx context.Context, adminID string, now int64) error {
 	// SMTP：默认禁用
-	if _, err := s.Repos.Settings.Get(system.KeySMTP); err == application.ErrNotFound {
+	if _, err := s.Repos.Settings.Get(ctx, system.KeySMTP); err == application.ErrNotFound {
 		b, _ := json.Marshal(system.SMTPConfig{Host: "", Port: 587, Encryption: "ssl", TimeoutSec: 10})
-		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 			Key: system.KeySMTP, Status: system.SettingDisabled,
 			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
 		}); err != nil {
@@ -166,9 +166,9 @@ func (s *Service) seedDefaultSettings(ctx context.Context, adminID string, now i
 		}
 	}
 	// SMS：默认禁用
-	if _, err := s.Repos.Settings.Get(system.KeySMS); err == application.ErrNotFound {
+	if _, err := s.Repos.Settings.Get(ctx, system.KeySMS); err == application.ErrNotFound {
 		b, _ := json.Marshal(system.SMSConfig{Provider: "aliyun"})
-		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 			Key: system.KeySMS, Status: system.SettingDisabled,
 			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
 		}); err != nil {
@@ -176,12 +176,12 @@ func (s *Service) seedDefaultSettings(ctx context.Context, adminID string, now i
 		}
 	}
 	// 提现规则：默认启用（手工审核，T+1 到账，0.6% 手续费）
-	if _, err := s.Repos.Settings.Get(system.KeyWithdrawRule); err == application.ErrNotFound {
+	if _, err := s.Repos.Settings.Get(ctx, system.KeyWithdrawRule); err == application.ErrNotFound {
 		b, _ := json.Marshal(system.WithdrawRuleConfig{
 			Enabled: true, FeeRate: 0.006, MinAmount: 10, MaxAmount: 5000,
 			DailyLimit: 5, Mode: "manual", SettleDays: 1,
 		})
-		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 			Key: system.KeyWithdrawRule, Status: system.SettingEnabled,
 			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
 		}); err != nil {
@@ -189,9 +189,9 @@ func (s *Service) seedDefaultSettings(ctx context.Context, adminID string, now i
 		}
 	}
 	// OSS：默认禁用
-	if _, err := s.Repos.Settings.Get(system.KeyOSS); err == application.ErrNotFound {
+	if _, err := s.Repos.Settings.Get(ctx, system.KeyOSS); err == application.ErrNotFound {
 		b, _ := json.Marshal(system.OSSConfig{Provider: "oss"})
-		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 			Key: system.KeyOSS, Status: system.SettingDisabled,
 			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
 		}); err != nil {
@@ -199,14 +199,14 @@ func (s *Service) seedDefaultSettings(ctx context.Context, adminID string, now i
 		}
 	}
 	// 本地存储：默认启用（根目录来自环境变量）
-	if _, err := s.Repos.Settings.Get(system.KeyLocal); err == application.ErrNotFound {
+	if _, err := s.Repos.Settings.Get(ctx, system.KeyLocal); err == application.ErrNotFound {
 		b, _ := json.Marshal(system.LocalStorageConfig{
 			RootDir: s.Cfg.StorageRootDir, PublicBaseURL: s.Cfg.StoragePublicURL,
 			MaxSizeMB:   s.Cfg.StorageMaxSizeMB,
 			AllowedMIME: []string{"image/jpeg", "image/png", "image/webp", "image/gif"},
 			PathPrefix:  "uploads",
 		})
-		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 			Key: system.KeyLocal, Status: system.SettingEnabled,
 			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
 		}); err != nil {
@@ -214,12 +214,12 @@ func (s *Service) seedDefaultSettings(ctx context.Context, adminID string, now i
 		}
 	}
 	// Casbin 配置（model + 默认策略）
-	if _, err := s.Repos.Settings.Get(system.KeyCasbin); err == application.ErrNotFound {
+	if _, err := s.Repos.Settings.Get(ctx, system.KeyCasbin); err == application.ErrNotFound {
 		b, _ := json.Marshal(system.CasbinConfig{
 			Model: casbin.ModelText(), Policy: casbin.PolicyText(casbin.DefaultPolicies()),
 			PolicyStore: "db",
 		})
-		if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+		if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 			Key: system.KeyCasbin, Status: system.SettingEnabled,
 			ValueJSON: string(b), UpdatedBy: adminID, UpdatedAt: now,
 		}); err != nil {
@@ -244,7 +244,7 @@ func (s *Service) GetSMTP(ctx context.Context) (*system.SMTPConfig, error) {
 }
 
 func (s *Service) loadSMTP(ctx context.Context) (*system.SMTPConfig, error) {
-	rec, err := s.Repos.Settings.Get(system.KeySMTP)
+	rec, err := s.Repos.Settings.Get(ctx, system.KeySMTP)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return &system.SMTPConfig{}, nil
@@ -287,7 +287,7 @@ func (s *Service) UpdateSMTP(ctx context.Context, in system.SMTPConfig, operator
 		status = system.SettingDisabled
 	}
 	b, _ := json.Marshal(in)
-	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+	if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 		Key: system.KeySMTP, Status: status, ValueJSON: string(b),
 		UpdatedBy: operator, UpdatedAt: now,
 	}); err != nil {
@@ -310,7 +310,7 @@ func (s *Service) TestSMTP(ctx context.Context, in system.SMTPConfig) error {
 
 // GetOSS 读取 OSS 配置（脱敏）。
 func (s *Service) GetOSS(ctx context.Context) (*system.OSSConfig, error) {
-	rec, err := s.Repos.Settings.Get(system.KeyOSS)
+	rec, err := s.Repos.Settings.Get(ctx, system.KeyOSS)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return &system.OSSConfig{}, nil
@@ -353,7 +353,7 @@ func (s *Service) UpdateOSS(ctx context.Context, in system.OSSConfig, operator s
 		status = system.SettingDisabled
 	}
 	b, _ := json.Marshal(in)
-	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+	if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 		Key: system.KeyOSS, Status: status, ValueJSON: string(b),
 		UpdatedBy: operator, UpdatedAt: now,
 	}); err != nil {
@@ -371,7 +371,7 @@ func (s *Service) UpdateOSS(ctx context.Context, in system.OSSConfig, operator s
 
 // GetLocalStorage 读取本地存储配置。
 func (s *Service) GetLocalStorage(ctx context.Context) (*system.LocalStorageConfig, error) {
-	rec, err := s.Repos.Settings.Get(system.KeyLocal)
+	rec, err := s.Repos.Settings.Get(ctx, system.KeyLocal)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return &system.LocalStorageConfig{}, nil
@@ -392,7 +392,7 @@ func (s *Service) UpdateLocalStorage(ctx context.Context, in system.LocalStorage
 	}
 	now := time.Now().Unix()
 	b, _ := json.Marshal(in)
-	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+	if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 		Key: system.KeyLocal, Status: system.SettingEnabled, ValueJSON: string(b),
 		UpdatedBy: operator, UpdatedAt: now,
 	}); err != nil {
@@ -426,7 +426,7 @@ func (s *Service) GetSMS(ctx context.Context) (*system.SMSConfig, error) {
 }
 
 func (s *Service) loadSMS(ctx context.Context) (*system.SMSConfig, error) {
-	rec, err := s.Repos.Settings.Get(system.KeySMS)
+	rec, err := s.Repos.Settings.Get(ctx, system.KeySMS)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return &system.SMSConfig{Provider: "aliyun"}, nil
@@ -472,7 +472,7 @@ func (s *Service) UpdateSMS(ctx context.Context, in system.SMSConfig, operator s
 		status = system.SettingDisabled
 	}
 	b, _ := json.Marshal(in)
-	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+	if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 		Key: system.KeySMS, Status: status, ValueJSON: string(b),
 		UpdatedBy: operator, UpdatedAt: now,
 	}); err != nil {
@@ -504,7 +504,7 @@ func (s *Service) TestSMS(ctx context.Context, in system.SMSConfig) error {
 
 // GetWithdrawRule 读取提现规则配置（未初始化时返回默认值，不落库）。
 func (s *Service) GetWithdrawRule(ctx context.Context) (*system.WithdrawRuleConfig, error) {
-	rec, err := s.Repos.Settings.Get(system.KeyWithdrawRule)
+	rec, err := s.Repos.Settings.Get(ctx, system.KeyWithdrawRule)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return &system.WithdrawRuleConfig{
@@ -544,7 +544,7 @@ func (s *Service) UpdateWithdrawRule(ctx context.Context, in system.WithdrawRule
 		status = system.SettingDisabled
 	}
 	b, _ := json.Marshal(in)
-	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+	if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 		Key: system.KeyWithdrawRule, Status: status, ValueJSON: string(b),
 		UpdatedBy: operator, UpdatedAt: now,
 	}); err != nil {
@@ -562,7 +562,7 @@ func (s *Service) UpdateWithdrawRule(ctx context.Context, in system.WithdrawRule
 
 // GetCasbinConfig 读取 Casbin 配置。
 func (s *Service) GetCasbinConfig(ctx context.Context) (*system.CasbinConfig, error) {
-	rec, err := s.Repos.Settings.Get(system.KeyCasbin)
+	rec, err := s.Repos.Settings.Get(ctx, system.KeyCasbin)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return &system.CasbinConfig{Model: casbin.ModelText(), PolicyStore: "db"}, nil
@@ -596,7 +596,7 @@ func (s *Service) UpdateCasbinConfig(ctx context.Context, policies [][]string, o
 	b, _ := json.Marshal(system.CasbinConfig{
 		Model: casbin.ModelText(), Policy: casbin.PolicyText(policies), PolicyStore: "db",
 	})
-	if err := s.Repos.Settings.Upsert(&system.SystemSetting{
+	if err := s.Repos.Settings.Upsert(ctx, &system.SystemSetting{
 		Key: system.KeyCasbin, Status: system.SettingEnabled, ValueJSON: string(b),
 		UpdatedBy: operator, UpdatedAt: now,
 	}); err != nil {

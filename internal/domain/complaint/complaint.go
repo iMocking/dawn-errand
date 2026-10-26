@@ -1,6 +1,8 @@
 // Package complaint 投诉工单限界上下文。
 package complaint
 
+import "context"
+
 import "dawn-errand/internal/domain/tenant"
 
 // Status 工单状态。
@@ -79,10 +81,10 @@ type Query struct {
 
 // ComplaintRepository 投诉仓储端口。
 type ComplaintRepository interface {
-	Save(c *Complaint) error
-	FindByID(id string) (*Complaint, error)
-	List(q Query, scope tenant.Scope) ([]*Complaint, int64, error)
-	CountPending() (int64, error)
+	Save(ctx context.Context, c *Complaint) error
+	FindByID(ctx context.Context, id string) (*Complaint, error)
+	List(ctx context.Context, q Query, scope tenant.Scope) ([]*Complaint, int64, error)
+	CountPending(ctx context.Context) (int64, error)
 	// CountByUserID 统计用户相关工单数。
-	CountByUserID(userID string) (int64, error)
+	CountByUserID(ctx context.Context, userID string) (int64, error)
 }

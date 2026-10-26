@@ -14,7 +14,7 @@ import (
 func newTestLocal(t *testing.T) (*Local, string) {
 	t.Helper()
 	root := t.TempDir()
-	l := NewLocal(func() *system.LocalStorageConfig {
+	l := NewLocal(func(context.Context) *system.LocalStorageConfig {
 		return &system.LocalStorageConfig{
 			RootDir: root, PathPrefix: "uploads",
 			PublicBaseURL: "http://test.local:8080", MaxSizeMB: 1,

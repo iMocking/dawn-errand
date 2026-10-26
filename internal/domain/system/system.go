@@ -1,6 +1,8 @@
 // Package system 系统配置限界上下文：可管理配置（SMTP/OSS/本地存储/Casbin）与首次启动初始化。
 package system
 
+import "context"
+
 // SettingKey 配置键。
 type SettingKey string
 
@@ -101,11 +103,11 @@ type BootstrapState struct {
 // SettingRepository 配置仓储端口。
 type SettingRepository interface {
 	// Get 读取配置。
-	Get(key SettingKey) (*SystemSetting, error)
+	Get(ctx context.Context, key SettingKey) (*SystemSetting, error)
 	// Upsert 保存配置。
-	Upsert(s *SystemSetting) error
+	Upsert(ctx context.Context, s *SystemSetting) error
 	// GetBootstrap 读取初始化状态。
-	GetBootstrap() (*BootstrapState, error)
+	GetBootstrap(ctx context.Context) (*BootstrapState, error)
 	// MarkInitialized 写入初始化完成标记（幂等：已存在则不覆盖）。
-	MarkInitialized(adminUserID string, now int64) error
+	MarkInitialized(ctx context.Context, adminUserID string, now int64) error
 }

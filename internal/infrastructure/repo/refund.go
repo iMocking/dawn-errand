@@ -11,7 +11,7 @@ import (
 // RefundRepo 实现 refund.Repository。
 type RefundRepo struct{ client *ent.Client }
 
-func (r RefundRepo) Save(v *refund.Refund) error {
+func (r RefundRepo) Save(ctx context.Context, v *refund.Refund) error {
 	if v.ID == "" {
 		v.ID = newULID()
 	}
@@ -20,13 +20,13 @@ func (r RefundRepo) Save(v *refund.Refund) error {
 		SetAmount(v.Amount).SetReason(v.Reason).SetStatus(string(v.Status)).
 		SetPrevStatus(v.PrevStatus).SetOperator(v.Operator).SetRejectReason(v.RejectReason).
 		SetCreatedAt(v.CreatedAt).SetHandledAt(v.HandledAt).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r RefundRepo) FindByOrder(orderID string) (*refund.Refund, error) {
+func (r RefundRepo) FindByOrder(ctx context.Context, orderID string) (*refund.Refund, error) {
 	e, err := r.client.Refund.Query().
 		Where(entrefund.OrderID(orderID)).
-		Order(ent.Desc(entrefund.FieldCreatedAt)).First(context.Background())
+		Order(ent.Desc(entrefund.FieldCreatedAt)).First(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -36,8 +36,8 @@ func (r RefundRepo) FindByOrder(orderID string) (*refund.Refund, error) {
 	return toRefund(e), nil
 }
 
-func (r RefundRepo) FindByID(id string) (*refund.Refund, error) {
-	e, err := r.client.Refund.Get(context.Background(), id)
+func (r RefundRepo) FindByID(ctx context.Context, id string) (*refund.Refund, error) {
+	e, err := r.client.Refund.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -47,13 +47,13 @@ func (r RefundRepo) FindByID(id string) (*refund.Refund, error) {
 	return toRefund(e), nil
 }
 
-func (r RefundRepo) Update(id string, status refund.Status, operator, rejectReason string, handledAt int64) error {
+func (r RefundRepo) Update(ctx context.Context, id string, status refund.Status, operator, rejectReason string, handledAt int64) error {
 	upd := r.client.Refund.UpdateOneID(id).
 		SetStatus(string(status)).SetOperator(operator).SetHandledAt(handledAt)
 	if rejectReason != "" {
 		upd.SetRejectReason(rejectReason)
 	}
-	return upd.Exec(context.Background())
+	return upd.Exec(ctx)
 }
 
 func toRefund(e *ent.Refund) *refund.Refund {

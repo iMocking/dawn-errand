@@ -1,6 +1,8 @@
 // Package merchant 商家限界上下文。
 package merchant
 
+import "context"
+
 import "dawn-errand/internal/domain/tenant"
 
 // MerchantStatus 商家营业状态。
@@ -128,26 +130,26 @@ type Stats struct {
 
 // MerchantRepository 商家仓储端口。
 type MerchantRepository interface {
-	Save(m *Merchant) error
-	FindByID(id string) (*Merchant, error)
+	Save(ctx context.Context, m *Merchant) error
+	FindByID(ctx context.Context, id string) (*Merchant, error)
 	// List 商家列表（scope 强制数据隔离）。
-	List(q MerchantQuery, scope tenant.Scope) ([]*Merchant, int64, error)
+	List(ctx context.Context, q MerchantQuery, scope tenant.Scope) ([]*Merchant, int64, error)
 	// ListForClient C 端商家列表（区域内、审核通过、未封禁；营业中优先）。
-	ListForClient(regionID, keyword, category string, page, pageSize int) ([]*Merchant, int64, error)
+	ListForClient(ctx context.Context, regionID, keyword, category string, page, pageSize int) ([]*Merchant, int64, error)
 	// AuditList 入驻审核列表（scope 隔离）。
-	AuditList(q AuditQuery, scope tenant.Scope) ([]*Merchant, int64, error)
+	AuditList(ctx context.Context, q AuditQuery, scope tenant.Scope) ([]*Merchant, int64, error)
 	// UpdateAudit 审核处理。
-	UpdateAudit(id string, approved bool, reason, operator string, now int64) error
+	UpdateAudit(ctx context.Context, id string, approved bool, reason, operator string, now int64) error
 	// UpdateStatus 变更营业状态。
-	UpdateStatus(id string, status MerchantStatus, now int64) error
+	UpdateStatus(ctx context.Context, id string, status MerchantStatus, now int64) error
 	// Stats 聚合统计（scope 隔离）。
-	Stats(scope tenant.Scope) (*Stats, error)
+	Stats(ctx context.Context, scope tenant.Scope) (*Stats, error)
 	// CountByRegion 统计各区域商家数（settings 用）。
-	CountByRegion(regionID string) (int64, error)
+	CountByRegion(ctx context.Context, regionID string) (int64, error)
 	// OnlineCountByRegion 统计区域在线商家数。
-	OnlineCountByRegion(regionID string) (int64, error)
+	OnlineCountByRegion(ctx context.Context, regionID string) (int64, error)
 	// CountAll 全局商家数。
-	CountAll() (int64, error)
+	CountAll(ctx context.Context) (int64, error)
 	// CountWeekNew 本周新增（入驻）数。
-	CountWeekNew(now int64) (int64, error)
+	CountWeekNew(ctx context.Context, now int64) (int64, error)
 }

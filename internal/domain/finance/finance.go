@@ -1,6 +1,8 @@
 // Package finance 资金结算限界上下文：提现审核、结算流水。
 package finance
 
+import "context"
+
 import "dawn-errand/internal/domain/tenant"
 
 // WithdrawStatus 提现状态。
@@ -127,32 +129,32 @@ type SettlementStats struct {
 
 // WithdrawalRepository 提现仓储端口。
 type WithdrawalRepository interface {
-	Save(w *Withdrawal) error
-	FindByID(id string) (*Withdrawal, error)
-	List(q WithdrawQuery, scope tenant.Scope) ([]*Withdrawal, int64, error)
+	Save(ctx context.Context, w *Withdrawal) error
+	FindByID(ctx context.Context, id string) (*Withdrawal, error)
+	List(ctx context.Context, q WithdrawQuery, scope tenant.Scope) ([]*Withdrawal, int64, error)
 	// ClaimAudit 条件认领审核：仅当状态=待审核时置为目标状态并追加时间线；
 	// 返回 false 表示已被并发审核（防重复打款/重复退回）。
-	ClaimAudit(id string, approved bool, remark, operator string, now int64) (bool, error)
+	ClaimAudit(ctx context.Context, id string, approved bool, remark, operator string, now int64) (bool, error)
 	// RevertAuditToPending 把 fromStatus 状态回退为「待审核」以便重试（条件更新，回执留痕）。
-	RevertAuditToPending(id, fromStatus, operator string, now int64) error
+	RevertAuditToPending(ctx context.Context, id, fromStatus, operator string, now int64) error
 	// Stats 汇总统计（scope 隔离）。
-	Stats(scope tenant.Scope, now int64) (*Stats, error)
+	Stats(ctx context.Context, scope tenant.Scope, now int64) (*Stats, error)
 	// CountPending 待审核数。
-	CountPending() (int64, error)
+	CountPending(ctx context.Context) (int64, error)
 	// CountByPartySince 主体在指定时间后的提现申请次数（每日次数限制）。
-	CountByPartySince(partyType, partyID string, since int64) (int64, error)
+	CountByPartySince(ctx context.Context, partyType, partyID string, since int64) (int64, error)
 	// SumPendingByParty 主体待审核提现金额。
-	SumPendingByParty(partyType, partyID string) (float64, error)
+	SumPendingByParty(ctx context.Context, partyType, partyID string) (float64, error)
 	// MarkPayout 记录打款回执（时间线 + 回执号）。
-	MarkPayout(id, ref string, now int64) error
+	MarkPayout(ctx context.Context, id, ref string, now int64) error
 }
 
 // SettlementRepository 结算流水仓储端口。
 type SettlementRepository interface {
-	Save(s *Settlement) error
-	List(q SettlementQuery, scope tenant.Scope) ([]*Settlement, int64, error)
+	Save(ctx context.Context, s *Settlement) error
+	List(ctx context.Context, q SettlementQuery, scope tenant.Scope) ([]*Settlement, int64, error)
 	// Stats 汇总（scope 隔离）。
-	Stats(scope tenant.Scope, now int64) (*SettlementStats, error)
+	Stats(ctx context.Context, scope tenant.Scope, now int64) (*SettlementStats, error)
 	// SumPendingByParty 主体待结算金额。
-	SumPendingByParty(partyType, partyID string) (float64, error)
+	SumPendingByParty(ctx context.Context, partyType, partyID string) (float64, error)
 }

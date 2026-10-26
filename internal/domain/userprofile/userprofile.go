@@ -1,6 +1,8 @@
 // Package userprofile 用户资料限界上下文（正式会员档案/资产）。
 package userprofile
 
+import "context"
+
 // Profile 用户资料聚合。
 type Profile struct {
 	UserID           string
@@ -20,9 +22,9 @@ type Profile struct {
 
 // ProfileRepository 用户资料仓储端口。
 type ProfileRepository interface {
-	Save(p *Profile) error
-	FindByUserID(userID string) (*Profile, error)
+	Save(ctx context.Context, p *Profile) error
+	FindByUserID(ctx context.Context, userID string) (*Profile, error)
 	// AddBalance 原子增减余额；minBalance >= 0 时附加 balance >= minBalance 条件，
 	// 条件不满足或资料不存在时返回 affected=0（防双花，禁止 Find-then-Save 覆盖余额）。
-	AddBalance(userID string, delta, minBalance float64, now int64) (affected int, err error)
+	AddBalance(ctx context.Context, userID string, delta, minBalance float64, now int64) (affected int, err error)
 }

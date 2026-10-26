@@ -44,7 +44,7 @@ func maskIDCard(s string) string {
 // List 用户列表。
 func (s *UsersService) List(ctx context.Context, q identity.UserQuery, sc tenant.Scope) ([]*identity.User, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Users.List(q, sc)
+	return s.Repos.Users.List(ctx, q, sc)
 }
 
 // UsersOverview 用户概览。
@@ -60,25 +60,25 @@ type UsersOverview struct {
 // Overview 顶部概览（scope 隔离）。
 func (s *UsersService) Overview(ctx context.Context, sc tenant.Scope) (*UsersOverview, error) {
 	now := time.Now().Unix()
-	_, total, err := s.Repos.Users.List(identity.UserQuery{Page: 1, PageSize: 1}, sc)
+	_, total, err := s.Repos.Users.List(ctx, identity.UserQuery{Page: 1, PageSize: 1}, sc)
 	if err != nil {
 		return nil, err
 	}
-	activeMonth, err := s.Repos.Orders.CountActiveMonth(sc, now)
+	activeMonth, err := s.Repos.Orders.CountActiveMonth(ctx, sc, now)
 	if err != nil {
 		return nil, err
 	}
-	todayNew, err := s.Repos.Users.CountRegisteredSince(sc, startOfToday(now))
+	todayNew, err := s.Repos.Users.CountRegisteredSince(ctx, sc, startOfToday(now))
 	if err != nil {
 		return nil, err
 	}
-	banned, err := s.Repos.Users.CountStatus(sc, identity.UserStatusBanned)
+	banned, err := s.Repos.Users.CountStatus(ctx, sc, identity.UserStatusBanned)
 	if err != nil {
 		return nil, err
 	}
 	avg := float64(0)
 	if total > 0 {
-		totalOrders, err := s.Repos.Orders.CountAll(sc)
+		totalOrders, err := s.Repos.Orders.CountAll(ctx, sc)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +109,7 @@ type UserDetail struct {
 
 // Detail 用户详情（区域站长限本区域）。
 func (s *UsersService) Detail(ctx context.Context, id string, sc tenant.Scope) (*UserDetail, error) {
-	u, err := s.Repos.Users.FindByID(id)
+	u, err := s.Repos.Users.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -123,13 +123,13 @@ func (s *UsersService) Detail(ctx context.Context, id string, sc tenant.Scope) (
 		return nil, tenantDenied()
 	}
 	now := time.Now().Unix()
-	prof, _ := s.Repos.Profiles.FindByUserID(id)
+	prof, _ := s.Repos.Profiles.FindByUserID(ctx, id)
 	rn, _ := s.Repos.RealNames.FindByUserID(ctx, id)
-	totalOrders, _ := s.Repos.Orders.CountUserOrders(id)
-	totalSpent, _ := s.Repos.Orders.CountUserSpent(id)
-	monthOrders, _ := s.Repos.Orders.CountUserMonth(id, now)
-	recent, _ := s.Repos.Orders.ListByUser(id, 10)
-	complaintCount, _ := s.Repos.Complaints.CountByUserID(id)
+	totalOrders, _ := s.Repos.Orders.CountUserOrders(ctx, id)
+	totalSpent, _ := s.Repos.Orders.CountUserSpent(ctx, id)
+	monthOrders, _ := s.Repos.Orders.CountUserMonth(ctx, id, now)
+	recent, _ := s.Repos.Orders.ListByUser(ctx, id, 10)
+	complaintCount, _ := s.Repos.Complaints.CountByUserID(ctx, id)
 	return &UserDetail{
 		User: u, Profile: prof, RealName: s.realNameView(rn),
 		TotalOrders: totalOrders, TotalSpent: totalSpent, MonthOrders: monthOrders,
@@ -150,7 +150,7 @@ func (s *UsersService) userAccessOK(u *identity.User, sc tenant.Scope) bool {
 
 // OrdersByUser 用户订单记录（分页，scope 隔离）。
 func (s *UsersService) OrdersByUser(ctx context.Context, id string, page, size int, sc tenant.Scope) ([]*order.Order, int64, error) {
-	u, err := s.Repos.Users.FindByID(id)
+	u, err := s.Repos.Users.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, 0, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -160,12 +160,12 @@ func (s *UsersService) OrdersByUser(ctx context.Context, id string, page, size i
 	if !s.userAccessOK(u, sc) {
 		return nil, 0, tenantDenied()
 	}
-	return s.Repos.Orders.List(order.Query{Page: page, PageSize: size, UserID: id}, sc)
+	return s.Repos.Orders.List(ctx, order.Query{Page: page, PageSize: size, UserID: id}, sc)
 }
 
 // ComplaintsByUser 用户投诉售后（分页，scope 隔离）。
 func (s *UsersService) ComplaintsByUser(ctx context.Context, id string, page, size int, sc tenant.Scope) ([]*complaint.Complaint, int64, error) {
-	u, err := s.Repos.Users.FindByID(id)
+	u, err := s.Repos.Users.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, 0, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -175,12 +175,12 @@ func (s *UsersService) ComplaintsByUser(ctx context.Context, id string, page, si
 	if !s.userAccessOK(u, sc) {
 		return nil, 0, tenantDenied()
 	}
-	return s.Repos.Complaints.List(complaint.Query{Page: page, PageSize: size, UserID: id}, sc)
+	return s.Repos.Complaints.List(ctx, complaint.Query{Page: page, PageSize: size, UserID: id}, sc)
 }
 
 // Ban 封禁/解封用户（撤销会话）。
 func (s *UsersService) Ban(ctx context.Context, id string, ban bool, operator string, sc tenant.Scope) error {
-	u, err := s.Repos.Users.FindByID(id)
+	u, err := s.Repos.Users.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -197,10 +197,10 @@ func (s *UsersService) Ban(ctx context.Context, id string, ban bool, operator st
 	if ban {
 		status = identity.UserStatusBanned
 	}
-	if err := s.Repos.Users.UpdateStatus(id, status); err != nil {
+	if err := s.Repos.Users.UpdateStatus(ctx, id, status); err != nil {
 		return err
 	}
-	if _, err := s.Repos.Credentials.BumpSessionVersion(id); err != nil {
+	if _, err := s.Repos.Credentials.BumpSessionVersion(ctx, id); err != nil {
 		return err
 	}
 	action := "user.unban"
@@ -224,7 +224,7 @@ func (s *UsersService) SetRole(ctx context.Context, id, role, operator string, s
 	if id == operator {
 		return errcode.New(errcode.CodeSettingInvalid, "不能修改自己的角色")
 	}
-	u, err := s.Repos.Users.FindByID(id)
+	u, err := s.Repos.Users.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -247,7 +247,7 @@ func (s *UsersService) SetRole(ctx context.Context, id, role, operator string, s
 	if !valid || role == identity.RoleSystem || role == identity.RoleMerchant || role == identity.RoleDriver {
 		return errcode.New(errcode.CodeSettingInvalid, "不支持的岗位角色: "+role)
 	}
-	if err := s.Repos.Users.UpdateRole(id, role); err != nil {
+	if err := s.Repos.Users.UpdateRole(ctx, id, role); err != nil {
 		return err
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -301,7 +301,7 @@ func (s *UsersService) AuditRealName(ctx context.Context, id, action, reason, op
 			if err := tx.RealNames.UpdateReview(ctx, id, realname.StatusApproved, "", operator, now); err != nil {
 				return err
 			}
-			prof, err := tx.Profiles.FindByUserID(v.UserID)
+			prof, err := tx.Profiles.FindByUserID(ctx, v.UserID)
 			if err != nil && err != application.ErrNotFound {
 				return err
 			}
@@ -320,7 +320,7 @@ func (s *UsersService) AuditRealName(ctx context.Context, id, action, reason, op
 				p.RedPacketBalance = prof.RedPacketBalance
 				p.RecentActiveAt = prof.RecentActiveAt
 			}
-			return tx.Profiles.Save(p)
+			return tx.Profiles.Save(ctx, p)
 		})
 		if err != nil {
 			return err

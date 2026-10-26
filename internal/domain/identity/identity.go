@@ -1,6 +1,8 @@
 // Package identity 身份权限限界上下文：用户、凭证、邮箱验证、密码重置、角色。
 package identity
 
+import "context"
+
 import (
 	"regexp"
 	"time"
@@ -127,23 +129,23 @@ type PasswordResetToken struct {
 // UserRepository 用户仓储端口（由 infrastructure 实现）。
 type UserRepository interface {
 	// Save 保存用户（幂等 upsert）。
-	Save(u *User) error
+	Save(ctx context.Context, u *User) error
 	// FindByID 按 ID 查用户。
-	FindByID(id string) (*User, error)
+	FindByID(ctx context.Context, id string) (*User, error)
 	// FindByEmail 按邮箱查用户。
-	FindByEmail(email string) (*User, error)
+	FindByEmail(ctx context.Context, email string) (*User, error)
 	// FindByPhone 按手机号查用户。
-	FindByPhone(phone string) (*User, error)
+	FindByPhone(ctx context.Context, phone string) (*User, error)
 	// List 分页查询（keyword 匹配昵称/邮箱/手机号，status 过滤；scope 隔离）。
-	List(q UserQuery, sc tenant.Scope) ([]*User, int64, error)
+	List(ctx context.Context, q UserQuery, sc tenant.Scope) ([]*User, int64, error)
 	// UpdateStatus 更新状态并递增会话版本（封禁/解封）。
-	UpdateStatus(id string, status UserStatus) error
+	UpdateStatus(ctx context.Context, id string, status UserStatus) error
 	// UpdateRole 更新后台角色（角色变更即时生效，下次请求按新角色鉴权）。
-	UpdateRole(id string, role string) error
+	UpdateRole(ctx context.Context, id string, role string) error
 	// CountRegisteredSince 统计指定时间后注册的用户数（scope 隔离）。
-	CountRegisteredSince(sc tenant.Scope, since int64) (int64, error)
+	CountRegisteredSince(ctx context.Context, sc tenant.Scope, since int64) (int64, error)
 	// CountStatus 统计指定状态的用户数（scope 隔离）。
-	CountStatus(sc tenant.Scope, status UserStatus) (int64, error)
+	CountStatus(ctx context.Context, sc tenant.Scope, status UserStatus) (int64, error)
 }
 
 // UserQuery 用户分页查询。
@@ -157,37 +159,37 @@ type UserQuery struct {
 // CredentialRepository 凭证仓储端口。
 type CredentialRepository interface {
 	// Save 保存凭证。
-	Save(c *Credential) error
+	Save(ctx context.Context, c *Credential) error
 	// FindByUserID 按用户 ID 查凭证。
-	FindByUserID(userID string) (*Credential, error)
+	FindByUserID(ctx context.Context, userID string) (*Credential, error)
 	// BumpSessionVersion 递增会话版本（撤销全部会话）。
-	BumpSessionVersion(userID string) (int64, error)
+	BumpSessionVersion(ctx context.Context, userID string) (int64, error)
 }
 
 // EmailTokenRepository 邮箱验证令牌仓储端口。
 type EmailTokenRepository interface {
 	// Create 创建令牌记录。
-	Create(t *EmailVerificationToken) error
+	Create(ctx context.Context, t *EmailVerificationToken) error
 	// FindByHash 按哈希查有效令牌（未使用且未过期）。
-	FindByHash(hash string) (*EmailVerificationToken, error)
+	FindByHash(ctx context.Context, hash string) (*EmailVerificationToken, error)
 	// MarkUsed 标记已使用。
-	MarkUsed(id string) error
+	MarkUsed(ctx context.Context, id string) error
 	// DeleteExpired 清理过期记录。
-	DeleteExpired(now int64) error
+	DeleteExpired(ctx context.Context, now int64) error
 }
 
 // PasswordTokenRepository 密码重置令牌仓储端口。
 type PasswordTokenRepository interface {
 	// Create 创建令牌记录。
-	Create(t *PasswordResetToken) error
+	Create(ctx context.Context, t *PasswordResetToken) error
 	// FindByHash 按哈希查有效令牌。
-	FindByHash(hash string) (*PasswordResetToken, error)
+	FindByHash(ctx context.Context, hash string) (*PasswordResetToken, error)
 	// MarkUsed 标记已使用。
-	MarkUsed(id string) error
+	MarkUsed(ctx context.Context, id string) error
 	// DeleteExpired 清理过期记录。
-	DeleteExpired(now int64) error
+	DeleteExpired(ctx context.Context, now int64) error
 	// DeleteByUser 删除用户全部重置令牌（改密成功后）。
-	DeleteByUser(userID string) error
+	DeleteByUser(ctx context.Context, userID string) error
 }
 
 // Now 供领域层测试替换的时间源（默认系统时钟）。

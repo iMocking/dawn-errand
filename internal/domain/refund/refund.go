@@ -1,6 +1,8 @@
 // Package refund 退款/售后单。
 package refund
 
+import "context"
+
 // Status 售后状态。
 type Status string
 
@@ -29,8 +31,8 @@ type Refund struct {
 
 // Repository 售后台账端口。
 type Repository interface {
-	Save(r *Refund) error
-	FindByOrder(orderID string) (*Refund, error)
-	FindByID(id string) (*Refund, error)
-	Update(id string, status Status, operator, rejectReason string, handledAt int64) error
+	Save(ctx context.Context, r *Refund) error
+	FindByOrder(ctx context.Context, orderID string) (*Refund, error)
+	FindByID(ctx context.Context, id string) (*Refund, error)
+	Update(ctx context.Context, id string, status Status, operator, rejectReason string, handledAt int64) error
 }

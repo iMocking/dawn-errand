@@ -21,23 +21,23 @@ type MerchantsService struct {
 // List 商家列表。
 func (s *MerchantsService) List(ctx context.Context, q merchant.MerchantQuery, sc tenant.Scope) ([]*merchant.Merchant, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Merchants.List(q, sc)
+	return s.Repos.Merchants.List(ctx, q, sc)
 }
 
 // Stats 商家聚合。
 func (s *MerchantsService) Stats(ctx context.Context, sc tenant.Scope) (*merchant.Stats, error) {
-	return s.Repos.Merchants.Stats(sc)
+	return s.Repos.Merchants.Stats(ctx, sc)
 }
 
 // AuditList 入驻审核列表。
 func (s *MerchantsService) AuditList(ctx context.Context, q merchant.AuditQuery, sc tenant.Scope) ([]*merchant.Merchant, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Merchants.AuditList(q, sc)
+	return s.Repos.Merchants.AuditList(ctx, q, sc)
 }
 
 // Detail 商家详情（对象级隔离）。
 func (s *MerchantsService) Detail(ctx context.Context, id string, sc tenant.Scope) (*merchant.Merchant, error) {
-	m, err := s.Repos.Merchants.FindByID(id)
+	m, err := s.Repos.Merchants.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
@@ -52,7 +52,7 @@ func (s *MerchantsService) Detail(ctx context.Context, id string, sc tenant.Scop
 
 // AuditAction 审核入驻：通过时自动开通商家端账号并返回一次性初始密码。
 func (s *MerchantsService) AuditAction(ctx context.Context, id, action, reason, operator string, sc tenant.Scope) (*ProvisionResult, error) {
-	m, err := s.Repos.Merchants.FindByID(id)
+	m, err := s.Repos.Merchants.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "申请不存在")
@@ -70,7 +70,7 @@ func (s *MerchantsService) AuditAction(ctx context.Context, id, action, reason, 
 		if strings.TrimSpace(reason) == "" {
 			return nil, errcode.New(errcode.CodeBadRequest, "驳回必须填写原因，便于业务员补件")
 		}
-		if err := s.Repos.Merchants.UpdateAudit(id, false, strings.TrimSpace(reason), operator, time.Now().Unix()); err != nil {
+		if err := s.Repos.Merchants.UpdateAudit(ctx, id, false, strings.TrimSpace(reason), operator, time.Now().Unix()); err != nil {
 			return nil, err
 		}
 		s.audit(ctx, id, operator)
@@ -81,7 +81,7 @@ func (s *MerchantsService) AuditAction(ctx context.Context, id, action, reason, 
 		return nil, err
 	}
 	// 先落审核状态，再由平台开通账号；开通失败时审核已通过，可在商家详情重试开通。
-	if err := s.Repos.Merchants.UpdateAudit(id, true, "", operator, time.Now().Unix()); err != nil {
+	if err := s.Repos.Merchants.UpdateAudit(ctx, id, true, "", operator, time.Now().Unix()); err != nil {
 		return nil, err
 	}
 	var account *ProvisionResult
@@ -154,7 +154,7 @@ func validateApplication(m *merchant.Merchant) error {
 
 // UpdateApplication 业务员补录/修改被驳回的入驻资料，并重新提交审核。
 func (s *MerchantsService) UpdateApplication(ctx context.Context, id string, in *merchant.Merchant, operator string, sc tenant.Scope) error {
-	cur, err := s.Repos.Merchants.FindByID(id)
+	cur, err := s.Repos.Merchants.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return errcode.NewStatus(404, errcode.CodeMerchantNotFound, "申请不存在")
@@ -186,12 +186,12 @@ func (s *MerchantsService) UpdateApplication(ctx context.Context, id string, in 
 	if err := validateApplication(in); err != nil {
 		return err
 	}
-	return s.Repos.Merchants.Save(in)
+	return s.Repos.Merchants.Save(ctx, in)
 }
 
 // UpdateStatus 变更营业状态。
 func (s *MerchantsService) UpdateStatus(ctx context.Context, id string, status merchant.MerchantStatus, operator string, sc tenant.Scope) error {
-	m, err := s.Repos.Merchants.FindByID(id)
+	m, err := s.Repos.Merchants.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
@@ -201,7 +201,7 @@ func (s *MerchantsService) UpdateStatus(ctx context.Context, id string, status m
 	if !merchantAccessOK(sc, m) {
 		return tenantDenied()
 	}
-	if err := s.Repos.Merchants.UpdateStatus(id, status, time.Now().Unix()); err != nil {
+	if err := s.Repos.Merchants.UpdateStatus(ctx, id, status, time.Now().Unix()); err != nil {
 		return err
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -222,7 +222,7 @@ func (s *MerchantsService) Create(ctx context.Context, m *merchant.Merchant, sc 
 		}
 	} else if m.RegionID == "" {
 		// 超管未指定区域：使用第一个服务区域（ent schema region_id NotEmpty）。
-		regions, err := s.Repos.Regions.List()
+		regions, err := s.Repos.Regions.List(ctx)
 		if err != nil || len(regions) == 0 {
 			return errcode.New(errcode.CodeBadRequest, "未配置服务区域，无法创建商家")
 		}
@@ -250,5 +250,5 @@ func (s *MerchantsService) Create(ctx context.Context, m *merchant.Merchant, sc 
 	if m.JoinedAt == 0 {
 		m.JoinedAt = now
 	}
-	return s.Repos.Merchants.Save(m)
+	return s.Repos.Merchants.Save(ctx, m)
 }

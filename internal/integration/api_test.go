@@ -58,7 +58,7 @@ func setup() {
 	}
 	gin.SetMode(gin.TestMode)
 	cfg := config.Load()
-	app, err := assembly.Build(cfg)
+	app, err := assembly.Build(context.Background(), cfg)
 	if err != nil {
 		panic(err)
 	}

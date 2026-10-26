@@ -53,7 +53,7 @@ type AddressInput struct {
 
 // ListMerchants 区域内商家列表（审核通过、未封禁）。
 func (s *ClientService) ListMerchants(ctx context.Context, userID, keyword, category string, page, pageSize int, lat, lng float64) ([]*MerchantCard, int64, error) {
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		return nil, 0, userErr(err)
 	}
@@ -61,7 +61,7 @@ func (s *ClientService) ListMerchants(ctx context.Context, userID, keyword, cate
 		return nil, 0, errcode.NewStatus(400, errcode.CodeRegionRequired, "请先选择服务区域")
 	}
 	page, pageSize = normalizePageParams(page, pageSize)
-	rows, total, err := s.Repos.Merchants.ListForClient(u.RegionID, keyword, category, page, pageSize)
+	rows, total, err := s.Repos.Merchants.ListForClient(ctx, u.RegionID, keyword, category, page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -79,25 +79,25 @@ func (s *ClientService) ListMerchants(ctx context.Context, userID, keyword, cate
 
 // GetMerchant 商家详情（仅本区域、审核通过）。
 func (s *ClientService) GetMerchant(ctx context.Context, userID, merchantID string, lat, lng float64) (*MerchantDetail, error) {
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		return nil, userErr(err)
 	}
 	if u.RegionID == "" {
 		return nil, errcode.NewStatus(400, errcode.CodeRegionRequired, "请先选择服务区域")
 	}
-	m, err := s.Repos.Merchants.FindByID(merchantID)
+	m, err := s.Repos.Merchants.FindByID(ctx, merchantID)
 	if err != nil {
 		return nil, merchantErr(err)
 	}
 	if m.RegionID != u.RegionID || m.AuditStatus != merchant.AuditApproved || m.Status == merchant.MerchantStatusBanned {
 		return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
 	}
-	cats, err := s.Repos.Catalog.ListCategories(m.ID)
+	cats, err := s.Repos.Catalog.ListCategories(ctx, m.ID)
 	if err != nil {
 		return nil, err
 	}
-	dishes, _, err := s.Repos.Catalog.ListDishes(catalog.DishQuery{
+	dishes, _, err := s.Repos.Catalog.ListDishes(ctx, catalog.DishQuery{
 		MerchantID: m.ID, IncludeOffSale: false, Page: 1, PageSize: 500,
 	})
 	if err != nil {
@@ -113,7 +113,7 @@ func (s *ClientService) GetMerchant(ctx context.Context, userID, merchantID stri
 
 // ListAddresses 本人地址列表。
 func (s *ClientService) ListAddresses(ctx context.Context, userID string) ([]*address.Address, error) {
-	return s.Repos.Addresses.ListByUser(userID)
+	return s.Repos.Addresses.ListByUser(ctx, userID)
 }
 
 // CreateAddress 新增地址（首条自动默认；上限 20 条）。
@@ -122,7 +122,7 @@ func (s *ClientService) CreateAddress(ctx context.Context, userID string, in Add
 	if err != nil {
 		return nil, err
 	}
-	n, err := s.Repos.Addresses.CountByUser(userID)
+	n, err := s.Repos.Addresses.CountByUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -139,11 +139,11 @@ func (s *ClientService) CreateAddress(ctx context.Context, userID string, in Add
 	}
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
 		if a.IsDefault {
-			if err := tx.Addresses.ClearDefault(userID); err != nil {
+			if err := tx.Addresses.ClearDefault(ctx, userID); err != nil {
 				return err
 			}
 		}
-		return tx.Addresses.Save(a)
+		return tx.Addresses.Save(ctx, a)
 	})
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func (s *ClientService) CreateAddress(ctx context.Context, userID string, in Add
 
 // UpdateAddress 修改地址（仅本人）。
 func (s *ClientService) UpdateAddress(ctx context.Context, userID, addressID string, in AddressInput) (*address.Address, error) {
-	a, err := s.ownAddress(userID, addressID)
+	a, err := s.ownAddress(ctx, userID, addressID)
 	if err != nil {
 		return nil, err
 	}
@@ -175,11 +175,11 @@ func (s *ClientService) UpdateAddress(ctx context.Context, userID, addressID str
 	a.IsDefault = in.IsDefault
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
 		if a.IsDefault {
-			if err := tx.Addresses.ClearDefault(userID); err != nil {
+			if err := tx.Addresses.ClearDefault(ctx, userID); err != nil {
 				return err
 			}
 		}
-		return tx.Addresses.Save(a)
+		return tx.Addresses.Save(ctx, a)
 	})
 	if err != nil {
 		return nil, err
@@ -189,39 +189,39 @@ func (s *ClientService) UpdateAddress(ctx context.Context, userID, addressID str
 
 // DeleteAddress 删除地址；删除默认地址后自动选取最近一条作为默认。
 func (s *ClientService) DeleteAddress(ctx context.Context, userID, addressID string) error {
-	a, err := s.ownAddress(userID, addressID)
+	a, err := s.ownAddress(ctx, userID, addressID)
 	if err != nil {
 		return err
 	}
 	return s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		if err := tx.Addresses.Delete(a.ID); err != nil {
+		if err := tx.Addresses.Delete(ctx, a.ID); err != nil {
 			return err
 		}
 		if !a.IsDefault {
 			return nil
 		}
-		list, err := tx.Addresses.ListByUser(userID)
+		list, err := tx.Addresses.ListByUser(ctx, userID)
 		if err != nil || len(list) == 0 {
 			return err
 		}
 		next := list[0]
 		next.IsDefault = true
-		return tx.Addresses.Save(next)
+		return tx.Addresses.Save(ctx, next)
 	})
 }
 
 // SetDefaultAddress 设为默认地址。
 func (s *ClientService) SetDefaultAddress(ctx context.Context, userID, addressID string) (*address.Address, error) {
-	a, err := s.ownAddress(userID, addressID)
+	a, err := s.ownAddress(ctx, userID, addressID)
 	if err != nil {
 		return nil, err
 	}
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		if err := tx.Addresses.ClearDefault(userID); err != nil {
+		if err := tx.Addresses.ClearDefault(ctx, userID); err != nil {
 			return err
 		}
 		a.IsDefault = true
-		return tx.Addresses.Save(a)
+		return tx.Addresses.Save(ctx, a)
 	})
 	if err != nil {
 		return nil, err
@@ -229,8 +229,8 @@ func (s *ClientService) SetDefaultAddress(ctx context.Context, userID, addressID
 	return a, nil
 }
 
-func (s *ClientService) ownAddress(userID, addressID string) (*address.Address, error) {
-	a, err := s.Repos.Addresses.FindByID(addressID)
+func (s *ClientService) ownAddress(ctx context.Context, userID, addressID string) (*address.Address, error) {
+	a, err := s.Repos.Addresses.FindByID(ctx, addressID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeAddressNotFound, "地址不存在")
@@ -267,7 +267,7 @@ func (s *ClientService) validateAddressInput(ctx context.Context, userID string,
 		}
 	}
 	if in.RegionID == "" {
-		u, err := s.Repos.Users.FindByID(userID)
+		u, err := s.Repos.Users.FindByID(ctx, userID)
 		if err != nil {
 			return in, userErr(err)
 		}
@@ -276,7 +276,7 @@ func (s *ClientService) validateAddressInput(ctx context.Context, userID string,
 	if in.RegionID == "" {
 		return in, errcode.NewStatus(400, errcode.CodeRegionRequired, "请先选择服务区域")
 	}
-	region, err := s.Repos.Regions.FindByID(in.RegionID)
+	region, err := s.Repos.Regions.FindByID(ctx, in.RegionID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return in, errcode.NewStatus(404, errcode.CodeRegionNotFound, "服务区域不存在")

@@ -41,8 +41,7 @@ func (r RiderRepo) unsealSecret(v string) string {
 	return plain
 }
 
-func (r RiderRepo) Save(m *rider.Rider) error {
-	ctx := context.Background()
+func (r RiderRepo) Save(ctx context.Context, m *rider.Rider) error {
 	if m.ID == "" {
 		m.ID = newULID()
 	}
@@ -104,8 +103,8 @@ func (r RiderRepo) toRider(e *ent.Rider) *rider.Rider {
 	}
 }
 
-func (r RiderRepo) FindByID(id string) (*rider.Rider, error) {
-	e, err := r.client.Rider.Get(context.Background(), id)
+func (r RiderRepo) FindByID(ctx context.Context, id string) (*rider.Rider, error) {
+	e, err := r.client.Rider.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -115,8 +114,7 @@ func (r RiderRepo) FindByID(id string) (*rider.Rider, error) {
 	return r.toRider(e), nil
 }
 
-func (r RiderRepo) List(q rider.RiderQuery, sc tenant.Scope) ([]*rider.Rider, int64, error) {
-	ctx := context.Background()
+func (r RiderRepo) List(ctx context.Context, q rider.RiderQuery, sc tenant.Scope) ([]*rider.Rider, int64, error) {
 	bq := r.client.Rider.Query()
 	scopeRider(bq, sc)
 	if s := strings.TrimSpace(q.Status); s != "" {
@@ -145,8 +143,7 @@ func (r RiderRepo) List(q rider.RiderQuery, sc tenant.Scope) ([]*rider.Rider, in
 	return out, int64(total), nil
 }
 
-func (r RiderRepo) AuditList(q rider.AuditQuery, sc tenant.Scope) ([]*rider.Rider, int64, error) {
-	ctx := context.Background()
+func (r RiderRepo) AuditList(ctx context.Context, q rider.AuditQuery, sc tenant.Scope) ([]*rider.Rider, int64, error) {
 	bq := r.client.Rider.Query()
 	scopeRider(bq, sc)
 	if s := strings.TrimSpace(q.Status); s != "" {
@@ -179,8 +176,7 @@ func (r RiderRepo) AuditList(q rider.AuditQuery, sc tenant.Scope) ([]*rider.Ride
 	return out, int64(total), nil
 }
 
-func (r RiderRepo) UpdateAudit(id string, approved bool, reason, operator string, now int64) error {
-	ctx := context.Background()
+func (r RiderRepo) UpdateAudit(ctx context.Context, id string, approved bool, reason, operator string, now int64) error {
 	status := string(rider.AuditApproved)
 	if !approved {
 		status = string(rider.AuditRejected)
@@ -199,15 +195,14 @@ func (r RiderRepo) UpdateAudit(id string, approved bool, reason, operator string
 	return err
 }
 
-func (r RiderRepo) UpdateStatus(id string, status rider.RiderStatus, now int64) error {
+func (r RiderRepo) UpdateStatus(ctx context.Context, id string, status rider.RiderStatus, now int64) error {
 	err := r.client.Rider.UpdateOneID(id).
 		SetStatus(string(status)).SetUpdatedAt(now).
-		SetLastActionAt(now).Exec(context.Background())
+		SetLastActionAt(now).Exec(ctx)
 	return err
 }
 
-func (r RiderRepo) Stats(sc tenant.Scope) (*rider.Stats, error) {
-	ctx := context.Background()
+func (r RiderRepo) Stats(ctx context.Context, sc tenant.Scope) (*rider.Stats, error) {
 	base := func() *ent.RiderQuery {
 		bq := r.client.Rider.Query()
 		scopeRider(bq, sc)
@@ -271,28 +266,28 @@ func (r RiderRepo) Stats(sc tenant.Scope) (*rider.Stats, error) {
 	}, nil
 }
 
-func (r RiderRepo) CountByRegion(regionID string) (int64, error) {
-	n, err := r.client.Rider.Query().Where(entrider.RegionID(regionID)).Count(context.Background())
+func (r RiderRepo) CountByRegion(ctx context.Context, regionID string) (int64, error) {
+	n, err := r.client.Rider.Query().Where(entrider.RegionID(regionID)).Count(ctx)
 	return int64(n), err
 }
 
-func (r RiderRepo) ActiveCountByRegion(regionID string) (int64, error) {
+func (r RiderRepo) ActiveCountByRegion(ctx context.Context, regionID string) (int64, error) {
 	n, err := r.client.Rider.Query().
 		Where(entrider.RegionID(regionID), entrider.StatusIn(
 			string(rider.RiderOnline), string(rider.RiderBusy), string(rider.RiderOffline),
 		)).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r RiderRepo) OnlineCount() (int64, error) {
+func (r RiderRepo) OnlineCount(ctx context.Context) (int64, error) {
 	n, err := r.client.Rider.Query().
 		Where(entrider.StatusIn(string(rider.RiderOnline), string(rider.RiderBusy))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r RiderRepo) TotalCount() (int64, error) {
-	n, err := r.client.Rider.Query().Count(context.Background())
+func (r RiderRepo) TotalCount(ctx context.Context) (int64, error) {
+	n, err := r.client.Rider.Query().Count(ctx)
 	return int64(n), err
 }

@@ -16,8 +16,8 @@ type CouponService struct {
 // List 用户券列表。filter: available / used / expired / all。
 func (s *CouponService) List(ctx context.Context, userID, filter string) ([]*coupon.Coupon, error) {
 	now := time.Now().Unix()
-	_ = s.Repos.Coupons.Expire(userID, now)
-	rows, err := s.Repos.Coupons.ListByUser(userID)
+	_ = s.Repos.Coupons.Expire(ctx, userID, now)
+	rows, err := s.Repos.Coupons.ListByUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

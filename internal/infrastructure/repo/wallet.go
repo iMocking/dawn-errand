@@ -12,8 +12,7 @@ import (
 // WalletRepo 实现 wallet.Repository。
 type WalletRepo struct{ client *ent.Client }
 
-func (r WalletRepo) Ensure(partyType, partyID string, now int64) (*wallet.Account, error) {
-	ctx := context.Background()
+func (r WalletRepo) Ensure(ctx context.Context, partyType, partyID string, now int64) (*wallet.Account, error) {
 	e, err := r.client.WalletAccount.Query().
 		Where(entwallet.PartyType(partyType), entwallet.PartyID(partyID)).Only(ctx)
 	if err == nil {
@@ -35,9 +34,9 @@ func (r WalletRepo) Ensure(partyType, partyID string, now int64) (*wallet.Accoun
 	return toWalletAccount(e), nil
 }
 
-func (r WalletRepo) Find(partyType, partyID string) (*wallet.Account, error) {
+func (r WalletRepo) Find(ctx context.Context, partyType, partyID string) (*wallet.Account, error) {
 	e, err := r.client.WalletAccount.Query().
-		Where(entwallet.PartyType(partyType), entwallet.PartyID(partyID)).Only(context.Background())
+		Where(entwallet.PartyType(partyType), entwallet.PartyID(partyID)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -47,9 +46,8 @@ func (r WalletRepo) Find(partyType, partyID string) (*wallet.Account, error) {
 	return toWalletAccount(e), nil
 }
 
-func (r WalletRepo) Adjust(partyType, partyID string, delta float64, allowNegative bool, now int64) (bool, *wallet.Account, error) {
-	ctx := context.Background()
-	if _, err := r.Ensure(partyType, partyID, now); err != nil {
+func (r WalletRepo) Adjust(ctx context.Context, partyType, partyID string, delta float64, allowNegative bool, now int64) (bool, *wallet.Account, error) {
+	if _, err := r.Ensure(ctx, partyType, partyID, now); err != nil {
 		return false, nil, err
 	}
 	q := r.client.WalletAccount.Update().
@@ -64,11 +62,11 @@ func (r WalletRepo) Adjust(partyType, partyID string, delta float64, allowNegati
 	if affected == 0 {
 		return false, nil, nil
 	}
-	acc, err := r.Find(partyType, partyID)
+	acc, err := r.Find(ctx, partyType, partyID)
 	return err == nil, acc, err
 }
 
-func (r WalletRepo) SaveTransaction(t *wallet.Transaction) error {
+func (r WalletRepo) SaveTransaction(ctx context.Context, t *wallet.Transaction) error {
 	if t.ID == "" {
 		t.ID = newULID()
 	}
@@ -76,21 +74,20 @@ func (r WalletRepo) SaveTransaction(t *wallet.Transaction) error {
 		SetID(t.ID).SetAccountID(t.AccountID).SetPartyType(t.PartyType).SetPartyID(t.PartyID).
 		SetOrderID(t.OrderID).SetType(t.Type).SetAmount(t.Amount).
 		SetBalanceAfter(t.BalanceAfter).SetNote(t.Note).SetCreatedAt(t.CreatedAt).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r WalletRepo) SumByTypeSince(partyType, partyID string, types []string, since int64) (float64, error) {
+func (r WalletRepo) SumByTypeSince(ctx context.Context, partyType, partyID string, types []string, since int64) (float64, error) {
 	q := r.client.WalletTransaction.Query().
 		Where(wallettransaction.PartyType(partyType), wallettransaction.PartyID(partyID),
 			wallettransaction.CreatedAtGTE(since))
 	if len(types) > 0 {
 		q.Where(wallettransaction.TypeIn(types...))
 	}
-	return sumFloat64(context.Background(), q, wallettransaction.FieldAmount)
+	return sumFloat64(ctx, q, wallettransaction.FieldAmount)
 }
 
-func (r WalletRepo) ListTransactions(q wallet.Query) ([]*wallet.Transaction, int64, error) {
-	ctx := context.Background()
+func (r WalletRepo) ListTransactions(ctx context.Context, q wallet.Query) ([]*wallet.Transaction, int64, error) {
 	bq := r.client.WalletTransaction.Query().
 		Where(wallettransaction.PartyType(q.PartyType), wallettransaction.PartyID(q.PartyID))
 	total, err := bq.Count(ctx)

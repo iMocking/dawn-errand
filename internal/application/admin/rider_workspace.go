@@ -37,11 +37,11 @@ func (s *RidersService) Workspace(ctx context.Context, id string, sc tenant.Scop
 		return nil, err
 	}
 	ws := &RiderWorkspace{Rider: r, UserNames: map[string]string{}}
-	orders, err := s.Repos.Orders.ListByRider(id, 200)
+	orders, err := s.Repos.Orders.ListByRider(ctx, id, 200)
 	if err != nil {
 		return nil, err
 	}
-	reviews, _, err := s.Repos.Reviews.List(review.Query{RiderID: id, Page: 1, PageSize: 50})
+	reviews, _, err := s.Repos.Reviews.List(ctx, review.Query{RiderID: id, Page: 1, PageSize: 50})
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (s *RidersService) Workspace(ctx context.Context, id string, sc tenant.Scop
 		if _, ok := ws.UserNames[rv.UserID]; ok {
 			continue
 		}
-		if u, err := s.Repos.Users.FindByID(rv.UserID); err == nil {
+		if u, err := s.Repos.Users.FindByID(ctx, rv.UserID); err == nil {
 			ws.UserNames[rv.UserID] = u.Name
 		}
 	}

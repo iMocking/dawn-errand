@@ -45,7 +45,7 @@ type DriverMe struct {
 
 // ClientMe 读取当前用户、资料与区域。
 func (s *Service) ClientMe(ctx context.Context, userID string) (*ClientMe, error) {
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -53,13 +53,13 @@ func (s *Service) ClientMe(ctx context.Context, userID string) (*ClientMe, error
 		return nil, err
 	}
 	out := &ClientMe{User: u}
-	if p, err := s.Repos.Profiles.FindByUserID(userID); err == nil {
+	if p, err := s.Repos.Profiles.FindByUserID(ctx, userID); err == nil {
 		out.Profile = p
 	} else if !errors.Is(err, application.ErrNotFound) {
 		return nil, err
 	}
 	if u.RegionID != "" {
-		if r, err := s.Repos.Regions.FindByID(u.RegionID); err == nil {
+		if r, err := s.Repos.Regions.FindByID(ctx, u.RegionID); err == nil {
 			out.Region = r
 		} else if !errors.Is(err, application.ErrNotFound) {
 			return nil, err
@@ -86,7 +86,7 @@ func (s *Service) UpdateClientProfile(ctx context.Context, userID, name, avatar 
 
 	var out *ClientMe
 	err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		u, err := tx.Users.FindByID(userID)
+		u, err := tx.Users.FindByID(ctx, userID)
 		if err != nil {
 			if errors.Is(err, application.ErrNotFound) {
 				return errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -101,10 +101,10 @@ func (s *Service) UpdateClientProfile(ctx context.Context, userID, name, avatar 
 			u.Avatar = avatar
 		}
 		u.UpdatedAt = now
-		if err := tx.Users.Save(u); err != nil {
+		if err := tx.Users.Save(ctx, u); err != nil {
 			return err
 		}
-		p, err := tx.Profiles.FindByUserID(userID)
+		p, err := tx.Profiles.FindByUserID(ctx, userID)
 		if err != nil {
 			if !errors.Is(err, application.ErrNotFound) {
 				return err
@@ -115,12 +115,12 @@ func (s *Service) UpdateClientProfile(ctx context.Context, userID, name, avatar 
 			p.Nickname = name
 		}
 		p.UpdatedAt = now
-		if err := tx.Profiles.Save(p); err != nil {
+		if err := tx.Profiles.Save(ctx, p); err != nil {
 			return err
 		}
 		out = &ClientMe{User: u, Profile: p}
 		if u.RegionID != "" {
-			if r, err := tx.Regions.FindByID(u.RegionID); err == nil {
+			if r, err := tx.Regions.FindByID(ctx, u.RegionID); err == nil {
 				out.Region = r
 			}
 		}
@@ -134,7 +134,7 @@ func (s *Service) UpdateClientProfile(ctx context.Context, userID, name, avatar 
 
 // ListRegions 可用服务区域（仅运营中）。
 func (s *Service) ListRegions(ctx context.Context) ([]*tenant.Region, error) {
-	rows, err := s.Repos.Regions.List()
+	rows, err := s.Repos.Regions.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (s *Service) SetClientRegion(ctx context.Context, userID, regionID string) 
 	if regionID == "" {
 		return nil, errcode.New(errcode.CodeBadRequest, "region_id 必填")
 	}
-	region, err := s.Repos.Regions.FindByID(regionID)
+	region, err := s.Repos.Regions.FindByID(ctx, regionID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeRegionNotFound, "服务区域不存在")
@@ -167,7 +167,7 @@ func (s *Service) SetClientRegion(ctx context.Context, userID, regionID string) 
 
 	var out *ClientMe
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		u, err := tx.Users.FindByID(userID)
+		u, err := tx.Users.FindByID(ctx, userID)
 		if err != nil {
 			if errors.Is(err, application.ErrNotFound) {
 				return errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
@@ -177,10 +177,10 @@ func (s *Service) SetClientRegion(ctx context.Context, userID, regionID string) 
 		now := time.Now().Unix()
 		u.RegionID = region.ID
 		u.UpdatedAt = now
-		if err := tx.Users.Save(u); err != nil {
+		if err := tx.Users.Save(ctx, u); err != nil {
 			return err
 		}
-		p, err := tx.Profiles.FindByUserID(userID)
+		p, err := tx.Profiles.FindByUserID(ctx, userID)
 		if err != nil {
 			if !errors.Is(err, application.ErrNotFound) {
 				return err
@@ -189,7 +189,7 @@ func (s *Service) SetClientRegion(ctx context.Context, userID, regionID string) 
 		}
 		p.Region = region.Name
 		p.UpdatedAt = now
-		if err := tx.Profiles.Save(p); err != nil {
+		if err := tx.Profiles.Save(ctx, p); err != nil {
 			return err
 		}
 		out = &ClientMe{User: u, Profile: p, Region: region}
@@ -203,14 +203,14 @@ func (s *Service) SetClientRegion(ctx context.Context, userID, regionID string) 
 
 // StoreMe 商家端上下文（店铺 + 今日经营数据）。
 func (s *Service) StoreMe(ctx context.Context, merchantID string) (*StoreMe, error) {
-	m, err := s.Repos.Merchants.FindByID(merchantID)
+	m, err := s.Repos.Merchants.FindByID(ctx, merchantID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
 		}
 		return nil, err
 	}
-	stats, err := s.Repos.Orders.Stats(tenant.Scope{Role: identity.RoleMerchant, MerchantID: merchantID}, time.Now().Unix())
+	stats, err := s.Repos.Orders.Stats(ctx, tenant.Scope{Role: identity.RoleMerchant, MerchantID: merchantID}, time.Now().Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -219,14 +219,14 @@ func (s *Service) StoreMe(ctx context.Context, merchantID string) (*StoreMe, err
 
 // DriverMe 骑手端上下文（档案 + 今日履约数据）。
 func (s *Service) DriverMe(ctx context.Context, riderID string) (*DriverMe, error) {
-	r, err := s.Repos.Riders.FindByID(riderID)
+	r, err := s.Repos.Riders.FindByID(ctx, riderID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
 		}
 		return nil, err
 	}
-	stats, err := s.Repos.Orders.Stats(tenant.Scope{Role: identity.RoleDriver, RiderID: riderID}, time.Now().Unix())
+	stats, err := s.Repos.Orders.Stats(ctx, tenant.Scope{Role: identity.RoleDriver, RiderID: riderID}, time.Now().Unix())
 	if err != nil {
 		return nil, err
 	}

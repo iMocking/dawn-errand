@@ -64,7 +64,7 @@ func (s *TrackingService) Report(ctx context.Context, riderID string, in Locatio
 	if in.Accuracy < 0 || in.Accuracy > 1000 {
 		return nil, errcode.New(errcode.CodeBadRequest, "accuracy 不合法")
 	}
-	r, err := s.Repos.Riders.FindByID(riderID)
+	r, err := s.Repos.Riders.FindByID(ctx, riderID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
@@ -80,7 +80,7 @@ func (s *TrackingService) Report(ctx context.Context, riderID string, in Locatio
 		Lat: in.Lat, Lng: in.Lng, Heading: in.Heading, Speed: in.Speed,
 		Accuracy: in.Accuracy, UpdatedAt: now,
 	}
-	if err := s.Repos.Locations.Upsert(loc); err != nil {
+	if err := s.Repos.Locations.Upsert(ctx, loc); err != nil {
 		return nil, err
 	}
 	if s.Geo != nil {
@@ -92,7 +92,7 @@ func (s *TrackingService) Report(ctx context.Context, riderID string, in Locatio
 
 // Track 用户查看订单配送轨迹（仅本人订单）。
 func (s *TrackingService) Track(ctx context.Context, userID, orderID string) (*TrackView, error) {
-	o, err := s.Repos.Orders.FindByID(orderID)
+	o, err := s.Repos.Orders.FindByID(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")
@@ -103,7 +103,7 @@ func (s *TrackingService) Track(ctx context.Context, userID, orderID string) (*T
 		return nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")
 	}
 	metrics.TrackRequestsTotal.Inc()
-	events, err := s.Repos.OrderEvents.ListByOrder(o.ID)
+	events, err := s.Repos.OrderEvents.ListByOrder(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +114,8 @@ func (s *TrackingService) Track(ctx context.Context, userID, orderID string) (*T
 		Events:   events,
 	}
 	if o.RiderID != "" {
-		view.Rider, _ = s.Repos.Riders.FindByID(o.RiderID)
-		if loc, err := s.Repos.Locations.FindByRider(o.RiderID); err == nil {
+		view.Rider, _ = s.Repos.Riders.FindByID(ctx, o.RiderID)
+		if loc, err := s.Repos.Locations.FindByRider(ctx, o.RiderID); err == nil {
 			view.Location = loc
 		}
 	}

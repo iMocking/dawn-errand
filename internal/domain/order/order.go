@@ -1,6 +1,8 @@
 // Package order 订单限界上下文（外卖/帮买/帮送/帮取/帮办）。
 package order
 
+import "context"
+
 import "dawn-errand/internal/domain/tenant"
 
 // OrderType 订单类型。
@@ -176,50 +178,50 @@ type DayTrend struct {
 
 // OrderRepository 订单仓储端口。
 type OrderRepository interface {
-	Save(o *Order) error
-	FindByID(id string) (*Order, error)
+	Save(ctx context.Context, o *Order) error
+	FindByID(ctx context.Context, id string) (*Order, error)
 	// FindByClientOrderNo 幂等查询：同一用户同一客户端单号。
-	FindByClientOrderNo(userID, clientOrderNo string) (*Order, error)
+	FindByClientOrderNo(ctx context.Context, userID, clientOrderNo string) (*Order, error)
 	// List 订单列表（scope 强制隔离）。
-	List(q Query, scope tenant.Scope) ([]*Order, int64, error)
+	List(ctx context.Context, q Query, scope tenant.Scope) ([]*Order, int64, error)
 	// ListByUser 用户近期订单。
-	ListByUser(userID string, limit int) ([]*Order, error)
+	ListByUser(ctx context.Context, userID string, limit int) ([]*Order, error)
 	// ListByMerchant 商家近期订单（管理端商家详情）。
-	ListByMerchant(merchantID string, limit int) ([]*Order, error)
+	ListByMerchant(ctx context.Context, merchantID string, limit int) ([]*Order, error)
 	// ListByRider 骑手近期订单（管理端骑手详情）。
-	ListByRider(riderID string, limit int) ([]*Order, error)
+	ListByRider(ctx context.Context, riderID string, limit int) ([]*Order, error)
 	// Stats 当日/昨日统计（scope 隔离）。
-	Stats(scope tenant.Scope, now int64) (*Stats, error)
+	Stats(ctx context.Context, scope tenant.Scope, now int64) (*Stats, error)
 	// Trend7d 近 7 日订单/交易额趋势（scope 隔离）。
-	Trend7d(scope tenant.Scope, now int64) ([]DayTrend, error)
+	Trend7d(ctx context.Context, scope tenant.Scope, now int64) ([]DayTrend, error)
 	// CountByRegion 区域今日订单数。
-	CountByRegion(regionID string, now int64) (int64, error)
+	CountByRegion(ctx context.Context, regionID string, now int64) (int64, error)
 	// CountToday 全局今日订单数。
-	CountToday(now int64) (int64, error)
+	CountToday(ctx context.Context, now int64) (int64, error)
 	// SumTodayGMV 全局今日交易额。
-	SumTodayGMV(now int64) (float64, error)
+	SumTodayGMV(ctx context.Context, now int64) (float64, error)
 	// CountUserOrders 用户累计订单数。
-	CountUserOrders(userID string) (int64, error)
+	CountUserOrders(ctx context.Context, userID string) (int64, error)
 	// CountUserMonth 用户本月订单数。
-	CountUserMonth(userID string, now int64) (int64, error)
+	CountUserMonth(ctx context.Context, userID string, now int64) (int64, error)
 	// CountUserSpent 用户累计消费。
-	CountUserSpent(userID string) (float64, error)
+	CountUserSpent(ctx context.Context, userID string) (float64, error)
 	// CountActiveMonth 本月活跃下单用户数（scope 隔离）。
-	CountActiveMonth(scope tenant.Scope, now int64) (int64, error)
+	CountActiveMonth(ctx context.Context, scope tenant.Scope, now int64) (int64, error)
 	// CountRecent 最近 7 天活跃用户数（用于活跃率）。
-	CountRecentActiveUsers(now int64) (int64, error)
+	CountRecentActiveUsers(ctx context.Context, now int64) (int64, error)
 	// CountByType 按订单类型计数（scope 隔离）。
-	CountByType(scope tenant.Scope) (map[OrderType]int64, error)
+	CountByType(ctx context.Context, scope tenant.Scope) (map[OrderType]int64, error)
 	// CountAll 订单总数（scope 隔离）。
-	CountAll(scope tenant.Scope) (int64, error)
+	CountAll(ctx context.Context, scope tenant.Scope) (int64, error)
 	// UpdateStatus 条件流转（from→to）；返回是否更新成功（0 行表示状态已变化/并发冲突）。
-	UpdateStatus(id string, from, to OrderStatus, patch StatusPatch, now int64) (bool, error)
+	UpdateStatus(ctx context.Context, id string, from, to OrderStatus, patch StatusPatch, now int64) (bool, error)
 	// AssignRider 抢单：仅当订单待取货且未分配骑手时成功（并发唯一）。
-	AssignRider(id, riderID, riderName string, now int64) (bool, error)
+	AssignRider(ctx context.Context, id, riderID, riderName string, now int64) (bool, error)
 	// ListPool 抢单池：本区域待取货且未分配骑手的订单。
-	ListPool(regionID string, page, pageSize int) ([]*Order, int64, error)
+	ListPool(ctx context.Context, regionID string, page, pageSize int) ([]*Order, int64, error)
 	// ListPendingPayBefore 超时未支付订单。
-	ListPendingPayBefore(before int64, limit int) ([]*Order, error)
+	ListPendingPayBefore(ctx context.Context, before int64, limit int) ([]*Order, error)
 	// ListDeliveredBefore 超时未确认收货订单。
-	ListDeliveredBefore(before int64, limit int) ([]*Order, error)
+	ListDeliveredBefore(ctx context.Context, before int64, limit int) ([]*Order, error)
 }

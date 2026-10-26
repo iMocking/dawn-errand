@@ -12,7 +12,7 @@ import (
 // PaymentRepo 实现 order.PaymentRepository。
 type PaymentRepo struct{ client *ent.Client }
 
-func (r PaymentRepo) Save(p *order.Payment) error {
+func (r PaymentRepo) Save(ctx context.Context, p *order.Payment) error {
 	if p.ID == "" {
 		p.ID = newULID()
 	}
@@ -21,14 +21,14 @@ func (r PaymentRepo) Save(p *order.Payment) error {
 		SetChannel(p.Channel).SetAmount(p.Amount).SetStatus(string(p.Status)).
 		SetTradeNo(p.TradeNo).SetPaidAt(p.PaidAt).
 		SetCreatedAt(nowSec()).SetUpdatedAt(nowSec()).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r PaymentRepo) FindByOrder(orderID string) (*order.Payment, error) {
+func (r PaymentRepo) FindByOrder(ctx context.Context, orderID string) (*order.Payment, error) {
 	e, err := r.client.Payment.Query().
 		Where(payment.OrderID(orderID)).
 		Order(ent.Desc(payment.FieldCreatedAt)).
-		First(context.Background())
+		First(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -42,7 +42,7 @@ func (r PaymentRepo) FindByOrder(orderID string) (*order.Payment, error) {
 	}, nil
 }
 
-func (r PaymentRepo) UpdateStatus(id string, status order.PaymentStatus, tradeNo string, paidAt int64) error {
+func (r PaymentRepo) UpdateStatus(ctx context.Context, id string, status order.PaymentStatus, tradeNo string, paidAt int64) error {
 	upd := r.client.Payment.UpdateOneID(id).SetStatus(string(status)).SetUpdatedAt(nowSec())
 	if tradeNo != "" {
 		upd.SetTradeNo(tradeNo)
@@ -50,14 +50,13 @@ func (r PaymentRepo) UpdateStatus(id string, status order.PaymentStatus, tradeNo
 	if paidAt > 0 {
 		upd.SetPaidAt(paidAt)
 	}
-	return upd.Exec(context.Background())
+	return upd.Exec(ctx)
 }
 
 // SummarizeRecon 聚合支付时间窗口内的对账口径。
 // 订单侧用分片批量查询替代逐单 FindByID（原实现每笔支付一次查询，属 N+1）；
 // regionID 非空时只统计该区域的订单，跨区数据不计入，实现区域隔离。
-func (r PaymentRepo) SummarizeRecon(start, end int64, regionID string) (*order.ReconSummary, error) {
-	ctx := context.Background()
+func (r PaymentRepo) SummarizeRecon(ctx context.Context, start, end int64, regionID string) (*order.ReconSummary, error) {
 	res := &order.ReconSummary{}
 
 	paid, err := r.client.Payment.Query().

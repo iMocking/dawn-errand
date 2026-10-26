@@ -105,7 +105,7 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 		return nil, errcode.New(errcode.CodeBadRequest, "备注不能超过 512 字")
 	}
 	if in.ClientOrderNo != "" {
-		if existing, err := s.Repos.Orders.FindByClientOrderNo(userID, in.ClientOrderNo); err == nil {
+		if existing, err := s.Repos.Orders.FindByClientOrderNo(ctx, userID, in.ClientOrderNo); err == nil {
 			return existing, nil
 		} else if !errors.Is(err, application.ErrNotFound) {
 			return nil, err
@@ -114,14 +114,14 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 	if len(in.Items) > 50 {
 		return nil, errcode.New(errcode.CodeBadRequest, "单笔订单最多 50 个商品")
 	}
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		return nil, userErr(err)
 	}
 	if u.RegionID == "" {
 		return nil, errcode.NewStatus(400, errcode.CodeRegionRequired, "请先选择服务区域")
 	}
-	region, err := s.Repos.Regions.FindByID(u.RegionID)
+	region, err := s.Repos.Regions.FindByID(ctx, u.RegionID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeRegionNotFound, "服务区域不存在")
 	}
@@ -136,7 +136,7 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 	}
 	o.OrderNo = newOrderNo(o.ID, now)
 	if in.Type == string(order.OrderTypeFood) {
-		if err := s.buildFoodOrder(o, in, u, region, now); err != nil {
+		if err := s.buildFoodOrder(ctx, o, in, u, region, now); err != nil {
 			return nil, err
 		}
 	} else if isErrandType(in.Type) {
@@ -146,7 +146,7 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 	} else {
 		return nil, errcode.New(errcode.CodeBadRequest, "不支持的订单类型")
 	}
-	couponID, err := s.applyCoupon(o, in.CouponID, now)
+	couponID, err := s.applyCoupon(ctx, o, in.CouponID, now)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 		// 外卖：下单即锁库存；取消/超时释放。
 		if o.Type == order.OrderTypeFood {
 			for _, it := range o.Goods {
-				ok, err := tx.Catalog.AdjustStock(it.DishID, -it.Count)
+				ok, err := tx.Catalog.AdjustStock(ctx, it.DishID, -it.Count)
 				if err != nil {
 					return err
 				}
@@ -165,11 +165,11 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 				}
 			}
 		}
-		if err := tx.Orders.Save(o); err != nil {
+		if err := tx.Orders.Save(ctx, o); err != nil {
 			return err
 		}
 		if couponID != "" {
-			ok, err := tx.Coupons.MarkUsed(couponID, userID, o.ID, now)
+			ok, err := tx.Coupons.MarkUsed(ctx, couponID, userID, o.ID, now)
 			if err != nil {
 				return err
 			}
@@ -177,12 +177,12 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 				return errcode.New(errcode.CodeCouponInvalid, "优惠券不可用或已被使用")
 			}
 		}
-		return s.record(tx, o, "", order.StatusPendingPay, order.ActorClient, userID, "用户下单", now)
+		return s.record(ctx, tx, o, "", order.StatusPendingPay, order.ActorClient, userID, "用户下单", now)
 	})
 	if err != nil {
 		// 并发重复提交：唯一索引冲突时回读首次订单。
 		if in.ClientOrderNo != "" {
-			if existing, e := s.Repos.Orders.FindByClientOrderNo(userID, in.ClientOrderNo); e == nil {
+			if existing, e := s.Repos.Orders.FindByClientOrderNo(ctx, userID, in.ClientOrderNo); e == nil {
 				return existing, nil
 			}
 		}
@@ -192,11 +192,11 @@ func (s *OrderService) Create(ctx context.Context, userID string, in CreateOrder
 	return o, nil
 }
 
-func (s *OrderService) buildFoodOrder(o *order.Order, in CreateOrderInput, u *identity.User, region *tenant.Region, now int64) error {
+func (s *OrderService) buildFoodOrder(ctx context.Context, o *order.Order, in CreateOrderInput, u *identity.User, region *tenant.Region, now int64) error {
 	if len(in.Items) == 0 {
 		return errcode.New(errcode.CodeBadRequest, "请选择商品")
 	}
-	m, err := s.Repos.Merchants.FindByID(in.MerchantID)
+	m, err := s.Repos.Merchants.FindByID(ctx, in.MerchantID)
 	if err != nil {
 		return merchantErr(err)
 	}
@@ -209,7 +209,7 @@ func (s *OrderService) buildFoodOrder(o *order.Order, in CreateOrderInput, u *id
 	if m.Status != merchant.MerchantStatusOpen {
 		return errcode.New(errcode.CodeMerchantClosed, "商家休息中，暂不接单")
 	}
-	a, err := s.Repos.Addresses.FindByID(in.AddressID)
+	a, err := s.Repos.Addresses.FindByID(ctx, in.AddressID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return errcode.NewStatus(404, errcode.CodeAddressNotFound, "收货地址不存在")
@@ -229,7 +229,7 @@ func (s *OrderService) buildFoodOrder(o *order.Order, in CreateOrderInput, u *id
 		if it.Count < 1 || it.Count > 99 {
 			return errcode.New(errcode.CodeBadRequest, "商品数量需在 1-99 之间")
 		}
-		d, err := s.Repos.Catalog.FindDish(it.DishID)
+		d, err := s.Repos.Catalog.FindDish(ctx, it.DishID)
 		if err != nil {
 			if errors.Is(err, application.ErrNotFound) {
 				return errcode.New(errcode.CodeDishUnavailable, "商品不存在或已下架")
@@ -363,12 +363,12 @@ func (s *OrderService) buildErrandOrder(o *order.Order, in CreateOrderInput, u *
 }
 
 // applyCoupon 校验并应用优惠券（下单时锁定，取消/退款释放）。
-func (s *OrderService) applyCoupon(o *order.Order, raw string, now int64) (string, error) {
+func (s *OrderService) applyCoupon(ctx context.Context, o *order.Order, raw string, now int64) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
 		return "", nil
 	}
-	c, err := s.Repos.Coupons.FindByID(raw)
+	c, err := s.Repos.Coupons.FindByID(ctx, raw)
 	if err != nil {
 		return "", errcode.New(errcode.CodeCouponInvalid, "优惠券不存在")
 	}
@@ -439,37 +439,37 @@ func initialSteps(now int64) []order.OrderStep {
 	}
 }
 
-func (s *OrderService) record(tx *application.RepoUnit, o *order.Order, from, to order.OrderStatus, actor order.ActorType, actorID, note string, now int64) error {
-	return tx.OrderEvents.Save(&order.Event{
+func (s *OrderService) record(ctx context.Context, tx *application.RepoUnit, o *order.Order, from, to order.OrderStatus, actor order.ActorType, actorID, note string, now int64) error {
+	return tx.OrderEvents.Save(ctx, &order.Event{
 		OrderID: o.ID, FromStatus: from, ToStatus: to,
 		ActorType: actor, ActorID: actorID, Note: note, CreatedAt: now,
 	})
 }
 
 // notify 写站内通知（失败不影响主流程）。
-func (s *OrderService) notify(tx *application.RepoUnit, userID, title, content, typ, refID string, now int64) {
+func (s *OrderService) notify(ctx context.Context, tx *application.RepoUnit, userID, title, content, typ, refID string, now int64) {
 	if userID == "" {
 		return
 	}
-	_ = tx.Notifications.Save(&notification.Notification{
+	_ = tx.Notifications.Save(ctx, &notification.Notification{
 		UserID: userID, Title: title, Content: content, Type: typ, RefID: refID, CreatedAt: now,
 	})
 }
 
 // notifyMerchant 给订单所属商家账号发通知。
-func (s *OrderService) notifyMerchant(tx *application.RepoUnit, o *order.Order, title, content string, now int64) {
+func (s *OrderService) notifyMerchant(ctx context.Context, tx *application.RepoUnit, o *order.Order, title, content string, now int64) {
 	if o.MerchantID == "" {
 		return
 	}
-	m, err := tx.Merchants.FindByID(o.MerchantID)
+	m, err := tx.Merchants.FindByID(ctx, o.MerchantID)
 	if err != nil {
 		return
 	}
-	s.notify(tx, m.OwnerUserID, title, content, "order", o.ID, now)
+	s.notify(ctx, tx, m.OwnerUserID, title, content, "order", o.ID, now)
 }
 
-func (s *OrderService) load(orderID string) (*order.Order, error) {
-	o, err := s.Repos.Orders.FindByID(orderID)
+func (s *OrderService) load(ctx context.Context, orderID string) (*order.Order, error) {
+	o, err := s.Repos.Orders.FindByID(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")
@@ -482,7 +482,7 @@ func (s *OrderService) load(orderID string) (*order.Order, error) {
 // ClientList 用户端订单列表。
 func (s *OrderService) ClientList(ctx context.Context, userID, tab, keyword string, page, size int) ([]*order.Order, int64, error) {
 	page, size = normalizePageParams(page, size)
-	return s.Repos.Orders.List(order.Query{
+	return s.Repos.Orders.List(ctx, order.Query{
 		Page: page, PageSize: size, Keyword: keyword,
 		Statuses: order.ClientTabStatuses(tab),
 	}, tenant.Scope{Role: identity.RoleUser, UserID: userID})
@@ -490,14 +490,14 @@ func (s *OrderService) ClientList(ctx context.Context, userID, tab, keyword stri
 
 // ClientDetail 用户端订单详情。
 func (s *OrderService) ClientDetail(ctx context.Context, userID, orderID string) (*OrderDetail, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
 	if o.UserID != userID {
 		return nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")
 	}
-	events, err := s.Repos.OrderEvents.ListByOrder(o.ID)
+	events, err := s.Repos.OrderEvents.ListByOrder(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -506,7 +506,7 @@ func (s *OrderService) ClientDetail(ctx context.Context, userID, orderID string)
 
 // CancelClient 用户取消订单（待支付/待接单）。
 func (s *OrderService) CancelClient(ctx context.Context, userID, orderID, reason string) (*order.Order, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -525,7 +525,7 @@ func (s *OrderService) CancelClient(ctx context.Context, userID, orderID, reason
 
 // Pay 支付订单（mock/余额）。
 func (s *OrderService) Pay(ctx context.Context, userID, orderID, channel string) (*order.Order, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -552,11 +552,11 @@ func (s *OrderService) Pay(ctx context.Context, userID, orderID, channel string)
 	tradeNo := "MOCK" + strings.ToUpper(ulidgen.New())[:20]
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
 		if channel == "balance" {
-			if err := deductBalance(tx, userID, o.PayAmount, now); err != nil {
+			if err := deductBalance(ctx, tx, userID, o.PayAmount, now); err != nil {
 				return err
 			}
 		}
-		if err := tx.Payments.Save(&order.Payment{
+		if err := tx.Payments.Save(ctx, &order.Payment{
 			OrderID: o.ID, UserID: userID, Channel: channel, Amount: o.PayAmount,
 			Status: order.PaymentPaid, TradeNo: tradeNo, PaidAt: now,
 		}); err != nil {
@@ -566,29 +566,29 @@ func (s *OrderService) Pay(ctx context.Context, userID, orderID, channel string)
 			PaymentStatus: "paid", PayMethod: channel,
 			FundFlow: fmt.Sprintf("%s 支付 ¥%.2f", channel, o.PayAmount),
 		}
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.StatusPendingPay, order.OrderPending, patch, now)
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.StatusPendingPay, order.OrderPending, patch, now)
 		if err != nil {
 			return err
 		}
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单状态已变化，请刷新后重试")
 		}
-		if err := s.record(tx, o, order.StatusPendingPay, order.OrderPending, order.ActorClient, userID, "支付成功", now); err != nil {
+		if err := s.record(ctx, tx, o, order.StatusPendingPay, order.OrderPending, order.ActorClient, userID, "支付成功", now); err != nil {
 			return err
 		}
-		s.notifyMerchant(tx, o, "新订单待接单", "订单 "+o.OrderNo+" 已支付，请及时接单", now)
+		s.notifyMerchant(ctx, tx, o, "新订单待接单", "订单 "+o.OrderNo+" 已支付，请及时接单", now)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 	metrics.OrdersPaidTotal.Inc()
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // PayByCallback 支付渠道回调确认（幂等；金额必须与服务端应付一致）。
 func (s *OrderService) PayByCallback(ctx context.Context, orderID, channel, tradeNo string, amount float64) (*order.Order, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -606,13 +606,13 @@ func (s *OrderService) PayByCallback(ctx context.Context, orderID, channel, trad
 		tradeNo = "CB" + strings.ToUpper(ulidgen.New())[:20]
 	}
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		if err := tx.Payments.Save(&order.Payment{
+		if err := tx.Payments.Save(ctx, &order.Payment{
 			OrderID: o.ID, UserID: o.UserID, Channel: channel, Amount: o.PayAmount,
 			Status: order.PaymentPaid, TradeNo: tradeNo, PaidAt: now,
 		}); err != nil {
 			return err
 		}
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.StatusPendingPay, order.OrderPending,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.StatusPendingPay, order.OrderPending,
 			order.StatusPatch{PaymentStatus: "paid", PayMethod: channel,
 				FundFlow: fmt.Sprintf("%s 回调支付 ¥%.2f", channel, o.PayAmount)}, now)
 		if err != nil {
@@ -621,22 +621,22 @@ func (s *OrderService) PayByCallback(ctx context.Context, orderID, channel, trad
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单状态已变化")
 		}
-		if err := s.record(tx, o, order.StatusPendingPay, order.OrderPending, order.ActorSystem, "payment", "支付回调成功", now); err != nil {
+		if err := s.record(ctx, tx, o, order.StatusPendingPay, order.OrderPending, order.ActorSystem, "payment", "支付回调成功", now); err != nil {
 			return err
 		}
-		s.notifyMerchant(tx, o, "新订单待接单", "订单 "+o.OrderNo+" 已支付，请及时接单", now)
+		s.notifyMerchant(ctx, tx, o, "新订单待接单", "订单 "+o.OrderNo+" 已支付，请及时接单", now)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 	metrics.OrdersPaidTotal.Inc()
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // Confirm 用户确认收货。
 func (s *OrderService) Confirm(ctx context.Context, userID, orderID string) (*order.Order, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -648,7 +648,7 @@ func (s *OrderService) Confirm(ctx context.Context, userID, orderID string) (*or
 	}
 	now := time.Now().Unix()
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.StatusDelivered, order.StatusPendingReview,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.StatusDelivered, order.StatusPendingReview,
 			order.StatusPatch{ConfirmedAt: now}, now)
 		if err != nil {
 			return err
@@ -656,21 +656,21 @@ func (s *OrderService) Confirm(ctx context.Context, userID, orderID string) (*or
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单状态已变化，请刷新后重试")
 		}
-		if err := s.record(tx, o, order.StatusDelivered, order.StatusPendingReview, order.ActorClient, userID, "确认收货", now); err != nil {
+		if err := s.record(ctx, tx, o, order.StatusDelivered, order.StatusPendingReview, order.ActorClient, userID, "确认收货", now); err != nil {
 			return err
 		}
-		s.notifyMerchant(tx, o, "用户已确认收货", "订单 "+o.OrderNo+" 已确认收货", now)
+		s.notifyMerchant(ctx, tx, o, "用户已确认收货", "订单 "+o.OrderNo+" 已确认收货", now)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // CancelSystem 系统超时取消（仅待支付）。
 func (s *OrderService) CancelSystem(ctx context.Context, orderID, reason string) (*order.Order, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -682,7 +682,7 @@ func (s *OrderService) CancelSystem(ctx context.Context, orderID, reason string)
 
 // AutoConfirm 系统自动确认收货（已送达 → 待评价）。
 func (s *OrderService) AutoConfirm(ctx context.Context, orderID string) (*order.Order, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -691,7 +691,7 @@ func (s *OrderService) AutoConfirm(ctx context.Context, orderID string) (*order.
 	}
 	now := time.Now().Unix()
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.StatusDelivered, order.StatusPendingReview,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.StatusDelivered, order.StatusPendingReview,
 			order.StatusPatch{ConfirmedAt: now}, now)
 		if err != nil {
 			return err
@@ -699,18 +699,18 @@ func (s *OrderService) AutoConfirm(ctx context.Context, orderID string) (*order.
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单状态已变化")
 		}
-		return s.record(tx, o, order.StatusDelivered, order.StatusPendingReview, order.ActorSystem, "system", "超时自动确认", now)
+		return s.record(ctx, tx, o, order.StatusDelivered, order.StatusPendingReview, order.ActorSystem, "system", "超时自动确认", now)
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // StoreList 商家端订单列表。
 func (s *OrderService) StoreList(ctx context.Context, merchantID, tab, keyword string, page, size int) ([]*order.Order, int64, error) {
 	page, size = normalizePageParams(page, size)
-	return s.Repos.Orders.List(order.Query{
+	return s.Repos.Orders.List(ctx, order.Query{
 		Page: page, PageSize: size, Keyword: keyword,
 		Statuses: order.StoreTabStatuses(tab),
 	}, tenant.Scope{Role: identity.RoleMerchant, MerchantID: merchantID})
@@ -718,14 +718,14 @@ func (s *OrderService) StoreList(ctx context.Context, merchantID, tab, keyword s
 
 // StoreDetail 商家端订单详情。
 func (s *OrderService) StoreDetail(ctx context.Context, merchantID, orderID string) (*OrderDetail, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
 	if o.MerchantID != merchantID {
 		return nil, errcode.NewStatus(404, errcode.CodeOrderNotOwned, "订单不存在")
 	}
-	events, err := s.Repos.OrderEvents.ListByOrder(o.ID)
+	events, err := s.Repos.OrderEvents.ListByOrder(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -734,7 +734,7 @@ func (s *OrderService) StoreDetail(ctx context.Context, merchantID, orderID stri
 
 // Accept 商家接单。
 func (s *OrderService) Accept(ctx context.Context, merchantID, orderID, operator string) (*order.Order, error) {
-	o, err := s.storeOrder(merchantID, orderID)
+	o, err := s.storeOrder(ctx, merchantID, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -743,7 +743,7 @@ func (s *OrderService) Accept(ctx context.Context, merchantID, orderID, operator
 	}
 	now := time.Now().Unix()
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.OrderPending, order.StatusPreparing,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.OrderPending, order.StatusPreparing,
 			order.StatusPatch{AcceptedAt: now}, now)
 		if err != nil {
 			return err
@@ -751,21 +751,21 @@ func (s *OrderService) Accept(ctx context.Context, merchantID, orderID, operator
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单已被处理")
 		}
-		if err := s.record(tx, o, order.OrderPending, order.StatusPreparing, order.ActorStore, operator, "商家接单", now); err != nil {
+		if err := s.record(ctx, tx, o, order.OrderPending, order.StatusPreparing, order.ActorStore, operator, "商家接单", now); err != nil {
 			return err
 		}
-		s.notify(tx, o.UserID, "商家已接单", "订单 "+o.OrderNo+" 商家已接单，正在备餐", "order", o.ID, now)
+		s.notify(ctx, tx, o.UserID, "商家已接单", "订单 "+o.OrderNo+" 商家已接单，正在备餐", "order", o.ID, now)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // Reject 商家拒单（全额退款 + 释放库存）。
 func (s *OrderService) Reject(ctx context.Context, merchantID, orderID, reason, operator string) (*order.Order, error) {
-	o, err := s.storeOrder(merchantID, orderID)
+	o, err := s.storeOrder(ctx, merchantID, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -781,7 +781,7 @@ func (s *OrderService) Reject(ctx context.Context, merchantID, orderID, reason, 
 
 // Ready 商家出餐。
 func (s *OrderService) Ready(ctx context.Context, merchantID, orderID, operator string) (*order.Order, error) {
-	o, err := s.storeOrder(merchantID, orderID)
+	o, err := s.storeOrder(ctx, merchantID, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -794,7 +794,7 @@ func (s *OrderService) Ready(ctx context.Context, merchantID, orderID, operator 
 		deliveryCode = randomCode()
 	}
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.StatusPreparing, order.StatusReady,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.StatusPreparing, order.StatusReady,
 			order.StatusPatch{
 				ReadyAt: now, PickupCode: pickupCode, DeliveryCode: deliveryCode,
 			}, now)
@@ -804,32 +804,32 @@ func (s *OrderService) Ready(ctx context.Context, merchantID, orderID, operator 
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单已被处理")
 		}
-		return s.record(tx, o, order.StatusPreparing, order.StatusReady, order.ActorStore, operator, "出餐完成", now)
+		return s.record(ctx, tx, o, order.StatusPreparing, order.StatusReady, order.ActorStore, operator, "出餐完成", now)
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // DriverList 骑手端我的订单。
 func (s *OrderService) DriverList(ctx context.Context, riderID, tab string, page, size int) ([]*order.Order, int64, error) {
 	page, size = normalizePageParams(page, size)
-	return s.Repos.Orders.List(order.Query{
+	return s.Repos.Orders.List(ctx, order.Query{
 		Page: page, PageSize: size, Statuses: order.DriverTabStatuses(tab),
 	}, tenant.Scope{Role: identity.RoleDriver, RiderID: riderID})
 }
 
 // DriverDetail 骑手端订单详情。
 func (s *OrderService) DriverDetail(ctx context.Context, riderID, orderID string) (*OrderDetail, error) {
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
 	if o.RiderID != riderID {
 		return nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")
 	}
-	events, err := s.Repos.OrderEvents.ListByOrder(o.ID)
+	events, err := s.Repos.OrderEvents.ListByOrder(ctx, o.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -838,7 +838,7 @@ func (s *OrderService) DriverDetail(ctx context.Context, riderID, orderID string
 
 // Pool 抢单池（按骑手位置计算取货距离）。
 func (s *OrderService) Pool(ctx context.Context, riderID string, lat, lng float64, page, size int) ([]*PoolItem, int64, error) {
-	r, err := s.Repos.Riders.FindByID(riderID)
+	r, err := s.Repos.Riders.FindByID(ctx, riderID)
 	if err != nil {
 		return nil, 0, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
 	}
@@ -846,7 +846,7 @@ func (s *OrderService) Pool(ctx context.Context, riderID string, lat, lng float6
 		return nil, 0, errcode.New(errcode.CodeRiderOffline, "账号已冻结")
 	}
 	page, size = normalizePageParams(page, size)
-	rows, total, err := s.Repos.Orders.ListPool(r.RegionID, page, size)
+	rows, total, err := s.Repos.Orders.ListPool(ctx, r.RegionID, page, size)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -864,7 +864,7 @@ func (s *OrderService) Pool(ctx context.Context, riderID string, lat, lng float6
 
 // SetDriverStatus 骑手上线/下线。
 func (s *OrderService) SetDriverStatus(ctx context.Context, riderID string, online bool, operator string) (*rider.Rider, error) {
-	r, err := s.Repos.Riders.FindByID(riderID)
+	r, err := s.Repos.Riders.FindByID(ctx, riderID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
 	}
@@ -878,7 +878,7 @@ func (s *OrderService) SetDriverStatus(ctx context.Context, riderID string, onli
 	if online {
 		status = rider.RiderOnline
 	}
-	if err := s.Repos.Riders.UpdateStatus(riderID, status, time.Now().Unix()); err != nil {
+	if err := s.Repos.Riders.UpdateStatus(ctx, riderID, status, time.Now().Unix()); err != nil {
 		return nil, err
 	}
 	r.Status = status
@@ -891,14 +891,14 @@ func (s *OrderService) SetDriverStatus(ctx context.Context, riderID string, onli
 
 // Grab 抢单：单条条件更新保证并发唯一。
 func (s *OrderService) Grab(ctx context.Context, riderID, orderID string) (*order.Order, error) {
-	r, err := s.Repos.Riders.FindByID(riderID)
+	r, err := s.Repos.Riders.FindByID(ctx, riderID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
 	}
 	if r.Status != "online" && r.Status != "busy" {
 		return nil, errcode.New(errcode.CodeRiderOffline, "请先上线再抢单")
 	}
-	o, err := s.load(orderID)
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -907,28 +907,28 @@ func (s *OrderService) Grab(ctx context.Context, riderID, orderID string) (*orde
 	}
 	now := time.Now().Unix()
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := tx.Orders.AssignRider(o.ID, riderID, r.Name, now)
+		ok, err := tx.Orders.AssignRider(ctx, o.ID, riderID, r.Name, now)
 		if err != nil {
 			return err
 		}
 		if !ok {
 			return errcode.NewStatus(409, errcode.CodeOrderGrabbed, "手慢了，订单已被抢")
 		}
-		if err := s.record(tx, o, order.StatusReady, order.StatusReady, order.ActorDriver, riderID, "骑手抢单", now); err != nil {
+		if err := s.record(ctx, tx, o, order.StatusReady, order.StatusReady, order.ActorDriver, riderID, "骑手抢单", now); err != nil {
 			return err
 		}
-		s.notify(tx, o.UserID, "骑手已接单", "订单 "+o.OrderNo+" 骑手 "+r.Name+" 已接单", "order", o.ID, now)
+		s.notify(ctx, tx, o.UserID, "骑手已接单", "订单 "+o.OrderNo+" 骑手 "+r.Name+" 已接单", "order", o.ID, now)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // Pickup 骑手取货。
 func (s *OrderService) Pickup(ctx context.Context, riderID, orderID, code string) (*order.Order, error) {
-	o, err := s.driverOrder(riderID, orderID)
+	o, err := s.driverOrder(ctx, riderID, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -940,7 +940,7 @@ func (s *OrderService) Pickup(ctx context.Context, riderID, orderID, code string
 	}
 	now := time.Now().Unix()
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.StatusReady, order.OrderDelivering,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.StatusReady, order.OrderDelivering,
 			order.StatusPatch{PickedAt: now}, now)
 		if err != nil {
 			return err
@@ -948,17 +948,17 @@ func (s *OrderService) Pickup(ctx context.Context, riderID, orderID, code string
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单已被处理")
 		}
-		return s.record(tx, o, order.StatusReady, order.OrderDelivering, order.ActorDriver, riderID, "骑手取货", now)
+		return s.record(ctx, tx, o, order.StatusReady, order.OrderDelivering, order.ActorDriver, riderID, "骑手取货", now)
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
 // Deliver 骑手送达。
 func (s *OrderService) Deliver(ctx context.Context, riderID, orderID, code string) (*order.Order, error) {
-	o, err := s.driverOrder(riderID, orderID)
+	o, err := s.driverOrder(ctx, riderID, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -971,7 +971,7 @@ func (s *OrderService) Deliver(ctx context.Context, riderID, orderID, code strin
 	now := time.Now().Unix()
 	earning := round2(o.DeliveryFee * riderShareRate)
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.OrderDelivering, order.StatusDelivered,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.OrderDelivering, order.StatusDelivered,
 			order.StatusPatch{DeliveredAt: now, RiderEarning: &earning}, now)
 		if err != nil {
 			return err
@@ -979,31 +979,31 @@ func (s *OrderService) Deliver(ctx context.Context, riderID, orderID, code strin
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单已被处理")
 		}
-		if err := s.record(tx, o, order.OrderDelivering, order.StatusDelivered, order.ActorDriver, riderID, "骑手送达", now); err != nil {
+		if err := s.record(ctx, tx, o, order.OrderDelivering, order.StatusDelivered, order.ActorDriver, riderID, "骑手送达", now); err != nil {
 			return err
 		}
-		if err := creditWallet(tx, "rider", riderID, earning, "delivery_income", o.ID, "配送收入", now); err != nil {
+		if err := creditWallet(ctx, tx, "rider", riderID, earning, "delivery_income", o.ID, "配送收入", now); err != nil {
 			return err
 		}
-		if r, err := tx.Riders.FindByID(riderID); err == nil {
-			_ = tx.Settlements.Save(&finance.Settlement{
+		if r, err := tx.Riders.FindByID(ctx, riderID); err == nil {
+			_ = tx.Settlements.Save(ctx, &finance.Settlement{
 				RegionID: o.RegionID, Party: r.Name, PartyType: "rider", PartyID: riderID,
 				Type: finance.SettlementRider, Amount: earning, Status: finance.SettlementArrived,
 				Period: time.Unix(now, 0).UTC().Format("2006-01-02"), SettledAt: now,
 				Action: "配送完成自动入账",
 			})
 		}
-		s.notify(tx, o.UserID, "订单已送达", "订单 "+o.OrderNo+" 已送达，请确认收货", "order", o.ID, now)
+		s.notify(ctx, tx, o.UserID, "订单已送达", "订单 "+o.OrderNo+" 已送达，请确认收货", "order", o.ID, now)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(orderID)
+	return s.load(ctx, orderID)
 }
 
-func (s *OrderService) storeOrder(merchantID, orderID string) (*order.Order, error) {
-	o, err := s.load(orderID)
+func (s *OrderService) storeOrder(ctx context.Context, merchantID, orderID string) (*order.Order, error) {
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -1013,8 +1013,8 @@ func (s *OrderService) storeOrder(merchantID, orderID string) (*order.Order, err
 	return o, nil
 }
 
-func (s *OrderService) driverOrder(riderID, orderID string) (*order.Order, error) {
-	o, err := s.load(orderID)
+func (s *OrderService) driverOrder(ctx context.Context, riderID, orderID string) (*order.Order, error) {
+	o, err := s.load(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -1029,7 +1029,7 @@ func (s *OrderService) cancel(ctx context.Context, o *order.Order, actor order.A
 	now := time.Now().Unix()
 	err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
 		if o.CouponID != "" {
-			if err := tx.Coupons.ReleaseByOrder(o.ID, now); err != nil {
+			if err := tx.Coupons.ReleaseByOrder(ctx, o.ID, now); err != nil {
 				return err
 			}
 		}
@@ -1038,24 +1038,24 @@ func (s *OrderService) cancel(ctx context.Context, o *order.Order, actor order.A
 				if it.DishID == "" {
 					continue
 				}
-				if _, err := tx.Catalog.AdjustStock(it.DishID, it.Count); err != nil {
+				if _, err := tx.Catalog.AdjustStock(ctx, it.DishID, it.Count); err != nil {
 					return err
 				}
 			}
 		}
 		if o.PaymentStatus == "paid" {
 			if o.PayMethod == "balance" {
-				if err := creditBalance(tx, o.UserID, o.PayAmount, now); err != nil {
+				if err := creditBalance(ctx, tx, o.UserID, o.PayAmount, now); err != nil {
 					return err
 				}
 			}
-			if p, err := tx.Payments.FindByOrder(o.ID); err == nil && p.Status == order.PaymentPaid {
-				if err := tx.Payments.UpdateStatus(p.ID, order.PaymentRefunded, "", now); err != nil {
+			if p, err := tx.Payments.FindByOrder(ctx, o.ID); err == nil && p.Status == order.PaymentPaid {
+				if err := tx.Payments.UpdateStatus(ctx, p.ID, order.PaymentRefunded, "", now); err != nil {
 					return err
 				}
 			}
 		}
-		ok, err := tx.Orders.UpdateStatus(o.ID, o.Status, order.OrderCanceled, order.StatusPatch{
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, o.Status, order.OrderCanceled, order.StatusPatch{
 			CanceledAt: now, CancelReason: reason, PaymentStatus: refundedStatus(o),
 		}, now)
 		if err != nil {
@@ -1064,20 +1064,20 @@ func (s *OrderService) cancel(ctx context.Context, o *order.Order, actor order.A
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单状态已变化，请刷新后重试")
 		}
-		if err := s.record(tx, o, o.Status, order.OrderCanceled, actor, actorID, reason, now); err != nil {
+		if err := s.record(ctx, tx, o, o.Status, order.OrderCanceled, actor, actorID, reason, now); err != nil {
 			return err
 		}
 		if actor == order.ActorClient {
-			s.notifyMerchant(tx, o, "用户取消订单", "订单 "+o.OrderNo+" 已被用户取消", now)
+			s.notifyMerchant(ctx, tx, o, "用户取消订单", "订单 "+o.OrderNo+" 已被用户取消", now)
 		} else {
-			s.notify(tx, o.UserID, "订单已取消", "订单 "+o.OrderNo+" 已取消："+reason, "order", o.ID, now)
+			s.notify(ctx, tx, o.UserID, "订单已取消", "订单 "+o.OrderNo+" 已取消："+reason, "order", o.ID, now)
 		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return s.load(o.ID)
+	return s.load(ctx, o.ID)
 }
 
 func refundedStatus(o *order.Order) string {
@@ -1088,11 +1088,11 @@ func refundedStatus(o *order.Order) string {
 }
 
 // deductBalance 原子扣减余额：单条件 UPDATE，禁止 Find-then-Save（并发双花）。
-func deductBalance(tx *application.RepoUnit, userID string, amount float64, now int64) error {
-	if _, err := tx.Profiles.FindByUserID(userID); err != nil {
+func deductBalance(ctx context.Context, tx *application.RepoUnit, userID string, amount float64, now int64) error {
+	if _, err := tx.Profiles.FindByUserID(ctx, userID); err != nil {
 		return errcode.New(errcode.CodeInsufficientFund, "余额不足，请更换支付方式")
 	}
-	affected, err := tx.Profiles.AddBalance(userID, -round2(amount), round2(amount), now)
+	affected, err := tx.Profiles.AddBalance(ctx, userID, -round2(amount), round2(amount), now)
 	if err != nil {
 		return err
 	}
@@ -1103,11 +1103,11 @@ func deductBalance(tx *application.RepoUnit, userID string, amount float64, now 
 }
 
 // creditBalance 原子入账余额。
-func creditBalance(tx *application.RepoUnit, userID string, amount float64, now int64) error {
-	if _, err := tx.Profiles.FindByUserID(userID); err != nil {
+func creditBalance(ctx context.Context, tx *application.RepoUnit, userID string, amount float64, now int64) error {
+	if _, err := tx.Profiles.FindByUserID(ctx, userID); err != nil {
 		return err
 	}
-	_, err := tx.Profiles.AddBalance(userID, round2(amount), -1, now)
+	_, err := tx.Profiles.AddBalance(ctx, userID, round2(amount), -1, now)
 	return err
 }
 

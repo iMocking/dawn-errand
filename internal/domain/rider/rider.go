@@ -1,6 +1,8 @@
 // Package rider 骑手（跑手）限界上下文。
 package rider
 
+import "context"
+
 import "dawn-errand/internal/domain/tenant"
 
 // RiderStatus 在线状态。
@@ -101,15 +103,15 @@ type AuditStats struct {
 
 // RiderRepository 骑手仓储端口。
 type RiderRepository interface {
-	Save(r *Rider) error
-	FindByID(id string) (*Rider, error)
-	List(q RiderQuery, scope tenant.Scope) ([]*Rider, int64, error)
-	AuditList(q AuditQuery, scope tenant.Scope) ([]*Rider, int64, error)
-	UpdateAudit(id string, approved bool, reason, operator string, now int64) error
-	UpdateStatus(id string, status RiderStatus, now int64) error
-	Stats(scope tenant.Scope) (*Stats, error)
-	CountByRegion(regionID string) (int64, error)
-	ActiveCountByRegion(regionID string) (int64, error)
-	OnlineCount() (int64, error)
-	TotalCount() (int64, error)
+	Save(ctx context.Context, r *Rider) error
+	FindByID(ctx context.Context, id string) (*Rider, error)
+	List(ctx context.Context, q RiderQuery, scope tenant.Scope) ([]*Rider, int64, error)
+	AuditList(ctx context.Context, q AuditQuery, scope tenant.Scope) ([]*Rider, int64, error)
+	UpdateAudit(ctx context.Context, id string, approved bool, reason, operator string, now int64) error
+	UpdateStatus(ctx context.Context, id string, status RiderStatus, now int64) error
+	Stats(ctx context.Context, scope tenant.Scope) (*Stats, error)
+	CountByRegion(ctx context.Context, regionID string) (int64, error)
+	ActiveCountByRegion(ctx context.Context, regionID string) (int64, error)
+	OnlineCount(ctx context.Context) (int64, error)
+	TotalCount(ctx context.Context) (int64, error)
 }

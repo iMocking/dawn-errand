@@ -1,5 +1,7 @@
 package order
 
+import "context"
+
 // StatusPatch 状态流转时一并写入的字段（零值表示不修改）。
 type StatusPatch struct {
 	RiderID          string
@@ -45,8 +47,8 @@ type Event struct {
 
 // EventRepository 订单事件仓储端口。
 type EventRepository interface {
-	Save(e *Event) error
-	ListByOrder(orderID string) ([]*Event, error)
+	Save(ctx context.Context, e *Event) error
+	ListByOrder(ctx context.Context, orderID string) ([]*Event, error)
 }
 
 // PaymentStatus 支付状态。
@@ -86,12 +88,12 @@ type ReconSummary struct {
 
 // PaymentRepository 支付单仓储端口。
 type PaymentRepository interface {
-	Save(p *Payment) error
-	FindByOrder(orderID string) (*Payment, error)
-	UpdateStatus(id string, status PaymentStatus, tradeNo string, paidAt int64) error
+	Save(ctx context.Context, p *Payment) error
+	FindByOrder(ctx context.Context, orderID string) (*Payment, error)
+	UpdateStatus(ctx context.Context, id string, status PaymentStatus, tradeNo string, paidAt int64) error
 	// SummarizeRecon 聚合指定支付时间窗口的对账口径；regionID 为空表示全平台。
 	// 聚合在仓储层完成（只取轻量列 + 订单批量匹配），禁止逐单 FindByID 造成 N+1。
-	SummarizeRecon(start, end int64, regionID string) (*ReconSummary, error)
+	SummarizeRecon(ctx context.Context, start, end int64, regionID string) (*ReconSummary, error)
 }
 
 // Code 返回订单状态的 App 机器码（后台展示仍用中文 status）。

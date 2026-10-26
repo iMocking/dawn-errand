@@ -99,7 +99,7 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (*UserResult, 
 	var userID string
 	var plainToken string
 	err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		if _, err := tx.Users.FindByEmail(email); err == nil {
+		if _, err := tx.Users.FindByEmail(ctx, email); err == nil {
 			return errcode.New(errcode.CodeEmailAlreadyExists, "该邮箱已注册")
 		}
 		hash, err := s.Hasher.Hash(in.Password)
@@ -111,16 +111,16 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (*UserResult, 
 			ID: ulidgen.New(), Email: email, Name: name, Phone: strings.TrimSpace(in.Phone),
 			Status: identity.UserStatusActive, Role: identity.RoleUser, RegisteredAt: now, UpdatedAt: now,
 		}
-		if err := tx.Users.Save(u); err != nil {
+		if err := tx.Users.Save(ctx, u); err != nil {
 			return err
 		}
-		if err := tx.Credentials.Save(&identity.Credential{
+		if err := tx.Credentials.Save(ctx, &identity.Credential{
 			UserID: u.ID, PasswordHash: hash, UpdatedAt: now,
 		}); err != nil {
 			return err
 		}
 		plainToken = newToken()
-		if err := tx.EmailTokens.Create(&identity.EmailVerificationToken{
+		if err := tx.EmailTokens.Create(ctx, &identity.EmailVerificationToken{
 			ID: ulidgen.New(), UserID: u.ID, TokenHash: hashToken(plainToken),
 			ExpiresAt: now + 24*3600,
 		}); err != nil {
@@ -142,7 +142,7 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (*UserResult, 
 
 // VerifyEmail 邮箱验证。
 func (s *Service) VerifyEmail(ctx context.Context, token string) error {
-	rec, err := s.Repos.EmailTokens.FindByHash(hashToken(strings.TrimSpace(token)))
+	rec, err := s.Repos.EmailTokens.FindByHash(ctx, hashToken(strings.TrimSpace(token)))
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return errcode.New(errcode.CodeTokenInvalid, "验证链接无效或已使用")
@@ -153,16 +153,16 @@ func (s *Service) VerifyEmail(ctx context.Context, token string) error {
 		return errcode.New(errcode.CodeTokenInvalid, "验证链接已过期")
 	}
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		if err := tx.EmailTokens.MarkUsed(rec.ID); err != nil {
+		if err := tx.EmailTokens.MarkUsed(ctx, rec.ID); err != nil {
 			return err
 		}
-		u, err := tx.Users.FindByID(rec.UserID)
+		u, err := tx.Users.FindByID(ctx, rec.UserID)
 		if err != nil {
 			return err
 		}
 		u.EmailVerified = true
 		u.UpdatedAt = time.Now().Unix()
-		return tx.Users.Save(u)
+		return tx.Users.Save(ctx, u)
 	})
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func (s *Service) ResendVerification(ctx context.Context, email string) error {
 	if !ok {
 		return errcode.New(errcode.CodeTooManyRequest, "请求过于频繁，请稍后再试")
 	}
-	u, err := s.Repos.Users.FindByEmail(email)
+	u, err := s.Repos.Users.FindByEmail(ctx, email)
 	if err != nil {
 		return nil // 防枚举
 	}
@@ -192,7 +192,7 @@ func (s *Service) ResendVerification(ctx context.Context, email string) error {
 		return errcode.New(errcode.CodeConflict, "邮箱已验证")
 	}
 	plain := newToken()
-	if err := s.Repos.EmailTokens.Create(&identity.EmailVerificationToken{
+	if err := s.Repos.EmailTokens.Create(ctx, &identity.EmailVerificationToken{
 		ID: ulidgen.New(), UserID: u.ID, TokenHash: hashToken(plain),
 		ExpiresAt: time.Now().Unix() + 24*3600,
 	}); err != nil {
@@ -225,9 +225,9 @@ func (s *Service) Login(ctx context.Context, account, password string) (*LoginRe
 
 	var u *identity.User
 	if ValidateEmail(account) {
-		u, err = s.Repos.Users.FindByEmail(account)
+		u, err = s.Repos.Users.FindByEmail(ctx, account)
 	} else {
-		u, err = s.Repos.Users.FindByPhone(account)
+		u, err = s.Repos.Users.FindByPhone(ctx, account)
 	}
 	if err != nil {
 		s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -240,7 +240,7 @@ func (s *Service) Login(ctx context.Context, account, password string) (*LoginRe
 		// 防枚举：账号不存在与密码错误同响应
 		return nil, errcode.NewStatus(401, errcode.CodeInvalidCredentials, "账号或密码错误")
 	}
-	cred, err := s.Repos.Credentials.FindByUserID(u.ID)
+	cred, err := s.Repos.Credentials.FindByUserID(ctx, u.ID)
 	if err != nil {
 		s.dummyVerify(password)
 		return nil, errcode.NewStatus(401, errcode.CodeInvalidCredentials, "账号或密码错误")
@@ -340,7 +340,7 @@ func (s *Service) LoginBySMS(ctx context.Context, phone, code string) (*LoginRes
 	if err := s.Codes.Delete(ctx, key); err != nil {
 		return nil, err
 	}
-	u, err := s.Repos.Users.FindByPhone(phone)
+	u, err := s.Repos.Users.FindByPhone(ctx, phone)
 	if errors.Is(err, application.ErrNotFound) {
 		u, err = s.autoRegisterByPhone(ctx, phone)
 	}
@@ -368,17 +368,17 @@ func (s *Service) autoRegisterByPhone(ctx context.Context, phone string) (*ident
 		UpdatedAt:     now,
 	}
 	err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		if err := tx.Users.Save(u); err != nil {
+		if err := tx.Users.Save(ctx, u); err != nil {
 			return err
 		}
 		// 无密码账号同样需要凭证行：认证中间件以 session_version 校验会话有效性。
-		if err := tx.Credentials.Save(&identity.Credential{
+		if err := tx.Credentials.Save(ctx, &identity.Credential{
 			UserID: u.ID, PasswordHash: passwordlessHash, UpdatedAt: now,
 		}); err != nil {
 			return err
 		}
 		// 初始化用户资料行（个人中心展示余额/积分等资产）。
-		return tx.Profiles.Save(&userprofile.Profile{
+		return tx.Profiles.Save(ctx, &userprofile.Profile{
 			UserID: u.ID, Level: "Lv.1 新用户", Verified: "未实名",
 			RegisterChannel: "sms_login", UpdatedAt: now,
 		})
@@ -396,7 +396,7 @@ const passwordlessHash = "!"
 // ensureCredential 确保用户存在凭证行；无密码账号使用占位哈希。
 // 认证中间件要求 credential 存在以校验 session_version，缺失会导致登录后全部 401/1006。
 func (s *Service) ensureCredential(ctx context.Context, userID string, now int64) (*identity.Credential, error) {
-	cred, err := s.Repos.Credentials.FindByUserID(userID)
+	cred, err := s.Repos.Credentials.FindByUserID(ctx, userID)
 	if err == nil {
 		return cred, nil
 	}
@@ -406,9 +406,9 @@ func (s *Service) ensureCredential(ctx context.Context, userID string, now int64
 	c := &identity.Credential{
 		UserID: userID, PasswordHash: passwordlessHash, SessionVersion: 0, UpdatedAt: now,
 	}
-	if err := s.Repos.Credentials.Save(c); err != nil {
+	if err := s.Repos.Credentials.Save(ctx, c); err != nil {
 		// 并发下可能已被其他请求创建，回读一次。
-		if again, e := s.Repos.Credentials.FindByUserID(userID); e == nil {
+		if again, e := s.Repos.Credentials.FindByUserID(ctx, userID); e == nil {
 			return again, nil
 		}
 		return nil, err
@@ -454,7 +454,7 @@ func (s *Service) Refresh(ctx context.Context, userID, refreshToken string) (*Lo
 	if err := s.Tokens.VerifyRefreshToken(ctx, userID, refreshToken); err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "刷新令牌无效或已过期")
 	}
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "用户不存在")
 	}
@@ -490,7 +490,7 @@ func (s *Service) RefreshAll(ctx context.Context, userID, refreshToken string) (
 	if err := s.Tokens.VerifyRefreshToken(ctx, userID, refreshToken); err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "刷新令牌无效或已过期")
 	}
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "用户不存在")
 	}
@@ -500,7 +500,7 @@ func (s *Service) RefreshAll(ctx context.Context, userID, refreshToken string) (
 	if _, err := s.ensureCredential(ctx, userID, time.Now().Unix()); err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "凭证不存在")
 	}
-	ver, err := s.Repos.Credentials.BumpSessionVersion(userID)
+	ver, err := s.Repos.Credentials.BumpSessionVersion(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -538,7 +538,7 @@ func (s *Service) Logout(ctx context.Context, userID, refreshToken string, allDe
 		return err
 	}
 	// 提升会话版本使已签发 access token 全部失效。
-	if _, err := s.Repos.Credentials.BumpSessionVersion(userID); err != nil {
+	if _, err := s.Repos.Credentials.BumpSessionVersion(ctx, userID); err != nil {
 		return err
 	}
 	return nil
@@ -546,7 +546,7 @@ func (s *Service) Logout(ctx context.Context, userID, refreshToken string, allDe
 
 // Me 当前用户信息。
 func (s *Service) Me(ctx context.Context, userID string) (*LoginResult, error) {
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "用户不存在")
 	}
@@ -565,12 +565,12 @@ func (s *Service) ForgotPassword(ctx context.Context, email string) error {
 	if !ok {
 		return errcode.New(errcode.CodeTooManyRequest, "请求过于频繁，请稍后再试")
 	}
-	u, err := s.Repos.Users.FindByEmail(email)
+	u, err := s.Repos.Users.FindByEmail(ctx, email)
 	if err != nil {
 		return nil // 防枚举
 	}
 	plain := newToken()
-	if err := s.Repos.PasswordTokens.Create(&identity.PasswordResetToken{
+	if err := s.Repos.PasswordTokens.Create(ctx, &identity.PasswordResetToken{
 		ID: ulidgen.New(), UserID: u.ID, TokenHash: hashToken(plain),
 		ExpiresAt: time.Now().Unix() + 30*60,
 	}); err != nil {
@@ -587,7 +587,7 @@ func (s *Service) ResetPassword(ctx context.Context, token, newPassword string) 
 	if err := ValidatePassword(newPassword); err != nil {
 		return err
 	}
-	rec, err := s.Repos.PasswordTokens.FindByHash(hashToken(strings.TrimSpace(token)))
+	rec, err := s.Repos.PasswordTokens.FindByHash(ctx, hashToken(strings.TrimSpace(token)))
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return errcode.New(errcode.CodeTokenInvalid, "重置链接无效或已使用")
@@ -610,7 +610,7 @@ func (s *Service) ChangePassword(ctx context.Context, userID, oldPassword, newPa
 
 func (s *Service) changePassword(ctx context.Context, userID, resetTokenID, oldPassword, newPassword, action string, isReset bool) error {
 	err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		cred, err := tx.Credentials.FindByUserID(userID)
+		cred, err := tx.Credentials.FindByUserID(ctx, userID)
 		if err != nil && !errors.Is(err, application.ErrNotFound) {
 			return err
 		}
@@ -628,17 +628,17 @@ func (s *Service) changePassword(ctx context.Context, userID, resetTokenID, oldP
 			next = cred.SessionVersion + 1
 		}
 		now := time.Now().Unix()
-		if err := tx.Credentials.Save(&identity.Credential{
+		if err := tx.Credentials.Save(ctx, &identity.Credential{
 			UserID: userID, PasswordHash: hash, SessionVersion: next, UpdatedAt: now,
 		}); err != nil {
 			return err
 		}
 		if resetTokenID != "" {
-			if err := tx.PasswordTokens.MarkUsed(resetTokenID); err != nil {
+			if err := tx.PasswordTokens.MarkUsed(ctx, resetTokenID); err != nil {
 				return err
 			}
 		}
-		return tx.PasswordTokens.DeleteByUser(userID)
+		return tx.PasswordTokens.DeleteByUser(ctx, userID)
 	})
 	if err != nil {
 		return err
@@ -654,7 +654,7 @@ func (s *Service) changePassword(ctx context.Context, userID, resetTokenID, oldP
 
 // GetPrincipal 构建数据隔离主体。
 func (s *Service) GetPrincipal(ctx context.Context, userID string) (*tenant.Principal, error) {
-	u, err := s.Repos.Users.FindByID(userID)
+	u, err := s.Repos.Users.FindByID(ctx, userID)
 	if err != nil {
 		return nil, errcode.NewStatus(401, errcode.CodeTokenInvalid, "用户不存在")
 	}

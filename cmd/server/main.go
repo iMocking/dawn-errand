@@ -22,8 +22,9 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	cfg := config.Load()
-	app, err := assembly.Build(cfg)
+	app, err := assembly.Build(ctx, cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "装配失败:", err)
 		os.Exit(1)
@@ -32,7 +33,7 @@ func main() {
 	defer app.Rdb.Close()
 
 	// 开发环境便捷迁移：ent 自动迁移（幂等）。生产环境请使用 go run ./cmd/migrate up 执行 SQL 迁移。
-	if err := app.Client.Schema.Create(context.Background()); err != nil {
+	if err := app.Client.Schema.Create(ctx); err != nil {
 		fmt.Fprintln(os.Stderr, "schema 迁移失败:", err)
 		os.Exit(1)
 	}

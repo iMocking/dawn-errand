@@ -17,16 +17,16 @@ import (
 
 // Local 本地存储实现 application.StoragePort。
 type Local struct {
-	cfg func() *system.LocalStorageConfig
+	cfg func(context.Context) *system.LocalStorageConfig
 }
 
 // NewLocal 构建本地存储。
-func NewLocal(cfg func() *system.LocalStorageConfig) *Local {
+func NewLocal(cfg func(context.Context) *system.LocalStorageConfig) *Local {
 	return &Local{cfg: cfg}
 }
 
-func (l *Local) config() (*system.LocalStorageConfig, error) {
-	c := l.cfg()
+func (l *Local) config(ctx context.Context) (*system.LocalStorageConfig, error) {
+	c := l.cfg(ctx)
 	if c == nil || c.RootDir == "" {
 		return nil, fmt.Errorf("本地存储未配置")
 	}
@@ -41,7 +41,7 @@ func (l *Local) config() (*system.LocalStorageConfig, error) {
 
 // Put 保存文件到公开桶。校验大小与 MIME，防路径穿越。
 func (l *Local) Put(ctx context.Context, data []byte, filename string, contentType string) (string, error) {
-	c, ext, err := l.validate(data, filename, contentType)
+	c, ext, err := l.validate(ctx, data, filename, contentType)
 	if err != nil {
 		return "", err
 	}
@@ -68,7 +68,7 @@ func (l *Local) Put(ctx context.Context, data []byte, filename string, contentTy
 
 // PutPrivate 保存敏感对象（证件等）到私有桶：不在静态挂载内，仅经鉴权路由读取。
 func (l *Local) PutPrivate(ctx context.Context, data []byte, rel, filename, contentType string) (string, string, error) {
-	c, ext, err := l.validate(data, filename, contentType)
+	c, ext, err := l.validate(ctx, data, filename, contentType)
 	if err != nil {
 		return "", "", err
 	}
@@ -92,7 +92,7 @@ func (l *Local) PutPrivate(ctx context.Context, data []byte, rel, filename, cont
 
 // ReadPrivate 按相对路径读取私有桶对象（拒绝穿越与越界）。
 func (l *Local) ReadPrivate(ctx context.Context, rel string) ([]byte, string, error) {
-	c, err := l.config()
+	c, err := l.config(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -115,8 +115,8 @@ func (l *Local) ReadPrivate(ctx context.Context, rel string) ([]byte, string, er
 }
 
 // validate 公共校验：大小 + MIME + 落盘扩展名白名单。
-func (l *Local) validate(data []byte, filename, contentType string) (*system.LocalStorageConfig, string, error) {
-	c, err := l.config()
+func (l *Local) validate(ctx context.Context, data []byte, filename, contentType string) (*system.LocalStorageConfig, string, error) {
+	c, err := l.config(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -127,7 +127,7 @@ func (l *Local) validate(data []byte, filename, contentType string) (*system.Loc
 		contentType = mime.TypeByExtension(filepath.Ext(filename))
 	}
 	contentType = strings.TrimSpace(strings.Split(contentType, ";")[0])
-	if !l.allowedMIME(contentType) {
+	if !l.allowedMIME(ctx, contentType) {
 		return nil, "", fmt.Errorf("不支持的文件类型 %s", contentType)
 	}
 	// 扩展名由 MIME 决定，忽略客户端文件名后缀，避免「图片内容 + .html 后缀」造成存储型 XSS。
@@ -196,8 +196,8 @@ func sanitizePrivateRel(rel string) (string, error) {
 	return rel, nil
 }
 
-func (l *Local) allowedMIME(mt string) bool {
-	c, _ := l.config()
+func (l *Local) allowedMIME(ctx context.Context, mt string) bool {
+	c, _ := l.config(ctx)
 	for _, a := range c.AllowedMIME {
 		if strings.EqualFold(strings.TrimSpace(strings.Split(a, ";")[0]), mt) {
 			return true
@@ -244,7 +244,7 @@ func sanitizeStem(s string) string {
 
 // TestConnection 检查根目录可写。
 func (l *Local) TestConnection(ctx context.Context) error {
-	c, err := l.config()
+	c, err := l.config(ctx)
 	if err != nil {
 		return err
 	}

@@ -45,7 +45,7 @@ func (s *CouponService) Issue(ctx context.Context, in IssueCouponInput) (*coupon
 	}
 	userID := strings.TrimSpace(in.UserID)
 	if userID == "" && in.Phone != "" {
-		u, err := s.Repos.Users.FindByPhone(strings.TrimSpace(in.Phone))
+		u, err := s.Repos.Users.FindByPhone(ctx, strings.TrimSpace(in.Phone))
 		if err != nil {
 			return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
 		}
@@ -54,12 +54,12 @@ func (s *CouponService) Issue(ctx context.Context, in IssueCouponInput) (*coupon
 	if userID == "" {
 		return nil, errcode.New(errcode.CodeBadRequest, "需指定 userId 或 phone")
 	}
-	if _, err := s.Repos.Users.FindByID(userID); err != nil {
+	if _, err := s.Repos.Users.FindByID(ctx, userID); err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "用户不存在")
 	}
 	merchantID := strings.TrimSpace(in.MerchantID)
 	if merchantID != "" {
-		if _, err := s.Repos.Merchants.FindByID(merchantID); err != nil {
+		if _, err := s.Repos.Merchants.FindByID(ctx, merchantID); err != nil {
 			return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
 		}
 	}
@@ -68,7 +68,7 @@ func (s *CouponService) Issue(ctx context.Context, in IssueCouponInput) (*coupon
 		Amount: in.Amount, MinSpend: in.MinSpend, Status: coupon.StatusUnused,
 		ExpiresAt: in.ExpiresAt,
 	}
-	if err := s.Repos.Coupons.Save(c); err != nil {
+	if err := s.Repos.Coupons.Save(ctx, c); err != nil {
 		return nil, err
 	}
 	return c, nil
@@ -82,5 +82,5 @@ func (s *CouponService) List(ctx context.Context, page, pageSize int, status, us
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 20
 	}
-	return s.Repos.Coupons.ListAll(page, pageSize, status, userID)
+	return s.Repos.Coupons.ListAll(ctx, page, pageSize, status, userID)
 }

@@ -46,7 +46,7 @@ func (s *WorkspaceService) Messages(ctx context.Context, limit int, sc tenant.Sc
 	var badges BadgeCounts
 	var list []Message
 
-	complaints, total, err := s.Repos.Complaints.List(complaint.Query{
+	complaints, total, err := s.Repos.Complaints.List(ctx, complaint.Query{
 		Page: 1, PageSize: limit, Status: string(complaint.StatusPending),
 	}, sc)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *WorkspaceService) Messages(ctx context.Context, limit int, sc tenant.Sc
 		})
 	}
 
-	merchants, total, err := s.Repos.Merchants.AuditList(merchant.AuditQuery{
+	merchants, total, err := s.Repos.Merchants.AuditList(ctx, merchant.AuditQuery{
 		Page: 1, PageSize: limit, Status: string(merchant.AuditPending),
 	}, sc)
 	if err != nil {
@@ -75,7 +75,7 @@ func (s *WorkspaceService) Messages(ctx context.Context, limit int, sc tenant.Sc
 		})
 	}
 
-	riders, total, err := s.Repos.Riders.AuditList(rider.AuditQuery{
+	riders, total, err := s.Repos.Riders.AuditList(ctx, rider.AuditQuery{
 		Page: 1, PageSize: limit, Status: string(rider.AuditPending),
 	}, sc)
 	if err != nil {
@@ -89,7 +89,7 @@ func (s *WorkspaceService) Messages(ctx context.Context, limit int, sc tenant.Sc
 		})
 	}
 
-	withdrawals, total, err := s.Repos.Withdrawals.List(finance.WithdrawQuery{
+	withdrawals, total, err := s.Repos.Withdrawals.List(ctx, finance.WithdrawQuery{
 		Page: 1, PageSize: limit, Status: string(finance.WithdrawPending),
 	}, sc)
 	if err != nil {
@@ -104,7 +104,7 @@ func (s *WorkspaceService) Messages(ctx context.Context, limit int, sc tenant.Sc
 		})
 	}
 
-	anns, _, err := s.Repos.Announcements.List(cms.AnnouncementQuery{
+	anns, _, err := s.Repos.Announcements.List(ctx, cms.AnnouncementQuery{
 		Page: 1, PageSize: 5, Status: string(cms.AnnPublished),
 	}, sc)
 	if err != nil {

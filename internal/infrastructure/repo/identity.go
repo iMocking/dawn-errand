@@ -17,8 +17,7 @@ import (
 // UserRepo 实现 identity.UserRepository。
 type UserRepo struct{ client *ent.Client }
 
-func (r UserRepo) Save(u *identity.User) error {
-	ctx := context.Background()
+func (r UserRepo) Save(ctx context.Context, u *identity.User) error {
 	if u.ID == "" {
 		u.ID = newULID()
 	}
@@ -65,8 +64,8 @@ func toUser(e *ent.User) *identity.User {
 	}
 }
 
-func (r UserRepo) FindByID(id string) (*identity.User, error) {
-	e, err := r.client.User.Get(context.Background(), id)
+func (r UserRepo) FindByID(ctx context.Context, id string) (*identity.User, error) {
+	e, err := r.client.User.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -76,8 +75,8 @@ func (r UserRepo) FindByID(id string) (*identity.User, error) {
 	return toUser(e), nil
 }
 
-func (r UserRepo) FindByEmail(email string) (*identity.User, error) {
-	e, err := r.client.User.Query().Where(user.EmailEqualFold(email)).Only(context.Background())
+func (r UserRepo) FindByEmail(ctx context.Context, email string) (*identity.User, error) {
+	e, err := r.client.User.Query().Where(user.EmailEqualFold(email)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -87,11 +86,11 @@ func (r UserRepo) FindByEmail(email string) (*identity.User, error) {
 	return toUser(e), nil
 }
 
-func (r UserRepo) FindByPhone(phone string) (*identity.User, error) {
+func (r UserRepo) FindByPhone(ctx context.Context, phone string) (*identity.User, error) {
 	if phone == "" {
 		return nil, ErrNotFound
 	}
-	e, err := r.client.User.Query().Where(user.PhoneEqualFold(phone)).Only(context.Background())
+	e, err := r.client.User.Query().Where(user.PhoneEqualFold(phone)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -101,8 +100,7 @@ func (r UserRepo) FindByPhone(phone string) (*identity.User, error) {
 	return toUser(e), nil
 }
 
-func (r UserRepo) List(q identity.UserQuery, sc tenant.Scope) ([]*identity.User, int64, error) {
-	ctx := context.Background()
+func (r UserRepo) List(ctx context.Context, q identity.UserQuery, sc tenant.Scope) ([]*identity.User, int64, error) {
 	bq := r.client.User.Query()
 	scopeUser(bq, sc)
 	if q.Status != "" {
@@ -131,39 +129,38 @@ func (r UserRepo) List(q identity.UserQuery, sc tenant.Scope) ([]*identity.User,
 	return out, int64(total), nil
 }
 
-func (r UserRepo) UpdateStatus(id string, status identity.UserStatus) error {
+func (r UserRepo) UpdateStatus(ctx context.Context, id string, status identity.UserStatus) error {
 	err := r.client.User.UpdateOneID(id).
 		SetStatus(string(status)).SetUpdatedAt(nowSec()).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
 
-func (r UserRepo) UpdateRole(id string, role string) error {
+func (r UserRepo) UpdateRole(ctx context.Context, id string, role string) error {
 	err := r.client.User.UpdateOneID(id).
 		SetRole(role).SetUpdatedAt(nowSec()).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
 
-func (r UserRepo) CountRegisteredSince(sc tenant.Scope, since int64) (int64, error) {
+func (r UserRepo) CountRegisteredSince(ctx context.Context, sc tenant.Scope, since int64) (int64, error) {
 	bq := r.client.User.Query()
 	scopeUser(bq, sc)
-	n, err := bq.Where(user.RegisteredAtGTE(since)).Count(context.Background())
+	n, err := bq.Where(user.RegisteredAtGTE(since)).Count(ctx)
 	return int64(n), err
 }
 
-func (r UserRepo) CountStatus(sc tenant.Scope, status identity.UserStatus) (int64, error) {
+func (r UserRepo) CountStatus(ctx context.Context, sc tenant.Scope, status identity.UserStatus) (int64, error) {
 	bq := r.client.User.Query()
 	scopeUser(bq, sc)
-	n, err := bq.Where(user.Status(string(status))).Count(context.Background())
+	n, err := bq.Where(user.Status(string(status))).Count(ctx)
 	return int64(n), err
 }
 
 // CredentialRepo 实现 identity.CredentialRepository。
 type CredentialRepo struct{ client *ent.Client }
 
-func (r CredentialRepo) Save(c *identity.Credential) error {
-	ctx := context.Background()
+func (r CredentialRepo) Save(ctx context.Context, c *identity.Credential) error {
 	exists, err := r.client.Credential.Query().Where(credential.UserID(c.UserID)).Exist(ctx)
 	if err != nil {
 		return err
@@ -181,8 +178,8 @@ func (r CredentialRepo) Save(c *identity.Credential) error {
 		Exec(ctx)
 }
 
-func (r CredentialRepo) FindByUserID(userID string) (*identity.Credential, error) {
-	e, err := r.client.Credential.Query().Where(credential.UserID(userID)).Only(context.Background())
+func (r CredentialRepo) FindByUserID(ctx context.Context, userID string) (*identity.Credential, error) {
+	e, err := r.client.Credential.Query().Where(credential.UserID(userID)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -197,9 +194,8 @@ func (r CredentialRepo) FindByUserID(userID string) (*identity.Credential, error
 	}, nil
 }
 
-func (r CredentialRepo) BumpSessionVersion(userID string) (int64, error) {
-	ctx := context.Background()
-	cur, err := r.FindByUserID(userID)
+func (r CredentialRepo) BumpSessionVersion(ctx context.Context, userID string) (int64, error) {
+	cur, err := r.FindByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			// 无凭证时创建初始版本为 1。
@@ -227,20 +223,20 @@ func (r CredentialRepo) BumpSessionVersion(userID string) (int64, error) {
 // EmailTokenRepo 实现 identity.EmailTokenRepository。
 type EmailTokenRepo struct{ client *ent.Client }
 
-func (r EmailTokenRepo) Create(t *identity.EmailVerificationToken) error {
+func (r EmailTokenRepo) Create(ctx context.Context, t *identity.EmailVerificationToken) error {
 	if t.ID == "" {
 		t.ID = newULID()
 	}
 	return r.client.EmailVerificationToken.Create().
 		SetID(t.ID).SetUserID(t.UserID).SetTokenHash(t.TokenHash).
 		SetExpiresAt(t.ExpiresAt).SetUsedAt(t.UsedAt).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r EmailTokenRepo) FindByHash(hash string) (*identity.EmailVerificationToken, error) {
+func (r EmailTokenRepo) FindByHash(ctx context.Context, hash string) (*identity.EmailVerificationToken, error) {
 	e, err := r.client.EmailVerificationToken.Query().
 		Where(emailverificationtoken.TokenHash(hash), emailverificationtoken.UsedAt(0)).
-		Only(context.Background())
+		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -253,34 +249,34 @@ func (r EmailTokenRepo) FindByHash(hash string) (*identity.EmailVerificationToke
 	}, nil
 }
 
-func (r EmailTokenRepo) MarkUsed(id string) error {
-	return r.client.EmailVerificationToken.UpdateOneID(id).SetUsedAt(nowSec()).Exec(context.Background())
+func (r EmailTokenRepo) MarkUsed(ctx context.Context, id string) error {
+	return r.client.EmailVerificationToken.UpdateOneID(id).SetUsedAt(nowSec()).Exec(ctx)
 }
 
-func (r EmailTokenRepo) DeleteExpired(now int64) error {
+func (r EmailTokenRepo) DeleteExpired(ctx context.Context, now int64) error {
 	_, err := r.client.EmailVerificationToken.Delete().
 		Where(emailverificationtoken.ExpiresAtLT(now)).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
 
 // PasswordTokenRepo 实现 identity.PasswordTokenRepository。
 type PasswordTokenRepo struct{ client *ent.Client }
 
-func (r PasswordTokenRepo) Create(t *identity.PasswordResetToken) error {
+func (r PasswordTokenRepo) Create(ctx context.Context, t *identity.PasswordResetToken) error {
 	if t.ID == "" {
 		t.ID = newULID()
 	}
 	return r.client.PasswordResetToken.Create().
 		SetID(t.ID).SetUserID(t.UserID).SetTokenHash(t.TokenHash).
 		SetExpiresAt(t.ExpiresAt).SetUsedAt(t.UsedAt).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r PasswordTokenRepo) FindByHash(hash string) (*identity.PasswordResetToken, error) {
+func (r PasswordTokenRepo) FindByHash(ctx context.Context, hash string) (*identity.PasswordResetToken, error) {
 	e, err := r.client.PasswordResetToken.Query().
 		Where(passwordresettoken.TokenHash(hash), passwordresettoken.UsedAt(0)).
-		Only(context.Background())
+		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -293,21 +289,21 @@ func (r PasswordTokenRepo) FindByHash(hash string) (*identity.PasswordResetToken
 	}, nil
 }
 
-func (r PasswordTokenRepo) MarkUsed(id string) error {
-	return r.client.PasswordResetToken.UpdateOneID(id).SetUsedAt(nowSec()).Exec(context.Background())
+func (r PasswordTokenRepo) MarkUsed(ctx context.Context, id string) error {
+	return r.client.PasswordResetToken.UpdateOneID(id).SetUsedAt(nowSec()).Exec(ctx)
 }
 
-func (r PasswordTokenRepo) DeleteExpired(now int64) error {
+func (r PasswordTokenRepo) DeleteExpired(ctx context.Context, now int64) error {
 	_, err := r.client.PasswordResetToken.Delete().
 		Where(passwordresettoken.ExpiresAtLT(now)).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
 
-func (r PasswordTokenRepo) DeleteByUser(userID string) error {
+func (r PasswordTokenRepo) DeleteByUser(ctx context.Context, userID string) error {
 	_, err := r.client.PasswordResetToken.Delete().
 		Where(passwordresettoken.UserID(userID)).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
 

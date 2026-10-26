@@ -13,8 +13,7 @@ import (
 // MerchantRepo 实现 merchant.MerchantRepository。
 type MerchantRepo struct{ client *ent.Client }
 
-func (r MerchantRepo) Save(m *merchant.Merchant) error {
-	ctx := context.Background()
+func (r MerchantRepo) Save(ctx context.Context, m *merchant.Merchant) error {
 	if m.ID == "" {
 		m.ID = newULID()
 	}
@@ -95,8 +94,8 @@ func toMerchant(e *ent.Merchant) *merchant.Merchant {
 	return m
 }
 
-func (r MerchantRepo) FindByID(id string) (*merchant.Merchant, error) {
-	e, err := r.client.Merchant.Get(context.Background(), id)
+func (r MerchantRepo) FindByID(ctx context.Context, id string) (*merchant.Merchant, error) {
+	e, err := r.client.Merchant.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -106,8 +105,7 @@ func (r MerchantRepo) FindByID(id string) (*merchant.Merchant, error) {
 	return toMerchant(e), nil
 }
 
-func (r MerchantRepo) List(q merchant.MerchantQuery, sc tenant.Scope) ([]*merchant.Merchant, int64, error) {
-	ctx := context.Background()
+func (r MerchantRepo) List(ctx context.Context, q merchant.MerchantQuery, sc tenant.Scope) ([]*merchant.Merchant, int64, error) {
 	bq := r.client.Merchant.Query()
 	scopeMerchant(bq, sc)
 	if s := strings.TrimSpace(q.Status); s != "" {
@@ -137,8 +135,7 @@ func (r MerchantRepo) List(q merchant.MerchantQuery, sc tenant.Scope) ([]*mercha
 }
 
 // ListForClient C 端商家列表：区域内、审核通过、未封禁；营业中优先。
-func (r MerchantRepo) ListForClient(regionID, keyword, category string, page, pageSize int) ([]*merchant.Merchant, int64, error) {
-	ctx := context.Background()
+func (r MerchantRepo) ListForClient(ctx context.Context, regionID, keyword, category string, page, pageSize int) ([]*merchant.Merchant, int64, error) {
 	bq := r.client.Merchant.Query().
 		Where(entmerchant.RegionID(regionID),
 			entmerchant.AuditStatus(string(merchant.AuditApproved)),
@@ -169,8 +166,7 @@ func (r MerchantRepo) ListForClient(regionID, keyword, category string, page, pa
 	return out, int64(total), nil
 }
 
-func (r MerchantRepo) AuditList(q merchant.AuditQuery, sc tenant.Scope) ([]*merchant.Merchant, int64, error) {
-	ctx := context.Background()
+func (r MerchantRepo) AuditList(ctx context.Context, q merchant.AuditQuery, sc tenant.Scope) ([]*merchant.Merchant, int64, error) {
 	bq := r.client.Merchant.Query()
 	scopeMerchant(bq, sc)
 	if s := strings.TrimSpace(q.Status); s != "" {
@@ -203,8 +199,7 @@ func (r MerchantRepo) AuditList(q merchant.AuditQuery, sc tenant.Scope) ([]*merc
 	return out, int64(total), nil
 }
 
-func (r MerchantRepo) UpdateAudit(id string, approved bool, reason, operator string, now int64) error {
-	ctx := context.Background()
+func (r MerchantRepo) UpdateAudit(ctx context.Context, id string, approved bool, reason, operator string, now int64) error {
 	status := string(merchant.AuditApproved)
 	if !approved {
 		status = string(merchant.AuditRejected)
@@ -220,14 +215,13 @@ func (r MerchantRepo) UpdateAudit(id string, approved bool, reason, operator str
 	return err
 }
 
-func (r MerchantRepo) UpdateStatus(id string, status merchant.MerchantStatus, now int64) error {
+func (r MerchantRepo) UpdateStatus(ctx context.Context, id string, status merchant.MerchantStatus, now int64) error {
 	err := r.client.Merchant.UpdateOneID(id).
-		SetStatus(string(status)).SetUpdatedAt(now).Exec(context.Background())
+		SetStatus(string(status)).SetUpdatedAt(now).Exec(ctx)
 	return err
 }
 
-func (r MerchantRepo) Stats(sc tenant.Scope) (*merchant.Stats, error) {
-	ctx := context.Background()
+func (r MerchantRepo) Stats(ctx context.Context, sc tenant.Scope) (*merchant.Stats, error) {
 	base := func() *ent.MerchantQuery {
 		bq := r.client.Merchant.Query()
 		scopeMerchant(bq, sc)
@@ -265,26 +259,26 @@ func (r MerchantRepo) Stats(sc tenant.Scope) (*merchant.Stats, error) {
 	}, nil
 }
 
-func (r MerchantRepo) CountByRegion(regionID string) (int64, error) {
-	n, err := r.client.Merchant.Query().Where(entmerchant.RegionID(regionID)).Count(context.Background())
+func (r MerchantRepo) CountByRegion(ctx context.Context, regionID string) (int64, error) {
+	n, err := r.client.Merchant.Query().Where(entmerchant.RegionID(regionID)).Count(ctx)
 	return int64(n), err
 }
 
-func (r MerchantRepo) OnlineCountByRegion(regionID string) (int64, error) {
+func (r MerchantRepo) OnlineCountByRegion(ctx context.Context, regionID string) (int64, error) {
 	n, err := r.client.Merchant.Query().
 		Where(entmerchant.RegionID(regionID), entmerchant.Status(string(merchant.MerchantStatusOpen))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r MerchantRepo) CountAll() (int64, error) {
-	n, err := r.client.Merchant.Query().Count(context.Background())
+func (r MerchantRepo) CountAll(ctx context.Context) (int64, error) {
+	n, err := r.client.Merchant.Query().Count(ctx)
 	return int64(n), err
 }
 
-func (r MerchantRepo) CountWeekNew(now int64) (int64, error) {
+func (r MerchantRepo) CountWeekNew(ctx context.Context, now int64) (int64, error) {
 	n, err := r.client.Merchant.Query().
 		Where(entmerchant.JoinedAtGTE(daysAgoStart(now, 7))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }

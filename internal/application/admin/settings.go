@@ -50,7 +50,7 @@ type SettingsResult struct {
 
 // GetSettings 服务区域列表（区域站长仅本区域）。
 func (s *SettingsService) GetSettings(ctx context.Context, sc tenant.Scope) (*SettingsResult, error) {
-	all, err := s.Repos.Regions.List()
+	all, err := s.Repos.Regions.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (s *SettingsService) SaveArea(ctx context.Context, in SaveAreaAction, opera
 			area.ID = ulidgen.New()
 		}
 		objectID = area.ID
-		if err := s.Repos.Regions.Save(area); err != nil {
+		if err := s.Repos.Regions.Save(ctx, area); err != nil {
 			return err
 		}
 	case "disable":
@@ -140,13 +140,13 @@ func (s *SettingsService) SaveArea(ctx context.Context, in SaveAreaAction, opera
 			return errcode.New(errcode.CodeBadRequest, "缺少区域 id")
 		}
 		objectID = in.Area.ID
-		r, err := s.Repos.Regions.FindByID(objectID)
+		r, err := s.Repos.Regions.FindByID(ctx, objectID)
 		if err != nil {
 			return err
 		}
 		r.Status = tenant.RegionStatusPreparing
 		r.UpdatedAt = now
-		if err := s.Repos.Regions.Save(r); err != nil {
+		if err := s.Repos.Regions.Save(ctx, r); err != nil {
 			return err
 		}
 	case "delete":
@@ -154,7 +154,7 @@ func (s *SettingsService) SaveArea(ctx context.Context, in SaveAreaAction, opera
 			return errcode.New(errcode.CodeBadRequest, "缺少区域 id")
 		}
 		objectID = in.Area.ID
-		if err := s.Repos.Regions.Delete(objectID); err != nil {
+		if err := s.Repos.Regions.Delete(ctx, objectID); err != nil {
 			return err
 		}
 	default:
@@ -172,7 +172,7 @@ func (s *SettingsService) SaveArea(ctx context.Context, in SaveAreaAction, opera
 
 // GetFeeRules 费率规则列表。
 func (s *SettingsService) GetFeeRules(ctx context.Context, sc tenant.Scope) ([]*cms.FeeRule, error) {
-	rules, err := s.Repos.FeeRules.List(sc)
+	rules, err := s.Repos.FeeRules.List(ctx, sc)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func (s *SettingsService) SaveFeeRule(ctx context.Context, in SaveFeeRuleInput, 
 	if rule.ID == "" {
 		rule.ID = ulidgen.New()
 	}
-	if err := s.Repos.FeeRules.Save(rule); err != nil {
+	if err := s.Repos.FeeRules.Save(ctx, rule); err != nil {
 		return err
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -262,7 +262,7 @@ func (s *SettingsService) SaveFeeRule(ctx context.Context, in SaveFeeRuleInput, 
 // ListAnnouncements 公告列表。
 func (s *SettingsService) ListAnnouncements(ctx context.Context, q cms.AnnouncementQuery, sc tenant.Scope) ([]*cms.Announcement, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Announcements.List(q, sc)
+	return s.Repos.Announcements.List(ctx, q, sc)
 }
 
 // SaveAnnouncementInput 公告写入白名单。
@@ -356,7 +356,7 @@ func (s *SettingsService) SaveAnnouncement(ctx context.Context, in SaveAnnouncem
 		objectID = ann.ID
 		// 编辑保留原行的 created_at / action_name / stats：白名单不含这些字段，
 		// 若按零值整行覆盖，公告的创建时间、按钮文案与推送统计会被清空。
-		if prev, ferr := s.Repos.Announcements.FindByID(ann.ID); ferr == nil && prev != nil {
+		if prev, ferr := s.Repos.Announcements.FindByID(ctx, ann.ID); ferr == nil && prev != nil {
 			ann.CreatedAt = prev.CreatedAt
 			ann.ActionName = prev.ActionName
 			ann.Stats = prev.Stats
@@ -364,7 +364,7 @@ func (s *SettingsService) SaveAnnouncement(ctx context.Context, in SaveAnnouncem
 			ann.CreatedAt = now
 			ann.ActionName = "发布"
 		}
-		if err := s.Repos.Announcements.Save(ann); err != nil {
+		if err := s.Repos.Announcements.Save(ctx, ann); err != nil {
 			return err
 		}
 	case "publish", "offline", "review", "withdraw":
@@ -377,7 +377,7 @@ func (s *SettingsService) SaveAnnouncement(ctx context.Context, in SaveAnnouncem
 			"review":   cms.AnnReviewing,
 			"withdraw": cms.AnnScheduled,
 		}[action]
-		if err := s.Repos.Announcements.UpdateStatus(objectID, target, now); err != nil {
+		if err := s.Repos.Announcements.UpdateStatus(ctx, objectID, target, now); err != nil {
 			return err
 		}
 	default:

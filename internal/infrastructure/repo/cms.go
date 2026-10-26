@@ -14,8 +14,7 @@ import (
 // AnnouncementRepo 实现 cms.AnnouncementRepository。
 type AnnouncementRepo struct{ client *ent.Client }
 
-func (r AnnouncementRepo) Save(a *cms.Announcement) error {
-	ctx := context.Background()
+func (r AnnouncementRepo) Save(ctx context.Context, a *cms.Announcement) error {
 	if a.ID == "" {
 		a.ID = newULID()
 	}
@@ -60,8 +59,8 @@ func toAnnouncement(e *ent.Announcement) *cms.Announcement {
 	return a
 }
 
-func (r AnnouncementRepo) FindByID(id string) (*cms.Announcement, error) {
-	e, err := r.client.Announcement.Get(context.Background(), id)
+func (r AnnouncementRepo) FindByID(ctx context.Context, id string) (*cms.Announcement, error) {
+	e, err := r.client.Announcement.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -71,8 +70,7 @@ func (r AnnouncementRepo) FindByID(id string) (*cms.Announcement, error) {
 	return toAnnouncement(e), nil
 }
 
-func (r AnnouncementRepo) List(q cms.AnnouncementQuery, sc tenant.Scope) ([]*cms.Announcement, int64, error) {
-	ctx := context.Background()
+func (r AnnouncementRepo) List(ctx context.Context, q cms.AnnouncementQuery, sc tenant.Scope) ([]*cms.Announcement, int64, error) {
 	bq := r.client.Announcement.Query()
 	if s := strings.TrimSpace(q.Status); s != "" {
 		bq.Where(entannouncement.Status(s))
@@ -99,14 +97,14 @@ func (r AnnouncementRepo) List(q cms.AnnouncementQuery, sc tenant.Scope) ([]*cms
 	return out, int64(total), nil
 }
 
-func (r AnnouncementRepo) ListDueScheduled(now int64) ([]*cms.Announcement, error) {
+func (r AnnouncementRepo) ListDueScheduled(ctx context.Context, now int64) ([]*cms.Announcement, error) {
 	rows, err := r.client.Announcement.Query().
 		Where(
 			entannouncement.Status(string(cms.AnnScheduled)),
 			entannouncement.PlannedAtGT(0),
 			entannouncement.PlannedAtLTE(now),
 		).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -117,26 +115,25 @@ func (r AnnouncementRepo) ListDueScheduled(now int64) ([]*cms.Announcement, erro
 	return out, nil
 }
 
-func (r AnnouncementRepo) MarkPublished(id string, now int64) error {
+func (r AnnouncementRepo) MarkPublished(ctx context.Context, id string, now int64) error {
 	err := r.client.Announcement.UpdateOneID(id).
 		SetStatus(string(cms.AnnPublished)).SetPublishedAt(now).SetActionName("下线").
 		SetUpdatedAt(now).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
 
-func (r AnnouncementRepo) UpdateStatus(id string, status cms.AnnouncementStatus, now int64) error {
+func (r AnnouncementRepo) UpdateStatus(ctx context.Context, id string, status cms.AnnouncementStatus, now int64) error {
 	err := r.client.Announcement.UpdateOneID(id).
 		SetStatus(string(status)).SetUpdatedAt(now).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
 
 // FeeRuleRepo 实现 cms.FeeRuleRepository。
 type FeeRuleRepo struct{ client *ent.Client }
 
-func (r FeeRuleRepo) Save(f *cms.FeeRule) error {
-	ctx := context.Background()
+func (r FeeRuleRepo) Save(ctx context.Context, f *cms.FeeRule) error {
 	if f.ID == "" {
 		f.ID = newULID()
 	}
@@ -177,10 +174,10 @@ func toFeeRule(e *ent.FeeRule) *cms.FeeRule {
 	}
 }
 
-func (r FeeRuleRepo) List(sc tenant.Scope) ([]*cms.FeeRule, error) {
+func (r FeeRuleRepo) List(ctx context.Context, sc tenant.Scope) ([]*cms.FeeRule, error) {
 	rows, err := r.client.FeeRule.Query().
 		Order(ent.Asc(entfeerule.FieldCategory), ent.Asc(entfeerule.FieldName)).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -191,8 +188,8 @@ func (r FeeRuleRepo) List(sc tenant.Scope) ([]*cms.FeeRule, error) {
 	return out, nil
 }
 
-func (r FeeRuleRepo) FindByID(id string) (*cms.FeeRule, error) {
-	e, err := r.client.FeeRule.Get(context.Background(), id)
+func (r FeeRuleRepo) FindByID(ctx context.Context, id string) (*cms.FeeRule, error) {
+	e, err := r.client.FeeRule.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -202,6 +199,6 @@ func (r FeeRuleRepo) FindByID(id string) (*cms.FeeRule, error) {
 	return toFeeRule(e), nil
 }
 
-func (r FeeRuleRepo) Delete(id string) error {
-	return r.client.FeeRule.DeleteOneID(id).Exec(context.Background())
+func (r FeeRuleRepo) Delete(ctx context.Context, id string) error {
+	return r.client.FeeRule.DeleteOneID(id).Exec(ctx)
 }

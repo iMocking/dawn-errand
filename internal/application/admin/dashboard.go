@@ -42,35 +42,35 @@ type DashboardService struct {
 // Get 获取总览数据（scope 强制隔离）。
 func (s *DashboardService) Get(ctx context.Context, sc tenant.Scope) (*DashboardData, error) {
 	now := time.Now().Unix()
-	os, err := s.Repos.Orders.Stats(sc, now)
+	os, err := s.Repos.Orders.Stats(ctx, sc, now)
 	if err != nil {
 		return nil, err
 	}
-	rs, err := s.Repos.Riders.Stats(sc)
+	rs, err := s.Repos.Riders.Stats(ctx, sc)
 	if err != nil {
 		return nil, err
 	}
-	ms, err := s.Repos.Merchants.Stats(sc)
+	ms, err := s.Repos.Merchants.Stats(ctx, sc)
 	if err != nil {
 		return nil, err
 	}
-	trend, err := s.Repos.Orders.Trend7d(sc, now)
+	trend, err := s.Repos.Orders.Trend7d(ctx, sc, now)
 	if err != nil {
 		return nil, err
 	}
-	dist, err := s.Repos.Orders.CountByType(sc)
+	dist, err := s.Repos.Orders.CountByType(ctx, sc)
 	if err != nil {
 		return nil, err
 	}
-	recent, _, err := s.Repos.Orders.List(order.Query{Page: 1, PageSize: 8}, sc)
+	recent, _, err := s.Repos.Orders.List(ctx, order.Query{Page: 1, PageSize: 8}, sc)
 	if err != nil {
 		return nil, err
 	}
-	wd, err := s.Repos.Withdrawals.Stats(sc, now)
+	wd, err := s.Repos.Withdrawals.Stats(ctx, sc, now)
 	if err != nil {
 		return nil, err
 	}
-	_, pendingComplaints, err := s.Repos.Complaints.List(complaint.Query{
+	_, pendingComplaints, err := s.Repos.Complaints.List(ctx, complaint.Query{
 		Page: 1, PageSize: 1, Status: "待处理",
 	}, sc)
 	if err != nil {
@@ -102,22 +102,22 @@ func (s *OrdersService) List(ctx context.Context, q order.Query, sc tenant.Scope
 	if q.PageSize < 1 || q.PageSize > 200 {
 		q.PageSize = 10
 	}
-	return s.Repos.Orders.List(q, sc)
+	return s.Repos.Orders.List(ctx, q, sc)
 }
 
 // CountByRegion 区域今日订单数（settings 页统计用）。
 func (s *OrdersService) CountByRegion(ctx context.Context, regionID string, now int64) (int64, error) {
-	return s.Repos.Orders.CountByRegion(regionID, now)
+	return s.Repos.Orders.CountByRegion(ctx, regionID, now)
 }
 
 // Events 订单事件时间线（后台详情用）。
 func (s *OrdersService) Events(ctx context.Context, id string) ([]*order.Event, error) {
-	return s.Repos.OrderEvents.ListByOrder(id)
+	return s.Repos.OrderEvents.ListByOrder(ctx, id)
 }
 
 // Detail 订单详情（对象级数据隔离）。
 func (s *OrdersService) Detail(ctx context.Context, id string, sc tenant.Scope) (*order.Order, error) {
-	o, err := s.Repos.Orders.FindByID(id)
+	o, err := s.Repos.Orders.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")

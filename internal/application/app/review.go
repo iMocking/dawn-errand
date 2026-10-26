@@ -49,7 +49,7 @@ func (s *ReviewService) Submit(ctx context.Context, userID, orderID string, in R
 			return nil, nil, errcode.New(errcode.CodeBadRequest, "标签过长")
 		}
 	}
-	o, err := s.Repos.Orders.FindByID(orderID)
+	o, err := s.Repos.Orders.FindByID(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")
@@ -59,7 +59,7 @@ func (s *ReviewService) Submit(ctx context.Context, userID, orderID string, in R
 	if o.UserID != userID {
 		return nil, nil, errcode.NewStatus(404, errcode.CodeOrderNotFound, "订单不存在")
 	}
-	if _, err := s.Repos.Reviews.FindByOrder(orderID); err == nil {
+	if _, err := s.Repos.Reviews.FindByOrder(ctx, orderID); err == nil {
 		return nil, nil, errcode.New(errcode.CodeOrderDuplicate, "该订单已评价")
 	} else if !errors.Is(err, application.ErrNotFound) {
 		return nil, nil, err
@@ -77,10 +77,10 @@ func (s *ReviewService) Submit(ctx context.Context, userID, orderID string, in R
 	}
 	var merchantIncome float64
 	err = s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-		if err := tx.Reviews.Save(rv); err != nil {
+		if err := tx.Reviews.Save(ctx, rv); err != nil {
 			return err
 		}
-		ok, err := tx.Orders.UpdateStatus(o.ID, order.StatusPendingReview, order.OrderDone,
+		ok, err := tx.Orders.UpdateStatus(ctx, o.ID, order.StatusPendingReview, order.OrderDone,
 			order.StatusPatch{ReviewedAt: now}, now)
 		if err != nil {
 			return err
@@ -88,23 +88,23 @@ func (s *ReviewService) Submit(ctx context.Context, userID, orderID string, in R
 		if !ok {
 			return errcode.New(errcode.CodeOrderState, "订单状态已变化")
 		}
-		if err := tx.OrderEvents.Save(&order.Event{
+		if err := tx.OrderEvents.Save(ctx, &order.Event{
 			OrderID: o.ID, FromStatus: order.StatusPendingReview, ToStatus: order.OrderDone,
 			ActorType: order.ActorClient, ActorID: userID, Note: "用户评价", CreatedAt: now,
 		}); err != nil {
 			return err
 		}
 		if o.MerchantID != "" {
-			if m, err := tx.Merchants.FindByID(o.MerchantID); err == nil {
+			if m, err := tx.Merchants.FindByID(ctx, o.MerchantID); err == nil {
 				commission := round2(o.Amount * m.Commission / 100)
 				merchantIncome = round2(o.Amount + o.PackingFee - commission)
 				if merchantIncome < 0 {
 					merchantIncome = 0
 				}
-				if err := creditWallet(tx, "merchant", m.ID, merchantIncome, "order_income", o.ID, "订单收入", now); err != nil {
+				if err := creditWallet(ctx, tx, "merchant", m.ID, merchantIncome, "order_income", o.ID, "订单收入", now); err != nil {
 					return err
 				}
-				_ = tx.Settlements.Save(&finance.Settlement{
+				_ = tx.Settlements.Save(ctx, &finance.Settlement{
 					RegionID: m.RegionID, Party: m.Name, PartyType: "merchant", PartyID: m.ID,
 					Type: finance.SettlementMerchant, Amount: merchantIncome,
 					Status: finance.SettlementArrived,
@@ -117,10 +117,10 @@ func (s *ReviewService) Submit(ctx context.Context, userID, orderID string, in R
 				m.MonthlyOrders++
 				m.MonthlyRevenue = round2(m.MonthlyRevenue + merchantIncome)
 				m.LastUpdatedAt = now
-				if err := tx.Merchants.Save(m); err != nil {
+				if err := tx.Merchants.Save(ctx, m); err != nil {
 					return err
 				}
-				_ = tx.Notifications.Save(&notification.Notification{
+				_ = tx.Notifications.Save(ctx, &notification.Notification{
 					UserID: m.OwnerUserID, Title: "收到新评价",
 					Content: "订单 " + o.OrderNo + " 收到 " + fmt.Sprint(in.Rating) + " 星评价",
 					Type:    "order", RefID: o.ID, CreatedAt: now,
@@ -133,7 +133,7 @@ func (s *ReviewService) Submit(ctx context.Context, userID, orderID string, in R
 		return nil, nil, err
 	}
 	metrics.OrdersCompletedTotal.Inc()
-	updated, err := s.Repos.Orders.FindByID(o.ID)
+	updated, err := s.Repos.Orders.FindByID(ctx, o.ID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -143,7 +143,7 @@ func (s *ReviewService) Submit(ctx context.Context, userID, orderID string, in R
 // ListStore 商家评价列表。
 func (s *ReviewService) ListStore(ctx context.Context, merchantID string, page, size int) ([]*review.Review, int64, error) {
 	page, size = normalizePageParams(page, size)
-	return s.Repos.Reviews.List(review.Query{MerchantID: merchantID, Page: page, PageSize: size})
+	return s.Repos.Reviews.List(ctx, review.Query{MerchantID: merchantID, Page: page, PageSize: size})
 }
 
 // Reply 商家回复评价。
@@ -152,7 +152,7 @@ func (s *ReviewService) Reply(ctx context.Context, merchantID, reviewID, content
 	if content == "" || utf8.RuneCountInString(content) > 1024 {
 		return errcode.New(errcode.CodeBadRequest, "回复内容需为 1-1024 字")
 	}
-	ok, err := s.Repos.Reviews.Reply(reviewID, merchantID, content, time.Now().Unix())
+	ok, err := s.Repos.Reviews.Reply(ctx, reviewID, merchantID, content, time.Now().Unix())
 	if err != nil {
 		return err
 	}
@@ -165,5 +165,5 @@ func (s *ReviewService) Reply(ctx context.Context, merchantID, reviewID, content
 // ListDriver 骑手评价列表（M4 可选）。
 func (s *ReviewService) ListDriver(ctx context.Context, riderID string, page, size int) ([]*review.Review, int64, error) {
 	page, size = normalizePageParams(page, size)
-	return s.Repos.Reviews.List(review.Query{RiderID: riderID, Page: page, PageSize: size})
+	return s.Repos.Reviews.List(ctx, review.Query{RiderID: riderID, Page: page, PageSize: size})
 }

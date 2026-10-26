@@ -64,7 +64,7 @@ type DishInput struct {
 
 // UpdateStatus 营业/休息切换（封禁商家不可自行操作）。
 func (s *StoreService) UpdateStatus(ctx context.Context, merchantID string, open bool, operator string) (*merchant.Merchant, error) {
-	m, err := s.Repos.Merchants.FindByID(merchantID)
+	m, err := s.Repos.Merchants.FindByID(ctx, merchantID)
 	if err != nil {
 		return nil, merchantErr(err)
 	}
@@ -76,7 +76,7 @@ func (s *StoreService) UpdateStatus(ctx context.Context, merchantID string, open
 		status = merchant.MerchantStatusOpen
 	}
 	now := time.Now().Unix()
-	if err := s.Repos.Merchants.UpdateStatus(merchantID, status, now); err != nil {
+	if err := s.Repos.Merchants.UpdateStatus(ctx, merchantID, status, now); err != nil {
 		return nil, err
 	}
 	m.Status = status
@@ -91,7 +91,7 @@ func (s *StoreService) UpdateStatus(ctx context.Context, merchantID string, open
 
 // GetBusiness 读取经营设置。
 func (s *StoreService) GetBusiness(ctx context.Context, merchantID string) (*merchant.Merchant, error) {
-	m, err := s.Repos.Merchants.FindByID(merchantID)
+	m, err := s.Repos.Merchants.FindByID(ctx, merchantID)
 	if err != nil {
 		return nil, merchantErr(err)
 	}
@@ -127,7 +127,7 @@ func (s *StoreService) UpdateBusiness(ctx context.Context, merchantID string, in
 	in.DeliveryFee = round2(in.DeliveryFee)
 	in.PackingFee = round2(in.PackingFee)
 
-	m, err := s.Repos.Merchants.FindByID(merchantID)
+	m, err := s.Repos.Merchants.FindByID(ctx, merchantID)
 	if err != nil {
 		return nil, merchantErr(err)
 	}
@@ -140,7 +140,7 @@ func (s *StoreService) UpdateBusiness(ctx context.Context, merchantID string, in
 	m.Announcement = in.Announcement
 	m.ServicePhone = in.ServicePhone
 	m.LastUpdatedAt = time.Now().Unix()
-	if err := s.Repos.Merchants.Save(m); err != nil {
+	if err := s.Repos.Merchants.Save(ctx, m); err != nil {
 		return nil, err
 	}
 	s.Repos.Audit.Record(ctx, application.AuditEntry{
@@ -153,14 +153,14 @@ func (s *StoreService) UpdateBusiness(ctx context.Context, merchantID string, in
 
 // Menu 读取本店菜单（含下架与售罄）。
 func (s *StoreService) Menu(ctx context.Context, merchantID string) (*Menu, error) {
-	if _, err := s.Repos.Merchants.FindByID(merchantID); err != nil {
+	if _, err := s.Repos.Merchants.FindByID(ctx, merchantID); err != nil {
 		return nil, merchantErr(err)
 	}
-	cats, err := s.Repos.Catalog.ListCategories(merchantID)
+	cats, err := s.Repos.Catalog.ListCategories(ctx, merchantID)
 	if err != nil {
 		return nil, err
 	}
-	dishes, _, err := s.Repos.Catalog.ListDishes(catalog.DishQuery{
+	dishes, _, err := s.Repos.Catalog.ListDishes(ctx, catalog.DishQuery{
 		MerchantID: merchantID, IncludeOffSale: true, Page: 1, PageSize: 500,
 	})
 	if err != nil {
@@ -183,10 +183,10 @@ func (s *StoreService) CreateCategory(ctx context.Context, merchantID string, in
 	if err != nil {
 		return nil, err
 	}
-	if _, err := s.Repos.Merchants.FindByID(merchantID); err != nil {
+	if _, err := s.Repos.Merchants.FindByID(ctx, merchantID); err != nil {
 		return nil, merchantErr(err)
 	}
-	cats, err := s.Repos.Catalog.ListCategories(merchantID)
+	cats, err := s.Repos.Catalog.ListCategories(ctx, merchantID)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (s *StoreService) CreateCategory(ctx context.Context, merchantID string, in
 		return nil, errcode.New(errcode.CodeBadRequest, "分类数量已达上限 50")
 	}
 	c := &catalog.Category{ID: ulidgen.New(), MerchantID: merchantID, Name: name, Sort: in.Sort}
-	if err := s.Repos.Catalog.SaveCategory(c); err != nil {
+	if err := s.Repos.Catalog.SaveCategory(ctx, c); err != nil {
 		return nil, err
 	}
 	s.audit(ctx, operator, "store.category.create", c.ID)
@@ -207,13 +207,13 @@ func (s *StoreService) UpdateCategory(ctx context.Context, merchantID, categoryI
 	if err != nil {
 		return nil, err
 	}
-	c, err := s.ownCategory(merchantID, categoryID)
+	c, err := s.ownCategory(ctx, merchantID, categoryID)
 	if err != nil {
 		return nil, err
 	}
 	c.Name = name
 	c.Sort = in.Sort
-	if err := s.Repos.Catalog.SaveCategory(c); err != nil {
+	if err := s.Repos.Catalog.SaveCategory(ctx, c); err != nil {
 		return nil, err
 	}
 	s.audit(ctx, operator, "store.category.update", c.ID)
@@ -222,18 +222,18 @@ func (s *StoreService) UpdateCategory(ctx context.Context, merchantID, categoryI
 
 // DeleteCategory 删除分类（分类下仍有菜品时拒绝）。
 func (s *StoreService) DeleteCategory(ctx context.Context, merchantID, categoryID, operator string) error {
-	c, err := s.ownCategory(merchantID, categoryID)
+	c, err := s.ownCategory(ctx, merchantID, categoryID)
 	if err != nil {
 		return err
 	}
-	n, err := s.Repos.Catalog.CountDishesByCategory(c.ID)
+	n, err := s.Repos.Catalog.CountDishesByCategory(ctx, c.ID)
 	if err != nil {
 		return err
 	}
 	if n > 0 {
 		return errcode.New(errcode.CodeCategoryInUse, "分类下仍有菜品，请先移动或删除菜品")
 	}
-	if err := s.Repos.Catalog.DeleteCategory(c.ID); err != nil {
+	if err := s.Repos.Catalog.DeleteCategory(ctx, c.ID); err != nil {
 		return err
 	}
 	s.audit(ctx, operator, "store.category.delete", c.ID)
@@ -246,7 +246,7 @@ func (s *StoreService) CreateDish(ctx context.Context, merchantID string, in Dis
 	if err != nil {
 		return nil, err
 	}
-	if _, err := s.ownCategory(merchantID, in.CategoryID); err != nil {
+	if _, err := s.ownCategory(ctx, merchantID, in.CategoryID); err != nil {
 		return nil, err
 	}
 	d := &catalog.Dish{
@@ -257,7 +257,7 @@ func (s *StoreService) CreateDish(ctx context.Context, merchantID string, in Dis
 	if in.OnSale != nil {
 		d.OnSale = *in.OnSale
 	}
-	if err := s.Repos.Catalog.SaveDish(d); err != nil {
+	if err := s.Repos.Catalog.SaveDish(ctx, d); err != nil {
 		return nil, err
 	}
 	s.audit(ctx, operator, "store.dish.create", d.ID)
@@ -270,11 +270,11 @@ func (s *StoreService) UpdateDish(ctx context.Context, merchantID, dishID string
 	if err != nil {
 		return nil, err
 	}
-	d, err := s.ownDish(merchantID, dishID)
+	d, err := s.ownDish(ctx, merchantID, dishID)
 	if err != nil {
 		return nil, err
 	}
-	if _, err := s.ownCategory(merchantID, in.CategoryID); err != nil {
+	if _, err := s.ownCategory(ctx, merchantID, in.CategoryID); err != nil {
 		return nil, err
 	}
 	d.CategoryID = in.CategoryID
@@ -287,7 +287,7 @@ func (s *StoreService) UpdateDish(ctx context.Context, merchantID, dishID string
 		d.OnSale = *in.OnSale
 	}
 	d.Sort = in.Sort
-	if err := s.Repos.Catalog.SaveDish(d); err != nil {
+	if err := s.Repos.Catalog.SaveDish(ctx, d); err != nil {
 		return nil, err
 	}
 	s.audit(ctx, operator, "store.dish.update", d.ID)
@@ -296,14 +296,14 @@ func (s *StoreService) UpdateDish(ctx context.Context, merchantID, dishID string
 
 // SetDishSale 上架/下架/改库存。stock < 0 表示不改库存。
 func (s *StoreService) SetDishSale(ctx context.Context, merchantID, dishID string, onSale bool, stock int, operator string) (*catalog.Dish, error) {
-	d, err := s.ownDish(merchantID, dishID)
+	d, err := s.ownDish(ctx, merchantID, dishID)
 	if err != nil {
 		return nil, err
 	}
 	if stock >= 0 && stock > 99999 {
 		return nil, errcode.New(errcode.CodeBadRequest, "库存超出范围")
 	}
-	if err := s.Repos.Catalog.UpdateDishSale(d.ID, onSale, stock, time.Now().Unix()); err != nil {
+	if err := s.Repos.Catalog.UpdateDishSale(ctx, d.ID, onSale, stock, time.Now().Unix()); err != nil {
 		return nil, err
 	}
 	d.OnSale = onSale
@@ -316,19 +316,19 @@ func (s *StoreService) SetDishSale(ctx context.Context, merchantID, dishID strin
 
 // DeleteDish 软删除菜品（历史订单快照不受影响）。
 func (s *StoreService) DeleteDish(ctx context.Context, merchantID, dishID, operator string) error {
-	d, err := s.ownDish(merchantID, dishID)
+	d, err := s.ownDish(ctx, merchantID, dishID)
 	if err != nil {
 		return err
 	}
-	if err := s.Repos.Catalog.SoftDeleteDish(d.ID, time.Now().Unix()); err != nil {
+	if err := s.Repos.Catalog.SoftDeleteDish(ctx, d.ID, time.Now().Unix()); err != nil {
 		return err
 	}
 	s.audit(ctx, operator, "store.dish.delete", d.ID)
 	return nil
 }
 
-func (s *StoreService) ownCategory(merchantID, categoryID string) (*catalog.Category, error) {
-	c, err := s.Repos.Catalog.FindCategory(categoryID)
+func (s *StoreService) ownCategory(ctx context.Context, merchantID, categoryID string) (*catalog.Category, error) {
+	c, err := s.Repos.Catalog.FindCategory(ctx, categoryID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeCategoryNotFound, "分类不存在")
@@ -341,8 +341,8 @@ func (s *StoreService) ownCategory(merchantID, categoryID string) (*catalog.Cate
 	return c, nil
 }
 
-func (s *StoreService) ownDish(merchantID, dishID string) (*catalog.Dish, error) {
-	d, err := s.Repos.Catalog.FindDish(dishID)
+func (s *StoreService) ownDish(ctx context.Context, merchantID, dishID string) (*catalog.Dish, error) {
+	d, err := s.Repos.Catalog.FindDish(ctx, dishID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return nil, errcode.NewStatus(404, errcode.CodeDishNotFound, "菜品不存在")

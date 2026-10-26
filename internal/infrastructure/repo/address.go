@@ -11,8 +11,7 @@ import (
 // AddressRepo implements address.Repository.
 type AddressRepo struct{ client *ent.Client }
 
-func (r AddressRepo) Save(a *address.Address) error {
-	ctx := context.Background()
+func (r AddressRepo) Save(ctx context.Context, a *address.Address) error {
 	if a.ID == "" {
 		a.ID = newULID()
 	}
@@ -35,8 +34,8 @@ func (r AddressRepo) Save(a *address.Address) error {
 		SetCreatedAt(nowSec()).SetUpdatedAt(nowSec()).Exec(ctx)
 }
 
-func (r AddressRepo) FindByID(id string) (*address.Address, error) {
-	e, err := r.client.UserAddress.Get(context.Background(), id)
+func (r AddressRepo) FindByID(ctx context.Context, id string) (*address.Address, error) {
+	e, err := r.client.UserAddress.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -51,11 +50,11 @@ func (r AddressRepo) FindByID(id string) (*address.Address, error) {
 	}, nil
 }
 
-func (r AddressRepo) ListByUser(userID string) ([]*address.Address, error) {
+func (r AddressRepo) ListByUser(ctx context.Context, userID string) ([]*address.Address, error) {
 	rows, err := r.client.UserAddress.Query().
 		Where(entaddress.UserID(userID)).
 		Order(ent.Desc(entaddress.FieldIsDefault), ent.Desc(entaddress.FieldUpdatedAt)).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -71,18 +70,18 @@ func (r AddressRepo) ListByUser(userID string) ([]*address.Address, error) {
 	return out, nil
 }
 
-func (r AddressRepo) Delete(id string) error {
-	return r.client.UserAddress.DeleteOneID(id).Exec(context.Background())
+func (r AddressRepo) Delete(ctx context.Context, id string) error {
+	return r.client.UserAddress.DeleteOneID(id).Exec(ctx)
 }
 
-func (r AddressRepo) ClearDefault(userID string) error {
+func (r AddressRepo) ClearDefault(ctx context.Context, userID string) error {
 	return r.client.UserAddress.Update().
 		Where(entaddress.UserID(userID), entaddress.IsDefault(true)).
 		SetIsDefault(false).SetUpdatedAt(nowSec()).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r AddressRepo) CountByUser(userID string) (int64, error) {
-	n, err := r.client.UserAddress.Query().Where(entaddress.UserID(userID)).Count(context.Background())
+func (r AddressRepo) CountByUser(ctx context.Context, userID string) (int64, error) {
+	n, err := r.client.UserAddress.Query().Where(entaddress.UserID(userID)).Count(ctx)
 	return int64(n), err
 }

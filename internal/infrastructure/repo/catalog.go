@@ -13,8 +13,7 @@ import (
 // CatalogRepo implements catalog.Repository.
 type CatalogRepo struct{ client *ent.Client }
 
-func (r CatalogRepo) SaveCategory(c *catalog.Category) error {
-	ctx := context.Background()
+func (r CatalogRepo) SaveCategory(ctx context.Context, c *catalog.Category) error {
 	if c.ID == "" {
 		c.ID = newULID()
 	}
@@ -33,8 +32,8 @@ func (r CatalogRepo) SaveCategory(c *catalog.Category) error {
 		SetCreatedAt(nowSec()).SetUpdatedAt(nowSec()).Exec(ctx)
 }
 
-func (r CatalogRepo) FindCategory(id string) (*catalog.Category, error) {
-	e, err := r.client.DishCategory.Get(context.Background(), id)
+func (r CatalogRepo) FindCategory(ctx context.Context, id string) (*catalog.Category, error) {
+	e, err := r.client.DishCategory.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -47,11 +46,11 @@ func (r CatalogRepo) FindCategory(id string) (*catalog.Category, error) {
 	}, nil
 }
 
-func (r CatalogRepo) ListCategories(merchantID string) ([]*catalog.Category, error) {
+func (r CatalogRepo) ListCategories(ctx context.Context, merchantID string) ([]*catalog.Category, error) {
 	rows, err := r.client.DishCategory.Query().
 		Where(dishcategory.MerchantID(merchantID)).
 		Order(ent.Asc(dishcategory.FieldSort), ent.Asc(dishcategory.FieldCreatedAt)).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -65,19 +64,18 @@ func (r CatalogRepo) ListCategories(merchantID string) ([]*catalog.Category, err
 	return out, nil
 }
 
-func (r CatalogRepo) DeleteCategory(id string) error {
-	return r.client.DishCategory.DeleteOneID(id).Exec(context.Background())
+func (r CatalogRepo) DeleteCategory(ctx context.Context, id string) error {
+	return r.client.DishCategory.DeleteOneID(id).Exec(ctx)
 }
 
-func (r CatalogRepo) CountDishesByCategory(categoryID string) (int64, error) {
+func (r CatalogRepo) CountDishesByCategory(ctx context.Context, categoryID string) (int64, error) {
 	n, err := r.client.Dish.Query().
 		Where(dish.CategoryID(categoryID), dish.DeletedAt(0)).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r CatalogRepo) SaveDish(d *catalog.Dish) error {
-	ctx := context.Background()
+func (r CatalogRepo) SaveDish(ctx context.Context, d *catalog.Dish) error {
 	if d.ID == "" {
 		d.ID = newULID()
 	}
@@ -101,8 +99,8 @@ func (r CatalogRepo) SaveDish(d *catalog.Dish) error {
 		Exec(ctx)
 }
 
-func (r CatalogRepo) FindDish(id string) (*catalog.Dish, error) {
-	e, err := r.client.Dish.Get(context.Background(), id)
+func (r CatalogRepo) FindDish(ctx context.Context, id string) (*catalog.Dish, error) {
+	e, err := r.client.Dish.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -124,8 +122,7 @@ func toDish(e *ent.Dish) *catalog.Dish {
 	}
 }
 
-func (r CatalogRepo) ListDishes(q catalog.DishQuery) ([]*catalog.Dish, int64, error) {
-	ctx := context.Background()
+func (r CatalogRepo) ListDishes(ctx context.Context, q catalog.DishQuery) ([]*catalog.Dish, int64, error) {
 	bq := r.client.Dish.Query().Where(dish.DeletedAt(0))
 	if q.MerchantID != "" {
 		bq.Where(dish.MerchantID(q.MerchantID))
@@ -156,30 +153,29 @@ func (r CatalogRepo) ListDishes(q catalog.DishQuery) ([]*catalog.Dish, int64, er
 	return out, int64(total), nil
 }
 
-func (r CatalogRepo) UpdateDishSale(id string, onSale bool, stock int, now int64) error {
+func (r CatalogRepo) UpdateDishSale(ctx context.Context, id string, onSale bool, stock int, now int64) error {
 	upd := r.client.Dish.UpdateOneID(id).SetOnSale(onSale).SetUpdatedAt(now)
 	if stock >= 0 {
 		upd.SetStock(stock)
 	}
-	return upd.Exec(context.Background())
+	return upd.Exec(ctx)
 }
 
-func (r CatalogRepo) SoftDeleteDish(id string, now int64) error {
+func (r CatalogRepo) SoftDeleteDish(ctx context.Context, id string, now int64) error {
 	return r.client.Dish.UpdateOneID(id).
 		SetDeletedAt(now).SetOnSale(false).SetUpdatedAt(now).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-func (r CatalogRepo) CountDishes(merchantID string) (int64, error) {
+func (r CatalogRepo) CountDishes(ctx context.Context, merchantID string) (int64, error) {
 	n, err := r.client.Dish.Query().
 		Where(dish.MerchantID(merchantID), dish.DeletedAt(0)).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
 // AdjustStock 原子调整库存；delta<0 时库存不足返回 false。
-func (r CatalogRepo) AdjustStock(dishID string, delta int) (bool, error) {
-	ctx := context.Background()
+func (r CatalogRepo) AdjustStock(ctx context.Context, dishID string, delta int) (bool, error) {
 	q := r.client.Dish.Update().Where(dish.ID(dishID))
 	if delta < 0 {
 		q = q.Where(dish.StockGTE(-delta))

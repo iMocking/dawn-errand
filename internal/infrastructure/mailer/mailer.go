@@ -16,7 +16,7 @@ import (
 )
 
 // ConfigProvider 返回当前生效的 SMTP 配置。
-type ConfigProvider func() (*system.SMTPConfig, error)
+type ConfigProvider func(context.Context) (*system.SMTPConfig, error)
 
 // Sender 实现 application.MailerPort。
 type Sender struct {
@@ -36,7 +36,7 @@ func (s *Sender) Send(ctx context.Context, to, subject, html string) error {
 		Save(ctx); err != nil {
 		return err
 	}
-	cfg, err := s.cfg()
+	cfg, err := s.cfg(ctx)
 	if err != nil || cfg == nil || cfg.Host == "" {
 		// 未配置 SMTP：仅记录 outbox（dev/测试模式）。
 		return nil
@@ -50,7 +50,7 @@ func (s *Sender) Send(ctx context.Context, to, subject, html string) error {
 
 // TestConnection 测试 SMTP 连接。
 func (s *Sender) TestConnection(ctx context.Context) error {
-	cfg, err := s.cfg()
+	cfg, err := s.cfg(ctx)
 	if err != nil {
 		return err
 	}

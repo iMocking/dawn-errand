@@ -18,9 +18,9 @@ import (
 )
 
 // SMTP 读取已保存的 SMTP 配置（解密密码；未配置返回空配置）。
-func SMTP(cipher *crypto.Cipher, store *repo.Store) func() (*sysdomain.SMTPConfig, error) {
-	return func() (*sysdomain.SMTPConfig, error) {
-		rec, err := store.Repos().Settings.Get(sysdomain.KeySMTP)
+func SMTP(cipher *crypto.Cipher, store *repo.Store) func(context.Context) (*sysdomain.SMTPConfig, error) {
+	return func(ctx context.Context) (*sysdomain.SMTPConfig, error) {
+		rec, err := store.Repos().Settings.Get(ctx, sysdomain.KeySMTP)
 		if err != nil {
 			if errors.Is(err, application.ErrNotFound) {
 				return &sysdomain.SMTPConfig{}, nil
@@ -41,14 +41,14 @@ func SMTP(cipher *crypto.Cipher, store *repo.Store) func() (*sysdomain.SMTPConfi
 }
 
 // LocalStorage 读取已保存的本地存储配置；未配置或损坏时回退到启动配置。
-func LocalStorage(store *repo.Store, cfg *config.Config) func() *sysdomain.LocalStorageConfig {
-	return func() *sysdomain.LocalStorageConfig {
+func LocalStorage(store *repo.Store, cfg *config.Config) func(context.Context) *sysdomain.LocalStorageConfig {
+	return func(ctx context.Context) *sysdomain.LocalStorageConfig {
 		def := &sysdomain.LocalStorageConfig{
 			RootDir:       cfg.StorageRootDir,
 			PublicBaseURL: cfg.StoragePublicURL,
 			MaxSizeMB:     cfg.StorageMaxSizeMB,
 		}
-		rec, err := store.Repos().Settings.Get(sysdomain.KeyLocal)
+		rec, err := store.Repos().Settings.Get(ctx, sysdomain.KeyLocal)
 		if err != nil {
 			return def
 		}

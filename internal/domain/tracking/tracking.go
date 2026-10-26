@@ -1,6 +1,8 @@
 // Package tracking 骑手实时位置与配送追踪。
 package tracking
 
+import "context"
+
 // Location 骑手最新位置（GCJ-02）。
 type Location struct {
 	ID        string
@@ -16,9 +18,9 @@ type Location struct {
 
 // Repository 位置仓储端口。
 type Repository interface {
-	Upsert(l *Location) error
-	FindByRider(riderID string) (*Location, error)
-	FindByRiders(riderIDs []string) (map[string]*Location, error)
+	Upsert(ctx context.Context, l *Location) error
+	FindByRider(ctx context.Context, riderID string) (*Location, error)
+	FindByRiders(ctx context.Context, riderIDs []string) (map[string]*Location, error)
 	// DeleteStale 清理长期未更新的位置。
-	DeleteStale(before int64) error
+	DeleteStale(ctx context.Context, before int64) error
 }

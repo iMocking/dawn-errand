@@ -56,7 +56,7 @@ func (r *Runner) RunOnce(ctx context.Context) Result {
 	if payTimeout <= 0 {
 		payTimeout = 15 * time.Minute
 	}
-	pending, err := r.Repos.Orders.ListPendingPayBefore(now-int64(payTimeout.Seconds()), limit)
+	pending, err := r.Repos.Orders.ListPendingPayBefore(ctx, now-int64(payTimeout.Seconds()), limit)
 	if err == nil {
 		for _, o := range pending {
 			if _, err := r.Orders.CancelSystem(ctx, o.ID, "超时未支付，系统自动取消"); err == nil {
@@ -70,7 +70,7 @@ func (r *Runner) RunOnce(ctx context.Context) Result {
 	if autoConfirm <= 0 {
 		autoConfirm = 24 * time.Hour
 	}
-	delivered, err := r.Repos.Orders.ListDeliveredBefore(now-int64(autoConfirm.Seconds()), limit)
+	delivered, err := r.Repos.Orders.ListDeliveredBefore(ctx, now-int64(autoConfirm.Seconds()), limit)
 	if err == nil {
 		for _, o := range delivered {
 			if _, err := r.Orders.AutoConfirm(ctx, o.ID); err == nil {
@@ -80,21 +80,21 @@ func (r *Runner) RunOnce(ctx context.Context) Result {
 		}
 	}
 
-	due, err := r.Repos.Announcements.ListDueScheduled(now)
+	due, err := r.Repos.Announcements.ListDueScheduled(ctx, now)
 	if err == nil {
 		for _, a := range due {
-			if err := r.Repos.Announcements.MarkPublished(a.ID, now); err == nil {
+			if err := r.Repos.Announcements.MarkPublished(ctx, a.ID, now); err == nil {
 				res.Published++
 			}
 		}
 	}
 
 	// 数据清理：过期令牌、历史通知、陈旧位置、过期券。
-	_ = r.Repos.EmailTokens.DeleteExpired(now)
-	_ = r.Repos.PasswordTokens.DeleteExpired(now)
-	_ = r.Repos.Notifications.DeleteBefore(now - 180*86400)
-	_ = r.Repos.Locations.DeleteStale(now - 7*86400)
-	_ = r.Repos.Coupons.ExpireAll(now)
+	_ = r.Repos.EmailTokens.DeleteExpired(ctx, now)
+	_ = r.Repos.PasswordTokens.DeleteExpired(ctx, now)
+	_ = r.Repos.Notifications.DeleteBefore(ctx, now-180*86400)
+	_ = r.Repos.Locations.DeleteStale(ctx, now-7*86400)
+	_ = r.Repos.Coupons.ExpireAll(ctx, now)
 	metrics.JobRunsTotal.WithLabelValues("cleanup", "done").Inc()
 
 	if res.Canceled > 0 || res.Confirmed > 0 || res.Published > 0 {

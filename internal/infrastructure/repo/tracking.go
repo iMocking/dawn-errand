@@ -11,8 +11,7 @@ import (
 // TrackingRepo 实现 tracking.Repository。
 type TrackingRepo struct{ client *ent.Client }
 
-func (r TrackingRepo) Upsert(l *tracking.Location) error {
-	ctx := context.Background()
+func (r TrackingRepo) Upsert(ctx context.Context, l *tracking.Location) error {
 	if l.ID == "" {
 		l.ID = newULID()
 	}
@@ -35,8 +34,8 @@ func (r TrackingRepo) Upsert(l *tracking.Location) error {
 		Exec(ctx)
 }
 
-func (r TrackingRepo) FindByRider(riderID string) (*tracking.Location, error) {
-	e, err := r.client.RiderLocation.Query().Where(riderlocation.RiderID(riderID)).Only(context.Background())
+func (r TrackingRepo) FindByRider(ctx context.Context, riderID string) (*tracking.Location, error) {
+	e, err := r.client.RiderLocation.Query().Where(riderlocation.RiderID(riderID)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -46,13 +45,13 @@ func (r TrackingRepo) FindByRider(riderID string) (*tracking.Location, error) {
 	return toLocation(e), nil
 }
 
-func (r TrackingRepo) FindByRiders(riderIDs []string) (map[string]*tracking.Location, error) {
+func (r TrackingRepo) FindByRiders(ctx context.Context, riderIDs []string) (map[string]*tracking.Location, error) {
 	if len(riderIDs) == 0 {
 		return map[string]*tracking.Location{}, nil
 	}
 	rows, err := r.client.RiderLocation.Query().
 		Where(riderlocation.RiderIDIn(riderIDs...)).
-		All(context.Background())
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +62,9 @@ func (r TrackingRepo) FindByRiders(riderIDs []string) (map[string]*tracking.Loca
 	return out, nil
 }
 
-func (r TrackingRepo) DeleteStale(before int64) error {
+func (r TrackingRepo) DeleteStale(ctx context.Context, before int64) error {
 	_, err := r.client.RiderLocation.Delete().
-		Where(riderlocation.UpdatedAtLT(before)).Exec(context.Background())
+		Where(riderlocation.UpdatedAtLT(before)).Exec(ctx)
 	return err
 }
 

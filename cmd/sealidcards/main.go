@@ -19,8 +19,9 @@ import (
 
 func main() {
 	apply := len(os.Args) > 1 && os.Args[1] == "--apply"
+	ctx := context.Background()
 	cfg := config.Load()
-	app, err := assembly.Build(cfg)
+	app, err := assembly.Build(ctx, cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "装配失败:", err)
 		os.Exit(1)
@@ -28,7 +29,6 @@ func main() {
 	defer app.Client.Close()
 	cipher := crypto.New(cfg.ConfigCipherKey)
 
-	ctx := context.Background()
 	rows, err := app.Client.Rider.Query().All(ctx)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "查询失败:", err)

@@ -41,7 +41,7 @@ func main() {
 
 	ctx := context.Background()
 	cfg := config.Load()
-	app, err := assembly.Build(cfg)
+	app, err := assembly.Build(ctx, cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "装配失败:", err)
 		os.Exit(1)
@@ -103,7 +103,7 @@ func exists(ctx context.Context, repos *application.RepoUnit, find func() error)
 }
 
 func seedRegion(ctx context.Context, repos *application.RepoUnit, now int64) {
-	regions, err := repos.Regions.List()
+	regions, err := repos.Regions.List(ctx)
 	if err == nil {
 		for _, r := range regions {
 			if r.Name == "王家湾镇" {
@@ -111,7 +111,7 @@ func seedRegion(ctx context.Context, repos *application.RepoUnit, now int64) {
 			}
 		}
 	}
-	if err := repos.Regions.Save(&tenant.Region{
+	if err := repos.Regions.Save(ctx, &tenant.Region{
 		ID: "area-001", Name: "王家湾镇", Status: tenant.RegionStatusOpen,
 		Villages: 12, RadiusKM: 5, StartFee: 5, FreeKM: 2,
 		Notice: "", CreatedAt: now, UpdatedAt: now,
@@ -123,10 +123,10 @@ func seedRegion(ctx context.Context, repos *application.RepoUnit, now int64) {
 }
 
 func seedUser(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if _, err := repos.Users.FindByID("U86540"); err == nil {
+	if _, err := repos.Users.FindByID(ctx, "U86540"); err == nil {
 		return
 	}
-	if err := repos.Users.Save(&identity.User{
+	if err := repos.Users.Save(ctx, &identity.User{
 		ID: "U86540", Email: "wangxiulan@shuguang.local", Phone: "13800008640",
 		Name: "王秀兰", Status: identity.UserStatusActive, EmailVerified: true,
 		Role: identity.RoleUser, RegionID: "area-001",
@@ -135,7 +135,7 @@ func seedUser(ctx context.Context, repos *application.RepoUnit, now int64) {
 		fmt.Println("  ! 用户写入失败:", err)
 		return
 	}
-	_ = repos.Profiles.Save(&userprofile.Profile{
+	_ = repos.Profiles.Save(ctx, &userprofile.Profile{
 		UserID: "U86540", Level: "Lv.5 乡镇常客", Nickname: "王秀兰", RealName: "王秀兰",
 		Verified: "已实名", Region: "王家湾镇", Address: "王家湾镇中心村 12 号",
 		RegisterChannel: "微信", BizTypes: "外卖,帮买", Balance: 88.5, RedPacketBalance: 12.0,
@@ -145,10 +145,10 @@ func seedUser(ctx context.Context, repos *application.RepoUnit, now int64) {
 }
 
 func seedMerchant(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if _, err := repos.Merchants.FindByID("M00268"); err == nil {
+	if _, err := repos.Merchants.FindByID(ctx, "M00268"); err == nil {
 		return
 	}
-	if err := repos.Merchants.Save(&merchant.Merchant{
+	if err := repos.Merchants.Save(ctx, &merchant.Merchant{
 		ID: "M00268", RegionID: "area-001", Name: "村口老陈家常菜", Category: "餐饮",
 		Address: "王家湾镇正街 28 号", AddressSub: "距镇政府 300m", Contact: "老陈", Phone: "13900002680",
 		OpenHours: "09:00-21:00", DeliveryRange: "全镇 5km", Commission: 12,
@@ -168,10 +168,10 @@ func seedMerchant(ctx context.Context, repos *application.RepoUnit, now int64) {
 }
 
 func seedRider(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if _, err := repos.Riders.FindByID("R00086"); err == nil {
+	if _, err := repos.Riders.FindByID(ctx, "R00086"); err == nil {
 		return
 	}
-	if err := repos.Riders.Save(&rider.Rider{
+	if err := repos.Riders.Save(ctx, &rider.Rider{
 		ID: "R00086", RegionID: "area-001", UserID: "U86541",
 		Name: "赵铁柱", Phone: "13700008686", Area: "王家湾镇", Tool: "电动两轮车",
 		Level: "Lv.5", IDCard: "4201**********0817", Vehicle: "台铃小绿", Account: "6222 0202 **** 8612",
@@ -209,7 +209,7 @@ func seedAccounts(ctx context.Context, repos *application.RepoUnit, hasher appli
 		{Email: "rider.owner@dawnerrand.local", Password: "Rider123456", Name: "赵铁柱", Role: identity.RoleDriver, RegionID: "area-001", RiderID: "R00086"},
 	}
 	for _, a := range accounts {
-		u, err := repos.Users.FindByEmail(a.Email)
+		u, err := repos.Users.FindByEmail(ctx, a.Email)
 		if err != nil {
 			hash, herr := hasher.Hash(a.Password)
 			if herr != nil {
@@ -223,17 +223,17 @@ func seedAccounts(ctx context.Context, repos *application.RepoUnit, hasher appli
 				MerchantID: a.MerchantID, RiderID: a.RiderID,
 				RegisteredAt: now, UpdatedAt: now,
 			}
-			if err := repos.Users.Save(u); err != nil {
+			if err := repos.Users.Save(ctx, u); err != nil {
 				fmt.Println("  ! 联调账号写入失败:", a.Email, err)
 				continue
 			}
-			if err := repos.Credentials.Save(&identity.Credential{
+			if err := repos.Credentials.Save(ctx, &identity.Credential{
 				UserID: u.ID, PasswordHash: hash, SessionVersion: 0, UpdatedAt: now,
 			}); err != nil {
 				fmt.Println("  ! 联调账号凭证写入失败:", a.Email, err)
 				continue
 			}
-			_ = repos.Profiles.Save(&userprofile.Profile{
+			_ = repos.Profiles.Save(ctx, &userprofile.Profile{
 				UserID: u.ID, Level: "Lv.3 联调账号", Nickname: a.Name,
 				Verified: "未实名", Region: "王家湾镇", RegisterChannel: "seed",
 				RecentActiveAt: now, UpdatedAt: now,
@@ -251,13 +251,13 @@ func seedAccounts(ctx context.Context, repos *application.RepoUnit, hasher appli
 			}
 			u.EmailVerified = true
 			u.UpdatedAt = now
-			if err := repos.Users.Save(u); err != nil {
+			if err := repos.Users.Save(ctx, u); err != nil {
 				fmt.Println("  ! 联调账号绑定更新失败:", a.Email, err)
 			}
-			if _, err := repos.Credentials.FindByUserID(u.ID); err != nil {
+			if _, err := repos.Credentials.FindByUserID(ctx, u.ID); err != nil {
 				hash, herr := hasher.Hash(a.Password)
 				if herr == nil {
-					_ = repos.Credentials.Save(&identity.Credential{
+					_ = repos.Credentials.Save(ctx, &identity.Credential{
 						UserID: u.ID, PasswordHash: hash, UpdatedAt: now,
 					})
 				}
@@ -267,21 +267,21 @@ func seedAccounts(ctx context.Context, repos *application.RepoUnit, hasher appli
 	}
 
 	// 主体表反向绑定（幂等）。
-	if m, err := repos.Merchants.FindByID("M00268"); err == nil {
-		storeUser, uerr := repos.Users.FindByEmail("store.owner@dawnerrand.local")
+	if m, err := repos.Merchants.FindByID(ctx, "M00268"); err == nil {
+		storeUser, uerr := repos.Users.FindByEmail(ctx, "store.owner@dawnerrand.local")
 		if uerr == nil && m.OwnerUserID != storeUser.ID {
 			m.OwnerUserID = storeUser.ID
 			m.LastUpdatedAt = now
-			if err := repos.Merchants.Save(m); err != nil {
+			if err := repos.Merchants.Save(ctx, m); err != nil {
 				fmt.Println("  ! 商家反向绑定失败:", err)
 			}
 		}
 	}
-	if r, err := repos.Riders.FindByID("R00086"); err == nil {
-		riderUser, uerr := repos.Users.FindByEmail("rider.owner@dawnerrand.local")
+	if r, err := repos.Riders.FindByID(ctx, "R00086"); err == nil {
+		riderUser, uerr := repos.Users.FindByEmail(ctx, "rider.owner@dawnerrand.local")
 		if uerr == nil && r.UserID != riderUser.ID {
 			r.UserID = riderUser.ID
-			if err := repos.Riders.Save(r); err != nil {
+			if err := repos.Riders.Save(ctx, r); err != nil {
 				fmt.Println("  ! 骑手反向绑定失败:", err)
 			}
 		}
@@ -290,7 +290,7 @@ func seedAccounts(ctx context.Context, repos *application.RepoUnit, hasher appli
 
 // seedCatalog 商家经营设置 + 菜品分类/菜品（幂等）。
 func seedCatalog(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if m, err := repos.Merchants.FindByID("M00268"); err == nil {
+	if m, err := repos.Merchants.FindByID(ctx, "M00268"); err == nil {
 		// 仅首次初始化经营设置，避免覆盖联调/运营修改。
 		if m.Lat == 0 && m.Lng == 0 && m.MinPrice == 0 && m.DeliveryFee == 0 && m.PackingFee == 0 && m.Announcement == "" {
 			m.Lat, m.Lng = 30.4201, 115.3290
@@ -300,7 +300,7 @@ func seedCatalog(ctx context.Context, repos *application.RepoUnit, now int64) {
 			m.Announcement = "今日有新鲜土鸡，欢迎下单"
 			m.ServicePhone = "13900002680"
 			m.LastUpdatedAt = now
-			if err := repos.Merchants.Save(m); err != nil {
+			if err := repos.Merchants.Save(ctx, m); err != nil {
 				fmt.Println("  ! 商家经营设置写入失败:", err)
 			}
 		}
@@ -311,10 +311,10 @@ func seedCatalog(ctx context.Context, repos *application.RepoUnit, now int64) {
 		{ID: "C002", MerchantID: "M00268", Name: "主食汤品", Sort: 2},
 	}
 	for i := range categories {
-		if _, err := repos.Catalog.FindCategory(categories[i].ID); err == nil {
+		if _, err := repos.Catalog.FindCategory(ctx, categories[i].ID); err == nil {
 			continue
 		}
-		if err := repos.Catalog.SaveCategory(&categories[i]); err != nil {
+		if err := repos.Catalog.SaveCategory(ctx, &categories[i]); err != nil {
 			fmt.Println("  ! 菜品分类写入失败:", categories[i].ID, err)
 		}
 	}
@@ -328,10 +328,10 @@ func seedCatalog(ctx context.Context, repos *application.RepoUnit, now int64) {
 		{ID: "D006", MerchantID: "M00268", CategoryID: "C001", Name: "农家小炒肉", Description: "季节限定，暂未上架", Price: 28, Stock: 0, OnSale: false, MonthlySales: 0, Sort: 4},
 	}
 	for i := range dishes {
-		if _, err := repos.Catalog.FindDish(dishes[i].ID); err == nil {
+		if _, err := repos.Catalog.FindDish(ctx, dishes[i].ID); err == nil {
 			continue
 		}
-		if err := repos.Catalog.SaveDish(&dishes[i]); err != nil {
+		if err := repos.Catalog.SaveDish(ctx, &dishes[i]); err != nil {
 			fmt.Println("  ! 菜品写入失败:", dishes[i].ID, err)
 		}
 	}
@@ -340,12 +340,12 @@ func seedCatalog(ctx context.Context, repos *application.RepoUnit, now int64) {
 
 // seedAddresses 联调用户地址（幂等，仅首次写入）。
 func seedAddresses(ctx context.Context, repos *application.RepoUnit, now int64) {
-	u, err := repos.Users.FindByEmail("client.test@dawnerrand.local")
+	u, err := repos.Users.FindByEmail(ctx, "client.test@dawnerrand.local")
 	if err != nil {
 		fmt.Println("  ! 联调用户不存在，跳过地址种子")
 		return
 	}
-	if n, _ := repos.Addresses.CountByUser(u.ID); n > 0 {
+	if n, _ := repos.Addresses.CountByUser(ctx, u.ID); n > 0 {
 		return
 	}
 	rows := []address.Address{
@@ -353,7 +353,7 @@ func seedAddresses(ctx context.Context, repos *application.RepoUnit, now int64) 
 		{ID: "ADDR002", UserID: u.ID, ContactName: "联调用户", Phone: "13800008640", RegionID: "area-001", Detail: "王家湾镇正街 6 号供销社", Tag: "公司", Lat: 30.4205, Lng: 115.3295},
 	}
 	for i := range rows {
-		if err := repos.Addresses.Save(&rows[i]); err != nil {
+		if err := repos.Addresses.Save(ctx, &rows[i]); err != nil {
 			fmt.Println("  ! 地址写入失败:", rows[i].ID, err)
 		}
 	}
@@ -362,7 +362,7 @@ func seedAddresses(ctx context.Context, repos *application.RepoUnit, now int64) 
 
 // seedCoupons 联调用户优惠券（幂等）。
 func seedCoupons(ctx context.Context, repos *application.RepoUnit, now int64) {
-	u, err := repos.Users.FindByEmail("client.test@dawnerrand.local")
+	u, err := repos.Users.FindByEmail(ctx, "client.test@dawnerrand.local")
 	if err != nil {
 		return
 	}
@@ -372,10 +372,10 @@ func seedCoupons(ctx context.Context, repos *application.RepoUnit, now int64) {
 	}
 	count := 0
 	for i := range rows {
-		if _, err := repos.Coupons.FindByID(rows[i].ID); err == nil {
+		if _, err := repos.Coupons.FindByID(ctx, rows[i].ID); err == nil {
 			continue
 		}
-		if err := repos.Coupons.Save(&rows[i]); err != nil {
+		if err := repos.Coupons.Save(ctx, &rows[i]); err != nil {
 			fmt.Println("  ! 优惠券写入失败:", rows[i].ID, err)
 			continue
 		}
@@ -388,7 +388,7 @@ func seedCoupons(ctx context.Context, repos *application.RepoUnit, now int64) {
 
 // seedMerchantApplication 为联调商家补齐入驻资料（仅当历史数据为空）。
 func seedMerchantApplication(ctx context.Context, repos *application.RepoUnit) {
-	m, err := repos.Merchants.FindByID("M00268")
+	m, err := repos.Merchants.FindByID(ctx, "M00268")
 	if err != nil || m.Application.LicenseNo != "" {
 		return
 	}
@@ -402,7 +402,7 @@ func seedMerchantApplication(ctx context.Context, repos *application.RepoUnit) {
 	m.Completeness = 100
 	m.SubmittedAt = m.AppliedAt
 	m.VerifiedAt = m.JoinedAt
-	if err := repos.Merchants.Save(m); err != nil {
+	if err := repos.Merchants.Save(ctx, m); err != nil {
 		fmt.Println("  ! 商家入驻资料写入失败:", err)
 		return
 	}
@@ -411,10 +411,10 @@ func seedMerchantApplication(ctx context.Context, repos *application.RepoUnit) {
 
 // seedReview 联调商家评价（幂等，按订单去重）。
 func seedReview(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if _, err := repos.Reviews.FindByOrder("SG202610220086"); err == nil {
+	if _, err := repos.Reviews.FindByOrder(ctx, "SG202610220086"); err == nil {
 		return
 	}
-	if err := repos.Reviews.Save(&review.Review{
+	if err := repos.Reviews.Save(ctx, &review.Review{
 		ID: "RV20261022001", OrderID: "SG202610220086", UserID: "U86540",
 		MerchantID: "M00268", RiderID: "R00086", Rating: 5,
 		Tags:    []string{"味道好", "分量足", "送得快"},
@@ -428,10 +428,10 @@ func seedReview(ctx context.Context, repos *application.RepoUnit, now int64) {
 }
 
 func seedOrder(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if _, err := repos.Orders.FindByID("SG202610220086"); err == nil {
+	if _, err := repos.Orders.FindByID(ctx, "SG202610220086"); err == nil {
 		return
 	}
-	if err := repos.Orders.Save(&order.Order{
+	if err := repos.Orders.Save(ctx, &order.Order{
 		ID: "SG202610220086", OrderNo: "202610220086", RegionID: "area-001",
 		MerchantID: "M00268", UserID: "U86540", RiderID: "R00086",
 		Type: order.OrderTypeFood, Status: order.OrderDelivering,
@@ -468,10 +468,10 @@ func seedOrder(ctx context.Context, repos *application.RepoUnit, now int64) {
 }
 
 func seedWithdraw(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if _, err := repos.Withdrawals.FindByID("TX20261022016"); err == nil {
+	if _, err := repos.Withdrawals.FindByID(ctx, "TX20261022016"); err == nil {
 		return
 	}
-	if err := repos.Withdrawals.Save(&finance.Withdrawal{
+	if err := repos.Withdrawals.Save(ctx, &finance.Withdrawal{
 		ID: "TX20261022016", RegionID: "area-001",
 		PartyType: "rider", PartyName: "赵铁柱", PartyNo: "R00086",
 		BankInfo: "尾号 8612 · 工商银行", Amount: 860, Fee: 0,
@@ -495,10 +495,10 @@ func seedWithdraw(ctx context.Context, repos *application.RepoUnit, now int64) {
 }
 
 func seedComplaint(ctx context.Context, repos *application.RepoUnit, now int64) {
-	if _, err := repos.Complaints.FindByID("GD20261022006"); err == nil {
+	if _, err := repos.Complaints.FindByID(ctx, "GD20261022006"); err == nil {
 		return
 	}
-	if err := repos.Complaints.Save(&complaint.Complaint{
+	if err := repos.Complaints.Save(ctx, &complaint.Complaint{
 		ID: "GD20261022006", OrderID: "SG202610220086", RegionID: "area-001", UserID: "U86540",
 		Category: "配送异常", Title: "配送超时 25 分钟，餐品已凉", Status: complaint.StatusPending,
 		Priority: "普通", Complainant: "王秀兰", Target: "赵铁柱", Extra: "骑手",
@@ -527,10 +527,10 @@ func seedComplaint(ctx context.Context, repos *application.RepoUnit, now int64) 
 
 func seedFeeRules(ctx context.Context, repos *application.RepoUnit, now int64) {
 	seed := func(id, category, name, value, desc string, accent bool, rule, example, fee, share, color string) {
-		if _, err := repos.FeeRules.FindByID(id); err == nil {
+		if _, err := repos.FeeRules.FindByID(ctx, id); err == nil {
 			return
 		}
-		if err := repos.FeeRules.Save(&cms.FeeRule{
+		if err := repos.FeeRules.Save(ctx, &cms.FeeRule{
 			ID: id, Category: category, Name: name, Status: cms.FeeEnabled,
 			Value: value, Desc: desc, Accent: accent, Highlight: accent,
 			Rule: rule, Example: example, Fee: fee, RiderShare: share,
@@ -557,10 +557,10 @@ func seedFeeRules(ctx context.Context, repos *application.RepoUnit, now int64) {
 
 func seedAnnouncements(ctx context.Context, repos *application.RepoUnit, now int64) {
 	seed := func(id, title, typ, tone, audience string, status cms.AnnouncementStatus, publishedAt, plannedAt int64, content string, tags []string) {
-		if _, err := repos.Announcements.FindByID(id); err == nil {
+		if _, err := repos.Announcements.FindByID(ctx, id); err == nil {
 			return
 		}
-		if err := repos.Announcements.Save(&cms.Announcement{
+		if err := repos.Announcements.Save(ctx, &cms.Announcement{
 			ID: id, Title: title, Type: typ, TypeTone: tone, Audience: audience,
 			Status: status, PublishedAt: publishedAt, PlannedAt: plannedAt,
 			Content: content, Tags: tags, CreatedBy: "seed",

@@ -13,8 +13,7 @@ import (
 // ComplaintRepo 实现 complaint.ComplaintRepository。
 type ComplaintRepo struct{ client *ent.Client }
 
-func (r ComplaintRepo) Save(c *complaint.Complaint) error {
-	ctx := context.Background()
+func (r ComplaintRepo) Save(ctx context.Context, c *complaint.Complaint) error {
 	if c.ID == "" {
 		c.ID = newULID()
 	}
@@ -50,8 +49,8 @@ func toComplaint(e *ent.Complaint) *complaint.Complaint {
 	return c
 }
 
-func (r ComplaintRepo) FindByID(id string) (*complaint.Complaint, error) {
-	e, err := r.client.Complaint.Get(context.Background(), id)
+func (r ComplaintRepo) FindByID(ctx context.Context, id string) (*complaint.Complaint, error) {
+	e, err := r.client.Complaint.Get(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -61,8 +60,7 @@ func (r ComplaintRepo) FindByID(id string) (*complaint.Complaint, error) {
 	return toComplaint(e), nil
 }
 
-func (r ComplaintRepo) List(q complaint.Query, sc tenant.Scope) ([]*complaint.Complaint, int64, error) {
-	ctx := context.Background()
+func (r ComplaintRepo) List(ctx context.Context, q complaint.Query, sc tenant.Scope) ([]*complaint.Complaint, int64, error) {
 	bq := r.client.Complaint.Query()
 	if sc.RegionOnly() {
 		bq.Where(entcomplaint.RegionID(sc.RegionID))
@@ -97,16 +95,16 @@ func (r ComplaintRepo) List(q complaint.Query, sc tenant.Scope) ([]*complaint.Co
 	return out, int64(total), nil
 }
 
-func (r ComplaintRepo) CountPending() (int64, error) {
+func (r ComplaintRepo) CountPending(ctx context.Context) (int64, error) {
 	n, err := r.client.Complaint.Query().
 		Where(entcomplaint.StatusIn(string(complaint.StatusPending), string(complaint.StatusProcessing))).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }
 
-func (r ComplaintRepo) CountByUserID(userID string) (int64, error) {
+func (r ComplaintRepo) CountByUserID(ctx context.Context, userID string) (int64, error) {
 	n, err := r.client.Complaint.Query().
 		Where(entcomplaint.UserID(userID)).
-		Count(context.Background())
+		Count(ctx)
 	return int64(n), err
 }

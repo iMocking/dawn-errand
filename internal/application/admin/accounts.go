@@ -49,7 +49,7 @@ type ProvisionResult struct {
 // ResetMerchantPassword 为已开通商家重置登录密码（旧会话立即失效）。
 // sc 为操作者数据范围：非全局角色只能操作归属范围内的商家。
 func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID, operator string, sc tenant.Scope) (*ProvisionResult, error) {
-	m, err := s.Repos.Merchants.FindByID(merchantID)
+	m, err := s.Repos.Merchants.FindByID(ctx, merchantID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
 	}
@@ -59,7 +59,7 @@ func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID,
 	if m.OwnerUserID == "" {
 		return nil, errcode.New(errcode.CodeMerchantStatus, "该商家尚未开通账号")
 	}
-	u, err := s.Repos.Users.FindByID(m.OwnerUserID)
+	u, err := s.Repos.Users.FindByID(ctx, m.OwnerUserID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "商家账号不存在")
 	}
@@ -71,11 +71,11 @@ func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID,
 	if err != nil {
 		return nil, errcode.New(errcode.CodePasswordPolicy, "密码生成失败")
 	}
-	cred, err := s.Repos.Credentials.FindByUserID(u.ID)
+	cred, err := s.Repos.Credentials.FindByUserID(ctx, u.ID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "账号凭证不存在")
 	}
-	if err := s.Repos.Credentials.Save(&identity.Credential{
+	if err := s.Repos.Credentials.Save(ctx, &identity.Credential{
 		UserID: u.ID, PasswordHash: hash,
 		SessionVersion: cred.SessionVersion + 1, UpdatedAt: time.Now().Unix(),
 	}); err != nil {
@@ -93,7 +93,7 @@ func (s *AccountsService) ResetMerchantPassword(ctx context.Context, merchantID,
 
 // ResetRiderPassword 为已开通骑手重置登录密码（旧会话立即失效）。
 func (s *AccountsService) ResetRiderPassword(ctx context.Context, riderID, operator string, sc tenant.Scope) (*ProvisionResult, error) {
-	r, err := s.Repos.Riders.FindByID(riderID)
+	r, err := s.Repos.Riders.FindByID(ctx, riderID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
 	}
@@ -103,7 +103,7 @@ func (s *AccountsService) ResetRiderPassword(ctx context.Context, riderID, opera
 	if r.UserID == "" {
 		return nil, errcode.New(errcode.CodeRiderStatus, "该骑手尚未开通账号")
 	}
-	u, err := s.Repos.Users.FindByID(r.UserID)
+	u, err := s.Repos.Users.FindByID(ctx, r.UserID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "骑手账号不存在")
 	}
@@ -115,11 +115,11 @@ func (s *AccountsService) ResetRiderPassword(ctx context.Context, riderID, opera
 	if err != nil {
 		return nil, errcode.New(errcode.CodePasswordPolicy, "密码生成失败")
 	}
-	cred, err := s.Repos.Credentials.FindByUserID(u.ID)
+	cred, err := s.Repos.Credentials.FindByUserID(ctx, u.ID)
 	if err != nil {
 		return nil, errcode.NewStatus(404, errcode.CodeUserNotFound, "账号凭证不存在")
 	}
-	if err := s.Repos.Credentials.Save(&identity.Credential{
+	if err := s.Repos.Credentials.Save(ctx, &identity.Credential{
 		UserID: u.ID, PasswordHash: hash,
 		SessionVersion: cred.SessionVersion + 1, UpdatedAt: time.Now().Unix(),
 	}); err != nil {
@@ -163,7 +163,7 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 	regionID, defaultName, placeholderEmail := "", "", ""
 	switch role {
 	case identity.RoleMerchant:
-		m, err := s.Repos.Merchants.FindByID(subjectID)
+		m, err := s.Repos.Merchants.FindByID(ctx, subjectID)
 		if err != nil {
 			if errors.Is(err, application.ErrNotFound) {
 				return nil, errcode.NewStatus(404, errcode.CodeMerchantNotFound, "商家不存在")
@@ -180,7 +180,7 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 		defaultName = firstNonEmpty(m.Contact, m.Name)
 		placeholderEmail = "merchant." + m.ID + "@shuguang.local"
 	case identity.RoleDriver:
-		r, err := s.Repos.Riders.FindByID(subjectID)
+		r, err := s.Repos.Riders.FindByID(ctx, subjectID)
 		if err != nil {
 			if errors.Is(err, application.ErrNotFound) {
 				return nil, errcode.NewStatus(404, errcode.CodeRiderNotFound, "骑手不存在")
@@ -235,7 +235,7 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 		// 事务内二次校验，避免并发重复开通。
 		switch role {
 		case identity.RoleMerchant:
-			m, err := tx.Merchants.FindByID(subjectID)
+			m, err := tx.Merchants.FindByID(ctx, subjectID)
 			if err != nil {
 				return err
 			}
@@ -243,7 +243,7 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 				return errcode.NewStatus(409, errcode.CodeConflict, "该商家已开通账号")
 			}
 		case identity.RoleDriver:
-			r, err := tx.Riders.FindByID(subjectID)
+			r, err := tx.Riders.FindByID(ctx, subjectID)
 			if err != nil {
 				return err
 			}
@@ -255,13 +255,13 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 		var u *identity.User
 		found := false
 		if in.Email != "" {
-			if v, err := tx.Users.FindByEmail(in.Email); err == nil {
+			if v, err := tx.Users.FindByEmail(ctx, in.Email); err == nil {
 				u, found = v, true
 			} else if !errors.Is(err, application.ErrNotFound) {
 				return err
 			}
 		} else if in.Phone != "" {
-			if v, err := tx.Users.FindByPhone(in.Phone); err == nil {
+			if v, err := tx.Users.FindByPhone(ctx, in.Phone); err == nil {
 				u, found = v, true
 			} else if !errors.Is(err, application.ErrNotFound) {
 				return err
@@ -281,10 +281,10 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 				RegisteredAt: now, UpdatedAt: now,
 			}
 			applySubjectBinding(u, role, subjectID)
-			if err := tx.Users.Save(u); err != nil {
+			if err := tx.Users.Save(ctx, u); err != nil {
 				return err
 			}
-			if err := tx.Credentials.Save(&identity.Credential{
+			if err := tx.Credentials.Save(ctx, &identity.Credential{
 				UserID: u.ID, PasswordHash: hash, SessionVersion: 0, UpdatedAt: now,
 			}); err != nil {
 				return err
@@ -310,13 +310,13 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 			}
 			u.EmailVerified = true
 			u.UpdatedAt = now
-			if err := tx.Users.Save(u); err != nil {
+			if err := tx.Users.Save(ctx, u); err != nil {
 				return err
 			}
-			cred, err := tx.Credentials.FindByUserID(u.ID)
+			cred, err := tx.Credentials.FindByUserID(ctx, u.ID)
 			switch {
 			case errors.Is(err, application.ErrNotFound):
-				if err := tx.Credentials.Save(&identity.Credential{
+				if err := tx.Credentials.Save(ctx, &identity.Credential{
 					UserID: u.ID, PasswordHash: hash, SessionVersion: 0, UpdatedAt: now,
 				}); err != nil {
 					return err
@@ -328,7 +328,7 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 				return err
 			case in.Password != "":
 				// 管理员显式设置密码：更新哈希并递增会话版本，使旧会话失效。
-				if err := tx.Credentials.Save(&identity.Credential{
+				if err := tx.Credentials.Save(ctx, &identity.Credential{
 					UserID: u.ID, PasswordHash: hash,
 					SessionVersion: cred.SessionVersion + 1, UpdatedAt: now,
 				}); err != nil {
@@ -337,7 +337,7 @@ func (s *AccountsService) provision(ctx context.Context, role, subjectID string,
 			}
 		}
 
-		if err := bindSubject(tx, role, subjectID, u.ID, now); err != nil {
+		if err := bindSubject(ctx, tx, role, subjectID, u.ID, now); err != nil {
 			return err
 		}
 		result = &ProvisionResult{
@@ -373,22 +373,22 @@ func applySubjectBinding(u *identity.User, role, subjectID string) {
 	u.MerchantID = ""
 }
 
-func bindSubject(tx *application.RepoUnit, role, subjectID, userID string, now int64) error {
+func bindSubject(ctx context.Context, tx *application.RepoUnit, role, subjectID, userID string, now int64) error {
 	if role == identity.RoleMerchant {
-		m, err := tx.Merchants.FindByID(subjectID)
+		m, err := tx.Merchants.FindByID(ctx, subjectID)
 		if err != nil {
 			return err
 		}
 		m.OwnerUserID = userID
 		m.LastUpdatedAt = now
-		return tx.Merchants.Save(m)
+		return tx.Merchants.Save(ctx, m)
 	}
-	r, err := tx.Riders.FindByID(subjectID)
+	r, err := tx.Riders.FindByID(ctx, subjectID)
 	if err != nil {
 		return err
 	}
 	r.UserID = userID
-	return tx.Riders.Save(r)
+	return tx.Riders.Save(ctx, r)
 }
 
 func firstNonEmpty(vals ...string) string {

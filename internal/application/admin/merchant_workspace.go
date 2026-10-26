@@ -39,21 +39,21 @@ func (s *MerchantsService) Workspace(ctx context.Context, id string, sc tenant.S
 	}
 	ws := &MerchantWorkspace{Merchant: m, UserNames: map[string]string{}}
 
-	cats, err := s.Repos.Catalog.ListCategories(id)
+	cats, err := s.Repos.Catalog.ListCategories(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	dishes, _, err := s.Repos.Catalog.ListDishes(catalog.DishQuery{
+	dishes, _, err := s.Repos.Catalog.ListDishes(ctx, catalog.DishQuery{
 		MerchantID: id, IncludeOffSale: true, Page: 1, PageSize: 200,
 	})
 	if err != nil {
 		return nil, err
 	}
-	reviews, _, err := s.Repos.Reviews.List(review.Query{MerchantID: id, Page: 1, PageSize: 50})
+	reviews, _, err := s.Repos.Reviews.List(ctx, review.Query{MerchantID: id, Page: 1, PageSize: 50})
 	if err != nil {
 		return nil, err
 	}
-	orders, err := s.Repos.Orders.ListByMerchant(id, 200)
+	orders, err := s.Repos.Orders.ListByMerchant(ctx, id, 200)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (s *MerchantsService) Workspace(ctx context.Context, id string, sc tenant.S
 		if _, ok := ws.UserNames[rv.UserID]; ok {
 			continue
 		}
-		if u, err := s.Repos.Users.FindByID(rv.UserID); err == nil {
+		if u, err := s.Repos.Users.FindByID(ctx, rv.UserID); err == nil {
 			ws.UserNames[rv.UserID] = u.Name
 		}
 	}

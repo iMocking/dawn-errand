@@ -3,6 +3,7 @@
 package assembly
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -56,8 +57,9 @@ type App struct {
 	MW       *middleware.Middleware
 }
 
-// Build 装配全部依赖。
-func Build(cfg *config.Config) (*App, error) {
+// Build 装配全部依赖。ctx 为进程根上下文：装配期的配置读取（如本地存储挂载点）用它，
+// 请求期的 ctx 由 gin 逐请求注入，不在这里传递。
+func Build(ctx context.Context, cfg *config.Config) (*App, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("配置校验失败: %w", err)
 	}
@@ -91,7 +93,7 @@ func Build(cfg *config.Config) (*App, error) {
 	limiter := redisc.NewLimiter(rdb)
 	sender := mailer.NewSender(client, syscfg.SMTP(cipher, store))
 	localStorage := syscfg.LocalStorage(store, cfg)
-	fileCfg := localStorage()
+	fileCfg := localStorage(ctx)
 	fileStore := storage.NewLocal(localStorage)
 	storageMount := strings.Trim(fileCfg.PathPrefix, "/")
 	if storageMount == "" {

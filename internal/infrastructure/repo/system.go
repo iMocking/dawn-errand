@@ -12,10 +12,10 @@ import (
 // SettingRepo 实现 system.SettingRepository。
 type SettingRepo struct{ client *ent.Client }
 
-func (r SettingRepo) Get(key system.SettingKey) (*system.SystemSetting, error) {
+func (r SettingRepo) Get(ctx context.Context, key system.SettingKey) (*system.SystemSetting, error) {
 	e, err := r.client.SystemSetting.Query().
 		Where(systemsetting.Key(string(key))).
-		Only(context.Background())
+		Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrNotFound
@@ -31,8 +31,7 @@ func (r SettingRepo) Get(key system.SettingKey) (*system.SystemSetting, error) {
 	}, nil
 }
 
-func (r SettingRepo) Upsert(s *system.SystemSetting) error {
-	ctx := context.Background()
+func (r SettingRepo) Upsert(ctx context.Context, s *system.SystemSetting) error {
 	exists, err := r.client.SystemSetting.Query().Where(systemsetting.Key(string(s.Key))).Exist(ctx)
 	if err != nil {
 		return err
@@ -53,8 +52,8 @@ func (r SettingRepo) Upsert(s *system.SystemSetting) error {
 }
 
 // GetBootstrap 读取初始化状态（无记录视为未初始化）。
-func (r SettingRepo) GetBootstrap() (*system.BootstrapState, error) {
-	s, err := r.Get(system.KeyBootstrap)
+func (r SettingRepo) GetBootstrap(ctx context.Context) (*system.BootstrapState, error) {
+	s, err := r.Get(ctx, system.KeyBootstrap)
 	if err != nil {
 		if err == ErrNotFound {
 			return &system.BootstrapState{Initialized: false}, nil
@@ -69,8 +68,8 @@ func (r SettingRepo) GetBootstrap() (*system.BootstrapState, error) {
 }
 
 // MarkInitialized 写入初始化完成标记（已存在则不覆盖）。
-func (r SettingRepo) MarkInitialized(adminUserID string, now int64) error {
-	cur, err := r.GetBootstrap()
+func (r SettingRepo) MarkInitialized(ctx context.Context, adminUserID string, now int64) error {
+	cur, err := r.GetBootstrap(ctx)
 	if err != nil {
 		return err
 	}
@@ -85,7 +84,7 @@ func (r SettingRepo) MarkInitialized(adminUserID string, now int64) error {
 	if err != nil {
 		return err
 	}
-	return r.Upsert(&system.SystemSetting{
+	return r.Upsert(ctx, &system.SystemSetting{
 		Key:       system.KeyBootstrap,
 		Status:    system.SettingEnabled,
 		ValueJSON: string(b),

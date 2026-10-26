@@ -29,15 +29,15 @@ type Overview struct {
 // Get 财务页数据（scope 隔离）。
 func (s *FinanceService) Get(ctx context.Context, sc tenant.Scope) (*Overview, error) {
 	now := time.Now().Unix()
-	st, err := s.Repos.Withdrawals.Stats(sc, now)
+	st, err := s.Repos.Withdrawals.Stats(ctx, sc, now)
 	if err != nil {
 		return nil, err
 	}
-	ss, err := s.Repos.Settlements.Stats(sc, now)
+	ss, err := s.Repos.Settlements.Stats(ctx, sc, now)
 	if err != nil {
 		return nil, err
 	}
-	list, total, err := s.Repos.Withdrawals.List(finance.WithdrawQuery{
+	list, total, err := s.Repos.Withdrawals.List(ctx, finance.WithdrawQuery{
 		Page: 1, PageSize: 10, Status: "待审核",
 	}, sc)
 	if err != nil {
@@ -49,18 +49,18 @@ func (s *FinanceService) Get(ctx context.Context, sc tenant.Scope) (*Overview, e
 // SettlementList 结算流水。
 func (s *FinanceService) SettlementList(ctx context.Context, q finance.SettlementQuery, sc tenant.Scope) ([]*finance.Settlement, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Settlements.List(q, sc)
+	return s.Repos.Settlements.List(ctx, q, sc)
 }
 
 // WithdrawList 提现列表。
 func (s *FinanceService) WithdrawList(ctx context.Context, q finance.WithdrawQuery, sc tenant.Scope) ([]*finance.Withdrawal, int64, error) {
 	normalizeQ(&q.Page, &q.PageSize)
-	return s.Repos.Withdrawals.List(q, sc)
+	return s.Repos.Withdrawals.List(ctx, q, sc)
 }
 
 // WithdrawDetail 提现单详情（对象级隔离）。
 func (s *FinanceService) WithdrawDetail(ctx context.Context, id string, sc tenant.Scope) (*finance.Withdrawal, error) {
-	w, err := s.Repos.Withdrawals.FindByID(id)
+	w, err := s.Repos.Withdrawals.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return nil, errcode.NewStatus(404, errcode.CodeWithdrawNotFound, "提现单不存在")
@@ -101,7 +101,7 @@ func (s *FinanceService) Reconciliation(ctx context.Context, date string, sc ten
 	if err != nil {
 		return nil, errcode.New(errcode.CodeBadRequest, "日期格式应为 YYYY-MM-DD")
 	}
-	sum, err := s.Repos.Payments.SummarizeRecon(day.Unix(), day.AddDate(0, 0, 1).Unix(), regionID)
+	sum, err := s.Repos.Payments.SummarizeRecon(ctx, day.Unix(), day.AddDate(0, 0, 1).Unix(), regionID)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func round2Money(v float64) float64 {
 	return float64(int64(v*100+0.5)) / 100
 }
 func (s *FinanceService) AuditWithdraw(ctx context.Context, id, action, remark, operator string, sc tenant.Scope) error {
-	w, err := s.Repos.Withdrawals.FindByID(id)
+	w, err := s.Repos.Withdrawals.FindByID(ctx, id)
 	if err != nil {
 		if err == application.ErrNotFound {
 			return errcode.NewStatus(404, errcode.CodeWithdrawNotFound, "提现单不存在")
@@ -141,7 +141,7 @@ func (s *FinanceService) AuditWithdraw(ctx context.Context, id, action, remark, 
 	}
 	now := time.Now().Unix()
 	// 条件认领：并发双审核仅一人生效，杜绝重复打款/重复退回。
-	claimed, err := s.Repos.Withdrawals.ClaimAudit(id, action == "pass", remark, operator, now)
+	claimed, err := s.Repos.Withdrawals.ClaimAudit(ctx, id, action == "pass", remark, operator, now)
 	if err != nil {
 		return err
 	}
@@ -152,13 +152,13 @@ func (s *FinanceService) AuditWithdraw(ctx context.Context, id, action, remark, 
 	if action == "pass" {
 		ref, err := s.Payout.Payout(ctx, id, w.PartyType, w.PartyID, w.Amount)
 		if err != nil {
-			if verr := s.Repos.Withdrawals.RevertAuditToPending(id, string(finance.WithdrawApproved), operator, time.Now().Unix()); verr != nil {
+			if verr := s.Repos.Withdrawals.RevertAuditToPending(ctx, id, string(finance.WithdrawApproved), operator, time.Now().Unix()); verr != nil {
 				return errcode.Wrap(err, errcode.CodePaymentFailed, "打款失败且状态回退异常，请人工对账")
 			}
 			return errcode.Wrap(err, errcode.CodePaymentFailed, "打款失败，已回退待审核，请重试")
 		}
 		if ref != "" {
-			if err := s.Repos.Withdrawals.MarkPayout(id, ref, time.Now().Unix()); err != nil {
+			if err := s.Repos.Withdrawals.MarkPayout(ctx, id, ref, time.Now().Unix()); err != nil {
 				return err
 			}
 		}
@@ -172,24 +172,24 @@ func (s *FinanceService) AuditWithdraw(ctx context.Context, id, action, remark, 
 	if w.PartyID != "" && s.Tx != nil {
 		rnow := time.Now().Unix()
 		if err := s.Tx.RunInTx(ctx, func(tx *application.RepoUnit) error {
-			acc, err := tx.Wallets.Ensure(w.PartyType, w.PartyID, rnow)
+			acc, err := tx.Wallets.Ensure(ctx, w.PartyType, w.PartyID, rnow)
 			if err != nil {
 				return err
 			}
-			ok, updated, err := tx.Wallets.Adjust(w.PartyType, w.PartyID, w.Amount, true, rnow)
+			ok, updated, err := tx.Wallets.Adjust(ctx, w.PartyType, w.PartyID, w.Amount, true, rnow)
 			if err != nil {
 				return err
 			}
 			if !ok || updated == nil {
 				return errcode.New(errcode.CodeWithdrawStatus, "退款入账失败")
 			}
-			return tx.Wallets.SaveTransaction(&wallet.Transaction{
+			return tx.Wallets.SaveTransaction(ctx, &wallet.Transaction{
 				AccountID: acc.ID, PartyType: w.PartyType, PartyID: w.PartyID,
 				Type: "withdraw_refund", Amount: w.Amount,
 				BalanceAfter: updated.Balance, Note: "提现驳回退回", CreatedAt: rnow,
 			})
 		}); err != nil {
-			if verr := s.Repos.Withdrawals.RevertAuditToPending(id, string(finance.WithdrawRejected), operator, rnow); verr == nil {
+			if verr := s.Repos.Withdrawals.RevertAuditToPending(ctx, id, string(finance.WithdrawRejected), operator, rnow); verr == nil {
 				return errcode.Wrap(err, errcode.CodeWithdrawStatus, "退款失败，已回退待审核，请重试驳回")
 			}
 			return err
