@@ -257,9 +257,21 @@ export function resetMerchantAccount(id: string) {
   )
 }
 
-/** 管理端上传图片（营业执照/身份证/门头照） */
-export function uploadMerchantImage(file: File) {
+/** 上传用途（与后端 purpose 白名单一致）：证件类进私有桶，图片类进公开桶。 */
+export type UploadPurpose =
+  | 'doc' | 'idcard' | 'id' | 'credential' | 'license' | 'cert'
+  | 'image' | 'avatar' | 'dish' | 'store' | 'menu' | 'proof' | 'delivery_proof' | 'complaint'
+
+/**
+ * 管理端上传图片（营业执照/身份证/门头照）。
+ * purpose 决定落到哪个桶：证件类（idcard/license/cert/doc）后端强制私有桶，
+ * 返回的 URL 需带 Bearer 才能读（见 AuthImage / openPrivateFile）；
+ * 门头照、菜品图等图片类（store/menu/image）走公开静态桶。
+ * 不传则后端按 image 处理——身份证一旦漏传就等同公开暴露，所以调用方必须显式指定。
+ */
+export function uploadMerchantImage(file: File, purpose: UploadPurpose = 'image') {
   const form = new FormData()
   form.append('file', file)
+  form.append('purpose', purpose)
   return http.post<{ url: string; name: string; size: number; mime: string }>('/uploads', form)
 }

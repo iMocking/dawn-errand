@@ -26,6 +26,18 @@ var AllRoles = []string{
 	RoleMerchant, RoleDriver, RoleUser, RoleSystem,
 }
 
+// IsPlatformRole 是否为平台侧管理角色（含区域站长）。
+// 用于「代主体上传的私有文件归属在 user/<管理员ID> 下」时的读取判定：
+// 客服代商家传的证照，区域站长审核必须能看到；普通会员的证件对站长不可见。
+func IsPlatformRole(role string) bool {
+	switch role {
+	case RoleSuperAdmin, RoleCSManager, RoleCSAgent, RoleRegionStation:
+		return true
+	default:
+		return false
+	}
+}
+
 // SystemIdentity 系统级身份定义（初始化完成后自动创建，与普通用户同表）。
 type SystemIdentity struct {
 	Email string

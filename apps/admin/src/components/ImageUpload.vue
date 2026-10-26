@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import SvgIcon from '@/components/SvgIcon/SvgIcon.vue'
-import { uploadMerchantImage } from '@/api/merchants'
+import AuthImage from '@/components/AuthImage.vue'
+import { uploadMerchantImage, type UploadPurpose } from '@/api/merchants'
 import { useToast } from '@/composables/useToast'
 
-defineProps<{
+const props = defineProps<{
   modelValue: string
   label: string
   hint?: string
   ratio?: 'wide' | 'square'
+  /** 证件类（idcard/license/cert…）会被后端放进私有桶，预览需带 token */
+  purpose?: UploadPurpose
 }>()
 const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>()
 const toast = useToast()
@@ -28,7 +31,7 @@ async function pick(e: Event) {
   }
   uploading.value = true
   try {
-    const res = await uploadMerchantImage(file)
+    const res = await uploadMerchantImage(file, props.purpose ?? 'image')
     emit('update:modelValue', res.url)
   } finally {
     uploading.value = false
@@ -45,7 +48,7 @@ async function pick(e: Event) {
       class="group relative overflow-hidden rounded-lg border border-line bg-head"
       :class="ratio === 'wide' ? 'aspect-[16/9]' : 'aspect-[4/3]'"
     >
-      <img :src="modelValue" alt="" class="h-full w-full object-cover" />
+      <AuthImage :src="modelValue" class="h-full w-full object-cover" />
       <button
         type="button"
         class="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100"

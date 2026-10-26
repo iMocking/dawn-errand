@@ -287,7 +287,8 @@ func uploadParty(p *tenant.Principal) (string, string) {
 // privateFileReadable 私有桶读取归属判定：
 // 主体本人（前缀与自身绑定一致）可读；未知前缀一律拒绝；
 // 平台角色（全局作用域）可读，用于入驻与售后审核；
-// 区域站长限本区域商家/骑手的文件（复用管理用例的作用域校验），看不到普通用户文件；
+// 区域站长限本区域商家/骑手的文件（复用管理用例的作用域校验），外加「归属账号是平台角色」的
+// user/* 文件（客服代上传的证照落在 user/<后台账号ID> 下）；普通会员本人的证件对站长仍不可见；
 // 其余（其他商家/骑手/会员）拒绝——证件属 PII，不能因为「登录了」就可见。
 func (h *Handler) privateFileReadable(c *gin.Context, p *tenant.Principal, sc tenant.Scope, seg, id string) bool {
 	switch seg {
@@ -317,6 +318,12 @@ func (h *Handler) privateFileReadable(c *gin.Context, p *tenant.Principal, sc te
 		if seg == "rider" {
 			_, err := h.Riders.Detail(c.Request.Context(), id, sc)
 			return err == nil
+		}
+		if seg == "user" {
+			// 管理端代主体上传的证件落在 user/<上传的后台账号ID> 下，路径本身不含商家信息：
+			// 只有当该账号是平台角色时才放行，避免区域站长顺带读到普通会员的身份证。
+			owner, err := h.MW.Users.FindByID(id)
+			return err == nil && owner != nil && identity.IsPlatformRole(owner.Role)
 		}
 	}
 	return false

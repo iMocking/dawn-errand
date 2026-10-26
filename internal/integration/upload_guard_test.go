@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"dawn-errand/internal/domain/identity"
 )
 
 // testPNG 1x1 像素图片，上传用例的最小合法载荷。
@@ -160,4 +162,88 @@ func TestAdminUploadRouteRoleGuard(t *testing.T) {
 	}
 	path := strings.TrimPrefix(body.URL, "http://localhost:8080")
 	_ = os.Remove(filepath.Join(handler.Cfg.StorageRootDir, filepath.FromSlash(strings.TrimPrefix(path, "/uploads/"))))
+}
+
+// uploadPrivateRel 以指定令牌上传证件，返回私有桶相对路径（user/<主体ID>/<ULID>）。
+func uploadPrivateRel(t *testing.T, token, route, name string) string {
+	t.Helper()
+	const marker = "/api/uploads/private/"
+	r := doMultipart(t, route, token, "file", name, testPNG, "purpose", "idcard")
+	if r.Code != 0 {
+		t.Fatalf("上传 %s code=%d msg=%s", route, r.Code, r.Message)
+	}
+	var body struct {
+		URL string `json:"url"`
+	}
+	if err := json.Unmarshal(r.Body, &body); err != nil {
+		t.Fatal(err)
+	}
+	i := strings.Index(body.URL, marker)
+	if i < 0 {
+		t.Fatalf("证件未落私有桶: %s", body.URL)
+	}
+	rel := body.URL[i+len(marker):]
+	t.Cleanup(func() {
+		_ = os.Remove(filepath.Join(handler.Cfg.StorageRootDir, "private", filepath.FromSlash(rel)))
+	})
+	return rel
+}
+
+// meUserID 取当前令牌对应的账号 ID。
+func meUserID(t *testing.T, token string) string {
+	t.Helper()
+	r, _ := do(t, http.MethodGet, "/api/auth/me", token, nil)
+	if r.Code != 0 {
+		t.Fatalf("me code=%d msg=%s", r.Code, r.Message)
+	}
+	var body struct {
+		User struct {
+			ID string `json:"id"`
+		} `json:"user"`
+	}
+	if err := json.Unmarshal(r.Body, &body); err != nil {
+		t.Fatal(err)
+	}
+	if body.User.ID == "" {
+		t.Fatal("me 未返回 user.id")
+	}
+	return body.User.ID
+}
+
+// TestPrivateUploadRegionStationRule R4-7：区域站长的私有桶读取边界。
+// 后台账号代主体上传的证照落在 user/<上传账号ID> 下，路径本身不含商家信息，
+// 因此对「平台角色账号上传」放行（否则站长无法审核），对「普通会员本人的证件」仍拒绝。
+func TestPrivateUploadRegionStationRule(t *testing.T) {
+	const marker = "/api/uploads/private/"
+	admin := loginAdmin(t)
+
+	stationEmail := "upload-station@shuguang.local"
+	station := mustRegisterAndLogin(t, stationEmail, "UploadPass123")
+	stationID := meUserID(t, station.Token)
+	if r, _ := do(t, http.MethodPost, "/api/users/"+stationID+"/role", admin,
+		map[string]string{"role": identity.RoleRegionStation}); r.Code != 0 {
+		t.Fatalf("提权站长 code=%d msg=%s", r.Code, r.Message)
+	}
+	t.Cleanup(func() {
+		do(t, http.MethodPost, "/api/users/"+stationID+"/role", admin, map[string]string{"role": identity.RoleUser})
+	})
+	// 作用域来自令牌声明，提权后必须重新登录才拿到区域作用域
+	stationTok := mustLogin(t, stationEmail, "UploadPass123").Token
+
+	member := mustRegisterAndLogin(t, "upload-member@shuguang.local", "UploadPass123")
+	memberRel := uploadPrivateRel(t, member.Token, "/api/app/common/uploads", "member-id.png")
+	proxyRel := uploadPrivateRel(t, admin, "/api/uploads", "proxy-license.png")
+
+	if code := getStatus(t, marker+proxyRel, stationTok); code != http.StatusOK {
+		t.Fatalf("站长读取后台代上传的证照应 200, got %d", code)
+	}
+	if code := getStatus(t, marker+memberRel, stationTok); code != http.StatusForbidden {
+		t.Fatalf("站长读取普通会员证件应 403, got %d", code)
+	}
+	if code := getStatus(t, marker+memberRel, member.Token); code != http.StatusOK {
+		t.Fatalf("本人读取自己的证件应 200, got %d", code)
+	}
+	if code := getStatus(t, marker+memberRel, admin); code != http.StatusOK {
+		t.Fatalf("超管读取会员证件应 200, got %d", code)
+	}
 }

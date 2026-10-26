@@ -4,9 +4,11 @@ import { useRouter } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
 import Modal from '@/components/Modal.vue'
 import AppButton from '@/components/AppButton.vue'
+import AuthImage from '@/components/AuthImage.vue'
 import { useToast } from '@/composables/useToast'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { formatTime } from '@/utils/format'
+import { isPrivateSrc, openPrivateFile } from '@/utils/privateUpload'
 import {
   getMerchantAuditList,
   auditMerchant,
@@ -31,6 +33,20 @@ const confirmState = ref<{ open: boolean; type: 'approve' | 'reject'; row: Merch
 const rejectReason = ref('')
 const accountOpen = ref(false)
 const accountResult = ref<{ userId: string; email: string; phone: string; initialPassword: string } | null>(null)
+
+/** 查看证照大图：私有桶对象必须带 token 取回，`<a href>` 直开只会拿到 401 JSON */
+async function openCert(url?: string) {
+  if (!url) return
+  if (!isPrivateSrc(url)) {
+    window.open(url, '_blank', 'noopener')
+    return
+  }
+  try {
+    await openPrivateFile(url)
+  } catch {
+    toast.error('无权查看该证照，或文件已不可用')
+  }
+}
 
 const logoPaths: Record<MerchantAuditRow['logoIcon'], string> = {
   food: '<path d="M3 11h18c0 5-4 8-9 8s-9-3-9-8z"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
@@ -163,15 +179,16 @@ onMounted(load)
           <!-- 证照 -->
           <div class="mt-3 flex flex-wrap gap-2">
             <component
-              :is="cert.url ? 'a' : 'div'"
+              :is="cert.url ? 'button' : 'div'"
               v-for="cert in row.certs"
               :key="cert.label"
-              :href="cert.url || undefined"
-              :target="cert.url ? '_blank' : undefined"
+              :type="cert.url ? 'button' : undefined"
               class="flex h-16 w-16 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-lg bg-head"
               style="border:1px dashed #D0D3D9;"
+              :title="cert.url ? '点击查看大图' : undefined"
+              @click="cert.url && openCert(cert.url)"
             >
-              <img v-if="cert.url" :src="cert.url" alt="" class="h-full w-full object-cover" />
+              <AuthImage v-if="cert.url" :src="cert.url" class="h-full w-full object-cover" />
               <template v-else>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86909C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" v-html="certIconPaths[cert.icon]" />
                 <span class="text-[10px] text-ink-3">{{ cert.label }}</span>

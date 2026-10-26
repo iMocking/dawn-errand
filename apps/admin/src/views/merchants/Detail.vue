@@ -4,8 +4,10 @@ import { useRoute } from 'vue-router'
 import StatusTag from '@/components/StatusTag.vue'
 import AppButton from '@/components/AppButton.vue'
 import Modal from '@/components/Modal.vue'
+import AuthImage from '@/components/AuthImage.vue'
 import { useToast } from '@/composables/useToast'
 import { formatDate, formatTime, formatMoney, formatNumber } from '@/utils/format'
+import { isPrivateSrc, openPrivateFile } from '@/utils/privateUpload'
 import {
   getMerchantDetail,
   getMerchantWorkspace,
@@ -16,6 +18,20 @@ import {
 
 const route = useRoute()
 const toast = useToast()
+
+/** 查看证照大图：私有桶对象必须带 token 取回，`<a href>` 直开只会拿到 401 JSON */
+async function openCert(url?: string) {
+  if (!url) return
+  if (!isPrivateSrc(url)) {
+    window.open(url, '_blank', 'noopener')
+    return
+  }
+  try {
+    await openPrivateFile(url)
+  } catch {
+    toast.error('无权查看该证照，或文件已不可用')
+  }
+}
 
 const detail = ref<MerchantDetail | null>(null)
 const workspace = ref<MerchantWorkspace | null>(null)
@@ -245,22 +261,22 @@ onMounted(async () => {
             </div>
             <div class="mt-4 text-[13px] font-semibold text-ink-1">证照影像</div>
             <div v-if="workspace?.certs.length" class="mt-2 flex flex-wrap gap-2.5">
-              <a
-                v-for="cert in workspace.certs"
-                :key="cert.label"
-                :href="cert.url || undefined"
-                :target="cert.url ? '_blank' : undefined"
-                class="w-32 overflow-hidden rounded-lg border border-line bg-white"
-              >
-                <div class="flex h-20 w-full items-center justify-center bg-head">
-                  <img v-if="cert.url" :src="cert.url" alt="" class="h-full w-full object-cover" />
-                  <div v-else class="flex flex-col items-center gap-1 text-ink-4">
+              <div v-for="cert in workspace.certs" :key="cert.label" class="w-32 overflow-hidden rounded-lg border border-line bg-white">
+                <component
+                  :is="cert.url ? 'button' : 'div'"
+                  :type="cert.url ? 'button' : undefined"
+                  class="flex h-20 w-full items-center justify-center bg-head"
+                  :title="cert.url ? '点击查看大图' : undefined"
+                  @click="cert.url && openCert(cert.url)"
+                >
+                  <AuthImage v-if="cert.url" :src="cert.url" class="h-full w-full object-cover" />
+                  <span v-else class="flex flex-col items-center gap-1 text-ink-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
                     <span class="text-[10px]">未上传</span>
-                  </div>
-                </div>
+                  </span>
+                </component>
                 <div class="px-2 py-1 text-[11px] text-ink-3">{{ cert.label }}</div>
-              </a>
+              </div>
               <div
                 v-for="(img, i) in workspace.application.storefrontImages"
                 :key="img"

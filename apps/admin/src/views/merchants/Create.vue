@@ -110,7 +110,7 @@ async function onStorefrontPick(e: Event) {
   try {
     for (const file of files) {
       if (!file.type.startsWith('image/')) continue
-      const res = await uploadMerchantImage(file)
+      const res = await uploadMerchantImage(file, 'store')
       form.application.storefrontImages.push(res.url)
     }
   } finally {
@@ -374,7 +374,7 @@ onMounted(load)
           </div>
           <div class="col-span-2 row-span-2">
             <div class="mb-1.5 text-[13px] text-ink-2">营业执照照片 <span class="text-[#FF4D4F]">*</span></div>
-            <ImageUpload v-model="form.application.licenseImage" label="营业执照" ratio="wide" hint="支持 JPG/PNG，10MB 以内" />
+            <ImageUpload v-model="form.application.licenseImage" label="营业执照" ratio="wide" purpose="license" hint="支持 JPG/PNG，10MB 以内 · 存私有桶" />
           </div>
           <div>
             <div class="mb-1.5 text-[13px] text-ink-2">法人姓名 <span class="text-[#FF4D4F]">*</span></div>
@@ -386,11 +386,11 @@ onMounted(load)
           </div>
           <div>
             <div class="mb-1.5 text-[13px] text-ink-2">身份证人像面 <span class="text-[#FF4D4F]">*</span></div>
-            <ImageUpload v-model="form.application.idCardFront" label="人像面" hint="需清晰可见证件号" />
+            <ImageUpload v-model="form.application.idCardFront" label="人像面" purpose="idcard" hint="需清晰可见证件号 · 存私有桶" />
           </div>
           <div>
             <div class="mb-1.5 text-[13px] text-ink-2">身份证国徽面 <span class="text-[#FF4D4F]">*</span></div>
-            <ImageUpload v-model="form.application.idCardBack" label="国徽面" />
+            <ImageUpload v-model="form.application.idCardBack" label="国徽面" purpose="idcard" />
           </div>
           <div>
             <div class="mb-1.5 text-[13px] text-ink-2">门头/店内照片 <span class="text-[#FF4D4F]">*</span></div>
@@ -414,7 +414,7 @@ onMounted(load)
             </div>
             <div class="col-span-2">
               <div class="mb-1.5 text-[13px] text-ink-2">食品经营许可证照片 <span class="text-[#FF4D4F]">*</span></div>
-              <ImageUpload v-model="form.application.foodLicenseImage" label="食品许可证" ratio="wide" />
+              <ImageUpload v-model="form.application.foodLicenseImage" label="食品许可证" ratio="wide" purpose="cert" />
             </div>
           </template>
 
