@@ -9,13 +9,19 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dawnerrand.driver.R
+import com.dawnerrand.driver.data.repository.DriverRemoteRepository
 import com.dawnerrand.driver.databinding.FragmentOrdersBinding
 import com.dawnerrand.driver.ui.screens.orderdetail.OrderDetailActivity
 import com.dawnerrand.driver.ui.theme.Design
 import com.dawnerrand.driver.ui.util.dp
 import com.dawnerrand.driver.ui.util.padTopWithStatusBar
+import com.dawnerrand.driver.ui.util.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 我的订单：还原 design/driver/orders.html（筛选 Tab + 历史订单卡片）。
@@ -39,13 +45,26 @@ class OrdersFragment : Fragment() {
         binding.navBar.padTopWithStatusBar()
         buildTabs()
 
-        adapter = OrdersAdapter(emptyList()) {
-            OrderDetailActivity.start(requireContext())
+        adapter = OrdersAdapter(emptyList()) { record ->
+            if (record.id.isBlank()) {
+                requireContext().toast("订单信息缺失，请刷新后重试")
+            } else {
+                OrderDetailActivity.start(requireContext(), record.id)
+            }
         }
         binding.recyclerOrders.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerOrders.adapter = adapter
 
         vm.records.observe(viewLifecycleOwner, Observer { adapter.submit(it) })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 从详情页返回时订单状态可能已推进，重拉一次再刷新列表。
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) { DriverRemoteRepository.refreshOrders() }
+            if (_binding != null) vm.reload()
+        }
     }
 
     private fun buildTabs() {

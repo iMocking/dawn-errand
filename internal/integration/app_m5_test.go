@@ -210,15 +210,20 @@ func TestPaymentCallback(t *testing.T) {
 	amount := od.Pricing.PayAmount
 	ts := time.Now().Unix()
 	secret := config.Load().PaymentCallbackSecret
-	sign := func(orderID, tradeNo, status string, amount float64, ts int64) string {
-		payload := fmt.Sprintf("%s|%s|%.2f|%s|%d", orderID, tradeNo, amount, status, ts)
+	sign := func(channel, orderID, tradeNo, status string, amount float64, ts int64) string {
+		// 与 infra/payment 的 canonical 保持一致：channel 必须进签名串，否则可跨渠道重放。
+		payload := fmt.Sprintf("%s|%s|%s|%.2f|%s|%d", channel, orderID, tradeNo, amount, status, ts)
 		mac := hmac.New(sha256.New, []byte(secret))
 		mac.Write([]byte(payload))
 		return hex.EncodeToString(mac.Sum(nil))
 	}
 	body := map[string]any{
 		"order_id": orderID, "trade_no": "MOCKCB001", "amount": amount,
-		"status": "paid", "timestamp": ts, "sign": sign(orderID, "MOCKCB001", "paid", amount, ts),
+		"status": "paid", "timestamp": ts, "sign": sign("wechat", orderID, "MOCKCB001", "paid", amount, ts),
+	}
+	// 跨渠道重放：为 wechat 签的名打到 alipay 路径上必须被拒（验签含 channel）。
+	if r, _ := do(t, http.MethodPost, "/api/payments/callback/alipay", "", body); r.Code != 1201 {
+		t.Fatalf("跨渠道重放应 1201, got %d", r.Code)
 	}
 	cb, _ := do(t, http.MethodPost, "/api/payments/callback/wechat", "", body)
 	if cb.Code != 0 {

@@ -62,6 +62,8 @@ type Handler struct {
 	StorageMount string
 	// Accounts 商家/骑手账号开通。
 	Accounts *admin.AccountsService
+	// Payments 支付回调验签端口（infrastructure/payment 实现；为空时回调直接 500，不放行）。
+	Payments application.PaymentNotifyVerifier
 
 	Dashboard  *admin.DashboardService
 	Orders     *admin.OrdersService

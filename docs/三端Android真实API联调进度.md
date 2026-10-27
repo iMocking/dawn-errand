@@ -55,7 +55,7 @@
 | 我的订单 | `GET /api/app/driver/orders` | ✅ 已接入 |
 | 收入/余额 | `GET /api/app/driver/finance/{summary,records}` | ✅ 已接入 |
 | 上/下线 | `PUT /api/app/driver/status` | ✅ 已接入开关 |
-| 抢单/取货/送达 | `POST /api/app/driver/orders/:id/{grab,pickup,deliver}` | ✅ API 方法已封装；页面动作待接 |
+| 抢单/取货/送达 | `POST /api/app/driver/orders/:id/{grab,pickup,deliver}` | ✅ 已接（2026-10-26）：大厅抢单、详情页取货/送达均真调接口，按钮按后端 `actions` 下发，取送码错误提示 1804 |
 | 位置上报 | `POST /api/app/driver/location` | ⏳ 待接 |
 
 ## 3. 联调验证记录
@@ -96,7 +96,7 @@ cd apps/driver; .\gradlew.bat :app:assembleDebug
 
 1. 用户端购物车、下单、支付、售后、评价、优惠券仍沿用本地 `DemoRepository` 流程，未全部切到后端。
 2. 商家端菜品 CRUD、营业参数保存、提现仍为本地/演示逻辑；订单动作已真实调用。
-3. 骑手端抢单/取货/送达 API 方法已封装，但页面按钮尚未全部替换；位置上报待接。
+3. 骑手端抢单/取货/送达已接线（2026-10-26：详情页按后端 `actions` 下发按钮，取送码由后端校验并提示 1804）；位置上报仍待接。
 4. 模拟器通过 `10.0.2.2:8080` 访问后端；真机需将 `API_BASE_URL` 改为局域网 IP 或 HTTPS 域名。
 5. 后端 JWT 刷新尚未在 Android 端实现自动单飞刷新；token 过期后需重新登录。
 
@@ -104,5 +104,5 @@ cd apps/driver; .\gradlew.bat :app:assembleDebug
 
 - 用户端：下单/支付/售后/评价/优惠券接口替换本地流程。
 - 商家端：菜品 CRUD、营业设置保存、提现接口。
-- 骑手端：抢单/取货/送达按钮与位置上报、导航联动。
+- 骑手端：位置上报与导航联动（抢单/取货/送达已于 2026-10-26 接线，见实施进度记录「（十九）」）。
 - 三端统一 `401 → refresh → 重放` 拦截器。

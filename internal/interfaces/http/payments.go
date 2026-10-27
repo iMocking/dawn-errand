@@ -1,22 +1,23 @@
 package http
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"dawn-errand/internal/application"
 	"dawn-errand/internal/pkg/errcode"
 	"dawn-errand/internal/pkg/response"
 )
 
-// PaymentCallback POST /api/payments/callback/:channel（支付渠道回调，HMAC 验签）。
-// 真实渠道适配层需将微信/支付宝报文转换为该统一格式后再调用本接口。
+// PaymentCallback POST /api/payments/callback/:channel（支付渠道回调）。
+//
+// 这里只做 HTTP 绑定与错误映射：验签已下沉到 infrastructure/payment 的适配层，
+// 待签名串包含 channel，因此为 A 渠道签的名打不到 B 渠道上。
+// 真实渠道适配层负责把微信/支付宝报文转换为该统一格式后再调用本接口。
 func (h *Handler) PaymentCallback(c *gin.Context) {
 	var in struct {
 		OrderID   string  `json:"order_id"`
@@ -30,29 +31,43 @@ func (h *Handler) PaymentCallback(c *gin.Context) {
 		response.Err(c, err)
 		return
 	}
-	if in.OrderID == "" || in.Sign == "" || in.Timestamp == 0 {
+	if h.Payments == nil {
+		err := application.ErrPaymentNotConfigured
+		_ = c.Error(err)
+		response.ErrStatus(c, http.StatusInternalServerError, errcode.CodeInternal, "支付回调验签未配置")
+		return
+	}
+
+	notify := application.PaymentNotify{
+		Channel:   strings.TrimSpace(c.Param("channel")),
+		OrderID:   strings.TrimSpace(in.OrderID),
+		TradeNo:   strings.TrimSpace(in.TradeNo),
+		Amount:    in.Amount,
+		Status:    strings.TrimSpace(in.Status),
+		Timestamp: in.Timestamp,
+	}
+	switch err := h.Payments.Verify(notify, in.Sign, time.Now().Unix()); {
+	case err == nil:
+	case errors.Is(err, application.ErrPaymentNotifyIncomplete):
 		response.ErrStatus(c, http.StatusBadRequest, errcode.CodeBadRequest, "回调参数不完整")
 		return
-	}
-	if delta := time.Now().Unix() - in.Timestamp; delta > 300 || delta < -300 {
+	case errors.Is(err, application.ErrPaymentTimestamp):
 		response.ErrStatus(c, http.StatusUnauthorized, errcode.CodeConflict, "回调时间戳超出窗口")
 		return
-	}
-	payload := fmt.Sprintf("%s|%s|%.2f|%s|%d",
-		in.OrderID, in.TradeNo, in.Amount, in.Status, in.Timestamp)
-	mac := hmac.New(sha256.New, []byte(h.Cfg.PaymentCallbackSecret))
-	mac.Write([]byte(payload))
-	expected := hex.EncodeToString(mac.Sum(nil))
-	if !hmac.Equal([]byte(strings.ToLower(in.Sign)), []byte(expected)) {
+	case errors.Is(err, application.ErrPaymentNotConfigured):
+		_ = c.Error(err)
+		response.ErrStatus(c, http.StatusInternalServerError, errcode.CodeInternal, "支付回调验签未配置")
+		return
+	default:
 		response.ErrStatus(c, http.StatusUnauthorized, errcode.CodeForbidden, "回调签名校验失败")
 		return
 	}
-	if in.Status != "paid" {
-		response.OKMsg(c, "已忽略非支付成功回调", gin.H{"status": in.Status})
+
+	if notify.Status != "paid" {
+		response.OKMsg(c, "已忽略非支付成功回调", gin.H{"status": notify.Status})
 		return
 	}
-	channel := strings.TrimSpace(c.Param("channel"))
-	o, err := h.OrderApp.PayByCallback(c.Request.Context(), in.OrderID, channel, in.TradeNo, in.Amount)
+	o, err := h.OrderApp.PayByCallback(c.Request.Context(), notify.OrderID, notify.Channel, notify.TradeNo, notify.Amount)
 	if err != nil {
 		response.Err(c, err)
 		return

@@ -19,13 +19,20 @@ class OrderPoolViewModel : ViewModel() {
 
     fun selectFilter(index: Int) {
         _selectedFilter.value = index
-        _orders.value = allOrders.filter { order ->
-            when (index) {
-                1 -> order.type == "外卖订单"
-                2 -> order.type != "外卖订单"
-                3 -> order.distanceKm < 5f
-                else -> true
-            }
+        _orders.value = filtered(index)
+    }
+
+    /** 抢单成功后池子会少一条：返回大厅时按当前筛选重新取一次仓库快照。 */
+    fun reload() {
+        _orders.value = filtered(_selectedFilter.value ?: 0)
+    }
+
+    private fun filtered(index: Int): List<OrderItem> = allOrders.filter { order ->
+        when (index) {
+            1 -> order.type == "外卖订单"
+            2 -> order.type != "外卖订单"
+            3 -> order.distanceKm < 5f
+            else -> true
         }
     }
 }

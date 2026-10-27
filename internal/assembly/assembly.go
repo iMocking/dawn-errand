@@ -25,6 +25,7 @@ import (
 	"dawn-errand/internal/infrastructure/ent"
 	"dawn-errand/internal/infrastructure/mailer"
 	"dawn-errand/internal/infrastructure/passwd"
+	"dawn-errand/internal/infrastructure/payment"
 	"dawn-errand/internal/infrastructure/payout"
 	"dawn-errand/internal/infrastructure/redisc"
 	"dawn-errand/internal/infrastructure/repo"
@@ -152,6 +153,7 @@ func Build(ctx context.Context, cfg *config.Config) (*App, error) {
 		Storage:       fileStore,
 		StorageMount:  storageMount,
 		Accounts:      accountsSvc,
+		Payments:      payment.NewHMACVerifier(cfg.PaymentCallbackSecret),
 		Dashboard:     &admin.DashboardService{Repos: repos},
 		Orders:        &admin.OrdersService{Repos: repos},
 		Merchants:     &admin.MerchantsService{Repos: repos, Accounts: accountsSvc},

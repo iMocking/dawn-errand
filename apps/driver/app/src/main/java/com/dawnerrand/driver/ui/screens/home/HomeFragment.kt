@@ -6,10 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.dawnerrand.driver.data.repository.DriverRemoteRepository
 import com.dawnerrand.driver.databinding.FragmentHomeBinding
 import com.dawnerrand.driver.ui.screens.navigation.NavigationActivity
 import com.dawnerrand.driver.ui.screens.orderdetail.OrderDetailActivity
 import com.dawnerrand.driver.ui.util.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 工作台：还原 design/driver/home.html（顶部渐变 + 今日收入环 + 上线开关 + 进行中订单 + 导航按钮）。
@@ -28,8 +33,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 顶部渐变延伸到状态栏：设计稿 54px 留白即状态栏区域，无需额外内边距
-
         binding.tvRiderName.text = vm.rider.name
         binding.tvRiderTag.text = vm.rider.level
         binding.tvTodayAmount.text = vm.rider.todayAmount
@@ -37,11 +40,7 @@ class HomeFragment : Fragment() {
         binding.tvTodayScore.text = vm.rider.score
         binding.ringToday.progress = 0.65f
 
-        binding.tvPickName.text = vm.activeOrder.pickName
-        binding.tvPickAddr.text = vm.activeOrder.pickAddr
-        // 设计稿 home.html：送点主行=地址、副行=送货·联系人（与详情页的 姓名/地址 字段语义不同，此处派生）
-        binding.tvDropName.text = vm.activeOrder.dropAddr.substringBefore(" · ")
-        binding.tvDropAddr.text = "送货 · ${vm.activeOrder.dropName} ${vm.activeOrder.dropContact}"
+        bindActiveOrder()
 
         binding.switchOnline.isOn = vm.isOnline
         binding.switchOnline.onCheckedChange = { on ->
@@ -52,11 +51,35 @@ class HomeFragment : Fragment() {
             if (msg != null) requireContext().toast(msg)
         }
 
-        binding.layoutActiveOrder.setOnClickListener {
-            OrderDetailActivity.start(requireContext())
-        }
         binding.btnGoNav.setOnClickListener {
             NavigationActivity.start(requireContext())
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 从详情页返回时订单状态可能已推进（取货/送达），重拉一次再刷新卡片。
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) { DriverRemoteRepository.refreshOrders() }
+            if (_binding != null) bindActiveOrder()
+        }
+    }
+
+    /** 进行中订单卡片：只展示后端真实数据，没有订单 ID 时点击给出明确提示而不是打开假详情。 */
+    private fun bindActiveOrder() {
+        val order = vm.activeOrder
+        binding.tvPickName.text = order.pickName
+        binding.tvPickAddr.text = order.pickAddr
+        binding.tvDropName.text = order.dropAddr.substringBefore(" · ")
+        val contact = listOf(order.dropName, order.dropContact).filter { it.isNotBlank() }.joinToString(" ")
+        binding.tvDropAddr.text = if (contact.isBlank()) "送货 · 暂无联系人" else "送货 · $contact"
+
+        binding.layoutActiveOrder.setOnClickListener {
+            if (order.id.isBlank()) {
+                requireContext().toast("暂无进行中订单")
+                return@setOnClickListener
+            }
+            OrderDetailActivity.start(requireContext(), order.id)
         }
     }
 

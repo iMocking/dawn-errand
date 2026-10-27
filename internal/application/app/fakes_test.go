@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 
 	"dawn-errand/internal/application"
 	"dawn-errand/internal/domain/catalog"
@@ -193,6 +192,12 @@ type fakeOrders struct {
 	updates  []string // "id:from->to"
 	assignOK bool
 	saved    []*order.Order
+
+	// List/ListPool 记录最后一次入参：应用层必须把租户 scope 与 Tab 状态
+	// 下推给仓储，而不是取全量回内存筛（R3-5 的默认拒绝就靠这层传参）。
+	lastQuery order.Query
+	lastScope tenant.Scope
+	lastPool  string // regionID
 }
 
 func newFakeOrders() *fakeOrders {
@@ -257,6 +262,12 @@ func applyPatch(o *order.Order, p order.StatusPatch, now int64) {
 	if p.AcceptedAt != 0 {
 		o.AcceptedAt = p.AcceptedAt
 	}
+	if p.ReadyAt != 0 {
+		o.ReadyAt = p.ReadyAt
+	}
+	if p.PickedAt != 0 {
+		o.PickedAt = p.PickedAt
+	}
 	if p.DeliveredAt != 0 {
 		o.DeliveredAt = p.DeliveredAt
 	}
@@ -280,6 +291,53 @@ func (f *fakeOrders) AssignRider(ctx context.Context, id, riderID, riderName str
 	}
 	o.RiderID, o.RiderName = riderID, riderName
 	return true, nil
+}
+
+// List 复刻列表查询：按主体归属与状态过滤，并保留入参供断言。
+func (f *fakeOrders) List(ctx context.Context, q order.Query, scope tenant.Scope) ([]*order.Order, int64, error) {
+	f.lastQuery, f.lastScope = q, scope
+	out := make([]*order.Order, 0, len(f.byID))
+	for _, o := range f.byID {
+		if q.UserID != "" && o.UserID != q.UserID {
+			continue
+		}
+		if scope.MerchantID != "" && o.MerchantID != scope.MerchantID {
+			continue
+		}
+		if scope.UserID != "" && o.UserID != scope.UserID {
+			continue
+		}
+		if scope.RiderID != "" && o.RiderID != scope.RiderID {
+			continue
+		}
+		if len(q.Statuses) > 0 && !containsStr(q.Statuses, string(o.Status)) {
+			continue
+		}
+		out = append(out, o)
+	}
+	return out, int64(len(out)), nil
+}
+
+// ListPool 复刻抢单池：本区域待取货且未分配骑手。
+func (f *fakeOrders) ListPool(ctx context.Context, regionID string, page, pageSize int) ([]*order.Order, int64, error) {
+	f.lastPool = regionID
+	out := make([]*order.Order, 0, len(f.byID))
+	for _, o := range f.byID {
+		if o.RegionID != regionID || o.Status != order.StatusReady || o.RiderID != "" {
+			continue
+		}
+		out = append(out, o)
+	}
+	return out, int64(len(out)), nil
+}
+
+func containsStr(list []string, want string) bool {
+	for _, s := range list {
+		if s == want {
+			return true
+		}
+	}
+	return false
 }
 
 // FindByClientOrderNo 复刻幂等回读：同用户同客户端单号命中已有订单。
@@ -341,6 +399,16 @@ type fakeEvents struct {
 func (f *fakeEvents) Save(ctx context.Context, e *order.Event) error {
 	f.saved = append(f.saved, e)
 	return nil
+}
+
+func (f *fakeEvents) ListByOrder(ctx context.Context, orderID string) ([]*order.Event, error) {
+	out := make([]*order.Event, 0, len(f.saved))
+	for _, e := range f.saved {
+		if e.OrderID == orderID {
+			out = append(out, e)
+		}
+	}
+	return out, nil
 }
 
 // --- 支付单 ---
@@ -436,7 +504,9 @@ func (f *fakeMerchants) FindByID(ctx context.Context, id string) (*merchant.Merc
 
 type fakeRiders struct {
 	rider.RiderRepository
-	byID map[string]*rider.Rider
+	byID      map[string]*rider.Rider
+	updateErr error
+	statuses  []rider.RiderStatus
 }
 
 func (f *fakeRiders) FindByID(ctx context.Context, id string) (*rider.Rider, error) {
@@ -445,6 +515,19 @@ func (f *fakeRiders) FindByID(ctx context.Context, id string) (*rider.Rider, err
 		return nil, application.ErrNotFound
 	}
 	return r, nil
+}
+
+func (f *fakeRiders) UpdateStatus(ctx context.Context, id string, status rider.RiderStatus, now int64) error {
+	if f.updateErr != nil {
+		return f.updateErr
+	}
+	r, ok := f.byID[id]
+	if !ok {
+		return application.ErrNotFound
+	}
+	r.Status = status
+	f.statuses = append(f.statuses, status)
+	return nil
 }
 
 // --- 库存 ---
@@ -554,10 +637,16 @@ func (f *fakeWithdrawals) ClaimAudit(ctx context.Context, id string, approved bo
 type fakeSettlements struct {
 	finance.SettlementRepository
 	pending float64
+	saved   []*finance.Settlement
 }
 
 func (f *fakeSettlements) SumPendingByParty(ctx context.Context, partyType, partyID string) (float64, error) {
 	return f.pending, nil
+}
+
+func (f *fakeSettlements) Save(ctx context.Context, s *finance.Settlement) error {
+	f.saved = append(f.saved, s)
+	return nil
 }
 
 // --- 审计 ---
@@ -583,6 +672,7 @@ type unit struct {
 	orders  *fakeOrders
 	refund  *fakeRefunds
 	withd   *fakeWithdrawals
+	settle  *fakeSettlements
 	audit   *fakeAudit
 	set     *fakeSettings
 	merch   *fakeMerchants
@@ -601,6 +691,7 @@ func newUnit() *unit {
 		orders:  newFakeOrders(),
 		refund:  newFakeRefunds(),
 		withd:   newFakeWithdrawals(),
+		settle:  &fakeSettlements{},
 		audit:   &fakeAudit{},
 		set:     &fakeSettings{valueJSON: map[string]string{}},
 		merch:   &fakeMerchants{byID: map[string]*merchant.Merchant{}},
@@ -617,7 +708,7 @@ func newUnit() *unit {
 		Wallets: u.wallet, Profiles: u.prof, Coupons: u.coupon, Orders: u.orders,
 		Refunds: u.refund, Withdrawals: u.withd, Settings: u.set, Merchants: u.merch,
 		Catalog: u.catalog, Payments: u.pay, Notifications: u.noti, OrderEvents: u.evts,
-		Audit: u.audit, Riders: u.riders,
+		Audit: u.audit, Riders: u.riders, Settlements: u.settle,
 	}
 	u.tx = &fakeTx{unit: u.repos}
 	return u

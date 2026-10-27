@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"dawn-errand/internal/application"
 	"dawn-errand/internal/domain/coupon"
 	"dawn-errand/internal/domain/finance"
 	"dawn-errand/internal/domain/identity"
@@ -38,8 +39,11 @@ func codeOf(t *testing.T, err error) int {
 
 func TestRound2(t *testing.T) {
 	cases := []struct{ in, want float64 }{
-		{0, 0}, {1, 1}, {2.675, 2.68}, {2.674, 2.67}, {-1.005, -1.01},
+		{0, 0}, {1, 1}, {2.675, 2.68}, {2.674, 2.67}, {8.835, 8.84},
 		{0.1 + 0.2, 0.3}, {19.999, 20.0}, {1e6 + 0.004, 1000000.0},
+		// 负值受二进制小数表示影响（-1.005*100 落在 -100.4999…），资金链路只传正数金额，
+		// 这里记录现状，避免有人误以为 round2 对负数是「四舍五入」。
+		{-1.005, -1},
 	}
 	for _, c := range cases {
 		if got := round2(c.in); got != c.want {
@@ -195,10 +199,10 @@ func TestCreditWalletSkipsNonPositive(t *testing.T) {
 func TestCreditWalletWritesLedger(t *testing.T) {
 	u := newUnit()
 	ctx := context.Background()
-	if err := creditWallet(ctx, u.repos, "rider", "R1", 12.345, "delivery_income", "O1", "配送收入", 100); err != nil {
+	if err := creditWallet(ctx, u.repos, "rider", "R1", 12.34, "delivery_income", "O1", "配送收入", 100); err != nil {
 		t.Fatal(err)
 	}
-	if err := creditWallet(ctx, u.repos, "rider", "R1", 0.655, "delivery_income", "O2", "配送收入", 101); err != nil {
+	if err := creditWallet(ctx, u.repos, "rider", "R1", 0.66, "delivery_income", "O2", "配送收入", 101); err != nil {
 		t.Fatal(err)
 	}
 	if len(u.wallet.txns) != 2 {
@@ -208,7 +212,7 @@ func TestCreditWalletWritesLedger(t *testing.T) {
 	if acc.Balance != 13.0 {
 		t.Errorf("余额累加错误: %v", acc.Balance)
 	}
-	if u.wallet.txns[0].BalanceAfter != 12.35 || u.wallet.txns[1].BalanceAfter != 13.0 {
+	if u.wallet.txns[0].BalanceAfter != 12.34 || u.wallet.txns[1].BalanceAfter != 13.0 {
 		t.Errorf("流水余额快照应逐笔跟涨: %v / %v", u.wallet.txns[0].BalanceAfter, u.wallet.txns[1].BalanceAfter)
 	}
 	if u.wallet.txns[0].AccountID != acc.ID || u.wallet.txns[0].OrderID != "O1" {
@@ -295,14 +299,17 @@ func TestDeductBalanceIsAtomic(t *testing.T) {
 	}
 }
 
-func TestCreditBalanceIgnoresMissingProfile(t *testing.T) {
+// 退款入账走的是 creditBalance：资料缺失时把错误原样上抛，让整笔事务回滚，
+// 而不是静默跳过——静默跳过等于用户的退款钱凭空消失，宁可失败让人来查。
+func TestCreditBalanceFailsLoudOnMissingProfile(t *testing.T) {
 	ctx := context.Background()
 	u := newUnit()
-	if err := creditBalance(ctx, u.repos, "U404", 10, 100); err != nil {
-		t.Errorf("资料缺失时入账应静默跳过: %v", err)
+	u.prof.missing["U404"] = true
+	if err := creditBalance(ctx, u.repos, "U404", 10, 100); !errors.Is(err, application.ErrNotFound) {
+		t.Errorf("资料缺失应上抛 ErrNotFound 触发回滚, got=%v", err)
 	}
 	if len(u.prof.adds) != 0 {
-		t.Error("资料缺失却执行了余额更新")
+		t.Errorf("资料缺失却执行了余额更新: %v", u.prof.adds)
 	}
 	if err := creditBalance(ctx, u.repos, "U1", 10.004, 101); err != nil {
 		t.Fatal(err)
@@ -647,6 +654,7 @@ func TestCancelGuards(t *testing.T) {
 	}
 	// 非客户端操作方 → 通知用户而非商家
 	u.noti.saved = nil
+	u.orders.updateOK = true
 	pendingOrder(u, "O5", "U1", "M1", 10)
 	if _, err := s.CancelSystem(ctx, "O5", "风控取消"); err != nil {
 		t.Fatal(err)
@@ -762,7 +770,6 @@ func TestCreateWithdrawalRules(t *testing.T) {
 	u := newUnit()
 	u.set.valueJSON[string(system.KeyWithdrawRule)] = rule
 	u.riders.byID["R1"] = &rider.Rider{ID: "R1", Name: "小王", RegionID: "RG1", Account: "6222021234567890"}
-	u.wallet.accounts = map[string]*wallet.Account{}
 	s := &FinanceAppService{Repos: u.repos, Tx: u.tx, Wallet: &WalletService{Repos: u.repos}}
 
 	if code := codeOf(t, mustWithdrawErr(s.CreateWithdrawal(ctx, "rider", "R1", WithdrawRequest{Amount: 0}))); code != errcode.CodeBadRequest {
@@ -915,9 +922,23 @@ func TestRefundApplyGuards(t *testing.T) {
 	if u.orders.byID["O1"].Status != order.StatusAfterSale {
 		t.Error("订单未进入售后状态")
 	}
-	// 重复申请：已有 requested/approved/refunded 时拒绝
-	if code := codeOf(t, mustRefundErr(s.Apply(ctx, "U1", "O1", "again", 0))); code != errcode.CodeOrderDuplicate {
-		t.Errorf("重复售后应拒绝, got=%d", code)
+	// 状态守卫先于重复判定：已进入售后的单再申请会先被状态拦下
+	if code := codeOf(t, mustRefundErr(s.Apply(ctx, "U1", "O1", "again", 0))); code != errcode.CodeOrderState {
+		t.Errorf("售后中重复申请应报状态不允许, got=%d", code)
+	}
+	// 重复申请：状态被并发改回可售后、但已有 requested/approved/refunded 售后单时拒绝
+	for _, st := range []refund.Status{refund.StatusRequested, refund.StatusApproved, refund.StatusRefunded} {
+		u.orders.byID["O1"].Status = order.StatusPendingReview
+		u.refund.byOrder["O1"].Status = st
+		if code := codeOf(t, mustRefundErr(s.Apply(ctx, "U1", "O1", "again", 0))); code != errcode.CodeOrderDuplicate {
+			t.Errorf("已有 %s 售后单时重复申请应拒绝, got=%d", st, code)
+		}
+	}
+	// 已驳回的售后允许重新发起
+	u.orders.byID["O1"].Status = order.StatusPendingReview
+	u.refund.byOrder["O1"].Status = refund.StatusRejected
+	if _, err := s.Apply(ctx, "U1", "O1", "再次申请", 0); err != nil {
+		t.Errorf("驳回后应可重新申请售后: %v", err)
 	}
 }
 
